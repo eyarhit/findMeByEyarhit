@@ -9,9 +9,13 @@ Plateforme de recrutement (Angular + microservices Spring + parser CV Python).
 ```cmd
 git clone https://github.com/eyarhit/findMeByEyarhit.git
 cd findMeByEyarhit
-docker compose build --no-cache
+git pull
+scripts\docker-build-backend.cmd
+docker compose build frontend python-service metabase-seed
 docker compose up -d
 ```
+
+If `docker compose build` fails on Maven downloads, use the script above (builds Java services one at a time). See [DOCKER_DEPLOYMENT.md](./DOCKER_DEPLOYMENT.md).
 
 Application : **http://localhost:4200** (Ctrl+F5 après mise à jour).
 

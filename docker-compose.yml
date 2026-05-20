@@ -54,7 +54,8 @@ services:
 
   discovery-service:
     build:
-      context: ./find-me-back-2.1/DiscoveryService
+      context: .
+      dockerfile: find-me-back-2.1/DiscoveryService/Dockerfile
     container_name: findme-discovery
     restart: unless-stopped
     ports:
@@ -65,7 +66,8 @@ services:
 
   gateway-service:
     build:
-      context: ./find-me-back-2.1/GatewayService
+      context: .
+      dockerfile: find-me-back-2.1/GatewayService/Dockerfile
     container_name: findme-gateway
     restart: unless-stopped
     environment:
@@ -77,7 +79,8 @@ services:
 
   user-service:
     build:
-      context: ./find-me-back-2.1/User_service
+      context: .
+      dockerfile: find-me-back-2.1/User_service/Dockerfile
     container_name: findme-user
     restart: unless-stopped
     environment:
@@ -101,7 +104,8 @@ services:
 
   cv-service:
     build:
-      context: ./find-me-back-2.1/Cv_service
+      context: .
+      dockerfile: find-me-back-2.1/Cv_service/Dockerfile
     container_name: findme-cv
     restart: unless-stopped
     environment:
@@ -119,7 +123,8 @@ services:
 
   mission-service:
     build:
-      context: ./find-me-back-2.1/Mission_service
+      context: .
+      dockerfile: find-me-back-2.1/Mission_service/Dockerfile
     container_name: findme-mission
     restart: unless-stopped
     environment:
@@ -138,7 +143,8 @@ services:
 
   quiz-service:
     build:
-      context: ./find-me-back-2.1/QuizService
+      context: .
+      dockerfile: find-me-back-2.1/QuizService/Dockerfile
     container_name: findme-quiz
     restart: unless-stopped
     environment:
@@ -156,7 +162,8 @@ services:
 
   codingame-service:
     build:
-      context: ./find-me-back-2.1/CodingameService
+      context: .
+      dockerfile: find-me-back-2.1/CodingameService/Dockerfile
     container_name: findme-codingame
     restart: unless-stopped
     environment:

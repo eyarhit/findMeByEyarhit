@@ -39,6 +39,41 @@ Or in one step:
 docker compose up --build -d
 ```
 
+### Slow network / Maven download errors
+
+If the build fails with messages like:
+
+`Premature end of Content-Length delimited message body`  
+`Could not transfer artifact org.springframework.boot:spring-boot:jar`
+
+the connection to Maven Central was interrupted (often because **7 Java services download in parallel**).
+
+**Recommended (Windows):** build backend services **one by one**:
+
+```cmd
+cd findMeByEyarhit
+scripts\docker-build-backend.cmd
+docker compose build frontend python-service metabase-seed
+docker compose up -d
+```
+
+PowerShell:
+
+```powershell
+.\scripts\docker-build-backend.ps1
+docker compose build frontend python-service metabase-seed
+docker compose up -d
+```
+
+Or limit parallel builds:
+
+```cmd
+set COMPOSE_PARALLEL_LIMIT=1
+docker compose build
+```
+
+Then retry only the failed service, e.g. `docker compose build user-service`.
+
 Then open:
 
 - Frontend: `http://localhost:4200`
