@@ -88,6 +88,38 @@ Then open:
 docker compose down
 ```
 
+### Container name already in use (`findme-python`, `findme-minio`, …)
+
+Old containers from a previous run still exist. From the project root:
+
+```cmd
+cd findMeByEyarhit
+docker compose down --remove-orphans
+for /f %i in ('docker ps -a --filter "name=findme" -q') do docker rm -f %i
+docker compose up -d
+```
+
+PowerShell:
+
+```powershell
+docker compose down --remove-orphans
+docker ps -a --filter "name=findme" -q | ForEach-Object { docker rm -f $_ }
+docker compose up -d
+```
+
+Data in volumes (`mysql_data`, etc.) is kept unless you use `docker compose down -v`.
+
+### Page without CSS (HTML only, no layout)
+
+The app uses **Tailwind CSS**. Config files `tailwind.config.js` and `postcss.config.js` must be in the repo. After `git pull`:
+
+```cmd
+docker compose build --no-cache frontend
+docker compose up -d --force-recreate frontend
+```
+
+Then hard-refresh the browser: **Ctrl+F5** on http://localhost:4200
+
 To remove volumes (database + object storage):
 
 ```bash

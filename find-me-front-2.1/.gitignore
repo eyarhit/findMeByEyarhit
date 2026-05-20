@@ -30,9 +30,11 @@ src/environments/environment.ts
 /.cache/  
 coverage/  
 
-# Compiled TypeScript files  
-*.js  
-*.js.map  
+# Compiled TypeScript files (keep Tailwind/PostCSS config at repo root)
+*.js
+!tailwind.config.js
+!postcss.config.js
+*.js.map
 
 # Miscellaneous  
 .DS_Store  
