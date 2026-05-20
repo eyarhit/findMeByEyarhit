@@ -7,12 +7,36 @@
 
 No Java, Node, Python, or MySQL installation is required on the client machine.
 
-## Start Entire Platform
-
-From the project root (`D:\projetpfe`), run:
+## Clone (first time)
 
 ```bash
-docker compose up --build
+git clone https://github.com/eyarhit/findMeByEyarhit.git
+cd findMeByEyarhit
+```
+
+After clone, confirm backend is present (not an empty folder):
+
+```bash
+# Windows
+dir find-me-back-2.1\Cv_service
+dir find-me-back-2.1\DiscoveryService
+```
+
+If those paths are missing, the repository clone is incomplete — use a fresh `git clone` from the URL above.
+
+## Start Entire Platform
+
+From the project root, run:
+
+```bash
+docker compose build --no-cache
+docker compose up -d
+```
+
+Or in one step:
+
+```bash
+docker compose up --build -d
 ```
 
 Then open:

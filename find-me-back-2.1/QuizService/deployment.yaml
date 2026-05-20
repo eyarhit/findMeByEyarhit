@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quiz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quiz
+  template:
+    metadata:
+      labels:
+        app: quiz
+    spec:
+      containers:
+        - name: quiz
+          image: depot.dpc.com.tn:8443/find-me-pfe/quiz:v-0.0.40
+          ports:
+             - containerPort: 9074
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: quiz
+spec:
+  selector:
+    app: quiz
+  ports:
+    - protocol: TCP
+      port: 80          
+      targetPort: 9074  
+  type: LoadBalancer
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: quiz-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+  - host: find-me.2.1-quiz.dpc.com.tn
+    http:
+      paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: quiz
+              port:
+                number: 80  
+  tls:
+    - hosts:
+        - find-me.2.1-quiz.dpc.com.tn
+      secretName: quiz-tls-secret

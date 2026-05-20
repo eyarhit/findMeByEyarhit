@@ -1,0 +1,25 @@
+# Build outputs
+**/target/
+**/node_modules/
+**/dist/
+**/.angular/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Python
+**/__pycache__/
+**/.venv/
+**/venv/
+
+# OS / junk
+.DS_Store
+Thumbs.db
+$null
+$nulldocker
+
+# Env secrets (never commit)
+.env
+.env.*
