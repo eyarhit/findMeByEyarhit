@@ -34,12 +34,7 @@ public class Competence implements Serializable {
     private String architechture;
     private String outils;
 
-    @ManyToMany
-    @JoinTable(
-            name = "competence_cv",
-            joinColumns = @JoinColumn(name = "competence_id"),
-            inverseJoinColumns = @JoinColumn(name = "cv_id")
-    )
+    @ManyToMany(mappedBy = "competences")
     @JsonIgnore
     private List<Cv> cvs = new ArrayList<>();
 }

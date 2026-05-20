@@ -164,9 +164,15 @@ export class UploadCvComponent {
         }
         this.router.navigate(['/cv/remplir']);
       },
-      error: () => {
+      error: (err) => {
         this.isLoading = false;
-        alert('Erreur lors de l\'enregistrement du CV.');
+        const msg =
+          err?.error?.error ??
+          err?.error?.message ??
+          err?.message ??
+          'Erreur lors de l\'enregistrement du CV.';
+        this.errorMessage = msg;
+        alert(msg);
       },
     });
   }

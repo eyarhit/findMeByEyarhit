@@ -71,6 +71,7 @@ public class CVService implements ICVService {
 
     @Transactional
     public Cv creerOuMettreAJour(Cv cv) {
+        normalizeCvLists(cv);
         Cv existingCv = cvRepo.findByUserId(cv.getUserId());
 
         if (existingCv != null) {
@@ -81,7 +82,7 @@ public class CVService implements ICVService {
 
 
             if (cv.getCompletedSteps() != null && !cv.getCompletedSteps().isEmpty()) {
-                Set<Integer> mergedSteps = new HashSet<>(existingCv.getCompletedSteps());
+                Set<Integer> mergedSteps = new HashSet<>(Optional.ofNullable(existingCv.getCompletedSteps()).orElse(new ArrayList<>()));
                 mergedSteps.addAll(cv.getCompletedSteps());
                 existingCv.setCompletedSteps(new ArrayList<>(mergedSteps));
             }
@@ -92,8 +93,64 @@ public class CVService implements ICVService {
             return cvRepo.save(existingCv);
         }
 
-
+        prepareNewCvForSave(cv);
         return cvRepo.save(cv);
+    }
+
+    private void normalizeCvLists(Cv cv) {
+        cv.setEducations(Optional.ofNullable(cv.getEducations()).orElse(new ArrayList<>()));
+        cv.setExperiences(Optional.ofNullable(cv.getExperiences()).orElse(new ArrayList<>()));
+        cv.setLangues(Optional.ofNullable(cv.getLangues()).orElse(new ArrayList<>()));
+        cv.setCompetences(Optional.ofNullable(cv.getCompetences()).orElse(new ArrayList<>()));
+        cv.setCompletedSteps(Optional.ofNullable(cv.getCompletedSteps()).orElse(new ArrayList<>()));
+    }
+
+    /** First-time save after CV parse — wire JPA relations and drop unknown IDs from other DBs. */
+    private void prepareNewCvForSave(Cv cv) {
+        for (Education edu : cv.getEducations()) {
+            if (edu.getId_education() != null && !educationRepo.existsById(edu.getId_education())) {
+                edu.setId_education(null);
+            }
+            edu.setCv(cv);
+        }
+        for (Experience exp : cv.getExperiences()) {
+            if (exp.getId_experience() != null && !experienceRepo.existsById(exp.getId_experience())) {
+                exp.setId_experience(null);
+            }
+            exp.setCv(cv);
+        }
+        cv.setLangues(resolveLangues(cv.getLangues()));
+        cv.setCompetences(resolveCompetences(cv.getCompetences()));
+    }
+
+    private List<Langue> resolveLangues(List<Langue> incoming) {
+        List<Langue> resolved = new ArrayList<>();
+        for (Langue lang : incoming) {
+            if (lang.getName() == null || lang.getName().isBlank() || lang.getNiveau() == null || lang.getNiveau().isBlank()) {
+                continue;
+            }
+            List<Langue> existingLangues = langueRepo.findByNameAndNiveau(lang.getName(), lang.getNiveau());
+            if (!existingLangues.isEmpty()) {
+                resolved.add(existingLangues.get(0));
+            } else {
+                lang.setId_langue(null);
+                resolved.add(langueRepo.save(lang));
+            }
+        }
+        return resolved;
+    }
+
+    private List<Competence> resolveCompetences(List<Competence> incoming) {
+        List<Competence> resolved = new ArrayList<>();
+        for (Competence comp : incoming) {
+            if (comp.getId_competence() != null && competenceRepo.existsById(comp.getId_competence())) {
+                resolved.add(competenceRepo.findById(comp.getId_competence()).orElseThrow());
+            } else {
+                comp.setId_competence(null);
+                resolved.add(competenceRepo.save(comp));
+            }
+        }
+        return resolved;
     }
 
     private void mergeCompetenceFields(Competence target, Competence source) {

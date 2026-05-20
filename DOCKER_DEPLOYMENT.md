@@ -120,6 +120,27 @@ docker compose up -d --force-recreate frontend
 
 Then hard-refresh the browser: **Ctrl+F5** on http://localhost:4200
 
+### `POST /api/v1/save` returns 500 (CV upload)
+
+Usually an **outdated `cv-service` image** or a **stale MySQL volume** from an old schema. On the machine that fails:
+
+```cmd
+git pull
+docker compose build --no-cache cv-service frontend
+docker compose up -d --force-recreate cv-service frontend
+docker compose logs --tail 80 cv-service
+```
+
+Check the last lines of logs for the real Java exception. If it persists, reset only CV data:
+
+```cmd
+docker compose down
+docker volume rm findmebyeyarhit_mysql_data
+docker compose up -d
+```
+
+(Wipes all DB data — users, offers, CVs.)
+
 To remove volumes (database + object storage):
 
 ```bash

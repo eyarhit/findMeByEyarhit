@@ -43,11 +43,15 @@ public class FlexibleLocalDateDeserializer extends JsonDeserializer<LocalDate> {
 
         try {
             return LocalDate.parse(value + "-01", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        } catch (DateTimeParseException ex) {
-            throw JsonMappingException.from(
-                    parser,
-                    "Invalid date format: '" + value + "'. Expected yyyy-MM-dd, yyyy-MM, or yyyy."
-            );
+        } catch (DateTimeParseException ignored) {
+            // try next format
         }
+
+        if (value.matches("(?i).*(present|présent|en\\s*cours|aujourd.?hui|now|actuel).*")) {
+            return null;
+        }
+
+        // Avoid 500 on noisy PDF dates — store as null instead of failing the whole save
+        return null;
     }
 }

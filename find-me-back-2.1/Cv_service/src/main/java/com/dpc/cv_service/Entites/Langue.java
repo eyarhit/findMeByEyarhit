@@ -24,12 +24,7 @@ public class Langue implements Serializable {
     private String name;
     private String niveau;
 
-    @ManyToMany
-    @JoinTable(
-            name = "langue_cv",
-            joinColumns = @JoinColumn(name = "langue_id"),
-            inverseJoinColumns = @JoinColumn(name = "cv_id")
-    )
+    @ManyToMany(mappedBy = "langues")
     @JsonIgnore
     private List<Cv> cvs = new ArrayList<>();
 }
