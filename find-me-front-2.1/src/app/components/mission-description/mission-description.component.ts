@@ -93,7 +93,25 @@ export class MissionDescriptionComponent {
     }
     return this.espace;
   }
- 
+
+  /**
+   * Cœur favori : uniquement catalogue candidat / mission freelance.
+   * Pas sur Offres publiées (RH) — les favoris se gèrent via « Offres en favorites ».
+   */
+  get showFavoriteButton(): boolean {
+    if (isRecruiterRole(this.authService.getRole())) {
+      return false;
+    }
+    const role = this.authService.getRole();
+    if (this.espace === 'Liste Offres') {
+      return role === 'CANDIDAT';
+    }
+    if (this.espace === 'Liste Mission') {
+      return role === 'FREELANCER' || role === 'PORTAGE_SALARIAL';
+    }
+    return false;
+  }
+
     addToFavorites(): void {
       const userId = this.authService.getUserId();
       const userType = this.authService.getRole();

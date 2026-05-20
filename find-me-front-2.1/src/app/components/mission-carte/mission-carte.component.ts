@@ -77,6 +77,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CandidatureService } from '../../services/candidature';
+import { FavoriService } from '../../services/favori.service';
 import {
   isRecruiterRole,
   offerListDetailEspace,
@@ -121,6 +122,9 @@ export class MissionCarteComponent {
   @Output() jobSelected: EventEmitter<Job> = new EventEmitter<Job>();
   @Input() isSelected: boolean = false;
   @Input() candidatureMissionIds: number[] = [];
+  @Input() favoriteMissionIds: number[] = [];
+  @Input() enableFavorites = false;
+  @Output() favoriteToggled = new EventEmitter<number>();
 
   type_contrat: string = 'annonce';
   storedtargetmarket: string | null = null;
@@ -129,7 +133,8 @@ export class MissionCarteComponent {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private candidatureService: CandidatureService
+    private candidatureService: CandidatureService,
+    private favoriService: FavoriService
   ) {}
 
   ngOnInit(): void {
@@ -164,6 +169,31 @@ export class MissionCarteComponent {
       return offerListDetailEspace(this.role ?? this.authService.getRole());
     }
     return this.espace;
+  }
+
+  get isFavorite(): boolean {
+    return this.favoriteMissionIds.includes(this.job?.id);
+  }
+
+  toggleFavorite(event: Event): void {
+    event.stopPropagation();
+    const userId = this.authService.getUserId();
+    const role = this.authService.getRole();
+    if (!userId || !role || !this.job?.id) {
+      return;
+    }
+
+    if (this.isFavorite) {
+      this.favoriService.removeFromFavorites(userId, this.job.id).subscribe({
+        next: () => this.favoriteToggled.emit(this.job.id),
+        error: (err) => console.error('Erreur retrait favori:', err),
+      });
+    } else {
+      this.favoriService.addToFavorites(userId, this.job.id, role).subscribe({
+        next: () => this.favoriteToggled.emit(this.job.id),
+        error: (err) => console.error('Erreur ajout favori:', err),
+      });
+    }
   }
 
   selectJob(): void {

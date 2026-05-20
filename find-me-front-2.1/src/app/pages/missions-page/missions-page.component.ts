@@ -8,6 +8,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription, timer, Observable, of, forkJoin } from 'rxjs';
 import { switchMap, takeUntil, map, catchError, finalize } from 'rxjs/operators';
 import { DocumentServiceService } from '../../services/document-service.service';
+import { FavoriService } from '../../services/favori.service';
 
 interface Job {
   id: number;
@@ -50,6 +51,7 @@ export class MissionsPageComponent implements OnInit, OnDestroy {
   selectedJob: Job | null = null;
   hasJobs = true;
   candidatureMissionIds: number[] = [];
+  favoriteMissionIds: number[] = [];
   userRole = '';
   private subscriptions = new Subscription();
   private autoScrollInterval: any;
@@ -64,7 +66,8 @@ export class MissionsPageComponent implements OnInit, OnDestroy {
     private missionService: MissionService,
     private authService: AuthService,
     private candidatureService: CandidatureService,
-    private apiRoutingServiceFlusk: apiRoutingServiceFlusk
+    private apiRoutingServiceFlusk: apiRoutingServiceFlusk,
+    private favoriService: FavoriService
   ) {}
 
   ngOnInit(): void {
@@ -87,7 +90,70 @@ export class MissionsPageComponent implements OnInit, OnDestroy {
     if (this.userId) {
       this.isLoading = true;
       this.loadCandidatures(this.userId);
+      this.loadFavoriteIds(this.userId);
       this.loadMissionsBasedOnRole(this.userId);
+    }
+  }
+
+  showFavoriteHearts(): boolean {
+    return (
+      ['Offres publier', 'Liste Offres', 'Mission publier', 'Liste Mission'].includes(
+        this.espace
+      ) && this.canUseFavorites()
+    );
+  }
+
+  private canUseFavorites(): boolean {
+    return [
+      'CANDIDAT',
+      'ESN_ADMIN',
+      'CHARGEDERECRUTEMENT',
+      'ESN_COMMERCIAL',
+      'FREELANCER',
+      'PORTAGE_SALARIAL',
+    ].includes(this.userRole);
+  }
+
+  private loadFavoriteIds(userId: number): void {
+    if (!this.canUseFavorites()) {
+      return;
+    }
+    this.subscriptions.add(
+      this.favoriService.getFavorites(userId, this.userRole).subscribe({
+        next: (data) => {
+          const missions = Array.isArray(data) ? data : [];
+          this.favoriteMissionIds = missions
+            .filter((m: { descrip_mission?: { typeContrat?: string } }) =>
+              this.matchesFavoriteEspace(m)
+            )
+            .map((m: { idMission?: number }) => Number(m.idMission))
+            .filter((id) => Number.isFinite(id));
+        },
+        error: () => {
+          this.favoriteMissionIds = [];
+        },
+      })
+    );
+  }
+
+  private matchesFavoriteEspace(mission: {
+    descrip_mission?: { typeContrat?: string };
+  }): boolean {
+    const typeContrat = mission?.descrip_mission?.typeContrat ?? '';
+    if (this.espace === 'Offres publier' || this.espace === 'Liste Offres') {
+      return ['CDI', 'CDD', 'ALTERNANCE'].includes(typeContrat);
+    }
+    if (this.espace === 'Mission publier' || this.espace === 'Liste Mission') {
+      return ['MISSION_CDI', 'FREELANCE'].includes(typeContrat);
+    }
+    return true;
+  }
+
+  onFavoriteToggled(missionId: number): void {
+    if (this.favoriteMissionIds.includes(missionId)) {
+      this.favoriteMissionIds = this.favoriteMissionIds.filter((id) => id !== missionId);
+    } else {
+      this.favoriteMissionIds = [...this.favoriteMissionIds, missionId];
     }
   }
 

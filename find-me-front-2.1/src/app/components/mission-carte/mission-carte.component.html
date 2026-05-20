@@ -68,6 +68,17 @@
   </div>
 
   <div class="job-card-right">
+    <button
+      *ngIf="enableFavorites"
+      type="button"
+      class="favorite-icon"
+      [class.active]="isFavorite"
+      (click)="toggleFavorite($event)"
+      [attr.title]="isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+      [attr.aria-label]="isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+    >
+      <i class="fas fa-heart"></i>
+    </button>
     <p class="job-ref">{{ job.ref }}</p>
     <p class="job-type">{{ job.type }}</p>
     <p class="job-experience">{{ job.experience }}</p>

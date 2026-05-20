@@ -10,7 +10,10 @@
                  [job]="job"
                  (jobSelected)="onJobSelected(job)" 
                  [isSelected]="selectedJob === job" 
-                 [candidatureMissionIds]="candidatureMissionIds" 
+                 [candidatureMissionIds]="candidatureMissionIds"
+                 [favoriteMissionIds]="favoriteMissionIds"
+                 [enableFavorites]="showFavoriteHearts()"
+                 (favoriteToggled)="onFavoriteToggled($event)"
                  [role]="userRole"
                  class="flex-shrink-0 w-[584px] snap-center flex flex-col">
     </app-job-card>
@@ -52,7 +55,7 @@
 
             <div class="col-span-5  h-full overflow-auto p-1">
               <app-job-card *ngFor="let job of filteredJobs" [job]="job"
-               (jobSelected)="onJobSelected(job)" [visiteur]="this.isVisiteur" [espace]="this.espace" [isSelected]="selectedJob === job" [candidatureMissionIds]="candidatureMissionIds" [role]="this.userRole" ></app-job-card>
+               (jobSelected)="onJobSelected(job)" [visiteur]="this.isVisiteur" [espace]="this.espace" [isSelected]="selectedJob === job" [candidatureMissionIds]="candidatureMissionIds" [favoriteMissionIds]="favoriteMissionIds" [enableFavorites]="showFavoriteHearts()" (favoriteToggled)="onFavoriteToggled($event)" [role]="this.userRole" ></app-job-card>
             </div>    
         
             <!-- Right Side (Job Description) -->
