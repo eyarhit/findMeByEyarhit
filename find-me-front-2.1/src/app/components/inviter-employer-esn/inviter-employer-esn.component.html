@@ -1,0 +1,86 @@
+
+<div  class="container-form-register">
+  <div class="registerFormTunisie">
+    <h2 class="title">Inviter un employé</h2>
+    <form [formGroup]="registerFormTunisie">
+      <!-- Nom et Prénom sur la même ligne -->
+      <div class="nom-prenom-container">
+        <div class="input-half">
+          <input type="text" formControlName="firstName" placeholder="Nom" class="field"
+            [ngClass]="{'border-red-500': registerFormTunisie.get('firstName')?.invalid && (registerFormTunisie.get('firstName')?.dirty || registerFormTunisie.get('firstName')?.touched)}">
+          <div *ngIf="registerFormTunisie.get('firstName')?.invalid && (registerFormTunisie.get('firstName')?.dirty || registerFormTunisie.get('firstName')?.touched)"
+            class="field-input">Nom est obligatoire.</div>
+        </div>
+        <div class="input-half">
+          <input type="text" formControlName="lastName" placeholder="Prénom" class="field"
+            [ngClass]="{'border-red-500': registerFormTunisie.get('lastName')?.invalid && (registerFormTunisie.get('lastName')?.dirty || registerFormTunisie.get('lastName')?.touched)}">
+          <div *ngIf="registerFormTunisie.get('lastName')?.invalid && (registerFormTunisie.get('lastName')?.dirty || registerFormTunisie.get('lastName')?.touched)"
+            class="field-input">Prénom est obligatoire.</div>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="mb-4 relative">
+        <input type="email" formControlName="email" placeholder="email" class="field" (mouseenter)="showEmailHint()"
+          (mouseleave)="hideEmailHint()"
+          [ngClass]="{'border-red-500': registerFormTunisie.get('email')?.invalid && (registerFormTunisie.get('email')?.dirty || registerFormTunisie.get('email')?.touched)}">
+        <div *ngIf="registerFormTunisie.get('email')?.invalid && (registerFormTunisie.get('email')?.dirty || registerFormTunisie.get('email')?.touched)"
+          class="field-input">Veuillez entrer une adresse e-mail valide.</div>
+        <div *ngIf="emailErrorMessage" class="text-red-500 text-sm mt-1">
+          {{ emailErrorMessage }}
+        </div>
+        <!-- Email Hint Popup -->
+        <div *ngIf="showHint" class="email-hint-popup">
+          <div class="hint-content">
+            <p class="text-sm font-medium mb-2">Format d'email requis :</p>
+            <ul class="list-disc pl-4 text-xs">
+              <li>Doit contenir un "&#64;"</li>
+              <li>Exemple : contact&#64;entreprise.com</li>
+            </ul>
+          </div>
+          <div class="hint-arrow"></div>
+        </div>
+      </div>
+
+      <!-- Pays et Numéro sur la même ligne -->
+      <div class="paye-telephone-container">
+        <!-- <div class="input-half">
+          <select formControlName="country" class="paye-input" (change)="onCountryChange()">
+            <option value="" disabled selected>Choisir un pays</option>
+            <option value="Tunisie">Tunisie</option>
+            <option value="France">France</option>
+          </select>
+        </div> -->
+        <div class="input-half">
+          <div class="flex items-center">
+            <select *ngIf="phoneCode" class="telephone-input-1" name="phoneCode" id="phoneCode" (change)="onPhoneCodeChange($event)">
+              <option value="+33" selected>+33</option>
+              <option value="+216">+216</option>
+            </select>
+            <span *ngIf="!phoneCode" class="telephone-input-1">{{num}}</span>
+            <input type="tel" formControlName="phoneNumber" placeholder="XXXXXXXX" class="telephone-input-2"
+              [ngClass]="{'border-red-500': registerFormTunisie.get('phoneNumber')?.invalid && (registerFormTunisie.get('phoneNumber')?.dirty || registerFormTunisie.get('phoneNumber')?.touched)}"
+              (keypress)="limitInputLength($event)" (input)="onPhoneNumberInput()">
+          </div>
+          <div *ngIf="registerFormTunisie.get('phoneNumber')?.hasError('required') && (registerFormTunisie.get('phoneNumber')?.dirty || registerFormTunisie.get('phoneNumber')?.touched)"
+            class="text-red-500 text-sm mt-1">Numéro de téléphone est obligatoire.</div>
+          <div *ngIf="registerFormTunisie.get('phoneNumber')?.hasError('pattern') && registerFormTunisie.get('phoneNumber')?.touched && (registerFormTunisie.get('phoneNumber')?.value.length < 9)"
+            class="text-red-500 text-sm mt-1">Veuillez entrer un numéro de téléphone valide.</div>
+          <div *ngIf="invalidCharEntered" class="text-red-500 text-sm mt-1">Seuls les chiffres sont autorisés.</div>
+        </div>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div *ngIf="isLoading" class="loading-spinner">
+        <p>Création en cours...</p>
+      </div>
+      <div *ngIf="!registerFormTunisie.valid && errorcreation" class="text-red-600 font-semibold mb-1 text-xs">
+        <p>Tous les champs sont obligatoires...</p>
+      </div>
+      <!-- Bouton Créer un compte -->
+      <button type="button" (click)="VerifyInscription()" class="bottun-creer-compte">
+        Inviter
+      </button>
+    </form>
+  </div>
+</div>

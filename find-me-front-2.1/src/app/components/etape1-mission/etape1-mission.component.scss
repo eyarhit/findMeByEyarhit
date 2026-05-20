@@ -1,0 +1,228 @@
+body {
+  background-color: #9c9c9c; // Gris clair plus doux que votre #8b8b8b
+  margin: 0;
+  min-height: 100vh;
+  
+}
+/* Conteneur principal */
+.mission-form-container {
+  position: relative; // Essential
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  padding: 40px;
+  width: 100%;
+  max-width: 500px;
+  margin: 20px auto;
+}
+
+/* Conteneur du bouton de fermeture */
+.form-close-container {
+  position: absolute;
+  top: -10px; // Ajustez selon besoin
+  right: -10px; // Ajustez selon besoin
+  z-index: 10;
+}
+
+/* Style iOS professionnel */
+.ios-close-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #f5f5f7;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    
+    .ios-close-icon::before,
+    .ios-close-icon::after {
+      background: #ff3b30; // Rouge au survol
+    }
+  }
+}
+
+.ios-close-icon {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: #8e8e93;
+    border-radius: 1px;
+  }
+  
+  &::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+  
+  &::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+  }
+}
+
+.form-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #22223b;
+  text-align: center;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.image-upload-label {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+}
+
+.mission-logo {
+  width: 88px;
+  height: 88px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #f2f2f2;
+  background: #f8f8fa;
+  transition: box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(31, 41, 55, 0.05);
+}
+
+.upload-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: rgba(34, 34, 59, 0.5);
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.image-upload-label:hover .upload-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.upload-text {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.mission-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e2ea;
+  background: #f8f8fa;
+  font-size: 1rem;
+  color: #22223b;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.form-control:focus {
+  border: 1.5px solid #4f46e5;
+  background: #fff;
+}
+
+select.form-control {
+  appearance: none;
+  background: #f8f8fa url("data:image/svg+xml,%3Csvg width='12' height='7' viewBox='0 0 12 7' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center/16px 16px;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 14px 0;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 8px;
+  margin-top: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(31, 41, 55, 0.05);
+  transition: background 0.2s;
+}
+
+.submit-btn:hover {
+  background: #1e40af;
+}
+
+.ios-close-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.15);
+    transform: scale(1.05);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+

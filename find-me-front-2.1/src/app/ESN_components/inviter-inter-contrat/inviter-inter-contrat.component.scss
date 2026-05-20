@@ -1,0 +1,209 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background: #F7FAFC;
+
+  // Supprime visuellement les scrollbars
+  scrollbar-width: none;        // Firefox
+  -ms-overflow-style: none;     // IE 10+
+
+  &::-webkit-scrollbar {
+    display: none;              // Chrome, Safari, Edge
+  }
+}
+
+body {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container-form-register {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100vw;
+  background: #F7FAFC;
+  overflow: hidden;
+}
+
+.registerFormTunisie {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  width: 100%;
+  max-width: 28rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.nom-prenom-container,
+.paye-telephone-container {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 1rem;
+}
+
+.input-half {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.field {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 1px solid #D1D5DB;
+  border-radius: 0.5rem;
+  background-color: #F0EFFF;
+  color: #232323;
+}
+
+.field::placeholder {
+  color: #A7A3FF;
+}
+
+.field:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(168, 162, 255, 0.4);
+}
+
+.field-input {
+  color: #f87171;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.paye-input {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 1px solid #D1D5DB;
+  border-radius: 0.5rem;
+  background-color: #F0EFFF;
+  color: #232323;
+}
+
+.paye-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(168, 162, 255, 0.4);
+}
+
+.telephone-input-1 {
+  background-color: #F0EFFF;
+  color: #232323;
+  padding: 0.5rem 1rem;
+  border: 1px solid #D1D5DB;
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
+.telephone-input-2 {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 1px solid #D1D5DB;
+  border-radius: 0 0.5rem 0.5rem 0;
+  background-color: #F0EFFF;
+  color: #232323;
+}
+
+.telephone-input-2:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(168, 162, 255, 0.4);
+}
+
+.password-field-wrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.bottun-eye-visibility {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.confirmpassword {
+  margin-bottom: 1rem;
+}
+
+.bottun-creer-compte {
+  width: 100%;
+  background-color: #4F46E5;
+  color: white;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+.bottun-creer-compte:hover {
+  background-color: #4338CA;
+}
+
+.bottun-creer-compte:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.5);
+}
+
+/* Hints & Popups */
+.email-hint-popup,
+.password-hint-popup {
+  position: absolute;
+  z-index: 50;
+  width: 260px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 1rem;
+  top: calc(100% + 8px);
+  left: 0;
+  animation: fadeIn 0.25s ease-out;
+  border: 1px solid #e5e7eb;
+}
+
+.email-hint-popup .hint-arrow,
+.password-hint-popup .hint-arrow {
+  position: absolute;
+  top: -8px;
+  left: 20px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #ffffff;
+  filter: drop-shadow(0 -2px 1px rgba(0, 0, 0, 0.05));
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

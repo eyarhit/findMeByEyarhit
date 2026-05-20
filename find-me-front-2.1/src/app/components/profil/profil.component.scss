@@ -1,0 +1,1348 @@
+// Variables globales
+$primary-color: #0c3068;
+$secondary-color: #3498db;
+$accent-color: #f2bb13;
+$success-color: #27ae60;
+$danger-color: #e74c3c;
+$light-bg: #f8f9fa;
+$dark-text: #2c3e50;
+$medium-text: #34495e;
+$light-text: #7f8c8d;
+$border-radius: 12px;
+$box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+$transition: all 0.3s ease;
+
+// Styles globaux
+body {
+  background-color: #f5f7fa;
+  font-family: 'Roboto', 'Segoe UI', sans-serif;
+  color: $dark-text;
+}
+
+// Ajoutez ces styles pour la disposition verticale avec 3 cartes côte à côte au milieu
+.profile-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.dashboard-header {
+  margin-bottom: 30px;
+  
+  h1 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 10px;
+    
+    span {
+      color: #3498db;
+    }
+  }
+  
+  .breadcrumb {
+    font-size: 14px;
+    color: #777;
+    
+    a {
+      color: #3498db;
+      text-decoration: none;
+      
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+    
+    .separator {
+      margin: 0 8px;
+    }
+  }
+}
+
+.cards-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.full-width-card {
+  width: 100%;
+}
+
+.documents-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.document-card {
+  min-height: 300px;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  }
+  
+  .card-header {
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    .title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      margin: 0;
+      
+      i {
+        margin-right: 10px;
+        color: #3498db;
+      }
+    }
+  }
+  
+  hr {
+    margin: 0;
+    border: none;
+    height: 1px;
+    background-color: #f0f0f0;
+  }
+  
+  .card-body {
+    padding: 25px;
+  }
+}
+
+.professional-info-card {
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    
+    h3 {
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      
+      &.formation::before {
+        content: "\f19d";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        margin-right: 10px;
+        color: #3498db;
+      }
+      
+      &.competences::before {
+        content: "\f085";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        margin-right: 10px;
+        color: #3498db;
+      }
+      
+      &.langues::before {
+        content: "\f1ab";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        margin-right: 10px;
+        color: #3498db;
+      }
+      
+      &.experience::before {
+        content: "\f0b1";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        margin-right: 10px;
+        color: #3498db;
+      }
+    }
+    
+    .consult-link {
+      color: #3498db;
+      text-decoration: none;
+      font-size: 14px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background-color: rgba(52, 152, 219, 0.1);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      
+      &:hover {
+        background-color: rgba(52, 152, 219, 0.2);
+      }
+    }
+  }
+}
+
+.codingame-card {
+  .codingame-logo {
+    width: 40px;
+    height: 40px;
+    
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+  
+  .codingame-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 30px;
+    
+    .codingame-description {
+      color: #666;
+      margin-bottom: 25px;
+      font-size: 16px;
+      line-height: 1.6;
+      max-width: 600px;
+    }
+    
+    .codingame-button {
+      background-color: #f2bb13;
+      color: #333;
+      border: none;
+      border-radius: 25px;
+      padding: 12px 25px;
+      font-weight: 600;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      
+      &:hover {
+        background-color: #e0a800;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+      }
+      
+      i {
+        font-size: 18px;
+      }
+    }
+  }
+}
+
+// Styles spécifiques pour les sections
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba($light-text, 0.2);
+  
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: $primary-color;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    
+    i {
+      margin-right: 8px;
+      color: $secondary-color;
+    }
+  }
+  
+  .consult-link {
+    color: $secondary-color;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 20px;
+    background-color: rgba($secondary-color, 0.1);
+    transition: $transition;
+    
+    &:hover {
+      background-color: rgba($secondary-color, 0.2);
+    }
+  }
+  
+  .edit-button {
+    background: none;
+    border: none;
+    color: $light-text;
+    cursor: pointer;
+    transition: $transition;
+    
+    &:hover {
+      color: $secondary-color;
+    }
+  }
+}
+
+// Styles pour les éléments de liste
+.section-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  background-color: $light-bg;
+  border-radius: 8px;
+  border-left: 3px solid $secondary-color;
+  transition: $transition;
+  
+  &:hover {
+    transform: translateX(5px);
+  }
+  
+  .section-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: $medium-text;
+  }
+  
+  .section-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+}
+
+// Styles pour les boutons d'action
+.action-button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: $transition;
+  font-size: 14px;
+  
+  &.primary {
+    background-color: $primary-color;
+    color: white;
+    
+    &:hover {
+      background-color: darken($primary-color, 10%);
+    }
+  }
+  
+  &.secondary {
+    background-color: $light-bg;
+    color: $medium-text;
+    
+    &:hover {
+      background-color: darken($light-bg, 5%);
+    }
+  }
+  
+  &.danger {
+    background-color: $danger-color;
+    color: white;
+    
+    &:hover {
+      background-color: darken($danger-color, 10%);
+    }
+  }
+}
+
+// Styles pour les formulaires
+.form-group {
+  margin-bottom: 20px;
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: $medium-text;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: $transition;
+    
+    &:focus {
+      outline: none;
+      border-color: $secondary-color;
+      box-shadow: 0 0 0 3px rgba($secondary-color, 0.2);
+    }
+  }
+  
+  textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+  }
+}
+
+// Styles pour les modales
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal {
+  background-color: white;
+  border-radius: $border-radius;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: auto;
+  animation: slideUp 0.4s ease;
+  
+  .modal-content {
+    padding: 25px;
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    
+    h4 {
+      font-size: 20px;
+      font-weight: 600;
+      color: $primary-color;
+      margin: 0;
+    }
+    
+    .close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: $light-text;
+      
+      &:hover {
+        color: $danger-color;
+      }
+    }
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// Styles pour la carte Codingame
+.codingame-card {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  overflow: hidden;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba($accent-color, 0.15) 0%, rgba($accent-color, 0) 70%);
+    border-radius: 50%;
+    z-index: 0;
+  }
+  
+  .card-header {
+    position: relative;
+    z-index: 1;
+    
+    .title {
+      &::before {
+        content: "\f121";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        margin-right: 12px;
+        color: $accent-color;
+      }
+    }
+    
+    .codingame-logo {
+      width: 40px;
+      height: 40px;
+      background-color: #fff;
+      border-radius: 50%;
+      padding: 5px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+  }
+  
+  .codingame-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 30px 0;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .codingame-description {
+    color: $medium-text;
+    margin-bottom: 30px;
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 80%;
+  }
+  
+  .codingame-button {
+    background: linear-gradient(135deg, $accent-color, #f39c12);
+    color: $dark-text;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 25px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: $transition;
+    box-shadow: 0 4px 10px rgba($accent-color, 0.3);
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 100%);
+      transition: all 0.6s ease;
+    }
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba($accent-color, 0.4);
+      
+      &::before {
+        left: 100%;
+      }
+    }
+  }
+}
+
+// Styles pour le popup Codingame
+.codingame-modal {
+  .modal-content {
+    max-width: 900px;
+  }
+  
+  .codingame-stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 25px 0;
+    
+    .stat-card {
+      background-color: $light-bg;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      width: 30%;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      transition: $transition;
+      border-top: 3px solid $accent-color;
+      
+      &:hover {
+        transform: translateY(-5px);
+      }
+      
+      .stat-value {
+        display: block;
+        font-size: 28px;
+        font-weight: bold;
+        color: $primary-color;
+        margin-bottom: 8px;
+      }
+      
+      .stat-label {
+        font-size: 14px;
+        color: $light-text;
+        font-weight: 500;
+      }
+    }
+  }
+  
+  .performance-chart-container {
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    
+    h5 {
+      margin-bottom: 20px;
+      color: $dark-text;
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      i {
+        color: $primary-color;
+      }
+    }
+  }
+  
+  .filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 25px 0;
+    padding: 20px;
+    background-color: $light-bg;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 180px;
+      flex: 1;
+      
+      label {
+        font-size: 13px;
+        color: $light-text;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+      
+      select {
+        padding: 10px 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        background-color: white;
+        font-size: 14px;
+        color: $medium-text;
+        transition: $transition;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        
+        &:focus {
+          outline: none;
+          border-color: $secondary-color;
+          box-shadow: 0 0 0 3px rgba($secondary-color, 0.2);
+        }
+      }
+    }
+    
+    .reset-filters {
+      height: 40px;
+      align-self: flex-end;
+      background-color: #e0e0e0;
+      border: none;
+      border-radius: 6px;
+      padding: 0 15px;
+      font-size: 14px;
+      color: $medium-text;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: $transition;
+      
+      &:hover {
+        background-color: #d0d0d0;
+      }
+    }
+  }
+  
+  .table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    margin: 25px 0;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: #c1c1c1;
+      border-radius: 10px;
+    }
+  }
+  
+  .result-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    
+    th {
+      position: sticky;
+      top: 0;
+      background-color: $primary-color;
+      color: white;
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+      
+      &:first-child {
+        border-top-left-radius: 10px;
+      }
+      
+      &:last-child {
+        border-top-right-radius: 10px;
+      }
+    }
+    
+    td {
+      padding: 15px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+      color: $medium-text;
+    }
+    
+    tbody tr {
+      transition: $transition;
+      
+      &:hover {
+        background-color: #f5f8ff;
+      }
+      
+      &.high-score {
+        background-color: rgba($accent-color, 0.1);
+        
+        &:hover {
+          background-color: rgba($accent-color, 0.15);
+        }
+      }
+    }
+    
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      color: $light-text;
+      
+      i {
+        margin-right: 8px;
+        font-size: 18px;
+      }
+    }
+  }
+  
+  .framework-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: rgba($secondary-color, 0.1);
+    color: $secondary-color;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .level-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+    
+    &.level-easy {
+      background-color: rgba($success-color, 0.1);
+      color: $success-color;
+    }
+    
+    &.level-medium {
+      background-color: rgba($accent-color, 0.1);
+      color: darken($accent-color, 10%);
+    }
+    
+    &.level-hard {
+      background-color: rgba($danger-color, 0.1);
+      color: $danger-color;
+    }
+  }
+  
+  .score-container {
+    position: relative;
+    width: 100px;
+    height: 20px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    
+    .score-bar {
+      height: 100%;
+      background: linear-gradient(to right, $accent-color, #f39c12);
+      border-radius: 10px;
+    }
+    
+    .score-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: 600;
+      font-size: 12px;
+      color: $dark-text;
+    }
+  }
+}
+
+// Styles pour les cartes de documents
+.document-card {
+  .card-header {
+    .title {
+      &.diplomes::before {
+        content: "\f19d";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        margin-right: 12px;
+        color: $secondary-color;
+      }
+      
+      &.certificats::before {
+        content: "\f0a3";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        margin-right: 12px;
+        color: $accent-color;
+      }
+      
+      &.sejour::before {
+        content: "\f5a0";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        margin-right: 12px;
+        color: $success-color;
+      }
+    }
+  }
+  
+  .section-item {
+    &.diplome-item {
+      border-left-color: $secondary-color;
+    }
+    
+    &.certificat-item {
+      border-left-color: $accent-color;
+    }
+    
+    &.sejour-item {
+      border-left-color: $success-color;
+    }
+  }
+}
+
+// Styles pour la carte de profil personnel
+.profile-card {
+  .profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 25px;
+    
+    .profile-picture-container {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin-bottom: 15px;
+      
+      .profile-picture {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid $secondary-color;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+      
+      .empty-profile {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-color: $light-bg;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 40px;
+        color: $light-text;
+        border: 3px solid $light-text;
+      }
+      
+      .camera-button {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background-color: $secondary-color;
+        color: white;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        border: 3px solid white;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        transition: $transition;
+        
+        &:hover {
+          background-color: darken($secondary-color, 10%);
+          transform: scale(1.1);
+        }
+      }
+    }
+    
+    .profile-name {
+      font-size: 20px;
+      font-weight: 600;
+      color: $dark-text;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+    
+    .profile-title {
+      font-size: 14px;
+      color: $light-text;
+      text-align: center;
+    }
+  }
+  
+  .profile-info-section {
+    margin-bottom: 20px;
+    
+    .info-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba($light-text, 0.2);
+      
+      h3 {
+        font-size: 16px;
+        font-weight: 600;
+        color: $primary-color;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        
+        i {
+          margin-right: 8px;
+          color: $secondary-color;
+        }
+      }
+      
+      .edit-button {
+        background: none;
+        border: none;
+        color: $light-text;
+        cursor: pointer;
+        transition: $transition;
+        
+        &:hover {
+          color: $secondary-color;
+        }
+      }
+    }
+    
+    .info-content {
+      .info-item {
+        display: flex;
+        margin-bottom: 12px;
+        
+        .info-icon {
+          width: 30px;
+          color: $secondary-color;
+          font-size: 14px;
+        }
+        
+        .info-label {
+          font-weight: 500;
+          color: $medium-text;
+          width: 100px;
+          font-size: 14px;
+        }
+        
+        .info-value {
+          flex: 1;
+          color: $dark-text;
+          font-size: 14px;
+          
+          a {
+            color: $secondary-color;
+            text-decoration: none;
+            
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Styles pour la carte d'informations professionnelles
+.professional-info-card {
+  .section-header {
+    h3 {
+      &.formation::before {
+        content: "\f19d";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        margin-right: 8px;
+        color: $secondary-color;
+      }
+      
+      &.competences::before {
+        content: "\f085";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        margin-right: 8px;
+        color: $secondary-color;
+      }
+      
+      &.langues::before {
+        content: "\f1ab";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        margin-right: 8px;
+        color: $secondary-color;
+      }
+      
+      &.experience::before {
+        content: "\f0b1";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        margin-right: 8px;
+        color: $secondary-color;
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 1100px) {
+  .cards-wrapper {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cards-wrapper {
+    gap: 15px;
+  }
+  
+  .card {
+    padding: 20px;
+  }
+  
+  .codingame-stats {
+    flex-direction: column;
+    
+    .stat-card {
+      width: 100% !important;
+      margin-bottom: 15px;
+    }
+  }
+  
+  .filters-container {
+    flex-direction: column;
+    
+    .filter-group {
+      width: 100%;
+    }
+    
+    .reset-filters {
+      align-self: flex-start;
+      margin-top: 10px;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboard-header {
+    h1 {
+      font-size: 24px;
+    }
+  }
+  
+  .card-header {
+    h1.title {
+      font-size: 18px;
+    }
+  }
+  
+  .section-header {
+    h3 {
+      font-size: 15px;
+    }
+  }
+  
+  .codingame-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .codingame-description {
+    max-width: 100%;
+  }
+  
+  .modal {
+    .modal-content {
+      padding: 15px;
+    }
+    
+    .modal-header {
+      h4 {
+        font-size: 18px;
+      }
+    }
+  }
+  
+  .result-table {
+    th, td {
+      padding: 10px;
+      font-size: 12px;
+    }
+    
+    .score-container {
+      width: 80px;
+    }
+    
+    .framework-badge, .level-badge {
+      font-size: 10px;
+      padding: 4px 8px;
+    }
+  }
+  
+  .profile-card {
+    .profile-header {
+      .profile-picture-container {
+        width: 100px;
+        height: 100px;
+      }
+      
+      .profile-name {
+        font-size: 18px;
+      }
+    }
+    
+    .profile-info-section {
+      .info-content {
+        .info-item {
+          flex-direction: column;
+          
+          .info-label {
+            width: auto;
+            margin-bottom: 5px;
+          }
+          
+          .info-icon {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Styles pour les PDF viewers
+.pdf-viewer-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+  animation: fadeIn 0.3s ease;
+
+  .modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: $border-radius;
+    width: 90%;
+    max-width: 1000px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.4s ease;
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      
+      h3 {
+        margin: 0;
+        color: $dark-text;
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .close-button {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: $light-text;
+        transition: color 0.2s ease;
+        
+        &:hover {
+          color: $danger-color;
+        }
+      }
+    }
+
+    .modal-body {
+      flex-grow: 1;
+      overflow: auto;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      
+      iframe {
+        border: none;
+        background-color: $light-bg;
+      }
+    }
+  }
+}
+
+// Styles pour les messages "aucun document"
+.no-documents {
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 16px;
+  color: $light-text;
+  background-color: $light-bg;
+  border-radius: 8px;
+  margin-top: 20px;
+  
+  p {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    
+    &::before {
+      content: "\f15b";
+      font-family: "Font Awesome 5 Free";
+      font-weight: 900;
+      font-size: 40px;
+      opacity: 0.3;
+    }
+  }
+}
+
+// Styles pour les boutons de sauvegarde
+.save-button {
+  background-color: $secondary-color;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: $transition;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  
+  i {
+    font-size: 14px;
+  }
+  
+  &:hover {
+    background-color: darken($secondary-color, 10%);
+  }
+  
+  &:disabled {
+    background-color: $light-text;
+    cursor: not-allowed;
+  }
+}
+
+// Styles pour les popups académiques et compétences
+.modal {
+  .academic-form, .skills-form {
+    .academic-section, .skill-item {
+      background-color: $light-bg;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      position: relative;
+      
+      .btn-remove {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        color: $danger-color;
+        cursor: pointer;
+        font-size: 16px;
+        
+        &:hover {
+          color: darken($danger-color, 10%);
+        }
+      }
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+  }
+}

@@ -1,0 +1,219 @@
+<div class="modal-overlay" *ngIf="visible" (click)="onClose()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <i class="fas fa-folder-open"></i>
+        Dossier de Compétences
+      </h2>
+      <button class="close-btn" (click)="onClose()" aria-label="Fermer">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="modal-content">
+      <div class="loading-overlay" *ngIf="isLoading">
+        <div class="spinner">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Chargement des documents...</p>
+        </div>
+      </div>
+
+      <div class="documents-container" *ngIf="!isLoading">
+                <!-- Section CV -->
+        <div class="document-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <i class="fas fa-file-alt"></i>
+              CV
+              <!-- CV ({{ cvDocuments.length }}) -->
+            </h3>
+          </div>
+
+          <div class="documents-grid" *ngIf="cvDocuments.length > 0">
+            <div 
+              class="document-card" 
+              *ngFor="let cv of cvDocuments">
+              
+              <div class="document-icon">
+                <i class="fas fa-file-pdf"></i>
+              </div>
+              
+              <div class="document-info">
+                <h4 class="document-name">{{ cv.fileName}}</h4>
+                <p class="document-type">CV</p>
+              </div>
+              
+              <div class="document-actions">
+                <button 
+                  class="view-btn" 
+                  (click)="$event.stopPropagation(); viewDocument(cv)"
+                  title="Voir le document">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <div class="checkbox-container" *ngIf="this.espace==='Postuler Mission' || this.espace==='Postuler Offre'">
+                  <input 
+                    type="checkbox" 
+                    [checked]="true"
+                    [disabled]="true"
+                    (click)="$event.stopPropagation()">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty-state" *ngIf="cvDocuments.length === 0">
+            <i class="fas fa-file-alt empty-icon"></i>
+            <p>Aucun CV trouvé</p>
+          </div>
+        </div>
+        <!-- Section Certificats -->
+        <div class="document-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <i class="fas fa-graduation-cap"></i>
+              Certificats ({{ certificates.length }})
+            </h3>
+            <div class="section-actions" *ngIf="this.espace==='Postuler Mission' || this.espace==='Postuler Offre'">
+              <button 
+                class="select-all-btn" 
+                (click)="selectAllCertificates()"
+                [class.selected]="allCertificatesSelected"
+                *ngIf="certificates.length > 0">
+                <i class="fas" [class.fa-check-square]="allCertificatesSelected" [class.fa-square]="!allCertificatesSelected"></i>
+                {{ allCertificatesSelected ? 'Désélectionner tout' : 'Sélectionner tout' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="documents-grid" *ngIf="certificates.length > 0">
+            <div 
+              class="document-card" 
+              *ngFor="let certificate of certificates"
+              [class.selected]="certificate.selected"
+              (click)="toggleDocumentSelection(certificate)">
+              
+              <div class="document-icon">
+                <i class="fas fa-file-pdf"></i>
+              </div>
+              
+              <div class="document-info">
+                <h4 class="document-name">{{ certificate.fileName }}</h4>
+                <p class="document-type">Certificat</p>
+              </div>
+              
+              <div class="document-actions">
+                <button 
+                  class="view-btn" 
+                  (click)="$event.stopPropagation(); viewDocument(certificate)"
+                  title="Voir le document">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <div class="checkbox-container" *ngIf="this.espace==='Postuler Mission' || this.espace==='Postuler Offre'">
+                  <input 
+                    type="checkbox" 
+                    [checked]="certificate.selected"
+                    (click)="$event.stopPropagation()"
+                    (change)="toggleDocumentSelection(certificate)">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty-state" *ngIf="certificates.length === 0">
+            <i class="fas fa-graduation-cap empty-icon"></i>
+            <p>Aucun certificat trouvé</p>
+          </div>
+        </div>
+
+        <!-- Section Diplomes -->
+        <div class="document-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <i class="fas fa-award"></i>
+              Diplômes ({{ diplomes.length }})
+            </h3>
+            <div class="section-actions" *ngIf="this.espace==='Postuler Mission' || this.espace==='Postuler Offre'">
+              <button 
+                class="select-all-btn" 
+                (click)="selectAllDiplomes()"
+                [class.selected]="allDiplomesSelected"
+                *ngIf="diplomes.length > 0">
+                <i class="fas" [class.fa-check-square]="allDiplomesSelected" [class.fa-square]="!allDiplomesSelected"></i>
+                {{ allDiplomesSelected ? 'Désélectionner tout' : 'Sélectionner tout' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="documents-grid" *ngIf="diplomes.length > 0">
+            <div 
+              class="document-card" 
+              *ngFor="let diplome of diplomes"
+              [class.selected]="diplome.selected"
+              (click)="toggleDocumentSelection(diplome)">
+              
+              <div class="document-icon">
+                <i class="fas fa-file-pdf"></i>
+              </div>
+              
+              <div class="document-info">
+                <h4 class="document-name">{{ diplome.fileName }}</h4>
+                <p class="document-type">Diplôme</p>
+              </div>
+              
+              <div class="document-actions">
+                <button 
+                  class="view-btn" 
+                  (click)="$event.stopPropagation(); viewDocument(diplome)"
+                  title="Voir le document">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <div class="checkbox-container" *ngIf="this.espace==='Postuler Mission' || this.espace==='Postuler Offre'">
+                  <input 
+                    type="checkbox" 
+                    [checked]="diplome.selected"
+                    (click)="$event.stopPropagation()"
+                    (change)="toggleDocumentSelection(diplome)">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty-state" *ngIf="diplomes.length === 0">
+            <i class="fas fa-award empty-icon"></i>
+            <p>Aucun diplôme trouvé</p>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal-footer">
+      <div class="selected-info" *ngIf="hasSelectedDocuments && (this.espace==='Postuler Mission' || this.espace==='Postuler Offre')">
+        <span class="selected-count">
+          <i class="fas fa-check-circle"></i>
+          {{ selectedDocumentIds.length }} document(s) sélectionné(s)
+        </span>
+      </div>
+
+      <div class="footer-actions">
+        <button class="btn btn-secondary" (click)="onClose()">
+          <i class="fas fa-times"></i>
+          Annuler
+        </button>
+        
+        <button 
+        *ngIf="this.espace==='Postuler Mission' || this.espace==='Postuler Offre'"
+          class="btn btn-primary" 
+          (click)="onPostuler()"
+          [disabled]="!hasSelectedDocuments">
+          <i class="fas fa-paper-plane"></i>
+          Postuler
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

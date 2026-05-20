@@ -1,0 +1,93 @@
+<div class="upload-documents-container">
+
+  <!-- Diplômes -->
+  <div class="upload-section">
+    <h2>Importer vos <strong>Diplômes</strong></h2>
+    <div class="upload-box">
+      <div class="upload-content">
+        <i class="fas fa-file-pdf fa-2x text-purple"></i>
+        <div class="file-select-area">
+          <ng-container *ngIf="diplomaFilesSelected.length === 0">
+            <i class="fas fa-plus fa-3x cursor-pointer" (click)="diplomaInput.click()"></i>
+            <p>
+              Glissez-déposez un fichier ou 
+              <a class="browse-link" (click)="diplomaInput.click()">Parcourir</a>
+            </p>
+          </ng-container>
+          <div *ngIf="diplomaFilesSelected.length > 0">
+            <div class="file-preview flex items-center gap-2" *ngFor="let file of diplomaFilesSelected; let i = index">
+              <p>📄 {{i + 1}}. {{ file.name }}</p>
+              <button 
+                class="remove-btn text-red-500 hover:text-red-700 text-lg ml-2"
+                (click)="removeDiplomaFile(i)"
+                aria-label="Supprimer ce fichier"
+                title="Supprimer ce fichier"
+              >&times;</button>
+            </div>
+            <button class="add-more-btn" (click)="diplomaInput.click()">+ Ajouter d'autres</button>
+          </div>
+          <input 
+            type="file" 
+            accept=".pdf, image/*" 
+            multiple 
+            style="display: none" 
+            (change)="onFileSelected($event, 'diploma')" 
+            #diplomaInput>
+        </div>
+        <p class="format-info">Formats acceptés : PDF, JPG, PNG, JPEG, GIF, SVG</p>
+      </div>
+      <button class="upload-button" (click)="onUpload()">📤 Enregistrer les diplômes</button>
+    </div>
+  </div>
+
+  <!-- Certificats -->
+  <div class="upload-section">
+    <h2>Importer vos <strong>Certificats</strong></h2>
+    <div class="upload-box">
+      <div class="upload-content">
+        <i class="fas fa-file-pdf fa-2x text-purple"></i>
+        <div class="file-select-area">
+          <ng-container *ngIf="certificateFilesSelected.length === 0">
+            <i class="fas fa-plus fa-3x cursor-pointer" (click)="certificateInput.click()"></i>
+            <p>
+              Glissez-déposez un fichier ou 
+              <a class="browse-link" (click)="certificateInput.click()">Parcourir</a>
+            </p>
+          </ng-container>
+          <div *ngIf="certificateFilesSelected.length > 0">
+            <div class="file-preview flex items-center gap-2" *ngFor="let file of certificateFilesSelected; let i = index">
+              <p>📄 {{i + 1}}. {{ file.name }}</p>
+              <button 
+                class="remove-btn text-red-500 hover:text-red-700 text-lg ml-2"
+                (click)="removeCertificateFile(i)"
+                aria-label="Supprimer ce fichier"
+                title="Supprimer ce fichier"
+              >&times;</button>
+            </div>
+            <button class="add-more-btn" (click)="certificateInput.click()">+ Ajouter d'autres</button>
+          </div>
+          <input 
+            type="file" 
+            accept=".pdf, image/*" 
+            multiple 
+            style="display: none" 
+            (change)="onFileSelected($event, 'certificate')" 
+            #certificateInput>
+        </div>
+        <p class="format-info">Formats acceptés : PDF, JPG, PNG, JPEG, GIF, SVG</p>
+      </div>
+      <button class="upload-button" (click)="onUploadCertif()">📤 Enregistrer les certificats</button>
+    </div>
+  </div>
+
+  <div class="finish-section">
+    <button class="finish-button" (click)="onFinish()">
+      <i class="fas fa-check-circle"></i> Confirmé !
+    </button>
+    <p *ngIf="!documentsUploaded" class="info-message">
+      ⚠️ Vous devez importer au moins un document pour valider cette étape
+    </p>
+  </div>
+
+
+</div>

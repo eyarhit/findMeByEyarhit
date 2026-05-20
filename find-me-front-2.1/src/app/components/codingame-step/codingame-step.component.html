@@ -1,0 +1,241 @@
+<div class="codingame-container">
+  <!-- Message d'erreur -->
+  <div *ngIf="errorMessage" class="error-message">
+    <i class="fas fa-exclamation-circle"></i>
+    <p>{{ errorMessage }}</p>
+    <button (click)="errorMessage = ''" class="close-btn">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Overlay de chargement -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Chargement en cours...</p>
+  </div>
+
+  <!-- Modern stepper with progress bar -->
+  <div class="stepper-progress">
+    <div class="progress-bar">
+      <div class="progress" [style.width]="((currentStep-1) / (steps.length-1)) * 100 + '%'"></div>
+    </div>
+    <div class="steps-wrapper">
+      <div *ngFor="let step of steps; let i = index" 
+           class="step" 
+           [class.active]="currentStep === i + 1"
+           [class.completed]="currentStep > i + 1">
+        <div class="step-icon">
+          <span *ngIf="currentStep <= i + 1">{{ i + 1 }}</span>
+          <i *ngIf="currentStep > i + 1" class="fas fa-check"></i>
+        </div>
+        <div class="step-label">{{ step }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <ng-container [ngSwitch]="currentStep">
+
+      <!-- Step 1: Experience Level -->
+      <div *ngSwitchCase="1" class="step-content fade-in">
+        <h2 class="step-title">Quel est votre niveau d'expérience ?</h2>
+        <div class="options-grid">
+          <button *ngFor="let level of levels" 
+                  (click)="selectLevel(level.id)" 
+                  class="option-card">
+            <div class="option-icon">
+              <i [ngClass]="level.id === 1 ? 'fas fa-seedling' : level.id === 2 ? 'fas fa-user-tie' : 'fas fa-crown'"></i>
+            </div>
+            <span class="option-label">{{ level.label }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Domain Selection -->
+      <div *ngSwitchCase="2" class="step-content fade-in">
+        <h2 class="step-title">Dans quel domaine souhaitez-vous être évalué ?</h2>
+        <div class="options-grid domains-grid">
+          <button *ngFor="let domain of domains" 
+                  (click)="selectDomain(domain.id)" 
+                  class="option-card domain-card">
+            <div class="domain-icon">
+              <i [ngClass]="
+                domain.name === 'Front-end' ? 'fas fa-laptop-code' : 
+                domain.name === 'Back-end' ? 'fas fa-server' : 
+                domain.name === 'Data engineer' ? 'fas fa-database' : 
+                domain.name === 'Cybersecurity' ? 'fas fa-shield-alt' : 
+                domain.name === 'DevOps' ? 'fas fa-cogs' : 
+                domain.name === 'Full-stack' ? 'fas fa-layer-group' : 
+                domain.name === 'Data scientist' ? 'fas fa-chart-bar' : 
+                'fas fa-code'"></i>
+            </div>
+            <span class="domain-name">{{ domain.name }}</span>
+          </button>
+        </div>
+        <button class="back-btn" (click)="previousStep()">
+          <i class="fas fa-arrow-left"></i> Retour
+        </button>
+      </div>
+
+      <!-- Step 3: Framework Selection -->
+      <div *ngSwitchCase="3" class="step-content fade-in">
+        <h2 class="step-title">Choisissez le framework ou la technologie</h2>
+        <div class="options-grid framework-grid">
+          <button *ngFor="let fw of frameworks" 
+                  (click)="selectFramework(fw.id)" 
+                  class="option-card framework-card">
+            <div class="framework-icon">
+              <i [ngClass]="
+                fw.name === 'Java' ? 'fab fa-java' : 
+                fw.name === 'Angular' ? 'fab fa-angular' : 
+                fw.name === 'C++' ? 'fas fa-code' : 
+                'fab fa-microsoft'"></i>
+            </div>
+            <span class="framework-name">{{ fw.name }}</span>
+          </button>
+        </div>
+        <button class="back-btn" (click)="previousStep()">
+          <i class="fas fa-arrow-left"></i> Retour
+        </button>
+      </div>
+
+      <!-- Step 4: Questions -->
+      <div *ngSwitchCase="4" class="step-content fade-in">
+        <div class="question-header">
+          <h2 class="step-title">Test technique</h2>
+          <div class="timer-container">
+            <svg class="progress-ring" width="70" height="70">
+              <circle
+                class="progress-ring__circle"
+                [attr.stroke]="elapsedTime <= 5 ? '#ef4444' : '#4f46e5'"
+                stroke-width="6"
+                fill="transparent"
+                r="30"
+                cx="35"
+                cy="35"
+                [attr.stroke-dasharray]="188.4"
+                [attr.stroke-dashoffset]="circleOffset"
+              />
+            </svg>
+            <div class="timer-text" [ngClass]="{ 'danger': elapsedTime <= 5 }">
+              {{ elapsedTime }}s
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress indicator -->
+        <div class="progress-indicator">
+          <div class="progress-text">Question {{ currentQuestionIndex + 1 }} sur {{ totalQuestions }}</div>
+          <div class="progress-bar-questions">
+            <div class="progress-fill" [style.width]="progressPercentage + '%'"></div>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="question-badge">Question {{ currentQuestionIndex + 1 }}</div>
+          <p class="question-text">{{ currentQuestion?.content }}</p>
+          <div class="options-list">
+            <label
+            *ngFor="let opt of ['A', 'B', 'C', 'D']"
+            class="option-label"
+            [class.selected]="userResponses[currentQuestion.id] === opt"
+          >
+                        <div class="radio-container">
+                <input type="radio" [value]="opt" [(ngModel)]="userResponses[currentQuestion.id]">
+                <span class="radio-custom"></span>
+              </div>
+              <span class="option-text">{{ currentQuestion?.['option' + opt] }}</span>
+            </label>
+          </div>
+        </div>
+
+        <button (click)="submitCurrentAnswer()">Question suivante <i class="fas fa-arrow-right"></i></button>
+
+      </div>
+
+      <!-- Step 5: Results - Design amélioré -->
+      <!-- Step 5: Results - Design amélioré -->
+<div *ngSwitchCase="5" class="results-section fade-in-up">
+  <div class="results-container">
+        <div class="results-header">
+          <h2 class="gradient-title">🎉 Bravo ! Test terminé</h2>
+          <p>Vous avez complété votre évaluation en <strong>{{ timeSpent }}</strong> secondes.</p>
+        </div>
+      
+        <div class="results-summary">
+          <div class="summary-card">
+            <i class="fas fa-clock summary-icon"></i>
+            <div class="summary-info">
+              <span>Temps total</span>
+              <strong>{{ timeSpent }}s</strong>
+            </div>
+          </div>
+          <div class="summary-card">
+            <i class="fas fa-tasks summary-icon"></i>
+            <div class="summary-info">
+              <span>Questions</span>
+              <strong>{{ totalQuestions }}</strong>
+            </div>
+          </div>
+          <div class="summary-card">
+            <i class="fas fa-star summary-icon"></i>
+            <div class="summary-info">
+              <span>Performance</span>
+              <strong>
+                {{ results.length > 0 ? (results[0].score >= 80 ? 'Excellente' : results[0].score >= 50 ? 'Bonne' : 'À améliorer') : 'N/A' }}
+              </strong>
+            </div>
+          </div>
+        </div>
+      
+        <div class="results-table-wrapper">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>Framework</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of results">
+                <td>{{ r.framework.name }}</td>
+                <td>
+                  <div class="score-bar">
+                    <div class="score-fill" [style.width]="r.score + '%'" 
+                         [ngClass]="{
+                           'high': r.score >= 80,
+                           'medium': r.score >= 50 && r.score < 80,
+                           'low': r.score < 50
+                         }">
+                    </div>
+                  </div>
+                  <span class="score-text">{{ r.score }}%</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      
+        <div class="feedback-message">
+          <p *ngIf="results.length > 0 && results[0].score >= 80">
+            🚀 Excellent travail ! Vous êtes prêt(e) pour des missions avancées.
+          </p>
+          <p *ngIf="results.length > 0 && results[0].score >= 50 && results[0].score < 80">
+            👍 Bon niveau ! Un peu de pratique et vous serez au top.
+          </p>
+          <p *ngIf="results.length > 0 && results[0].score < 50">
+            📚 Continuez vos efforts ! Ce test a identifié des domaines où vous pouvez progresser.
+          </p>
+        </div>
+      
+        <div class="action-buttons">
+          <button class="restart-button" (click)="restartTest()">↺ Recommencer</button>
+          <button class="finish-button" (click)="finish.emit()">✔️ Terminer</button>
+        </div>
+      </div>
+    </div>
+    </ng-container>
+    
+  </div>
+
+</div>

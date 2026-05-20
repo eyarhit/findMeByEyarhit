@@ -1,0 +1,104 @@
+<div class="grid grid-cols-1 gap-6">
+    <!-- Loading State -->
+    <ng-container *ngIf="isLoading">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+      </div>
+    </ng-container>
+  
+    <!-- Role Distribution Card -->
+    <div class="dashboard-card" *ngIf="!isLoading">
+      <h2>Répartition des rôles d'utilisateur</h2>
+      
+      <div class="flex flex-col md:flex-row items-center gap-8">
+        <!-- Pie Chart -->
+        <div class="chart-container">
+          <div class="pie-chart" 
+               [ngStyle]="{ 'background': getConicGradient(roleCounts, ['#7c3aed', '#10b981', '#f59e0b']) }">
+          </div>
+        </div>
+        
+        <!-- Legend and Stats -->
+        <div class="flex-1 space-y-6">
+           
+          
+            <!-- Legend - Improved Layout -->
+            <div class="legend-container flex flex-wrap justify-center gap-3">
+              <div class="legend-item" *ngFor="let role of roleCounts | keyvalue">
+                <div class="legend-color" [ngStyle]="{ 'background-color': getRoleLegendColor(role.key) }"></div>
+                <div class="legend-label">
+                  <span class="font-semibold">{{ role.key }}:</span> {{ role.value }}
+                </div>
+              </div>
+            </div>
+          
+            <!-- Stats Grid - Responsive Layout -->
+            <div class="stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div class="stat-item" *ngFor="let role of roleCounts | keyvalue">
+                <div class="flex items-center justify-between">
+                  <div class="stat-label">{{ role.key }} Users</div>
+                  <div class="stat-value">{{ role.value }}</div>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                  <div class="bg-purple-600 h-2 rounded-full" 
+                       [style.width]="(role.value / totalUsers * 100) + '%'"></div>
+                </div>
+                <div class="text-xs text-gray-500 mt-1 text-right">
+                  {{ (role.value / totalUsers * 100).toFixed(1) }}% of total
+                </div>
+              </div>
+            </div>
+             <!-- Total Users Card - Centered -->
+             <!-- <div class="flex justify-center">
+                <div class="stat-item bg-gradient-to-r from-purple-50 to-green-50 w-full max-w-xs">
+                  <div class="stat-label">Total Users</div>
+                  <div class="stat-value text-purple-600">{{ totalUsers }}</div>
+                </div>
+              </div> -->
+          </div>
+      </div>
+    </div>
+  
+    <!-- Status Distribution Card -->
+    <div class="dashboard-card mt-6" *ngIf="!isLoading">
+      <h2>Répartition du statut des utilisateurs</h2>
+      
+      <div class="flex flex-col md:flex-row items-center gap-8">
+        <!-- Pie Chart -->
+        <div class="chart-container">
+          <div class="pie-chart" 
+               [ngStyle]="{ 'background': getConicGradient(statusCounts, ['#10b981', '#ef4444', '#8b5cf6', '#f59e0b']) }">
+          </div>
+        </div>
+        
+        <!-- Legend and Stats -->
+        <div class="flex-1">
+          <!-- Legend -->
+          <div class="legend-container">
+            <div class="legend-item" *ngFor="let status of statusCounts | keyvalue">
+              <div class="legend-color" [ngStyle]="{ 'background-color': getStatusLegendColor(status.key) }"></div>
+              <div class="legend-label">
+                {{ status.key }}: <span>{{ status.value }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-item" *ngFor="let status of statusCounts | keyvalue">
+              <div class="stat-label">{{ status.key }} Users</div>
+              <div class="stat-value">{{ status.value }}</div>
+              <div class="text-xs text-gray-500 mt-1">
+                {{ (status.value / totalStatus * 100).toFixed(1) }}% of total
+              </div>
+            </div>
+            
+            <div class="stat-item bg-gradient-to-r from-green-50 to-red-50">
+              <div class="stat-label">Total Statuses</div>
+              <div class="stat-value text-green-600">{{ totalStatus }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>

@@ -1,0 +1,124 @@
+<!-- <div class="job-card w-full " [class.selected]="isSelected" (click)="selectJob()" >
+  <div class="job-card-left">
+
+    <img [src]="job.logo" alt="poste Logo" class="job-logo">
+
+✅ 
+    <div class="job-details">
+          <div style="display: flex;flex-direction: row;">
+      <h3 class="job-title">{{ job.title }}</h3>
+        <p *ngIf="candidatureMissionIds.includes(job.id)" class="candidature-existante">
+  Vous avez déjà postulé à cette {{this.type_contrat}}.
+</p>  </div>
+      <p class="job-poste">{{ job.poste }}</p>
+      <p class="job-location">{{ job.pays }}</p>
+      <p class="job-location"> {{ job.ville }}</p>
+      <p class="job-salary">{{ job.salary }}  {{this.storedtargetmarket === 'Tunisien' ? 'TND' : '€'}}</p>
+    </div>  
+  </div>
+  <div class="job-card-right">
+    <p class="job-ref">{{ job.ref }}</p>
+    <p class="job-type">{{ job.type }}</p>
+    <p class="job-experience">{{ job.experience }}</p>
+    <div style="display: flex;flex-direction: row;gap: 2px;">
+       <button *ngIf="espace === 'Mission publier'|| espace === 'Offres publier'" class="view-button" (click)="viewCandidature(job.id)">Voir Candidature</button>
+       <button class="view-button" (click)="viewMission(job.id)">Voir plus</button>
+    </div>
+  </div>
+</div>
+  <div class="notification-container" *ngIf="IsMission">
+  <button (click)="IsMission = false" class="absolute top-8 right-16  text-white hover:text-red-600 focus:outline-none text-xl" style="
+    right: 14vw;
+"
+  > 
+    &times;
+  </button>
+  <app-mission-details style="
+    width: 55vw;
+" [mission_id]="job.id.toString()" [visiteur]="visiteur" [espace]="espace"></app-mission-details>
+  </div>
+
+<div class="notification-container-3 relative" *ngIf="candidature">
+  <button (click)="candidature = false" class="absolute top-8 right-16  text-white hover:text-red-600 focus:outline-none text-xl" style="
+    right: 14vw;
+"
+  > 
+    &times;
+  </button>
+  <app-list-utilisateur [espace]="this.espace" [missionId]="this.missionId"></app-list-utilisateur>
+  </div> -->
+
+  <!-- new carte mission + contatct -->
+
+  <div class="job-card w-full" [class.selected]="isSelected" (click)="selectJob()">
+  <div class="job-card-left">
+    <img [src]="job.logo || 'assets/images/Logo/FindMeLogo.png'" alt="poste Logo" class="job-logo" (error)="$any($event.target).src='assets/images/Logo/FindMeLogo.png'">
+    <div class="job-details">
+      <div style="display: flex; flex-direction: row;">
+        <h3 class="job-title">{{ job.title }}</h3>
+        <p *ngIf="candidatureMissionIds.includes(job.id)" class="candidature-existante">
+          Vous avez déjà postulé à cette {{ type_contrat }}.
+        </p>
+      </div>
+      <p class="job-poste">{{ job.poste }}</p>
+      <p class="job-location">{{ job.pays }}</p>
+      <p class="job-location">{{ job.ville }}</p>
+      <p class="job-salary">{{ job.salary }} {{ storedtargetmarket === 'Tunisien' ? 'TND' : '€' }}</p>
+    </div>
+  </div>
+
+  <div class="job-card-right">
+    <p class="job-ref">{{ job.ref }}</p>
+    <p class="job-type">{{ job.type }}</p>
+    <p class="job-experience">{{ job.experience }}</p>
+    <div style="display: flex; flex-direction: row; gap: 5px;">
+      <button *ngIf="espace === 'Mission publier'|| espace === 'Offres publier'" class="view-button" (click)="viewCandidature(job.id)">Voir Candidature</button>
+      <button class="view-button" (click)="viewMission(job.id)">Voir plus</button>
+<!-- <button class="contact-button" (click)="openContactForm(job)">
+  <i class="fas fa-paper-plane"></i>
+  <span>Contacter</span>
+      </button> -->
+
+    </div>
+  </div>
+</div>
+
+  <div class="notification-container " *ngIf="IsMission">
+  <button (click)="IsMission = false" class="absolute top-8 right-16  text-white hover:text-red-600 focus:outline-none text-xl" style="
+    right: 14vw;
+"
+  > 
+    &times;
+  </button>
+  <app-mission-details style="
+    width: 55vw;
+" [mission_id]="job.id.toString()" [visiteur]="visiteur" [espace]="espace"></app-mission-details>
+  </div>
+
+<div class="notification-container-3 relative" *ngIf="candidature">
+  <button (click)="candidature = false" class="absolute top-8 right-16  text-white hover:text-red-600 focus:outline-none text-xl" style="
+    right: 14vw;
+"
+  > 
+    &times;
+  </button>
+  <app-list-utilisateur [espace]="this.espace" [missionId]="this.missionId"></app-list-utilisateur>
+  </div> 
+
+<app-messenger-chat
+  *ngIf="showContactForm && selectedJob"
+  [show]="showContactForm"
+  [companyName]="selectedJob.title"
+  [companyLogo]="selectedJob.logo"
+  [jobOwnerId]="this.jobOwnerId"
+  (closeChat)="closeContactForm()"
+></app-messenger-chat>
+
+<!-- <app-messenger-chat
+  *ngIf="showContactForm && selectedJob"
+  [show]="showContactForm"
+  [companyName]="selectedJob.title"
+  [companyLogo]="selectedJob.logo"
+  [jobOwnerId]="selectedJob.recruiterUserId"
+  (closeChat)="closeContactForm()"
+></app-messenger-chat> -->

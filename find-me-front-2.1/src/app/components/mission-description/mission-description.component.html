@@ -1,0 +1,158 @@
+<div class="mission-card" *ngIf="!(job.poste === '') && (!isEmpty)">
+ 
+  <div class="mission-header">
+    <div class="header-left">
+      <img [src]="job.logo || 'assets/images/Logo/FindMeLogo.png'" alt="poste Logo" class="job-logo" (error)="$any($event.target).src='assets/images/Logo/FindMeLogo.png'">
+    </div> 
+    <div class="header-center">
+      <h2 class="mission-title">{{ job.title }}</h2>
+      <p class="poste-name">{{ job.poste }}</p>
+    </div>
+    <div class="header-right" >
+      <span class="mission-ref" >Réf: {{ job.ref }}</span>
+      <button *ngIf="(this.espace==='Liste Offres'||this.espace==='Liste Mission') " class="favorite-button" (click)="addToFavorites()" title="Ajouter aux favoris">
+        <div class="heart-container">
+          <svg class="favorite-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+          </svg>
+        </div>
+      </button>
+      
+    </div>
+  </div>
+
+  <!-- Détails du poste -->
+  <div class="mission-details">
+    <div class="details-grid">
+      <div class="detail-item">
+        <div class="detail-icon">📍</div>
+        <div class="detail-content">
+          <span class="detail-label">Lieu</span>
+          <span class="detail-value">{{ job.pays }} {{ job.ville }} </span>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-icon">💰</div>
+        <div class="detail-content">
+          <span class="detail-label">Salaire</span>
+          <span class="detail-value">{{ job.salary }} {{this.storedtargetmarket === 'Tunisien' ? 'TND' : '€'}}</span>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-icon">🗓️</div>
+        <div class="detail-content">
+          <span class="detail-label">Début</span>
+          <span class="detail-value">{{ job.date_debut | date:'longDate' }}</span>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-icon">🏁</div>
+        <div class="detail-content">
+          <span class="detail-label">Fin</span>
+          <span class="detail-value">{{ job.date_fin | date:'longDate' }}</span>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-icon">📄</div>
+        <div class="detail-content">
+          <span class="detail-label">Type de contrat</span>
+          <span class="detail-value">{{ job.type }}</span>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-icon">🗣️</div>
+        <div class="detail-content">
+          <span class="detail-label">Langue</span>
+          <span class="detail-value">{{ job.langue }}</span>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-icon">🏠</div>
+        <div class="detail-content">
+          <span class="detail-label">Travail à distance</span>
+          <span class="detail-value">{{ job.isRemote ? 'Oui' : 'Non' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compétences -->
+  <div class="mission-section">
+    <h3 class="section-title">
+      <span class="section-icon">🛠️</span>
+      Compétences requises
+    </h3>
+    <div class="skills-container">
+      <span class="skill-badge" *ngFor="let competence of job.competences">{{ competence }}</span>
+    </div>
+  </div>
+
+  <!-- Profil recherché -->
+  <div class="mission-section">
+    <h3 class="section-title">
+      <span class="section-icon">👤</span>
+      Profil recherché
+    </h3>
+    <div class="profile-details">
+      <div class="profile-item">
+        <span class="profile-label">Expérience:</span>
+        <span class="profile-value">{{ job.experience }}</span>
+      </div>
+      <div class="profile-item">
+        <span class="profile-label">Exigences:</span>
+        <span class="profile-value">{{ job.exigences }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Avantages -->
+  <div class="mission-section">
+    <h3 class="section-title">
+      <span class="section-icon">✨</span>
+      Avantages
+    </h3>
+    <p class="section-content">{{ job.avantages }}</p>
+  </div>
+
+  
+  <div class="action-container">
+    <button class="action-button" (click)="viewMission(job.id)">
+      <span class="button-text">Voir plus</span>
+      <span class="button-icon">→</span>
+    </button>
+  </div>
+</div>
+
+<!-- Si aucune offre -->
+<div class="empty-state" *ngIf="isEmpty">
+  <div class="empty-icon">📭</div>
+  <h3 class="empty-title">Aucune offre d'emploi trouvée</h3>
+  <p class="empty-message">Veuillez réessayer avec d'autres critères de recherche.</p>
+</div>
+
+<!-- Notification toast  -->
+<div class="notification-toast" [class.show]="showNotification">
+  <div class="notification-content">
+    <div class="notification-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+      </svg>
+    </div>
+    <div class="notification-message">
+      <p class="notification-title">Ajouté aux favoris</p>
+      <p class="notification-desc">Votre offre avec la réf: {{ job.ref }} a été ajoutée avec succès</p>
+    </div>
+  </div>
+</div>
+  <div class="notification-container" *ngIf="IsMission">
+  <button (click)="IsMission = false" class="absolute top-8 right-16  text-white hover:text-red-600 focus:outline-none text-xl" style="
+    right: 14vw;
+"
+  > 
+    &times;
+  </button>
+  <app-mission-details style="
+    width: 55vw;
+" [mission_id]="job.id.toString()" [visiteur]="visiteur" [espace]="espace"></app-mission-details>
+  </div>
+

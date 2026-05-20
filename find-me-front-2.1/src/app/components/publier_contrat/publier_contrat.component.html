@@ -1,0 +1,381 @@
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+    <!-- Form Header -->
+    <div class="bg-[#5A3FC9] px-6 py-4">
+     <ng-container *ngIf="action !== 'modifier'; else editMode">
+  <h1 class="text-2xl font-bold text-white">Publier une Nouvelle {{ espace === 'Mission' ? 'mission' : "offre d'emplois" }}</h1>
+  <p class="text-indigo-100">Remplissez les informations requises pour publier votre {{ espace === 'Mission' ? 'mission' : "offre d'emplois" }}</p>
+</ng-container>
+
+<ng-template #editMode>
+  <h1 class="text-2xl font-bold text-white">Mettre à jour votre {{ espace === 'Mission' ? 'mission' : "offre d'emplois" }}</h1>
+  <p class="text-indigo-100">Remplissez les informations requises pour mettre à jour votre {{ espace === 'Mission' ? 'mission' : "offre d'emplois" }}</p>
+</ng-template>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="px-6 py-4 border-b">
+      <div class="flex justify-between">
+        <div *ngFor="let step of steps; let i = index" class="flex flex-col items-center">
+          <div [ngClass]="{
+            'bg-[#5A3FC9] text-white': currentStep > i + 1 || currentStep === i + 1,
+            'bg-gray-200 text-gray-600': currentStep < i + 1
+          }" class="w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300">
+            {{i + 1}}
+          </div>
+          <span [ngClass]="{
+            'text-[#5A3FC9] font-medium': currentStep >= i + 1,
+            'text-gray-400': currentStep < i + 1
+          }" class="text-sm mt-2">{{step}}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Content -->
+    <form [formGroup]="missionForm" (ngSubmit)="submitForm()" class="p-6">
+      <!-- Step 1: Basic Information -->
+      <div *ngIf="currentStep === 1" [@fadeInOut] class="space-y-6">
+        <h2 class="text-xl font-semibold text-gray-800">Informations de Base</h2>
+           <!-- <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Référence code*</label>
+            <input formControlName="reference_code" type="text" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                   [class.border-red-500]="showError('reference_code')">
+            <div *ngIf="showError('reference_code')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div> -->
+        <div formGroupName="descrip_mission" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nom du département*</label>
+            <input formControlName="mission_name" type="text" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                   [class.border-red-500]="showError('descrip_mission.mission_name')">
+            <div *ngIf="showError('descrip_mission.mission_name')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Poste*</label>
+            <input formControlName="poste" type="text" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                   [class.border-red-500]="showError('descrip_mission.poste')">
+            <div *ngIf="showError('descrip_mission.poste')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Type de contrat*</label>
+            <select formControlName="typeContrat" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    [class.border-red-500]="showError('descrip_mission.typeContrat')">
+              <option value="">Choisir un type de contrat</option>
+              <option *ngIf="this.espace === 'Offres d\'emplois' || this.espace === 'Offres publier'" value="CDI">CDI</option>
+              <option *ngIf="this.espace === 'Offres d\'emplois' || this.espace === 'Offres publier'" value="CDD">CDD</option>
+              <option *ngIf="this.espace === 'Offres d\'emplois' || this.espace === 'Offres publier'" value="ALTERNANCE">Alternance</option>
+              <!-- <option *ngIf="espace === 'Offres d\'emplois'" value="PORTAGE_SALARIAL">Portage salarial</option> -->
+              <option *ngIf="this.espace === 'Mission' || this.espace === 'Mission publier'" value="FREELANCE">Freelance</option>
+              <option *ngIf="this.espace === 'Mission' || this.espace === 'Mission publier' " value="MISSION_CDI">Mission CDI</option>
+
+
+            
+            </select>
+            <div *ngIf="showError('descrip_mission.typeContrat')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div>
+        </div>
+
+        <div formGroupName="descrip_mission">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description*</label>
+          <textarea formControlName="description" rows="4" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    [class.border-red-500]="showError('descrip_mission.description')"></textarea>
+          <div *ngIf="showError('descrip_mission.description')" class="text-red-500 text-xs mt-1">
+            Ce champ est requis
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Dates & Location -->
+      <div *ngIf="currentStep === 2" [@fadeInOut] class="space-y-6">
+        <h2 class="text-xl font-semibold text-gray-800">Dates & Localisation</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div formGroupName="descrip_mission">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date de début*</label>
+            <input formControlName="date_debut" type="date" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                   [class.border-red-500]="showError('descrip_mission.date_debut')">
+            <div *ngIf="showError('descrip_mission.date_debut')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div>
+
+          <div formGroupName="descrip_mission">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date de fin*</label>
+            <input formControlName="date_fin" type="date" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                   [class.border-red-500]="showError('descrip_mission.date_fin')">
+            <div *ngIf="showError('descrip_mission.date_fin')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div>
+
+        <!-- Pays + ville (sous-groupe unique `ville`) -->
+        <div formGroupName="ville" class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div formGroupName="pays">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Pays*</label>
+            <select
+              formControlName="nom"
+              (change)="onCountryChange()"
+              class="w-full px-4 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              [class.border-red-500]="showError('ville.pays.nom')">
+              <option value="" disabled>Choisir un pays</option>
+              <option *ngFor="let c of countries" [value]="c.nom">{{ c.nom }}</option>
+            </select>
+            <div *ngIf="showError('ville.pays.nom')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ville*</label>
+            <select
+              formControlName="nomdeville"
+              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              [class.border-red-500]="showError('ville.nomdeville')">
+              <option value="">Choisir une ville</option>
+              <option *ngFor="let city of filteredCities" [value]="city.nomdeville">
+                {{ city.nomdeville }}
+              </option>
+            </select>
+            <div *ngIf="showError('ville.nomdeville')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div>
+        </div>
+
+          <div formGroupName="descrip_mission" class="flex items-center col-span-2">
+            <input formControlName="isRemote" type="checkbox" id="remote" class="h-4 w-4 text-[#5A3FC9] focus:ring-indigo-500 border-gray-300 rounded">
+            <label for="remote" class="ml-2 block text-sm text-gray-700">Travail à distance possible</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Requirements -->
+      <div *ngIf="currentStep === 3" [@fadeInOut] class="space-y-6">
+        <h2 class="text-xl font-semibold text-gray-800">Exigences du Profil</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div formGroupName="profilDemande">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Années d'expérience*</label>
+            <input formControlName="annees_experiences" type="number" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                   [class.border-red-500]="showError('profilDemande.annees_experiences')">
+            <div *ngIf="showError('profilDemande.annees_experiences')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div>
+
+          <div formGroupName="descrip_mission">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Langue*</label>
+            <select formControlName="langue" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    [class.border-red-500]="showError('descrip_mission.langue')">
+              <option value="">Choisir une Langue</option>      
+              <option value="FRANCAIS">Français</option>
+              <option value="ANGLAIS">Anglais</option>
+              <option value="ALLEMAND">Allemand</option>
+              <option value="ESPAGNOL">Espagnol</option>
+              <option value="AUTRE">Autre</option>
+            </select>
+            <div *ngIf="showError('descrip_mission.langue')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Compétences requises*</label>
+          <div class="flex flex-wrap gap-2 mb-2" *ngIf="competences.length > 0">
+            <span *ngFor="let comp of competences" class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm flex items-center">
+              {{comp}}
+              <button type="button" (click)="removeCompetence(comp)" class="ml-1 text-indigo-500 hover:text-indigo-700">
+                &times;
+              </button>
+            </span>
+          </div>
+          <div class="flex">
+            <input #competenceInput type="text" class="flex-1 px-4 py-2 border rounded-l-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
+                   placeholder="Ajouter une compétence" (keyup.enter)="addCompetence(competenceInput)">
+            <button type="button" (click)="addCompetence(competenceInput)" class="bg-[#5A3FC9] text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 transition">
+              Ajouter
+            </button>
+          </div>
+          <div *ngIf="showCompetencesError()" class="text-red-500 text-xs mt-1">
+            Ajoutez au moins une compétence
+          </div>
+        </div>
+
+        <div formGroupName="profilDemande">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Exigences spécifiques</label>
+          <textarea formControlName="exigences" rows="4" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    [class.border-red-500]="showError('profilDemande.exigences')"></textarea>
+                                <div *ngIf="showError('profilDemande.exigences')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Conditions -->
+      <div *ngIf="currentStep === 4" [@fadeInOut] class="space-y-6">
+        <h2 class="text-xl font-semibold text-gray-800">Conditions de {{ espace === "Offres d'emplois" ? "l'offre d'emploi" : "la mission" }}</h2>
+        
+        <div formGroupName="descrip_mission" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Salaire*</label>
+            <input formControlName="salaire" type="number" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                   [class.border-red-500]="showError('descrip_mission.salaire')">
+            <div *ngIf="showError('descrip_mission.salaire')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de postes disponibles*</label>
+            <input formControlName="nbre_recruteurs" type="number" min="1" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                   [class.border-red-500]="showError('descrip_mission.nbre_recruteurs')">
+            <div *ngIf="showError('descrip_mission.nbre_recruteurs')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div>
+
+          <!-- <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Statut*</label>
+            <select formControlName="statut" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    [class.border-red-500]="showError('descrip_mission.statut')">
+              <option value="">Choisir une Statut</option> 
+              <option value="CELEBATAIRE">Célibataire</option>
+              <option value="ENGAGE">Marié(e)</option>
+              <option value="None">autres</option>
+            </select>
+            <div *ngIf="showError('descrip_mission.statut')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div> -->
+
+          <div  class="col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Avantages*</label>
+            <textarea formControlName="avantages" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      [class.border-red-500]="showError('descrip_mission.avantages')"></textarea>
+            <div *ngIf="showError('descrip_mission.avantages')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div>
+
+          <div class="col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Futures tâches*</label>
+            <textarea formControlName="futures_taches" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      [class.border-red-500]="showError('descrip_mission.futures_taches')"></textarea>
+            <div *ngIf="showError('descrip_mission.futures_taches')" class="text-red-500 text-xs mt-1">
+              Ce champ est requis
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Review & Submit -->
+      <div *ngIf="currentStep === 5" [@fadeInOut] class="space-y-6">
+        <h2 class="text-xl font-semibold text-gray-800">Vérification des Informations</h2>
+        
+        <div class="bg-gray-50 p-6 rounded-lg">
+          <h3 class="text-lg font-medium text-gray-800 mb-4">Résumé de {{ espace === "Offres d'emplois" ? "l'offre d'emploi" : "la mission" }}</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <p class="text-sm text-gray-500">Nom de {{ espace === "Offres d'emplois" ? "l'offre d'emploi" : "la mission" }}:</p>
+              <p class="font-medium">{{getControl('descrip_mission.mission_name')?.value}}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Poste:</p>
+              <p class="font-medium">{{getControl('descrip_mission.poste')?.value}}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Type de contrat:</p>
+              <p class="font-medium">{{getControl('descrip_mission.typeContrat')?.value}}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Localisation:</p>
+              <p class="font-medium">{{getSelectedCityName()}}, {{getSelectedCountryName()}}</p>
+              <p *ngIf="getControl('descrip_mission.isRemote')?.value" class="text-[#5A3FC9] text-sm">(Travail à distance possible)</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Période:</p>
+              <p class="font-medium">
+                {{getControl('descrip_mission.date_debut')?.value | date}} 
+                <span *ngIf="getControl('descrip_mission.date_fin')?.value">- {{getControl('descrip_mission.date_fin')?.value | date}}</span>
+              </p>
+            </div>
+           <div>
+  <p class="text-sm text-gray-500">Salaire:</p>
+  <p class="font-medium">
+    {{ getControl('descrip_mission.salaire')?.value }}
+    {{ storedtargetmarket === 'Tunisien' ? 'TND' : '€' }}
+  </p>
+</div>
+            <div>
+              <p class="text-sm text-gray-500">Années d'expérience:</p>
+              <p class="font-medium">{{getControl('profilDemande.annees_experiences')?.value}} ans</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Langue:</p>
+              <p class="font-medium">{{getControl('descrip_mission.langue')?.value}}</p>
+            </div>
+          </div>
+
+          <div class="mt-6" *ngIf="competences.length > 0">
+            <h4 class="text-md font-medium text-gray-800 mb-2">Compétences requises:</h4>
+            <div class="flex flex-wrap gap-2">
+              <span *ngFor="let comp of competences" class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">
+                {{comp}}
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-6" *ngIf="getControl('descrip_mission.description')?.value">
+            <h4 class="text-md font-medium text-gray-800 mb-2">Description:</h4>
+            <p class="text-gray-700">{{getControl('descrip_mission.description')?.value}}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center">
+          <input id="confirm" type="checkbox" (change)="onConfirmationChange($event)" 
+                 class="h-4 w-4 text-[#5A3FC9] focus:ring-indigo-500 border-gray-300 rounded">
+          <label for="confirm" class="ml-2 block text-sm text-gray-700">Je confirme que les informations fournies sont exactes</label>
+        </div>
+        <div *ngIf="!confirmationChecked && currentStep === 5" class="text-red-500 text-xs">
+          Veuillez confirmer les informations pour continuer
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between mt-8">
+        <button *ngIf="currentStep > 1" type="button" (click)="previousStep()" 
+                class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+          Précédent
+        </button>
+        <div *ngIf="currentStep === 1"></div>
+        
+        <button *ngIf="currentStep < steps.length" type="button" (click)="nextStep()" 
+                [disabled]="isStepInvalid()" 
+                [ngClass]="{
+                  'bg-[#5A3FC9] hover:bg-indigo-700': !isStepInvalid(),
+                  'bg-indigo-300 cursor-not-allowed': isStepInvalid()
+                }" class="px-6 py-2 text-white rounded-lg transition">
+          Suivant
+        </button>
+        
+        <button *ngIf="currentStep === steps.length" type="submit" [disabled]="!missionForm.valid || !confirmationChecked"
+                [ngClass]="{
+                  'bg-[#5A3FC9] hover:bg-green-700': missionForm.valid && confirmationChecked,
+                  'bg-[#a39bc6] cursor-not-allowed': !missionForm.valid || !confirmationChecked
+                }" class="px-6 py-2 text-white rounded-lg transition">
+          Publier {{ espace === "Offres d'emplois" ? "l'offre d'emploi" : "la mission" }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

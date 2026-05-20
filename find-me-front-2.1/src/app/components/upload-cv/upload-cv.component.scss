@@ -1,0 +1,301 @@
+// Variables
+$primary-color: #5A3FC9;
+$primary-light: #7A63D9;
+$primary-dark: #4A2FB9;
+$gray-100: #f8f9fa;
+$gray-200: #e9ecef;
+$gray-300: #dee2e6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #6c757d;
+$gray-700: #495057;
+$gray-800: #343a40;
+$error-color: #dc3545;
+$success-color: #28a745;
+$border-radius: 8px;
+$box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+
+// Main container
+.upload-cv-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: 100%;
+}
+
+// Card styling
+.upload-card {
+  background-color: white;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  width: 100%;
+  max-width: 700px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+}
+
+.card-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid $gray-200;
+  
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $gray-800;
+    margin-bottom: 0.5rem;
+  }
+  
+  p {
+    color: $gray-600;
+    margin-bottom: 0;
+    font-size: 0.95rem;
+  }
+}
+
+// Upload area
+.upload-area {
+  margin: 1.5rem 2rem;
+  border: 2px dashed $gray-400;
+  border-radius: $border-radius;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: $primary-color;
+    background-color: rgba($primary-color, 0.02);
+  }
+  
+  &.active-drag {
+    border-color: $primary-color;
+    background-color: rgba($primary-color, 0.05);
+  }
+  
+  &.has-file {
+    border-color: $success-color;
+    background-color: rgba($success-color, 0.05);
+  }
+}
+
+.upload-icon {
+  margin-bottom: 1rem;
+  
+  svg {
+    width: 48px;
+    height: 48px;
+    color: $primary-color;
+  }
+}
+
+.upload-content {
+  p {
+    margin-bottom: 1rem;
+    color: $gray-700;
+  }
+  
+  .file-info {
+    font-size: 0.8rem;
+    color: $gray-500;
+    margin-top: 1rem;
+  }
+}
+
+.btn-select-file {
+  background-color: $primary-color;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: $border-radius;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: $primary-dark;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.3);
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+// Selected file
+.selected-file {
+  margin: 0 2rem 1.5rem;
+}
+
+.file-preview {
+  display: flex;
+  align-items: center;
+  background-color: $gray-100;
+  border-radius: $border-radius;
+  padding: 0.75rem 1rem;
+  border: 1px solid $gray-300;
+}
+
+.file-icon {
+  margin-right: 1rem;
+  
+  svg {
+    width: 32px;
+    height: 32px;
+    color: $primary-color;
+  }
+}
+
+.file-details {
+  flex: 1;
+  
+  .file-name {
+    display: block;
+    font-weight: 500;
+    color: $gray-800;
+    margin-bottom: 0.25rem;
+  }
+  
+  .file-size {
+    font-size: 0.8rem;
+    color: $gray-600;
+  }
+}
+
+.btn-remove-file {
+  background: none;
+  border: none;
+  color: $gray-600;
+  cursor: pointer;
+  padding: 0.25rem;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  &:hover {
+    color: $error-color;
+  }
+}
+
+// Loading state
+.loading-state {
+  margin: 1.5rem 2rem;
+  padding: 1.5rem;
+  background-color: $gray-100;
+  border-radius: $border-radius;
+  text-align: center;
+  
+  p {
+    margin-top: 1rem;
+    font-weight: 500;
+    color: $gray-700;
+  }
+  
+  .loading-info {
+    font-size: 0.9rem;
+    color: $gray-600;
+    font-weight: normal;
+    margin-top: 0.5rem;
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba($primary-color, 0.3);
+  border-radius: 50%;
+  border-top-color: $primary-color;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// Error message
+.error-message {
+  margin: 1.5rem 2rem;
+  padding: 1rem;
+  background-color: rgba($error-color, 0.1);
+  border-radius: $border-radius;
+  color: $error-color;
+  display: flex;
+  align-items: center;
+  
+  svg {
+    width: 24px;
+    height: 24px;
+    margin-right: 0.75rem;
+  }
+  
+  p {
+    margin: 0;
+  }
+}
+
+// Action buttons
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1.5rem 2rem;
+  border-top: 1px solid $gray-200;
+  gap: 1rem;
+}
+
+.btn-cancel {
+  padding: 0.6rem 1.2rem;
+  background-color: $gray-200;
+  color: $gray-700;
+  border: none;
+  border-radius: $border-radius;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: $gray-300;
+  }
+}
+
+.btn-save {
+  padding: 0.6rem 1.5rem;
+  background-color: $primary-color;
+  color: white;
+  border: none;
+  border-radius: $border-radius;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background-color: $primary-dark;
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .upload-cv-container {
+    padding: 1rem;
+  }
+  
+  .card-header, .upload-area, .selected-file, .loading-state, .error-message, .action-buttons {
+    margin: 1rem;
+    padding: 1rem;
+  }
+}

@@ -1,0 +1,49 @@
+# Metabase seul — à utiliser avec MySQL sur l’hôte (XAMPP).
+# Démarrage : docker compose -f docker-compose.bi.yml up -d
+# UI : http://localhost:3030
+#
+# Connexion Metabase → MySQL :
+#   Hôte : host.docker.internal
+#   Port : 3306
+#   Utilisateur : findme_bi / Mot de passe : findme_bi_readonly
+# (après exécution de scripts/bi_mysql_setup_xampp.sql)
+
+services:
+  metabase:
+    image: metabase/metabase:latest
+    container_name: findme-metabase-xampp
+    restart: unless-stopped
+    ports:
+      - "3030:3000"
+    environment:
+      MB_SITE_URL: http://localhost:3030
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - metabase_data:/metabase-data
+
+  metabase-seed:
+    build:
+      context: ./bi/metabase
+      dockerfile: Dockerfile.seed
+    container_name: findme-metabase-seed-xampp
+    restart: "no"
+    environment:
+      METABASE_URL: http://metabase:3000
+      METABASE_EXTERNAL_URL: http://localhost:3030
+      METABASE_SETUP_EMAIL: bi-admin@findme.local
+      METABASE_SETUP_PASSWORD: FindMe_BI_Auto_2026!xQ7vM2
+      METABASE_ADMIN_FIRST_NAME: FindMe
+      METABASE_ADMIN_LAST_NAME: BI
+      METABASE_SITE_NAME: Find-Me BI
+      MYSQL_HOST: host.docker.internal
+      MYSQL_PORT: 3306
+      MYSQL_USER: findme_bi
+      MYSQL_PASSWORD: findme_bi_readonly
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - metabase
+
+volumes:
+  metabase_data:

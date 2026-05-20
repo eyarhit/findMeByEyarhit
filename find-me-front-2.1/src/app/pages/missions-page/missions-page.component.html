@@ -1,0 +1,68 @@
+
+<!-- Carousel Container -->
+<div *ngIf="jobsRecommended.length > 0 && (this.espace==='Liste Offres'||this.espace==='Liste Mission') && this.isVisiteur==false" 
+     class="relative bg-[#f5f7fc] py-6 mb-4 overflow-hidden mt-4 animate-fade-in">
+  <h2 class="Titre_Meuilleur_Opportuniter " style="margin-bottom: 0.4cm;">Les meilleures opportunités</h2>
+  
+  <!-- Carousel Track -->
+  <div #carouselTrack class="flex overflow-x-auto snap-x snap-mandatory gap-4 px-4 py-2 hide-scrollbar scroll-smooth">
+    <app-job-card *ngFor="let job of jobsRecommended; let i = index" 
+                 [job]="job"
+                 (jobSelected)="onJobSelected(job)" 
+                 [isSelected]="selectedJob === job" 
+                 [candidatureMissionIds]="candidatureMissionIds" 
+                 [role]="userRole"
+                 class="flex-shrink-0 w-[584px] snap-center flex flex-col">
+    </app-job-card>
+  </div>
+
+  <!-- Navigation Arrows -->
+  <button (click)="scrollLeft()" 
+          class="absolute left-2 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 z-10">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+    </svg>
+  </button>
+  <button (click)="scrollRight()" 
+          class="absolute right-2 top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 z-10">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+    </svg>
+  </button>
+</div>
+
+<!-- Main Part -->
+<div class="favorites-container">
+          <!-- Left Side (Job Listings) -->
+          <app-search-filter (searchCriteria)="onSearchCriteria($event)" style="width: 80%;"></app-search-filter>
+            <div *ngIf="isLoading" class="flex flex-col items-center justify-center my-12 space-y-4">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
+    <p class="text-lg font-semibold text-gray-700 animate-pulse">Chargement des annonces...</p>
+  </div>
+<!-- Empty State -->
+<div *ngIf="!isLoading && filteredJobs.length === 0" class="flex flex-col items-center justify-center py-12">
+  <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+  </svg>
+  <h3 class="mt-4 text-lg font-medium text-gray-900">Aucune annonce trouvée</h3>
+</div>
+          <div class="grid grid-cols-10 gap-4 p-4 h-[80vh]" style="width: -webkit-fill-available">
+            <!-- Left Side (Job Listings) -->
+             <!-- Loading Spinner -->
+
+            <div class="col-span-5  h-full overflow-auto p-1">
+              <app-job-card *ngFor="let job of filteredJobs" [job]="job"
+               (jobSelected)="onJobSelected(job)" [visiteur]="this.isVisiteur" [espace]="this.espace" [isSelected]="selectedJob === job" [candidatureMissionIds]="candidatureMissionIds" [role]="this.userRole" ></app-job-card>
+            </div>    
+        
+            <!-- Right Side (Job Description) -->
+
+            <app-job-description style="position: relative;" class="col-span-5 h-full overflow-auto" 
+            *ngIf="selectedJob" [visiteur]="this.isVisiteur"  [job]="selectedJob" [isEmpty]="!hasJobs" [espace]="this.espace"></app-job-description>
+
+          </div>
+</div>        
+
+ 
+  
+

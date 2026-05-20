@@ -1,0 +1,248 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: findme-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: user_bd
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -proot --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  minio:
+    image: minio/minio:latest
+    container_name: findme-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: findme-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    restart: "no"
+    # Script sur une seule chaîne : évite les ambiguïtés YAML `>` / guillemets qui peuvent
+    # laisser le conteneur « tourner » sans exit (user-service attend alors completed_successfully).
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        until mc alias set local http://minio:9000 minioadmin minioadmin; do sleep 2; done;
+        mc mb -p local/find-me || true;
+        mc anonymous set private local/find-me || true;
+        echo "minio-init: ok";
+        exit 0
+
+  discovery-service:
+    build:
+      context: ./find-me-back-2.1/DiscoveryService
+    container_name: findme-discovery
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  gateway-service:
+    build:
+      context: ./find-me-back-2.1/GatewayService
+    container_name: findme-gateway
+    restart: unless-stopped
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+    ports:
+      - "9082:9082"
+    depends_on:
+      - discovery-service
+
+  user-service:
+    build:
+      context: ./find-me-back-2.1/User_service
+    container_name: findme-user
+    restart: unless-stopped
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/user_bd?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_BUCKET_NAME: find-me
+    ports:
+      - "9068:9068"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+      minio-init:
+        condition: service_completed_successfully
+
+  cv-service:
+    build:
+      context: ./find-me-back-2.1/Cv_service
+    container_name: findme-cv
+    restart: unless-stopped
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/cv_bd?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    ports:
+      - "9158:9158"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+
+  mission-service:
+    build:
+      context: ./find-me-back-2.1/Mission_service
+    container_name: findme-mission
+    restart: unless-stopped
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mission_bd?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SERVER_PORT: 9055
+    ports:
+      - "9055:9055"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+
+  quiz-service:
+    build:
+      context: ./find-me-back-2.1/QuizService
+    container_name: findme-quiz
+    restart: unless-stopped
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/quiz_bd?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    ports:
+      - "9074:9074"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+
+  codingame-service:
+    build:
+      context: ./find-me-back-2.1/CodingameService
+    container_name: findme-codingame
+    restart: unless-stopped
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/codingame_bd?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    ports:
+      - "9056:9056"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      discovery-service:
+        condition: service_started
+
+  python-service:
+    build:
+      context: ./find-me-python-2.1
+    container_name: findme-python
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+
+  # Sur http://localhost:3030 la console peut afficher : 503 sur /api/health (Metabase en "initializing")
+  # et 404 sur /app/instance-loading-page/img/*.png — comportement côté image Metabase, souvent cosmétique ; attendre la fin des migrations.
+  metabase:
+    image: metabase/metabase:latest
+    container_name: findme-metabase
+    restart: unless-stopped
+    environment:
+      MB_SITE_URL: http://localhost:3030
+      # JDBC explicite : MySQL 8.4 + driver MariaDB → allowPublicKeyRetrieval (sinon "RSA public key is not available").
+      MB_DB_TYPE: mysql
+      MB_DB_CONNECTION_URI: >-
+        jdbc:mysql://mysql:3306/metabase_app?user=metabase_app&password=FindMe_MetabaseApp_2026_xQ9&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      JAVA_OPTS: -Xmx1536m
+    ports:
+      - "3030:3000"
+    volumes:
+      - metabase_data:/metabase-data
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  metabase-seed:
+    build:
+      context: ./bi/metabase
+      dockerfile: Dockerfile.seed
+    container_name: findme-metabase-seed
+    restart: "no"
+    environment:
+      METABASE_URL: http://metabase:3000
+      METABASE_EXTERNAL_URL: http://localhost:3030
+      METABASE_SETUP_EMAIL: bi-admin@findme.local
+      METABASE_SETUP_PASSWORD: FindMe_BI_Auto_2026!xQ7vM2
+      METABASE_ADMIN_FIRST_NAME: FindMe
+      METABASE_ADMIN_LAST_NAME: BI
+      METABASE_SITE_NAME: Find-Me BI
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: findme_bi
+      MYSQL_PASSWORD: findme_bi_readonly
+    depends_on:
+      metabase:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+
+  # frontend:
+  #   build:
+  #     context: ./find-me-front-2.1
+  #   container_name: findme-frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "4200:80"
+  #   depends_on:
+  #     - gateway-service
+  #     - user-service
+  #     - cv-service
+  #     - mission-service
+  #     - quiz-service
+  #     - codingame-service
+  #     - python-service
+  #     - metabase
+
+volumes:
+  mysql_data:
+  minio_data:
+  metabase_data:

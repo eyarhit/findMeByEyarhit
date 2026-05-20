@@ -1,0 +1,99 @@
+<div class="card" [ngClass]="typedocument === 'CvFindMe' ? 'cv-findme' : 'extrait-document'">
+  <div class="card-header flex items-center justify-between">
+    <h1 class="title" >
+      <i [class.fa-file]="typedocument === 'CvFindMe'" 
+         [class.fa-graduation-cap]="typedocument !== 'CvFindMe'"
+         class="fas title-icon"></i>
+      {{ typedocument === 'CvFindMe' ? 'CV FindMe' : (role === 'FREELANCER' || role === 'ESN_ADMIN' || role === 'PORTAGE_SALARIAL' ? 'EXTRAIT' : 'Documents séjour') }}
+    </h1>
+    <button *ngIf="this.espace!='postuler'" class="add-button" (click)="UploadDocument()">
+      <i class="fas fa-plus"></i>
+    </button>
+  </div>
+ 
+  <hr />
+
+  <div class="card-body">
+    <!-- Loop with checkbox + view icon -->
+    <div class="documents-container">
+<div class="section-item flex items-center justify-between" 
+     *ngFor="let doc of documents"
+     (click)="handleItemClick(doc.document, $event)">
+  <div class="flex items-center gap-3">
+    <input *ngIf="typedocument === 'CvFindMe' && this.espace==='postuler'"
+           type="checkbox"
+           [checked]="selectedDocId === doc.document"
+           (click)="$event.stopPropagation()" 
+           [disabled]="selectedDocId && selectedDocId !== doc.document"
+    />
+    <span class="section-title">{{ doc.fileName }}</span>
+  </div>
+  <div class="section-actions flex items-center gap-3">
+          <button class="view-button" (click)="viewDocument(doc)">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button *ngIf="this.espace!='postuler'"
+
+            class="edit-button"
+            (click)="confirmDelete(doc.document, doc.fileName)"
+            [disabled]="isDeleting"
+          >
+            <i class="fas" [class.fa-trash]="!isDeleting" [class.fa-spinner]="isDeleting" [class.fa-spin]="isDeleting"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm choice -->
+    <div class="btn" *ngIf="selectedDocId && typedocument === 'CvFindMe' && this.espace==='postuler'">
+      <button class="btn btn-primary" (click)="confirmSelectedDocument()">
+        Confirmer le choix du cv
+      </button>
+    </div>
+
+    <!-- Show message if no documents -->
+    <div *ngIf="documents.length === 0" class="no-documents mt-4">
+      <p>Aucun document trouvé.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PDF Viewer Modal -->
+<div *ngIf="showPdf" class="pdf-viewer-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>{{ selectedDocument?.document?.fileName }}</h3>
+      <button (click)="closePdf()" class="close-button">&times;</button>
+    </div>
+    <div class="modal-body">
+      <iframe 
+        [src]="sanitizedPdfSrc" 
+        frameborder="0" 
+        width="100%" 
+        height="500px"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Document Modal -->
+<div *ngIf="isExtrait" class="notification-container">
+  <div class="modal-content upload-modal">
+    <div class="modal-header">
+      <h3>{{ this.role === 'FREELANCER'|| this.role === 'ESN_ADMIN'|| this.role === 'PORTAGE_SALARIAL' ? 'Ajouter un extrait' : 'Ajouter un document de séjour' }}</h3>
+      <button (click)="closePopupCarteSejour()" class="close-button">&times;</button>
+    </div>
+    <div class="modal-body upload-modal-body">
+      <app-type_sejour
+        [type]="this.typedocument!"
+        [text]="'documents'"
+        [submitetype]="'submit'"
+        [email]="this.email!"
+        [externalFiles]="files"
+        (filesAdded)="handleFilesAdded($event)"
+        (fileRemoved)="handleFileRemoved($event)"
+      ></app-type_sejour>
+    </div>
+  </div>
+</div>

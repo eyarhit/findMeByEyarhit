@@ -1,0 +1,51 @@
+<div class="notification-container" 
+     [ngStyle]="{ top: posY + 'px', right: '20px', position: 'fixed' }" 
+     (mousedown)="onDragStart($event)" 
+     (touchstart)="onDragStart($event)">
+  
+  <!-- Bell Icon with Counter -->
+  <button (click)="toggleBell()" 
+          class="notification-btn" 
+          aria-label="Toggle notifications" 
+          [attr.aria-expanded]="isBellOpen">
+    <i class="fa fa-bell" aria-hidden="true"></i>
+    <ng-container *ngIf="unreadCount">
+      <span *ngIf="unreadCount > 0" class="badge" aria-live="polite">
+        {{ unreadCount }}
+      </span>
+    </ng-container>
+  </button>
+  
+  <!-- Notification List Dropdown -->
+  <div *ngIf="isBellOpen" class="notification-list" role="list" aria-label="Notifications list">
+    <div class="header">
+      <strong>Notifications</strong>
+      <button class="mark-all" (click)="markAllAsread()">Tout marquer comme lu</button>
+    </div>
+    <ul>
+      <li *ngFor="let notification of notifications" 
+          class="notification-item animate-slide-in"
+          [ngClass]="{'unread': !notification.read}"
+          (click)="openNotification(notification)"
+          style="cursor: pointer;">
+        <div class="notification-content">
+          <div class="notification-message">{{ notification.message }}</div>
+          <div class="notification-time">
+            {{ notification.timestamp | date:'dd/MM/yyyy HH:mm' }}
+          </div>
+        </div>
+        <button *ngIf="!notification.read" 
+                class="mark-unread-button" 
+                (click)="markAsread(notification); $event.stopPropagation()">
+          <i class="fas fa-eye"></i>
+        </button>
+        <i *ngIf="notification.read" class="fas fa-check-circle read-icon"></i>
+      </li>
+      <li *ngIf="notifications.length === 0" class="empty">Vous n’avez aucune nouvelle notification.</li>
+    </ul>
+  </div>
+<!--  
+  <button class="btn" (click)="sendNotification('8', 'Bonjour à Aziz c est une paragraphe juste pour tester la partie message notification')" type="button" aria-label="Send Hello World notification">
+    Envoyer Bonjour à Aziz
+  </button> -->
+</div>

@@ -1,0 +1,200 @@
+<div class="selection-page">
+  <!-- Partie gauche  -->
+  <div class="left-panel">
+    <div class="content-container">
+      <div class="header">
+        <h2 class="title">Rejoignez-nous</h2>
+        <p class="subtitle">Choisissez votre profil pour commencer</p>
+      </div>
+
+      <div class="selection-cards">
+        <!-- Entreprise -->
+        <div 
+          class="selection-card" 
+          [ngClass]="{'active': userType === 'ESN_ADMIN'}"
+          (click)="onUserTypeSelected('ESN_ADMIN')">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </div>
+          <div class="card-text">
+            <h3>Ressource Humaine (RH)
+            </h3>
+            <p>Recrutez les meilleurs talents</p>
+          </div>
+          <div class="card-radio">
+            <input type="radio" name="userType" value="entreprise" [checked]="userType === 'entreprise'">
+            <span class="checkmark"></span>
+          </div>
+        </div>
+        <!-- Candidat -->
+        <div 
+          class="selection-card" 
+          [ngClass]="{'active': userType === 'candidat'}"
+          (click)="onUserTypeSelected('candidat')">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <div class="card-text">
+            <h3>Candidat</h3>
+            <p>Trouvez votre emploi idéal</p>
+          </div>
+          <div class="card-radio">
+            <input type="radio" name="userType" value="candidat" [checked]="userType === 'candidat'">
+            <span class="checkmark"></span>
+          </div>
+        </div>
+
+        <!-- Masqué temporairement : carte Freelancer / Portage salarial + ancienne carte Portage seule (décommenter tout le bloc pour réactiver)
+        <div
+        class="selection-card"
+        (click)="onUserTypeSelected('freelancer')">
+        <div class="card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="card-text">
+          <h3>Freelancer/Portage Salarial </h3>
+          <p>Trouvez votre mission idéale</p>
+        </div>
+        <div class="card-radio">
+          <input type="radio" name="userType" value="Freelancer" [checked]="userType === 'Freelancer'">
+          <span class="checkmark"></span>
+        </div>
+      </div>
+      <div
+        class="selection-card"
+        [ngClass]="{'active': userType === 'PORTAGE_SALARIAL'}"
+        (click)="onUserTypeSelected('PORTAGE_SALARIAL')">
+        <div class="card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="card-text">
+          <h3>Portage Salariale </h3>
+          <p>Trouvez votre mission idéale</p>
+        </div>
+        <div class="card-radio">
+          <input type="radio" name="userType" value="PORTAGE_SALARIAL" [checked]="userType === 'PORTAGE_SALARIAL'">
+          <span class="checkmark"></span>
+        </div>
+      </div>
+        -->
+      </div>
+
+      <div *ngIf="userTypeError" class="error-message">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>Vous devez choisir une personnalité.</span>
+      </div>
+
+     <div class="action-area">
+  <button (click)="register()" class="register-button">
+    <span>S'inscrire</span>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+      <polyline points="12 5 19 12 12 19"></polyline>
+    </svg>
+  </button>
+  <p class="login-link">Vous avez déjà un compte ? <a href="/login">Se connecter !</a></p>
+</div>
+    </div>
+  </div>
+  
+  <!-- Partie droite  -->
+  <div class="right-panel">
+    <div class="welcome-content">
+      <div class="logo-area">
+   <!--   <div class="tagline">Trouvez votre chemin professionnel</div> -->
+      </div>
+      <div class="welcome-text">
+        <h2>Lancez votre carrière avec nous</h2>
+        <p>Connectez-vous aux meilleures opportunités professionnelles et découvrez des talents exceptionnels.</p>
+      </div>
+      
+      <div class="illustration-simple">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="dots-pattern"></div>
+      </div>
+      
+      
+    </div>
+  </div>
+
+<!-- Popup modal : choix Freelancer ou Portage salarial (masquée avec la carte ; décommenter pour réactiver)
+<div class="modal-overlay " *ngIf="showFreelancerPopup">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Choisissez votre type de Freelance</h3>
+      <button class="close-button" (click)="closePopup()">&times;</button>
+    </div>
+    <div class="modal-body">
+              <div 
+          class="selection-card" 
+          [ngClass]="{'active': userType === 'FREELANCER'}"
+          (click)="selectFreelancerType('FREELANCER')">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <div class="card-text">
+        <h4>Freelancer</h4>
+        <p>Travailler en indépendant sur des projets</p>
+          </div>
+          <div class="card-radio">
+            <input type="radio" name="userType" value="candidat" [checked]="userType === 'candidat'">
+            <span class="checkmark"></span>
+          </div>
+        </div>
+         <div 
+          class="selection-card" 
+          [ngClass]="{'active': userType === 'PORTAGE_SALARIAL'}"
+          (click)="selectFreelancerType('PORTAGE_SALARIAL')">
+          <div class="card-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <div class="card-text">
+        <h4>Portage Salarial</h4>
+        <p>Travailler sous un régime de portage salarial</p>
+          </div>
+          <div class="card-radio">
+            <input type="radio" name="userType" value="candidat" [checked]="userType === 'candidat'">
+            <span class="checkmark"></span>
+          </div>
+        </div>
+      
+     <div class="action-area" >
+  <button (click)="register()" class="register-button">
+    <span>S'inscrire</span>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+      <polyline points="12 5 19 12 12 19"></polyline>
+    </svg>
+  </button>
+  <p class="login-link">Vous avez déjà un compte ? <a href="/login">Se connecter !</a></p>
+</div>
+    </div>
+    
+  </div>
+</div>
+-->
+</div>

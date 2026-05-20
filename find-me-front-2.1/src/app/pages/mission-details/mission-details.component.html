@@ -1,0 +1,195 @@
+<div class="container-fluid mission-details-container" style="
+    padding: 1vw;
+">
+  <div class="page-container">
+
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+      <div class="card company-card">
+        <div class="flex-center">
+          <img [src]="jobs[0]?.logo" alt="Logo Entreprise" class="logo-img" />
+        </div>
+        <h2 class="company-name">{{ jobs[0]?.company }}</h2>
+
+        <div class="divider"></div>
+ 
+        <h3 class="section-title">Informations clés</h3>
+
+        <div class="info-grid">
+          <div class="info-item" *ngFor="let info of [
+            { icon: 'calendar-alt', label: 'Date de début', value: (jobs[0]?.date_debut | date:'dd MMM yyyy') },
+            { icon: 'briefcase', label: 'Type de contrat', value: jobs[0]?.type },
+            { icon: 'user-clock', label: 'Expérience requise', value: jobs[0]?.experience },
+            { icon: 'money-bill-wave', label: 'Salaire', value: (jobs[0]?.salary != null && jobs[0]?.salary !== '') ? (jobs[0]?.salary + this.currency) : '—' },
+            { icon: 'map-marker-alt', label: 'Localisation', value: jobs[0]?.location },
+            { icon: 'users', label: 'Postes', value: jobs[0]?.nbre_recruteurs }
+          ]">
+            <i class="fas fa-{{info.icon}} info-icon"></i>
+            <div class="info-card">
+              <span class="info-label">{{ info.label }}</span>
+              <span class="info-value">{{ info.value }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" >
+      <div class="card header-card">
+        <div class="mission-header">
+          <div class="mission-title-container">
+            <h1 class="mission-title">{{ jobs[0]?.title }}</h1>
+            <span class="mission-ref">Réf: {{ jobs[0]?.ref }}</span>
+          </div>
+          <button *ngIf=" this.espace==='Postuler Mission' ||  this.espace==='Postuler Offre'" class="btn btn-primary apply-btn" (click)="PostulerCard()">
+            <i class="fas fa-paper-plane"></i>
+            <span class="btn-text">Postuler</span>
+          </button>
+<button *ngIf="(espace==='Mission publier' || espace==='Offres publier') && !visiteur" 
+        class="btn btn-primary apply-btn" 
+        (click)="isEditing = true">
+  <i class="fas" [class.fa-edit]="!isEditing" [class.fa-save]="isEditing"></i>
+  <span class="btn-text">Modifier {{ espace === 'Mission' ? 'la mission' : "l'offre d'emplois" }}</span>
+</button>
+        </div>
+      </div>
+
+      <div class="mission-description">
+        <div class="content-section" *ngFor="let section of [
+          { icon: 'file-alt', title: 'Description ' + type_contrat, content: jobs[0]?.description },
+          { icon: 'star', title: 'Avantages ' + type_contrat, content: jobs[0]?.avantages },
+          { icon: 'tasks', title: 'Tâches principales', content: jobs[0]?.competences },
+          { icon: 'clipboard-check', title: 'Exigences', content: jobs[0]?.exigences }
+        ]">
+          <h3 class="section-title">
+            <i class="fas fa-{{section.icon}} section-icon"></i>
+            {{ section.title }}
+          </h3>
+          <p class="section-content">{{ section.content }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Postuler Card -->
+    <div *ngIf="showPostulerCard" class="postuler-card">
+      <div class="postuler-header">
+        <h2 class="postuler-title">Postuler à cette {{ this.espace === 'Postuler Mission' ? 'Mission' : 'Offre' }}</h2>
+        <button class="close-btn" (click)="DesactiverCard()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="postuler-content">
+        <p class="postuler-text">
+          Déposez votre Cv si votre Cv n'est pas déjà rempli. Sinon, vous pouvez le compléter en cliquant sur le bouton ci-dessous.
+        </p>
+
+        <div class="radio-group">
+          <label class="radio-option">
+            <input
+              type="radio"
+              name="cvOption"
+              [checked]="cvOption === 'consulter'"
+              (change)="cvOption = 'consulter'"
+            />
+<button
+  class="btn btn-secondary cv-btn"
+  [class.selected]="cvOption === 'consulter'"
+  (click)="choisirCvBeehive()"
+>
+  <i class="fas fa-file-alt"></i> Sélectionnez un CV FIND ME
+</button>
+          </label>
+          <label class="radio-option">
+            <input
+              type="radio"
+              name="cvOption"
+              [checked]="cvOption === 'upload'"
+              (change)="cvOption = 'upload'"
+            />
+            Déposez votre Cv:
+          </label>
+        </div>
+
+        <div
+          class="file-drop-area"
+          *ngIf="cvOption === 'upload'"
+          [class.dragging]="isDragging"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+          (click)="fileInput.nativeElement.click()"
+        >
+          <i class="fas fa-cloud-upload-alt upload-icon"></i>
+          <p class="upload-text">Déplacer le fichier ici ou cliquez pour parcourir</p>
+          <p class="upload-hint">Format accepté: PDF (max 20 Mo)</p>
+        </div>
+
+        <input
+          type="file"
+          #fileInput
+          accept=".pdf"
+          class="hidden"
+          (change)="onFileSelected($event)"
+          *ngIf="cvOption === 'upload'"
+        />
+
+        <div *ngIf="uploadedFile && cvOption === 'upload'" class="file-info">
+          <span class="file-name">
+            <i class="fas fa-file-pdf file-icon"></i>
+            {{ uploadedFile.name }}
+          </span>
+          <button class="remove-file-btn" (click)="removeFile()" title="Supprimer le fichier">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message">
+        <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+      </div>
+
+      <div class="postuler-actions">
+        <button class="btn btn-outline" (click)="DesactiverCard()">Annuler</button>
+        <button class="btn btn-primary" (click)="Postuler()">
+  <i class="fas fa-paper-plane"></i> Postuler
+</button>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+<div class="notification-container" *ngIf="isEditing"> 
+  <button (click)="isEditing = false" class="absolute top-8 right-16  text-white hover:text-red-600 focus:outline-none text-xl" style="
+    right: 14vw;
+"
+  > 
+    &times;
+  </button>
+<app-publier_contrat 
+  [jobs]="jobs" 
+  [action]="'modifier'"
+  (isEditing)="handleEditStatus($event)">
+</app-publier_contrat>
+</div>
+<div class="notification-container" *ngIf="choisircvBeehive"> 
+  <button (click)="choisircvBeehive= false" class="absolute top-8 right-16  text-white hover:text-red-600 focus:outline-none text-xl" style="
+    right: 14vw;
+"
+  > 
+    &times;
+  </button>
+ <app-carte-type-sejour style="margin-top: -12vw !important;" [profileId]="this.userId" [espace]="'postuler'" [typedocument]="'CvFindMe'" [profilerole]="this.role!" (SelectedDocument)="handleSelectedDocument($event)" (choisircvBeehive)="handlechoisircvBeehive($event)"></app-carte-type-sejour>
+</div>
+
+<div class="notification-container" *ngIf="this.visible"> 
+  <button (click)="this.visible= false" class="absolute top-8 right-16  text-white hover:text-red-600 focus:outline-none text-xl" style="
+    right: 14vw;
+"
+  > 
+    &times;
+  </button>
+<app-dossier-competences [espace]="this.espace" [profileId]="userId" (visible)="handDossierCompethenceVisibility($event)"  (documentsSelected)="documentsSelected($event)"[idselectedCv]="this.selectedDocument"></app-dossier-competences>
+</div>

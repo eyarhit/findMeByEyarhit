@@ -1,0 +1,36 @@
+<div class="job-card" [class.selected]="isSelected" (click)="selectJob()">
+  <div class="job-card-left">
+    <div class="logo-badge-container">
+      <div class="logo-oval">
+        <img [src]="job.logo" alt="Company Logo" class="job-logo" />
+      </div>
+    <div class="badge-and-actions">
+  <span *ngIf="job.status==='ENCOURS'" class="job-badge">En cours</span>
+  <span *ngIf="job.status==='ACCEPTER'" class="accept-badge" >Accepter</span>
+   <span *ngIf="job.status==='REFUSER'" class="refuse-badge" >Refuser</span>
+
+</div>
+     <!-- Bouton supprimer en haut à droite -->
+  <button style="margin: 2%;"
+    (click)="confirmDeletePopup(job.id_candidature)" 
+  >
+    <i class="far fa-trash-alt" style="color: #4B2EC3; "></i>
+
+  </button>
+    </div>
+    <div class="job-details">
+      <h3 class="job-title">{{ job.title }}</h3>
+      <div class="job-info">
+        <span>{{ job.company }}</span>
+        <span>{{ job.ville }}</span>
+        <span>{{ job.salary }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="job-card-right">
+    <p class="job-ref">REF-{{ job.ref }}</p>
+    <p class="job-type">{{ job.type }}</p>
+    <p class="job-experience">{{ job.experience }}</p>
+    <button class="view-button" (click)="viewMission(job.id); $event.stopPropagation()">Voir plus</button>
+  </div>
+</div>

@@ -1,0 +1,301 @@
+<div class="flex min-h-screen bg-[#f5f7fc]">
+  <!-- Sidebar -->
+  <aside class="fixed top-0 left-0 h-full shadow-lg bg-white z-10" style="width: 280px;">
+    <div class="h-full flex flex-col">
+      <!-- Sidebar header with logo -->
+      <div class="sidebar-header p-4 border-b border-gray-200 bg-gradient-to-r from-[#f9fafb] to-[#f3f4f6]">
+        <h1 class="text-xl font-bold text-gray-800">Find<span class="text-[#5A3FC9]">Me</span></h1>
+      </div>
+      
+      <!-- User profile -->
+      <div class="p-5">
+        <div class="profile-card rounded-xl bg-white shadow-md p-6 text-center relative overflow-hidden">
+          <!-- Decorative background -->
+          <div class="absolute top-0 left-0 right-0 h-24 bg-gradient-to-r from-[#5A3FC9]/10 to-[#7367F0]/10"></div>
+          
+          <!-- Profile image -->
+          <div class="relative">
+            <div class="profile-image-container mx-auto mb-4">
+              <img *ngIf="ImageProfile" [src]="ImageProfile"
+                   alt="Profile"
+                   class="rounded-full h-24 w-24 object-cover border-4 border-white shadow-md">
+              <div *ngIf="!ImageProfile" class="profile-placeholder h-24 w-24 rounded-full flex items-center justify-center bg-[#5A3FC9]/20 text-[#5A3FC9] text-2xl font-bold">
+                {{profile?.firstName?.charAt(0) || ''}}{{profile?.lastName?.charAt(0) || ''}}
+              </div>
+            </div>
+          </div>
+          
+          <!-- User information -->
+          <h2 class="text-lg font-semibold text-gray-800 mb-1">{{profile?.firstName || 'Prénom'}} {{profile?.lastName || 'Nom'}}</h2>
+          <p *ngIf="role!='ADMIN'" class="text-sm text-gray-500 mb-3">{{TitreProfile}}</p>
+          <p class="text-sm text-gray-500 mb-3">({{profile?.nomSociete || ''}} {{roleDisplayLabel}})</p>
+          
+          <!-- Profile button -->
+          <a [routerLink]="['/profil']"
+             class="profile-button inline-flex items-center justify-center bg-[#5A3FC9] text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-[#3C1DA5] transition duration-300 w-full">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            Voir mon profil
+          </a>
+        </div>
+      </div>
+      
+      <!-- Navigation -->
+      <nav class="flex-1 overflow-y-auto px-4 py-2">
+        <!-- CV Section for CANDIDAT/FREELANCER/PORTAGE_SALARIAL -->
+        <ul *ngIf="(role === 'CANDIDAT' || role === 'FREELANCER' || role === 'PORTAGE_SALARIAL') && urlContains('cv')" class="space-y-1">
+          <li>
+            <h3 class="text-xs uppercase font-semibold text-gray-500 tracking-wider px-3 py-2">Espace CV</h3>
+            <a [routerLink]="['/cv/accueil']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9v9a2 2 0 01-2 2h-4a2 2 0 01-2-2V15H9v6a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              </svg>
+              <span>Accueil CV</span>
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="['/cv/remplir']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 11h10M7 15h6M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
+              </svg>
+              <span>Remplir CV Manuellement</span>
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="['/cv/importer']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 15V5" />
+              </svg>
+              <span>Importer CV PDF</span>
+            </a>
+          </li>
+        </ul>
+
+        <!-- ESN Section -->
+        <!-- Masqué : gestion employés / ESN (demande utilisateur) -->
+        <ul *ngIf="false && (role === 'ESN_ADMIN' || role === 'ESN_COMMERCIAL') && urlContains('gestion-employer')" class="space-y-1">
+          <li>
+            <h3 class="text-xs uppercase font-semibold text-gray-500 tracking-wider px-3 py-2">Espace ESN</h3>
+            <a [routerLink]="['/gestion-employer/esn-commercial']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9v9a2 2 0 01-2 2h-4a2 2 0 01-2-2V15H9v6a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              </svg>
+              <span>ESN Commercial</span>
+            </a>
+            <!-- <a [routerLink]="['/gestion-employer/ingenieuraffaire']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9v9a2 2 0 01-2 2h-4a2 2 0 01-2-2V15H9v6a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              </svg>
+              <span>Ingénieur d'affaires</span>
+            </a> -->
+            <a [routerLink]="['/gestion-employer/charger-recrutement']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9v9a2 2 0 01-2 2h-4a2 2 0 01-2-2V15H9v6a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              </svg>
+              <span>Charger Recrutement</span>
+            </a>
+            <a [routerLink]="['/gestion-employer/intercontrat']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9v9a2 2 0 01-2 2h-4a2 2 0 01-2-2V15H9v6a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+              </svg>
+              <span>Inter-contrat</span>
+            </a>
+          </li>
+        </ul>
+        
+        <!-- Missions/Offers Section -->
+        <ul *ngIf="(role === 'CANDIDAT'||role === 'CHARGEDERECRUTEMENT'||role === 'FREELANCER' || role === 'ADMIN' || role === 'ESN_ADMIN' || role === 'ESN_COMMERCIAL' || role === 'INTERCONTRAT' || role === 'INGENIEURDAFFAIRE' || role === 'PORTAGE_SALARIAL') && (urlContains('Missions') || urlContains('Offres'))" class="space-y-1">
+          <!-- Missions Section -->
+          <li *ngIf="false && urlContains('Missions')">
+            <h3 class="text-xs uppercase font-semibold text-gray-500 tracking-wider px-3 py-2">Espace Missions</h3>
+            <!-- <a *ngIf="role === 'ESN_ADMIN' || role === 'ESN_COMMERCIAL' || role === 'INTERCONTRAT' || role === 'FREELANCER' || role === 'PORTAGE_SALARIAL'"  -->
+               
+            
+            
+            <a [routerLink]="['/Missions/Liste']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>Liste des missions</span>
+            </a>
+               <a [routerLink]="['/Missions/creer']"
+                   routerLinkActive="active-link"
+                   *ngIf="this.role==='ESN_COMMERCIAL' || this.role==='ESN_ADMIN'|| this.role==='INGENIEURDAFFAIRE'"
+                   class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+                   <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg> <span>Publier une mission</span>
+            </a>
+
+
+
+                   <a *ngIf="this.role==='ESN_COMMERCIAL' || this.role==='ESN_ADMIN'|| this.role==='INGENIEURDAFFAIRE'" [routerLink]="['/Missions/publier']"
+       routerLinkActive="active-link"
+       [routerLinkActiveOptions]="{ exact: true }"
+       class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+                   <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg> <span>Missions publiées</span>
+    </a>
+                        <a *ngIf="role === 'FREELANCER' || role === 'PORTAGE_SALARIAL' || role === 'ESN_ADMIN' || role === 'ESN_COMMERCIAL' || role === 'INTERCONTRAT'|| role==='INGENIEURDAFFAIRE'" 
+               [routerLink]="['/Missions/missionsfavories']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              <span>Missions en favorites</span>
+            </a>
+            <!-- <a *ngIf="role === 'FREELANCER' || role === 'PORTAGE_SALARIAL' || role === 'ESN_ADMIN' || role === 'ESN_COMMERCIAL'"  -->
+            <a *ngIf="role === 'FREELANCER' || role === 'PORTAGE_SALARIAL' "   
+            [routerLink]="['/Missions/Postuler']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Missions postulées</span>
+            </a>
+          </li> 
+          <!-- Offers Section -->
+        <li *ngIf="urlContains('Offres')">
+          <h3 class="text-xs uppercase font-semibold text-gray-500 tracking-wider px-3 py-2">Espace Offres</h3>
+            <a *ngIf="role === 'CANDIDAT' || role === 'ESN_ADMIN' || this.role === 'CHARGEDERECRUTEMENT'"
+               [routerLink]="['/Offres/Liste']" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>Liste des offres</span>
+            </a>
+                        <a *ngIf="role === 'ESN_ADMIN' || this.role === 'CHARGEDERECRUTEMENT'" [routerLink]="['/Offres/creer']"
+       routerLinkActive="active-link"
+       [routerLinkActiveOptions]="{ exact: true }"
+       class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+                   <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg> <span>Publier une offre</span>
+    </a>
+                            <a *ngIf="role === 'ESN_ADMIN' || this.role === 'CHARGEDERECRUTEMENT'" [routerLink]="['/Offres/publier']"
+       routerLinkActive="active-link"
+       [routerLinkActiveOptions]="{ exact: true }"
+       class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+                   <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg> <span>Offre publiée</span>
+    </a>
+                     <a *ngIf="role === 'CANDIDAT' || role === 'ESN_ADMIN' || role === 'CHARGEDERECRUTEMENT' " 
+               [routerLink]="['/Offres/offresfavories']" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              <span>Offres en favorites</span>
+            </a>
+            <!-- <a *ngIf="role === 'CANDIDAT' || this.role==='CHARGEDERECRUTEMENT' || this.role==='ESN_ADMIN'"  -->
+            <a *ngIf="role === 'CANDIDAT'"   
+            [routerLink]="['/Offres/Postuler']" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>Offres postulées</span>
+            </a>
+          
+        </li>
+        </ul>
+
+        <!-- Profile Section -->
+        <ul *ngIf="(role === 'CANDIDAT' || role === 'FREELANCER' || role === 'PORTAGE_SALARIAL' || role === 'ADMIN') && urlContains('profil')" class="space-y-1">
+          <li>
+            <h3 class="text-xs uppercase font-semibold text-gray-500 tracking-wider px-3 py-2">Navigation</h3>
+            <a [routerLink]="['/cv']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>Espace CV</span>
+            </a>
+          </li>
+          <!-- Masqué : Espace Mission (demande utilisateur)
+          <li>
+            <a [routerLink]="['/Missions']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>Espace Mission</span>
+            </a>
+          </li>
+          -->
+        </ul>
+
+        <!-- Admin Section -->
+        <ul *ngIf="role === 'ADMIN' && urlContains('utilisateur')" class="space-y-1">
+          <li>
+            <h3 class="text-xs uppercase font-semibold text-gray-500 tracking-wider px-3 py-2">Espace Utilisateur</h3>
+            <a [routerLink]="['/utilisateur/accueil']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"></svg>
+              <span>Vue global</span>
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="['/utilisateur/admin']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>Espace Admin</span>
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="['/utilisateur/bi']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <span>Tableaux de bord BI</span>
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="['/utilisateur/candidat']" routerLinkActive="active-link"
+               class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
+              <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>Espace Candidat</span>
+            </a>
+          </li>
+        </ul>
+
+        <!-- Logout Button -->
+        <div class="mt-6 pt-6 border-t border-gray-200">
+          <button (click)="logout()"
+                  class="flex w-full items-center text-red-600 hover:text-red-800 px-3 py-3 rounded-lg hover:bg-red-50 cursor-pointer transition-all duration-200">
+            <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" />
+            </svg>
+            <span>Déconnexion</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="ml-[280px] flex-1 p-8 overflow-y-auto">
+    <router-outlet></router-outlet>
+  </main> 
+</div>

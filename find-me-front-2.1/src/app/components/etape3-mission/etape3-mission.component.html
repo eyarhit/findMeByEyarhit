@@ -1,0 +1,77 @@
+<div class="job-posting-container">
+      <button class="ios-close-button" routerLink="/dashboard">
+    <span class="ios-close-icon"></span>
+  </button>
+  <div class="job-posting-form">
+    <div class="form-header">
+      <h2>2 sur 2 : Décrivez la mission</h2>
+      <p class="required-fields-info">* indique que tous les champs sont obligatoires</p>
+    </div>
+
+    <form [formGroup]="jobPostingForm" (ngSubmit)="onSubmit()">
+      <div class="form-row full-width">
+        <div class="form-group">
+          <label for="description">Description *</label>
+          <div class="rich-text-controls">
+            <button type="button" class="text-control bold" (click)="formatText('bold')">B</button>
+            <button type="button" class="text-control italic" (click)="formatText('italic')">I</button>
+            <button type="button" class="text-control list" (click)="formatText('list')">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M2 4h1v1H2V4zm0 3h1v1H2V7zm0 3h1v1H2v-1zm3-6h9v1H5V4zm0 3h9v1H5V7zm0 3h9v1H5v-1z"></path>
+              </svg>
+            </button>
+          </div>
+          <textarea 
+            id="description" 
+            formControlName="description" 
+            class="form-control"
+            rows="8"
+            placeholder="Conseils : faites une présentation rapide du poste, expliquez les critères de réussite pour ce poste, ainsi que son rôle global au sein de l'organisation."
+          ></textarea>
+          <div class="character-count">{{ getCharacterCount() }}/10000</div>
+        </div>
+      </div>
+
+
+      <div class="form-actions">
+          <button type="button" class="btn btn-preview" (click)="openPreview()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            Aperçu
+          </button>
+        <button type="button" class="btn btn-secondary" routerLink="/etape2-mission">Retour</button>
+        <div class="action-buttons">
+          <button type="submit" class="btn btn-primary">Publier la mission</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="company-info">
+    <div class="company-card">
+      <div class="company-header">
+        <img src="assets/olx-logo.png" alt="OLX Logo" class="company-logo">
+        <div class="company-name">
+          <h3>OLX</h3>
+          <p>Tunis, Gouvernorat Tunis, Tunisie</p>
+          <p>Sur site</p>
+          <p class="registration-status">Enregistré en tant que brouillon</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mission-tips company-card">
+      <h4>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        Ciblez votre mission pour toucher les bonnes inters-contrat
+      </h4>
+      <p>Intégrez une description de la mission et ajoutez les compétences requises pour cibler les mieux qualifiés en recherche de mission correspondant à vos critères.</p>
+    </div>
+  </div>
+</div>

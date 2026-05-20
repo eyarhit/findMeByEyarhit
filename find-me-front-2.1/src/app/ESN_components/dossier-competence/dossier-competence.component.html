@@ -1,0 +1,416 @@
+<!-- Notification Toast - Design amélioré -->
+<div class="toast-container" *ngIf="showToast">
+  <div class="toast toast-{{toastType}}">
+    <div class="toast-icon">
+      <i [class]="toastIcon"></i>
+    </div>
+    <div class="toast-content">
+      <p class="toast-message">{{ toastMessage }}</p>
+    </div>
+    <button class="toast-close" (click)="hideToast()">
+      ×
+    </button>
+  </div>
+</div>
+
+<div class="card-container">
+  <!-- Popup Alert - Design amélioré -->
+<div *ngIf="showPopup" class="custom-popup" [class.success]="popupType === 'success'" [class.error]="popupType === 'error'">
+  <div class="popup-header">
+    <div class="popup-icon">
+      <i class="fas" [class.fa-check-circle]="popupType === 'success'" [class.fa-exclamation-circle]="popupType === 'error'"></i>
+    </div>
+    <h3 class="popup-title">{{popupTitle}}</h3>
+    <button class="popup-close" (click)="closePopup()">×</button>
+  </div>
+  <div class="popup-body">
+    <p>{{popupMessage}}</p> 
+  </div>
+  <div class="popup-progress" [style.animation-duration]="'5s'"></div>
+</div>
+
+  <div class="card-content">
+    <!-- En-tête de la page -->
+ 
+    
+      <!-- Steps Container - Design amélioré -->
+      <div class="steps-container relative mb-8">
+        <div class="steps-wrapper">
+          <div *ngFor="let step of steps; let i = index" class="step-item"
+              [class.active]="activeStep === step.number" 
+              [class.completed]="completedSteps.has(step.number)"
+              (click)="goToStep(step.number)">
+            <div class="step-circle">
+              <span *ngIf="!completedSteps.has(step.number)">{{ step.number }}</span>
+              <i *ngIf="completedSteps.has(step.number)" class="fas fa-check"></i>
+            </div>
+            <div class="step-description">
+              <!-- <i class="fas {{step.icon}} step-icon"></i> -->
+              {{ step.description }}
+            </div>
+            <div *ngIf="i < steps.length - 1" class="step-connector"></div>
+          </div>
+        </div>
+      </div>
+
+    <!-- Form Content -->
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="cv-form">
+      <!-- Step 1 - Page 1 & 2: Academic Formations, Technical Skills, Professional Experiences & Languages -->
+      <div *ngIf="activeStep === 1" class="form-step">
+        <!-- Page 1: Academic Formations & Technical Skills -->
+        <div *ngIf="currentPage === 1" class="form-page">
+          <!-- Academic Formations -->
+          <div formArrayName="academicFormations" class="section-container">
+            <div class="section-header">
+              <h3 class="section-title">Formation Académique</h3>
+              <button type="button" class="btn-add" (click)="addAcademicFormation()">
+                <i class="fas fa-plus-circle"></i> Ajouter une formation
+              </button>
+            </div>
+            <hr class="separator-line">
+            
+            <div *ngFor="let formation of academicFormations.controls; let i = index"
+                 class="form-card">
+              <div [formGroupName]="i">
+                <div class="form-card-header">
+                  <span class="form-card-title">Formation #{{i+1}}</span>
+                  <button type="button" class="btn-remove" (click)="removeAcademicFormation(i)">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- Form Fields -->
+                  <div class="form-group">
+                    <label>Date de début</label>
+                    <input type="date" formControlName="dateDebut" class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <label>Date de fin</label>
+                    <input type="date" formControlName="dateFin" class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <label>Université</label>
+                    <input type="text" formControlName="university" class="form-control" placeholder="Ex: Université de Paris">
+                  </div>
+                  <div class="form-group">
+                    <label>Diplôme</label>
+                    <input type="text" formControlName="diplome" class="form-control" placeholder="Ex: Master en Informatique">
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div *ngIf="academicFormations.controls.length === 0" class="empty-state">
+              <i class="fas fa-graduation-cap empty-icon"></i>
+              <p>Aucune formation académique ajoutée</p>
+              <button type="button" class="btn-add-empty" (click)="addAcademicFormation()">
+                <i class="fas fa-plus-circle"></i> Ajouter une formation
+              </button>
+            </div>
+          </div>
+
+          <!-- Technical Skills -->
+          <div class="section-container" formGroupName="technicalSkills">
+            <div class="section-header">
+              <h3 class="section-title">Compétences Techniques</h3>
+            </div>
+            <hr class="separator-line">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Skills Inputs -->
+              <div class="form-group">
+                <label>Langages de balisage</label>
+                <input type="text" formControlName="langageBallsage" class="form-control" placeholder="Ex: HTML, XML, Markdown">
+              </div>
+              <div class="form-group">
+                <label>Langages de programmation</label>
+                <input type="text" formControlName="languageProgrammation" class="form-control" placeholder="Ex: JavaScript, Python, Java">
+              </div>
+              <div class="form-group">
+                <label>Frameworks</label>
+                <input type="text" formControlName="framework" class="form-control" placeholder="Ex: Angular, React, Vue.js">
+              </div>
+              <div class="form-group">
+                <label>Bibliothèques</label>
+                <input type="text" formControlName="bibliotheque" class="form-control" placeholder="Ex: jQuery, Bootstrap, Material UI">
+              </div>
+              <div class="form-group">
+                <label>APIs</label>
+                <input type="text" formControlName="api" class="form-control" placeholder="Ex: REST, GraphQL, WebSockets">
+              </div>
+              <div class="form-group">
+                <label>Base de données</label>
+                <input type="text" formControlName="db" class="form-control" placeholder="Ex: MySQL, MongoDB, PostgreSQL">
+              </div>
+              <div class="form-group">
+                <label>Système d'exploitation</label>
+                <input type="text" formControlName="systemExploitation" class="form-control" placeholder="Ex: Windows, Linux, macOS">
+              </div>
+              <div class="form-group">
+                <label>Conception</label>
+                <input type="text" formControlName="conception" class="form-control" placeholder="Ex: UML, Wireframing, Prototyping">
+              </div>
+              <div class="form-group">
+                <label>Méthodologie</label>
+                <input type="text" formControlName="methodologie" class="form-control" placeholder="Ex: Agile, Scrum, Kanban">
+              </div>
+              <div class="form-group">
+                <label>Design Pattern</label>
+                <input type="text" formControlName="designPattern" class="form-control" placeholder="Ex: MVC, Singleton, Observer">
+              </div>
+              <div class="form-group">
+                <label>Architecture</label>
+                <input type="text" formControlName="architechture" class="form-control" placeholder="Ex: Microservices, SOA, Serverless">
+              </div>
+              <div class="form-group">
+                <label>Outils</label>
+                <input type="text" formControlName="outils" class="form-control" placeholder="Ex: Git, Docker, Jenkins">
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="btn-primary" (click)="goToNextPage()">
+                <span>Suivant</span>
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Page 2: Professional Experiences & Languages -->
+        <div *ngIf="currentPage === 2" class="form-page">
+          <!-- Professional Experiences -->
+          <div formArrayName="professionalExperiences" class="section-container">
+            <div class="section-header">
+              <h3 class="section-title">Expériences Professionnelles</h3>
+              <button type="button" class="btn-add" (click)="addProfessionalExperience()">
+                <i class="fas fa-plus-circle"></i> Ajouter une expérience
+              </button>
+            </div>
+            <hr class="separator-line">
+            
+            <div *ngFor="let experience of professionalExperiences.controls; let i = index"
+                 class="form-card">
+              <div [formGroupName]="i">
+                <div class="form-card-header">
+                  <span class="form-card-title">Expérience #{{i+1}}</span>
+                  <button type="button" class="btn-remove" (click)="removeProfessionalExperience(i)">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- Form Fields -->
+                  <div class="form-group">
+                    <label>Date de début</label>
+                    <input type="date" formControlName="dateDebut" class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <label>Date de fin</label>
+                    <input type="date" formControlName="dateFin" class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <label>Titre du poste</label>
+                    <input type="text" formControlName="poste" class="form-control" placeholder="Ex: Développeur Full Stack">
+                  </div>
+                  <div class="form-group">
+                    <label>Nom du projet</label>
+                    <input type="text" formControlName="nomProjet" class="form-control" placeholder="Ex: Plateforme e-commerce">
+                  </div>
+                  <div class="form-group">
+                    <label>Entreprise</label>
+                    <input type="text" formControlName="entreprise" class="form-control" placeholder="Ex: Tech Solutions Inc.">
+                  </div>
+                  <div class="form-group">
+                    <label>Client</label>
+                    <textarea formControlName="client" class="form-control" placeholder="Ex: Société internationale dans le secteur bancaire"></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label>Équipe</label>
+                    <textarea formControlName="equipe" class="form-control" placeholder="Ex: Équipe de 5 développeurs, 1 designer UX/UI"></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label>Travail réalisé</label>
+                    <textarea formControlName="travailRealise" class="form-control" placeholder="Ex: Développement du module de paiement en ligne"></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label>Environnement</label>
+                    <textarea formControlName="environnement" class="form-control" placeholder="Ex: Angular, Node.js, MongoDB, AWS"></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label>Description</label>
+                    <textarea formControlName="description" class="form-control" placeholder="Ex: Projet de refonte complète d'une application existante"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div *ngIf="professionalExperiences.controls.length === 0" class="empty-state">
+              <i class="fas fa-briefcase empty-icon"></i>
+              <p>Aucune expérience professionnelle ajoutée</p>
+              <button type="button" class="btn-add-empty" (click)="addProfessionalExperience()">
+                <i class="fas fa-plus-circle"></i> Ajouter une expérience
+              </button>
+            </div>
+          </div>
+
+          <!-- Languages -->
+          <div formArrayName="languages" class="section-container">
+            <div class="section-header">
+              <h3 class="section-title">Langues</h3>
+              <button type="button" class="btn-add" (click)="addLanguage()">
+                <i class="fas fa-plus-circle"></i> Ajouter une langue
+              </button>
+            </div>
+            <hr class="separator-line">
+            
+            <div class="languages-grid">
+              <div *ngFor="let language of languages.controls; let i = index"
+                   class="language-card">
+                <div [formGroupName]="i">
+                  <div class="language-card-content">
+                    <div class="form-group">
+                      <label>Langue</label>
+                      <select formControlName="name" class="form-control">
+                        <option [ngValue]="''" disabled>Choisir une langue</option>
+                        <option *ngFor="let lang of languageList" [value]="lang">{{ lang }}</option>
+                      </select>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label>Niveau</label>
+                      <select formControlName="niveau" class="form-control">
+                        <option [ngValue]="''" disabled>Choisir un niveau</option>
+                        <option *ngFor="let level of levels" [value]="level">{{ level }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button type="button" class="btn-remove-language" (click)="removeLanguage(i)">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div *ngIf="languages.controls.length === 0" class="empty-state">
+              <i class="fas fa-language empty-icon"></i>
+              <p>Aucune langue ajoutée</p>
+              <button type="button" class="btn-add-empty" (click)="addLanguage()">
+                <i class="fas fa-plus-circle"></i> Ajouter une langue
+              </button>
+            </div>
+          </div>
+
+          <!-- Navigation Buttons -->
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="goToPreviousPage()">
+              <i class="fas fa-arrow-left"></i>
+              <span>Précédent</span>
+            </button>
+
+            <div class="right-buttons">
+              <button type="button" class="btn-primary" (click)="goToStep(activeStep + 1)">
+                <span>Suivant</span>
+                <i class="fas fa-arrow-right"></i>
+              </button>
+              
+              <button type="submit" class="btn-success">
+                <i class="fas fa-save"></i>
+                <span>Enregistrer le CV</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    <!-- Step 2 - model cv Beehive -->
+    <div *ngIf="activeStep === 2" class="step-container">  
+      <div class="header-row">
+        <!-- Partie gauche : Label + input + bouton Ajouter -->
+        <div class="left-part">
+          <label class="floating-label">Titre du profil</label>
+          <div class="input-with-button">
+            <input 
+              type="text" 
+              class="cv-input" 
+              placeholder="Ex: Développeur Full Stack Java/Spring - Expert en solutions cloud" 
+              [formControl]="titreDeProfilControl"
+              (keyup.enter)="AjouterTitreDeProfil()"
+            />
+            <button class="finish-button" (click)="AjouterTitreDeProfil()">
+              <span *ngIf="!titreDeProfilControl.value">Ajouter</span>
+              <span *ngIf="titreDeProfilControl.value">Mettre à jour</span>
+            </button>
+          </div>
+          <div class="encouragement-message" *ngIf="!titreDeProfilControl.value && activeStep === 2">
+            <i class="fas fa-lightbulb"></i>
+            <span>Un titre de profil augmente vos chances de recrutement !</span>
+          </div>
+          <div class="success-message" *ngIf="titreDeProfilControl.value && activeStep === 2">
+            <i class="fas fa-check-circle"></i>
+            <span>Un titre de profil augmente vos chances de recrutement de 40% !</span>
+          </div>
+        </div>
+      
+        <!-- Partie droite : Bouton Télécharger -->
+        <div class="right-part">
+          <button class="action-button download-button" (click)="generateCV()">
+            <span>Télécharger Votre CV</span>
+            <i class="fas fa-download"></i>
+          </button>
+          
+        </div>
+      </div>
+      
+      <div class="cv-preview-container">
+        <app-model-cv></app-model-cv>
+        </div>
+      </div>
+
+      
+
+      <!-- Step 3 - diplome+certif -->
+      <div *ngIf="activeStep === 3" class="step-container">
+        <div class="certif-container">
+          <app-certif-diplome></app-certif-diplome>
+        </div>
+        
+
+
+        
+      </div>
+
+           
+      <!-- Navigation Buttons -->
+      <div class="form-actions mt-8 flex justify-between" *ngIf="activeStep !== 1">
+        <button *ngIf="activeStep > 1" type="button" class="btn-secondary" (click)="goToStep(activeStep - 1)">
+          <i class="fas fa-arrow-left"></i>
+          <span>Précédent</span>
+        </button>
+
+        <div *ngIf="activeStep === 3" class="form-actions mt-6 text-right">
+          <button type="button" class="btn-finish" (click)="onFinish()">
+            <span>Terminer</span>
+            <i class="fas fa-check-circle ml-2"></i>
+          </button>
+        </div>
+
+        <button *ngIf="activeStep < steps.length" type="button" class="btn-primary"
+            (click)="goToStep(activeStep + 1)">
+          <span>Suivant</span>
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Debug Panel (visible seulement en développement) -->
+<div *ngIf="false" class="debug-panel">
+  <h3>Debug Information</h3>
+  <p><strong>UserID:</strong> {{userId}}</p>
+  <p><strong>Completed Steps:</strong> {{completedSteps | json}}</p>
+  <p><strong>Active Step:</strong> {{activeStep}}</p>
+  <button (click)="clearLocalStorage()">Clear Local Storage</button>
+</div>
+
+</div>

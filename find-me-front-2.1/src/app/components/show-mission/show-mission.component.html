@@ -1,0 +1,77 @@
+<div class="preview-container">
+  <h2>Aperçu de la mission</h2>
+  <p class="preview-description">
+    Voici un aperçu de votre mission telle que la verront les inters-contrat en recherche de mission. 
+    Il comprend les détails de votre mission, tels que la taille et le lieu du client, ainsi que les 
+    informations relatives à la date de création de votre profil.
+  </p>
+
+  <div class="job-card">
+    <div class="job-header" *ngIf="job.image">
+      <img [src]="job.image" alt="Company logo" class="company-logo">
+    </div>
+
+    <div class="job-content">
+      <h3>{{ job.companyName }}</h3>
+      <p class="job-location">
+        {{ job.location }} ({{ getWorkTypeText() }})
+      </p>
+
+      <div class="job-meta">
+        <span class="job-type">Temps plein</span>
+        <span class="job-posted">Publié par {{ job.companyName }}</span>
+      </div>
+
+      <div class="job-section">
+        <h4>Description</h4>
+        <p>{{ job.description }}</p>
+      </div>
+
+      <div class="job-section">
+        <h4>Responsabilités</h4>
+        <p>{{ job.responsibilities }}</p>
+      </div>
+
+      <div class="job-section">
+        <h4>Qualifications</h4>
+        <p>{{ job.qualifications }}</p>
+      </div>
+
+      <div class="job-section" *ngIf="job.requirements">
+        <h4>Exigences</h4>
+        <p>{{ job.requirements }}</p>
+      </div>
+
+      <div class="job-section" *ngIf="job.benefits">
+        <h4>Avantages</h4>
+        <p>{{ job.benefits }}</p>
+      </div>
+
+      <div class="job-section" *ngIf="job.skills && job.skills.length > 0">
+        <h4>Compétences</h4>
+        <div class="skills-list">
+          <span class="skill-tag" *ngFor="let skill of job.skills">{{ skill }}</span>
+        </div>
+      </div>
+
+      <div class="job-details">
+        <div class="detail-item" *ngIf="job.experienceYears">
+          <span class="detail-label">Expérience:</span>
+          <span class="detail-value">{{ job.experienceYears }} ans</span>
+        </div>
+        <div class="detail-item" *ngIf="job.salary">
+          <span class="detail-label">Salaire:</span>
+          <span class="detail-value">{{ job.salary }}</span>
+        </div>
+        <div class="detail-item" *ngIf="job.startDate">
+          <span class="detail-label">Date de début:</span>
+          <span class="detail-value">{{ job.startDate | date }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-footer">
+    <p>Conseils : faites une présentation rapide de la mission, expliquez les critères de réussite pour cette mission, ainsi que son rôle global au sein de l'organisation.</p>
+  </div>
+</div>

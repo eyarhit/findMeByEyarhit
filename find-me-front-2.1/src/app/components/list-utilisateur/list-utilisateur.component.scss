@@ -1,0 +1,83 @@
+$primary-color: #6c63ff;
+$border-radius: 8px;
+.notification-container {
+  margin-top: 63px !important;
+position: fixed;
+top: 0;
+right: 0;
+bottom: 0;
+left: 0;
+background-color: rgba(31, 41, 55, 0.5); /* Gray with 50% opacity */
+overflow-y: auto;
+height: 100%;
+width: 100%;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+.notification-container-2 {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 10vw; /* 30% de la largeur de l'écran (viewport width) */
+  background-color: rgba(31, 41, 55, 0.5); /* gris foncé semi-transparent */
+  overflow-y: auto;
+  width: 100vw; /* prend 70% de la largeur de l'écran */
+  height: 100vh; /* prend toute la hauteur de l'écran */
+  margin-top: 4rem; /* au lieu de 4%, utilisons des unités rem */
+  margin-right: 0;
+}
+.notification-container-3 {
+  padding-bottom: 2vw;
+  padding-right: 10vw;
+  padding-top: 4vw;
+  padding-left: 10vw;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 10vw; /* 30% de la largeur de l'écran (viewport width) */
+  background-color: rgba(31, 41, 55, 0.5); /* gris foncé semi-transparent */
+  overflow-y: auto;
+  width: 100vw; /* prend 70% de la largeur de l'écran */
+  height: 100vh; /* prend toute la hauteur de l'écran */
+  margin-top: 4vw; /* au lieu de 4%, utilisons des unités rem */
+  margin-right: 100;
+}
+  .rechercher-btn {
+    margin-left: 12px;
+    padding: 0 15px;
+    height: 38px;
+    background-color: $primary-color;
+    color: white;
+    border: none;
+    border-radius: $border-radius;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: darken($primary-color, 10%);
+    }
+  }
+  .statut-encours {
+  color: #c57d00; /* orange foncé */
+  border: 1px solid #c57d00;
+  background-color: #fffaf0;
+}
+
+.statut-accepter {
+  color: #198754; /* vert bootstrap */
+  border: 1px solid #198754;
+  background-color: #f0fff5;
+}
+
+.statut-refuser {
+  color: #dc3545; /* rouge bootstrap */
+  border: 1px solid #dc3545;
+  background-color: #fff5f5;
+}
+.btn-espace{
+  font-size: 0.6vw !important;
+}

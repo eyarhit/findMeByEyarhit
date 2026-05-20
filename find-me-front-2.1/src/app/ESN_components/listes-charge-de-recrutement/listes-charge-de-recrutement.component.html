@@ -1,0 +1,69 @@
+<div class="contacts-container">
+  <div class="search-bar">
+    <div class="search-input">
+      <input type="text" placeholder="Nom, Prénom, Email" [(ngModel)]="searchTerm">
+      <i class="fa fa-search search-icon"></i>
+    </div>
+    <button class="rechercher-btn">Rechercher</button>
+  </div>
+
+  <div class="contacts-grid">
+    <div class="contact-card" *ngFor="let contact of filteredContacts">
+      <div class="card-header">
+        <div class="avatar">
+          <img [src]="contact.image" alt="Photo de profil">
+        </div>
+        <button class="delete-btn" (click)="openDeleteConfirmation(contact, $event)">
+          <i class="fa fa-trash"></i>
+        </button>
+      </div>
+      <div class="card-body" [routerLink]="['/contact-details', contact.id]">
+        <h3 class="contact-name">{{ contact.name }}</h3>
+        <p class="contact-title">{{ contact.title }}</p>
+        <div class="contact-company">
+          <p>{{ contact.company }}</p>
+        </div>
+        <div class="contact-info">
+          <div class="info-item">
+            <i class="fa fa-phone"></i>
+            <span>{{ contact.phone }}</span>
+          </div>
+          <div class="info-item">
+            <i class="fa fa-envelope"></i>
+            <span>{{ contact.email }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pagination">
+    <button class="prev-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Préc</button>
+    <div class="page-numbers">
+      <ng-container *ngFor="let page of getPageNumbers()">
+        <div class="page-number" [class.active]="page === currentPage" (click)="changePage(page)">
+          {{ page }}
+        </div>
+      </ng-container>
+    </div>
+    <button class="next-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">Suiv</button>
+  </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal-overlay" *ngIf="showDeleteModal">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Confirmer la suppression</h3>
+      <button class="close-btn" (click)="closeDeleteModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <p>Êtes-vous sûr de vouloir supprimer le contact <strong>{{ contactToDelete?.name }}</strong> ?</p>
+      <p class="warning">Cette action est irréversible.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="cancel-btn" (click)="closeDeleteModal()">Annuler</button>
+      <button class="confirm-btn" (click)="confirmDelete()">Supprimer</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rapport de Projet de Fin d’Études — Plateforme Find-Me</title>
+  <style>
+    :root {
+      --ink: #1a202c;
+      --muted: #4a5568;
+      --accent: #2c5282;
+      --accent-light: #ebf4ff;
+      --border: #cbd5e0;
+      --table-head: #2c5282;
+      --table-head-text: #fff;
+      --cover-bg: linear-gradient(135deg, #1a365d 0%, #2c5282 45%, #3182ce 100%);
+    }
+    @page {
+      size: A4;
+      margin: 2.2cm 2cm 2.2cm 2cm;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", Calibri, "Helvetica Neue", Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.55;
+      color: var(--ink);
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 12mm 16mm 20mm;
+      background: #f7fafc;
+    }
+    @media print {
+      body { background: #fff; padding: 0; max-width: none; }
+      .no-print { display: none !important; }
+      a[href^="#"] { color: inherit; text-decoration: none; }
+    }
+    .cover {
+      min-height: 260mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: var(--cover-bg);
+      color: #fff;
+      margin: -12mm -16mm 24mm;
+      padding: 28mm 16mm;
+      page-break-after: always;
+    }
+    .cover h1 {
+      font-size: 22pt;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin: 0 0 8mm;
+      line-height: 1.25;
+      border: none;
+    }
+    .cover .subtitle {
+      font-size: 14pt;
+      font-weight: 400;
+      opacity: 0.95;
+      margin-bottom: 18mm;
+    }
+    .cover .meta {
+      font-size: 11pt;
+      opacity: 0.9;
+      line-height: 1.8;
+    }
+    .cover .badge {
+      display: inline-block;
+      margin-top: 22mm;
+      padding: 3mm 8mm;
+      background: rgba(255,255,255,0.15);
+      border-radius: 4px;
+      font-size: 10pt;
+    }
+    h1.doc-title {
+      font-size: 16pt;
+      color: var(--accent);
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 4mm;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 14pt;
+      color: var(--accent);
+      margin-top: 10mm;
+      margin-bottom: 4mm;
+      page-break-after: avoid;
+    }
+    h3 {
+      font-size: 12pt;
+      color: #2d3748;
+      margin-top: 7mm;
+      margin-bottom: 3mm;
+      page-break-after: avoid;
+    }
+    h4 {
+      font-size: 11pt;
+      color: var(--muted);
+      font-weight: 600;
+      margin-top: 5mm;
+      margin-bottom: 2mm;
+    }
+    p { margin: 0 0 3.5mm; text-align: justify; hyphens: auto; }
+    ul, ol { margin: 2mm 0 4mm 5mm; padding-left: 5mm; }
+    li { margin-bottom: 2mm; }
+    .chapter {
+      page-break-before: always;
+      padding-top: 4mm;
+    }
+    .chapter:first-of-type { page-break-before: auto; }
+    .chapter-intro {
+      background: var(--accent-light);
+      border-left: 4px solid var(--accent);
+      padding: 4mm 5mm;
+      margin: 4mm 0 6mm;
+      font-size: 10.5pt;
+      color: #2d3748;
+    }
+    .toc { margin: 6mm 0 10mm; }
+    .toc ul { list-style: none; padding-left: 0; margin-left: 0; }
+    .toc li { margin: 2.5mm 0; padding-left: 0; }
+    .toc a { color: var(--accent); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    .toc .sub { padding-left: 6mm; font-size: 10.5pt; }
+    table.spec {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 4mm 0 6mm;
+      font-size: 10pt;
+      page-break-inside: avoid;
+    }
+    table.spec th {
+      background: var(--table-head);
+      color: var(--table-head-text);
+      padding: 2.5mm 3mm;
+      text-align: left;
+      font-weight: 600;
+    }
+    table.spec td {
+      border: 1px solid var(--border);
+      padding: 2.5mm 3mm;
+      vertical-align: top;
+    }
+    table.spec tr:nth-child(even) { background: #f7fafc; }
+    .note {
+      font-size: 10pt;
+      color: var(--muted);
+      font-style: italic;
+      border-left: 3px solid #cbd5e0;
+      padding-left: 4mm;
+      margin: 4mm 0;
+    }
+    .concl-box {
+      background: #edf2f7;
+      border: 1px solid var(--border);
+      padding: 5mm;
+      margin: 5mm 0;
+      border-radius: 2px;
+    }
+    .concl-box h4 { margin-top: 0; color: var(--accent); }
+    .page-plan {
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 4mm 5mm;
+      margin: 4mm 0;
+      page-break-inside: avoid;
+    }
+    .page-plan strong { color: var(--accent); }
+    code { font-family: Consolas, "Courier New", monospace; font-size: 9.5pt; background: #edf2f7; padding: 0 2px; }
+    .print-hint {
+      font-size: 9.5pt;
+      color: #718096;
+      margin: 8mm 0 0;
+      padding: 3mm;
+      background: #fff;
+      border: 1px dashed var(--border);
+    }
+    hr.soft { border: none; border-top: 1px solid #e2e8f0; margin: 8mm 0; }
+  </style>
+</head>
+<body>
+
+  <div class="cover">
+    <h1>Rapport de Projet de Fin d’Études</h1>
+    <p class="subtitle">Conception et réalisation d’une plateforme web<br /><strong>Find-Me</strong> — mise en relation, missions, CV et pilotage</p>
+    <div class="meta">
+      <p><strong>[Nom Prénom]</strong> — [Diplôme, spécialité]</p>
+      <p>[Établissement] — [Année universitaire 2025–2026]</p>
+      <p>Encadrant(s) : [Nom du ou des encadrants]</p>
+    </div>
+    <span class="badge">Document technique — usage académique</span>
+  </div>
+
+  <p class="no-print print-hint"><strong>Conseil :</strong> pour un rendu type Google Docs ou Word, ouvrez ce fichier dans Chrome ou Edge, puis <em>Fichier &gt; Imprimer &gt; Enregistrer au format PDF</em>, ou importez le PDF dans Google Drive puis <em>Ouvrir avec Google Docs</em>. Vous pouvez aussi copier-coller les sections en conservant la mise en forme.</p>
+
+  <h1 class="doc-title">Table des matières</h1>
+  <nav class="toc">
+    <ul>
+      <li><a href="#intro">Introduction</a></li>
+      <li><a href="#c1">Chapitre 1 — Contexte, problématique et objectifs</a>
+        <ul class="sub">
+          <li><a href="#c1-1">1.1 Contexte métier</a></li>
+          <li><a href="#c1-2">1.2 Problématique</a></li>
+          <li><a href="#c1-3">1.3 Objectifs du projet</a></li>
+          <li><a href="#c1-c">Synthèse du chapitre 1</a></li>
+        </ul>
+      </li>
+      <li><a href="#c2">Chapitre 2 — Analyse des besoins</a>
+        <ul class="sub">
+          <li><a href="#c2-1">2.1 Acteurs et périmètre</a></li>
+          <li><a href="#c2-2">2.2 Besoins fonctionnels</a></li>
+          <li><a href="#c2-3">2.3 Besoins non fonctionnels</a></li>
+          <li><a href="#c2-c">Synthèse du chapitre 2</a></li>
+        </ul>
+      </li>
+      <li><a href="#c3">Chapitre 3 — Spécifications et plan de réalisation</a>
+        <ul class="sub">
+          <li><a href="#c3-1">3.1 Spécifications générales</a></li>
+          <li><a href="#c3-2">3.2 Plan par lots / itérations</a></li>
+          <li><a href="#c3-c">Synthèse du chapitre 3</a></li>
+        </ul>
+      </li>
+      <li><a href="#c4">Chapitre 4 — Conception architecturale</a>
+        <ul class="sub">
+          <li><a href="#c4-1">4.1 Vue d’ensemble</a></li>
+          <li><a href="#c4-2">4.2 Microservices et responsabilités</a></li>
+          <li><a href="#c4-c">Synthèse du chapitre 4</a></li>
+        </ul>
+      </li>
+      <li><a href="#c5">Chapitre 5 — Réalisation backend</a>
+        <ul class="sub">
+          <li><a href="#c5-1">5.1 Stack et modules Maven</a></li>
+          <li><a href="#c5-2">5.2 API, sécurité et données</a></li>
+          <li><a href="#c5-c">Synthèse du chapitre 5</a></li>
+        </ul>
+      </li>
+      <li><a href="#c6">Chapitre 6 — Réalisation frontend</a>
+        <ul class="sub">
+          <li><a href="#c6-1">6.1 Framework et organisation</a></li>
+          <li><a href="#c6-2">6.2 Parcours utilisateur</a></li>
+          <li><a href="#c6-c">Synthèse du chapitre 6</a></li>
+        </ul>
+      </li>
+      <li><a href="#c7">Chapitre 7 — Données, fichiers et intelligence décisionnelle</a>
+        <ul class="sub">
+          <li><a href="#c7-1">7.1 Bases MySQL et scripts d’initialisation</a></li>
+          <li><a href="#c7-2">7.2 Stockage objet (MinIO)</a></li>
+          <li><a href="#c7-3">7.3 Metabase et lecture BI</a>
+            <ul class="sub">
+              <li><a href="#c7-3-1">7.3.1 Interface Metabase (admin BI)</a></li>
+              <li><a href="#c7-3-2">7.3.2 Comptes techniques JDBC / lecture BI</a></li>
+              <li><a href="#c7-3-3">7.3.3 Administration MinIO</a></li>
+            </ul>
+          </li>
+          <li><a href="#c7-c">Synthèse du chapitre 7</a></li>
+        </ul>
+      </li>
+      <li><a href="#c8">Chapitre 8 — Déploiement Docker</a>
+        <ul class="sub">
+          <li><a href="#c8-1">8.1 Orchestration des services</a></li>
+          <li><a href="#c8-c">Synthèse du chapitre 8</a></li>
+        </ul>
+      </li>
+      <li><a href="#c9">Chapitre 9 — Intégration, temps réel et qualité</a>
+        <ul class="sub">
+          <li><a href="#c9-1">9.1 Passerelle et découverte de services</a></li>
+          <li><a href="#c9-2">9.2 Tests et bonnes pratiques</a></li>
+          <li><a href="#c9-c">Synthèse du chapitre 9</a></li>
+        </ul>
+      </li>
+      <li><a href="#c10">Chapitre 10 — Bilan, difficultés et perspectives</a>
+        <ul class="sub">
+          <li><a href="#c10-c">Synthèse du chapitre 10</a></li>
+        </ul>
+      </li>
+      <li><a href="#conclusion">Conclusion générale</a></li>
+      <li><a href="#biblio">Bibliographie et webographie</a></li>
+      <li><a href="#annexe">Annexe A — Inventaire des services exposés</a></li>
+      <li><a href="#annexe-comptes">Annexe B — Comptes démonstration (Metabase, MinIO)</a></li>
+    </ul>
+  </nav>
+
+  <section id="intro">
+    <h1 class="doc-title">Introduction</h1>
+    <p>Ce rapport présente le travail réalisé dans le cadre d’un <strong>projet de fin d’études (PFE)</strong> portant sur la plateforme <strong>Find-Me</strong> : une application web destinée à faciliter la mise en relation entre profils (candidats, freelances, portage salarial, intercontrat, etc.), des structures de type ESN / entreprise, et la gestion de missions ou d’offres d’emploi. Le périmètre couvre l’<strong>analyse des besoins</strong>, la <strong>conception</strong>, la <strong>réalisation</strong> (front et back), le <strong>déploiement conteneurisé</strong> et une couche d’<strong>aide à la décision</strong> (BI) autour de Metabase.</p>
+    <p>La démarche suit une progression classique d’ingénierie logicielle : du cahier des charges implicite aux spécifications, puis à l’architecture microservices, à l’implémentation et à la validation en environnement Docker. Les technologies retenues s’inscrivent dans l’écosystème <strong>Java / Spring Boot 3</strong>, <strong>Angular 17</strong>, <strong>MySQL 8.4</strong> et <strong>Docker Compose</strong>, avec des composants complémentaires (MinIO, service Python, Metabase).</p>
+    <p class="note">Les champs entre crochets […] sur la page de garde doivent être complétés par l’étudiant (identité, établissement, encadrants, année).</p>
+  </section>
+
+  <section id="c1" class="chapter">
+    <h1 class="doc-title">Chapitre 1 — Contexte, problématique et objectifs</h1>
+    <div class="chapter-intro">Ce chapitre situe le projet dans son environnement métier et académique, formule la problématique et fixe les objectifs mesurables du livrable.</div>
+
+    <h2 id="c1-1">1.1 Contexte métier</h2>
+    <p>Le marché de l’emploi et de la mission en IT repose sur des échanges rapides entre <strong>donneurs d’ordre</strong> (entreprises, ESN), <strong>chargés de recrutement</strong>, <strong>commerciaux</strong> et <strong>talents</strong> (salariés en portage, freelances, candidats, profils en intercontrat). Les outils généralistes ne couvrent pas toujours les workflows spécifiques (publication de missions, filtrage par société, quiz de compétences, suivi de candidatures, messagerie).</p>
+    <p>La plateforme <strong>Find-Me</strong> vise à centraliser une partie de ces interactions dans une application web unique, avec des espaces différenciés selon les <strong>rôles</strong> (ESN admin, commercial, chargé de recrutement, candidat, etc.) et des modules dédiés (CV, missions, quiz, Codingame, administration BI).</p>
+
+    <h2 id="c1-2">1.2 Problématique</h2>
+    <p>La problématique peut être formulée ainsi : <em>Comment concevoir et implémenter une application modulaire, évolutive et déployable de façon reproductible, permettant la gestion multi-acteurs des profils, des missions et des contenus (fichiers), tout en offrant des indicateurs de pilotage ?</em></p>
+    <p>Les contraintes principales sont : la <strong>séparation des responsabilités</strong> (éviter un monolithe rigide), la <strong>sécurité des accès</strong> (authentification, contrôle par rôle), la <strong>cohérence des données</strong> (plusieurs bases métier), et la <strong>facilité de démonstration</strong> (stack Docker prête à l’emploi pour le jury PFE).</p>
+
+    <h2 id="c1-3">1.3 Objectifs du projet</h2>
+    <table class="spec">
+      <thead><tr><th>Objectif</th><th>Description</th><th>Critère de réalisation</th></tr></thead>
+      <tbody>
+        <tr><td>O1 — Fonctionnel</td><td>Parcours inscription, authentification, navigation par rôle, missions/offres, CV, listes utilisateurs, chat.</td><td>Parcours démontrables sur l’interface Angular.</td></tr>
+        <tr><td>O2 — Architecture</td><td>Microservices Spring Boot enregistrés sur Eureka, routage via API Gateway.</td><td>Services visibles sur le dashboard Eureka ; appels front routés.</td></tr>
+        <tr><td>O3 — Données</td><td>Persistance MySQL par domaine (utilisateur, CV, mission, quiz, Codingame).</td><td>Schémas créés / alimentés ; cohérence des entités JPA.</td></tr>
+        <tr><td>O4 — Fichiers</td><td>Stockage compatible S3 via MinIO (ex. pièces jointes profil).</td><td>Conteneur MinIO opérationnel ; configuration injectée au user-service.</td></tr>
+        <tr><td>O5 — Déploiement</td><td>Orchestration <code>docker-compose</code> avec healthchecks et dépendances ordonnées.</td><td><code>docker compose up</code> relève l’ensemble des services définis dans le compose du dépôt.</td></tr>
+        <tr><td>O6 — BI</td><td>Metabase connecté à une base applicative MySQL ; accès admin BI documenté.</td><td>Instance Metabase joignable ; compte initialisé par script de seed (selon configuration du projet).</td></tr>
+      </tbody>
+    </table>
+
+    <div id="c1-c" class="concl-box">
+      <h4>Synthèse du chapitre 1</h4>
+      <p>Le projet répond à un besoin de <strong>digitalisation ciblée</strong> des échanges autour des missions et profils IT. La problématique impose une <strong>architecture distribuée</strong> et un <strong>déploiement industrialisé</strong>. Les objectifs O1 à O6 structurent le reste du rapport et permettent d’évaluer le degré d’atteinte du livrable.</p>
+    </div>
+  </section>
+
+  <section id="c2" class="chapter">
+    <h1 class="doc-title">Chapitre 2 — Analyse des besoins</h1>
+    <div class="chapter-intro">Identification des acteurs, des fonctionnalités attendues et des contraintes de qualité (performances, sécurité, ergonomie).</div>
+
+    <h2 id="c2-1">2.1 Acteurs et périmètre</h2>
+    <table class="spec">
+      <thead><tr><th>Acteur</th><th>Rôle applicatif (exemples)</th><th>Interactions principales</th></tr></thead>
+      <tbody>
+        <tr><td>Visiteur</td><td>Non authentifié</td><td>Consultation landing, inscription selon filière, login.</td></tr>
+        <tr><td>Candidat / Freelance / Portage / Intercontrat</td><td>Profils « talent »</td><td>CV, quiz, candidatures, messagerie, offres.</td></tr>
+        <tr><td>ESN (admin, commercial)</td><td>Gestion société / missions</td><td>Tableaux de bord, publication, suivi candidatures, utilisateurs par société.</td></tr>
+        <tr><td>Chargé de recrutement</td><td>RH côté client</td><td>Listes, invitations, offres.</td></tr>
+        <tr><td>Administrateur BI</td><td>Analyse</td><td>Accès Metabase, tableaux de bord (hors périmètre métier strict mais utile au pilotage).</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="c2-2">2.2 Besoins fonctionnels</h2>
+    <ul>
+      <li><strong>BF1 — Compte utilisateur :</strong> inscription avec vérification (OTP), authentification JWT, réinitialisation de mot de passe.</li>
+      <li><strong>BF2 — Profil et CV :</strong> création, import, mise à jour des informations CV (service dédié).</li>
+      <li><strong>BF3 — Missions et offres :</strong> listes, création, publication, favoris, postulation, filtrage par espace (mission vs offre).</li>
+      <li><strong>BF4 — Quiz et évaluation :</strong> parcours quiz, popups de résultat (service Quiz).</li>
+      <li><strong>BF5 — Codingame :</strong> intégration d’un module lié au service Codingame (évaluation technique).</li>
+      <li><strong>BF6 — Communication :</strong> chat temps réel (WebSocket / STOMP selon configuration front).</li>
+      <li><strong>BF7 — Administration :</strong> espaces admin (ex. tableau de bord BI avec liens vers Metabase externe pour respecter les politiques CSP).</li>
+    </ul>
+
+    <h2 id="c2-3">2.3 Besoins non fonctionnels</h2>
+    <table class="spec">
+      <thead><tr><th>Catégorie</th><th>Exigence</th><th>Mise en œuvre dans le projet</th></tr></thead>
+      <tbody>
+        <tr><td>Disponibilité</td><td>Services redémarrables, dépendances saines</td><td>Healthchecks MySQL / MinIO ; <code>depends_on</code> avec conditions.</td></tr>
+        <tr><td>Maintenabilité</td><td>Code découpé par service</td><td>Modules Maven indépendants ; packages Angular par domaine.</td></tr>
+        <tr><td>Sécurité</td><td>Authentification stateless, CORS, contrôle d’accès</td><td>Spring Security, JWT, garde de routes Angular.</td></tr>
+        <tr><td>Interopérabilité</td><td>API REST JSON</td><td>Contrôleurs Spring ; client Http Angular.</td></tr>
+        <tr><td>Portabilité</td><td>Environnement identique dev / démo</td><td>Images Docker et variables d’environnement.</td></tr>
+      </tbody>
+    </table>
+
+    <div id="c2-c" class="concl-box">
+      <h4>Synthèse du chapitre 2</h4>
+      <p>Les besoins recouvrent un <strong>large spectre fonctionnel</strong> (identité, contenu, mission, évaluation, communication) et des <strong>exigences de qualité</strong> typiques d’un projet d’ingénierie. Cette analyse guide la découpe en microservices et les choix d’infrastructure (MySQL, MinIO, Metabase).</p>
+    </div>
+  </section>
+
+  <section id="c3" class="chapter">
+    <h1 class="doc-title">Chapitre 3 — Spécifications et plan de réalisation</h1>
+    <div class="chapter-intro">Spécifications structurantes et découpage du travail en phases pour assurer une livraison progressive et testable.</div>
+
+    <h2 id="c3-1">3.1 Spécifications générales</h2>
+    <table class="spec">
+      <thead><tr><th>Réf.</th><th>Spécification</th><th>Détail</th></tr></thead>
+      <tbody>
+        <tr><td>SP-ARCH</td><td>Architecture microservices</td><td>Chaque domaine métier majeur expose son API ; découverte Eureka ; point d’entrée unique Gateway (port 9082 dans le compose du dépôt).</td></tr>
+        <tr><td>SP-DATA</td><td>Isolation des bases</td><td>Bases <code>user_bd</code>, <code>cv_bd</code>, <code>mission_bd</code>, <code>quiz_bd</code>, <code>codingame_bd</code>, plus bases d’app Metabase / lecture BI.</td></tr>
+        <tr><td>SP-UI</td><td>Single Page Application</td><td>Angular 17, Material, routage modulaire, garde d’authentification et garde par rôle.</td></tr>
+        <tr><td>SP-DEP</td><td>Déploiement</td><td>Fichier <code>docker-compose.yml</code> à la racine du projet <code>projetpfe</code> ; build context par service.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="c3-2">3.2 Plan par lots / itérations (exemple de planning PFE)</h2>
+    <p>Le tableau ci-dessous propose une <strong>organisation en pages de plan</strong> : chaque « lot » correspond à une unité de travail documentable (jalon, livrable, critère d’acceptation).</p>
+
+    <div class="page-plan"><strong>Lot A — Fondations back</strong><br />Discovery + Gateway + User service + MySQL : authentification, modèle utilisateur/rôle, enregistrement Eureka. <em>Jalon :</em> login API OK via Gateway.</div>
+    <div class="page-plan"><strong>Lot B — Données métier étendues</strong><br />CV service, Mission service : CRUD et règles métier de base. <em>Jalon :</em> création CV et mission depuis les API.</div>
+    <div class="page-plan"><strong>Lot C — Front Angular</strong><br />Pages login, inscription, navigation shell (navbar/sidebar), modules Missions/Offres/CV. <em>Jalon :</em> parcours complet en local ou via conteneur frontend.</div>
+    <div class="page-plan"><strong>Lot D — Évaluation et Python</strong><br />Quiz service, Codingame service, service Python (port 8000). <em>Jalon :</em> appels front vers endpoints exposés.</div>
+    <div class="page-plan"><strong>Lot E — Fichiers et temps réel</strong><br />MinIO, intégration user-service, notifications / WebSocket. <em>Jalon :</em> upload ou accès fichier selon périmètre fonctionnel.</div>
+    <div class="page-plan"><strong>Lot F — BI et industrialisation</strong><br />Metabase sur MySQL applicatif, scripts SQL d’init (<code>docker/mysql-init</code>), seed Metabase, tableau admin BI sans iframe si CSP restrictive. <em>Jalon :</em> démo jury sur <code>docker compose up</code>.</div>
+
+    <div id="c3-c" class="concl-box">
+      <h4>Synthèse du chapitre 3</h4>
+      <p>Les spécifications <strong>figent les choix d’architecture et d’UX</strong> ; le plan en lots permet une <strong>progression maîtrisée</strong> du PFE, chaque jalon étant vérifiable indépendamment avant l’intégration finale.</p>
+    </div>
+  </section>
+
+  <section id="c4" class="chapter">
+    <h1 class="doc-title">Chapitre 4 — Conception architecturale</h1>
+    <div class="chapter-intro">Vue logique et physique de la solution : découpage, flux principaux et interactions entre composants.</div>
+
+    <h2 id="c4-1">4.1 Vue d’ensemble</h2>
+    <p>L’application suit un modèle <strong>client — passerelle — microservices — données</strong>. Le navigateur charge l’application Angular (servie en production depuis le conteneur <code>frontend</code> sur le port 4200 hôte). Les requêtes HTTP vers les API passent typiquement par la <strong>Gateway</strong>, qui résout les instances via <strong>Eureka</strong>. Les services accèdent chacun à leur schéma MySQL ; le user-service consomme en outre <strong>MinIO</strong> pour le stockage objet.</p>
+    <p><strong>Metabase</strong> est déployé comme composant analytique séparé (port 3030 sur l’hôte dans la configuration actuelle), avec persistance de configuration applicative sur MySQL et un conteneur de <em>seed</em> pour automatiser la création d’un espace BI de démonstration.</p>
+
+    <h2 id="c4-2">4.2 Microservices et responsabilités</h2>
+    <table class="spec">
+      <thead><tr><th>Composant</th><th>Responsabilité</th><th>Technologie</th></tr></thead>
+      <tbody>
+        <tr><td>Discovery Service</td><td>Registre de services (Eureka Server)</td><td>Spring Cloud Netflix Eureka</td></tr>
+        <tr><td>Gateway Service</td><td>Routage, filtrage, point d’entrée API</td><td>Spring Cloud Gateway</td></tr>
+        <tr><td>User service</td><td>Utilisateurs, rôles, auth, OTP, fichiers profil via MinIO</td><td>Spring Boot 3, JPA, Security</td></tr>
+        <tr><td>CV service</td><td>Gestion des CV</td><td>Spring Boot, JPA</td></tr>
+        <tr><td>Mission service</td><td>Missions / offres liées au recrutement</td><td>Spring Boot, JPA</td></tr>
+        <tr><td>Quiz service</td><td>Quiz et logique associée</td><td>Spring Boot</td></tr>
+        <tr><td>Codingame service</td><td>Intégration évaluations type Codingame</td><td>Spring Boot</td></tr>
+        <tr><td>Python service</td><td>Traitements ou API complémentaires (port 8000)</td><td>Python (Dockerfile du dossier <code>find-me-python-2.1</code>)</td></tr>
+        <tr><td>Frontend</td><td>IHM web</td><td>Angular 17</td></tr>
+      </tbody>
+    </table>
+
+    <div id="c4-c" class="concl-box">
+      <h4>Synthèse du chapitre 4</h4>
+      <p>La conception privilégie le <strong>découplage par domaine</strong> et la <strong>découverte dynamique</strong> des instances, ce qui correspond aux usages industriels des architectures cloud-native, au prix d’une complexité d’intégration plus élevée qu’un monolithe.</p>
+    </div>
+  </section>
+
+  <section id="c5" class="chapter">
+    <h1 class="doc-title">Chapitre 5 — Réalisation backend</h1>
+    <div class="chapter-intro">Implémentation côté serveur : modules Maven, API REST, persistance et règles transverses (sécurité, gestion d’erreurs).</div>
+
+    <h2 id="c5-1">5.1 Stack et modules Maven</h2>
+    <p>Le dépôt backend <code>find-me-back-2.1</code> est un <strong>projet Maven multi-modules</strong> (<code>packaging pom</code>) avec Java 17 et Spring Boot 3.3.x. Les modules listés dans le POM parent incluent notamment : DiscoveryService, GatewayService, Cv_service, Mission_service, QuizService, User_service, CodingameService, ainsi qu’un module Twilio pour les besoins de notification par SMS / intégration téléphonique selon le périmètre activé.</p>
+    <p>Chaque service embarque les starters adaptés (Web, Data JPA, Security selon les besoins), Lombok pour réduire le boilerplate, et le connecteur MySQL.</p>
+
+    <h2 id="c5-2">5.2 API, sécurité et données</h2>
+    <p>Les contrôleurs REST exposent des ressources versionnées (ex. préfixe <code>/api/v1/users</code> pour le user-service). La sécurité s’appuie sur <strong>Spring Security</strong> et des <strong>JWT</strong> côté client Angular (<code>@auth0/angular-jwt</code>, décodage des claims). Les entités JPA modélisent utilisateurs, rôles, profils et relations ; les dépôts Spring Data dérivent les requêtes métier.</p>
+    <p>Des évolutions récentes du projet visent à <strong>uniformiser les réponses d’erreur en JSON</strong> (éviter les corps texte brut sur les codes 400) pour faciliter le traitement côté Angular, et à fiabiliser les endpoints de filtrage par société et rôle (cohérence enum / base de données).</p>
+
+    <div id="c5-c" class="concl-box">
+      <h4>Synthèse du chapitre 5</h4>
+      <p>Le backend illustre une <strong>ingénierie API-first</strong> avec séparation claire des contextes de persistance. Les choix Spring économisent du code infrastructure tout en restant alignés sur les standards d’entreprise.</p>
+    </div>
+  </section>
+
+  <section id="c6" class="chapter">
+    <h1 class="doc-title">Chapitre 6 — Réalisation frontend</h1>
+    <div class="chapter-intro">Couche présentation : framework, design system, routage et expérience utilisateur.</div>
+
+    <h2 id="c6-1">6.1 Framework et organisation</h2>
+    <p>L’application <code>find-me-front-2.1</code> est développée avec <strong>Angular 17</strong>, avec <strong>Angular Material</strong> et <strong>Font Awesome</strong> pour l’iconographie. Les dépendances incluent également Chart.js, SweetAlert2, jsPDF, SockJS / STOMP pour le temps réel, et des composants d’animation (Lottie).</p>
+    <p>Le routage (<code>app-routing.module.ts</code>) structure les espaces : accueil public, authentification, modules <code>cv</code>, <code>Missions</code>, <code>Offres</code>, <code>gestion-employer</code>, <code>admin</code>, profil, chat, etc. Les <code>AuthGuard</code> et garde par rôle protègent les routes sensibles.</p>
+
+    <h2 id="c6-2">6.2 Parcours utilisateur</h2>
+    <p>L’utilisateur accède à des vues différentes selon son rôle : par exemple, listes d’utilisateurs filtrées par <code>userRole</code> pour l’ESN commercial, le chargé de recrutement ou l’intercontrat ; espaces missions/offres avec données de contexte (<code>espace</code>) pour adapter les libellés et filtres.</p>
+    <p>Des ajustements UX ont été apportés pour limiter les appels inutiles (ex. chargement CV depuis la navbar uniquement pour les profils concernés) et pour le module BI : ouverture de Metabase dans un nouvel onglet lorsque les politiques de sécurité du contenu (CSP) interdisent l’intégration en iframe.</p>
+
+    <div id="c6-c" class="concl-box">
+      <h4>Synthèse du chapitre 6</h4>
+      <p>Le frontend offre une <strong>IHM riche et modulaire</strong>, cohérente avec une application métier multi-rôles. L’usage d’Angular facilite la maintenabilité à moyen terme grâce au typage TypeScript et à la structure par composants.</p>
+    </div>
+  </section>
+
+  <section id="c7" class="chapter">
+    <h1 class="doc-title">Chapitre 7 — Données, fichiers et intelligence décisionnelle</h1>
+    <div class="chapter-intro">Persistance relationnelle, scripts d’initialisation, stockage objet et couche analytique.</div>
+
+    <h2 id="c7-1">7.1 Bases MySQL et scripts d’initialisation</h2>
+    <p>MySQL 8.4 est le SGBD central du compose. Les bases métier sont créées ou utilisées via les URL JDBC des services. Le répertoire <code>docker/mysql-init</code> contient des scripts SQL exécutés au premier démarrage du volume (ordonnancement par préfixe numérique des fichiers) : création d’utilisateurs de lecture pour la BI, base applicative Metabase, corrections de compatibilité (ex. mots de passe MySQL 8.4), et scripts de cohérence des données (ex. normalisation de valeurs d’énumération de rôles).</p>
+
+    <h2 id="c7-2">7.2 Stockage objet (MinIO)</h2>
+    <p>MinIO fournit une API <strong>compatible S3</strong>. Un conteneur d’initialisation crée le bucket applicatif et fixe les politiques d’accès. Le user-service reçoit l’URL et les clés par variables d’environnement (<code>MINIO_*</code> dans le compose).</p>
+
+    <h2 id="c7-3">7.3 Metabase et lecture BI</h2>
+    <p>Metabase est configuré pour utiliser MySQL comme <strong>base applicative</strong> (au lieu d’une base embarquée fragile en démonstration prolongée). Le conteneur <code>metabase-seed</code> exécute un script d’initialisation qui crée le premier compte administrateur Metabase à partir des variables du fichier <code>docker-compose.yml</code> (service <code>metabase-seed</code>).</p>
+
+    <h3 id="c7-3-1">7.3.1 Accès à l’interface Metabase (administration BI)</h3>
+    <table class="spec">
+      <thead><tr><th>Élément</th><th>Valeur (environnement de démo Docker)</th></tr></thead>
+      <tbody>
+        <tr><td>URL publique (navigateur)</td><td><code>http://localhost:3030</code> (port hôte mappé sur le port 3000 du conteneur)</td></tr>
+        <tr><td>Nom du site (<code>METABASE_SITE_NAME</code>)</td><td>Find-Me BI</td></tr>
+        <tr><td>Compte administrateur — e-mail</td><td><code>bi-admin@findme.local</code></td></tr>
+        <tr><td>Compte administrateur — mot de passe</td><td><code>FindMe_BI_Auto_2026!xQ7vM2</code></td></tr>
+        <tr><td>Profil affiché</td><td>Prénom : FindMe — Nom : BI</td></tr>
+      </tbody>
+    </table>
+    <p>Après connexion, l’administrateur Metabase peut configurer des <strong>sources de données</strong>, des <strong>questions</strong>, des <strong>tableaux de bord</strong> et gérer les utilisateurs Metabase (équipes, collections). L’application Angular expose un espace <strong>admin / BI</strong> qui propose des liens vers cette instance (ouverture souvent dans un nouvel onglet, notamment si la politique CSP de Metabase interdit l’intégration en iframe).</p>
+
+    <h3 id="c7-3-2">7.3.2 Comptes techniques associés (référence)</h3>
+    <p>Ces identifiants servent au <strong>fonctionnement interne</strong> des conteneurs ; le jury ou le développeur n’y accède en principe pas depuis l’interface Metabase, mais ils figurent dans la configuration pour reproductibilité et maintenance.</p>
+    <table class="spec">
+      <thead><tr><th>Rôle</th><th>Utilisateur</th><th>Mot de passe / remarque</th></tr></thead>
+      <tbody>
+        <tr><td>Base applicative Metabase (JDBC <code>MB_DB_CONNECTION_URI</code>)</td><td><code>metabase_app</code></td><td><code>FindMe_MetabaseApp_2026_xQ9</code> — base MySQL <code>metabase_app</code></td></tr>
+        <tr><td>Lecture BI sur les données métier (seed / connexion données)</td><td><code>findme_bi</code></td><td><code>findme_bi_readonly</code> — utilisateur MySQL en lecture seule pour alimenter les jeux de données analytiques</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="c7-3-3">7.3.3 Administration du stockage MinIO (fichiers)</h3>
+    <p>Le stockage objet MinIO dispose d’une <strong>console web d’administration</strong> utile pour vérifier les buckets et les accès pendant la démo ou le débogage.</p>
+    <table class="spec">
+      <thead><tr><th>Élément</th><th>Valeur (démo <code>docker-compose.yml</code>)</th></tr></thead>
+      <tbody>
+        <tr><td>API S3</td><td><code>http://localhost:9000</code></td></tr>
+        <tr><td>Console MinIO</td><td><code>http://localhost:9001</code></td></tr>
+        <tr><td>Identifiant administrateur</td><td><code>minioadmin</code></td></tr>
+        <tr><td>Mot de passe</td><td><code>minioadmin</code></td></tr>
+        <tr><td>Bucket applicatif (créé par <code>minio-init</code>)</td><td><code>find-me</code></td></tr>
+      </tbody>
+    </table>
+
+    <p class="note"><strong>Attention sécurité :</strong> tous les mots de passe ci-dessus sont destinés à un <strong>environnement local ou de démonstration PFE</strong>. En production, il faut les remplacer par des secrets forts, les externaliser (fichiers d’environnement non versionnés, coffre-fort de secrets) et ne pas les publier dans un dépôt public.</p>
+
+    <div id="c7-c" class="concl-box">
+      <h4>Synthèse du chapitre 7</h4>
+      <p>Les données sont <strong>segmentées par service</strong> tout en restant sous un même moteur pour simplifier l’exploitation. MinIO et Metabase complètent le triptyque <strong>transactionnel — fichiers — analytique</strong>. Les <strong>comptes d’accès Metabase</strong> (admin BI), les <strong>identifiants techniques MySQL</strong> liés à Metabase et à la lecture BI, ainsi que la <strong>console MinIO</strong>, sont désormais explicitement documentés pour la démo et la reprise du projet, avec rappel de ne pas réutiliser ces secrets en production.</p>
+    </div>
+  </section>
+
+  <section id="c8" class="chapter">
+    <h1 class="doc-title">Chapitre 8 — Déploiement Docker</h1>
+    <div class="chapter-intro">Conteneurisation, orchestration locale et conditions de démarrage.</div>
+
+    <h2 id="c8-1">8.1 Orchestration des services</h2>
+    <p>Le fichier <code>docker-compose.yml</code> décrit l’ensemble des services : MySQL, MinIO (+ init), Eureka, Gateway, microservices Spring, Python, Metabase (+ seed), et le conteneur frontend (build depuis le Dockerfile Angular, exposition sur le port 4200). Les <code>healthcheck</code> et <code>depends_on</code> avec condition <code>service_healthy</code> réduisent les courses au démarrage (erreurs JDBC avant que MySQL soit prêt).</p>
+    <p>La commande standard de lancement est : <code>docker compose up -d</code> depuis la racine <code>projetpfe</code>. Pour ne reconstruire qu’un service : <code>docker compose build user-service</code> puis <code>docker compose up -d user-service</code>.</p>
+
+    <div id="c8-c" class="concl-box">
+      <h4>Synthèse du chapitre 8</h4>
+      <p>Docker Compose assure une <strong>reproductibilité</strong> indispensable à la soutenance : le jury peut lever l’environnement complet sur une machine équipée de Docker, sans installation manuelle de JDK ou de Node sur l’hôte.</p>
+    </div>
+  </section>
+
+  <section id="c9" class="chapter">
+    <h1 class="doc-title">Chapitre 9 — Intégration, temps réel et qualité</h1>
+    <div class="chapter-intro">Passerelle, WebSockets, et pratiques de validation.</div>
+
+    <h2 id="c9-1">9.1 Passerelle et découverte de services</h2>
+    <p>Le <strong>Discovery service</strong> (port 8761) expose la console Eureka listant les instances UP. La <strong>Gateway</strong> (9082) centralise l’accès client aux routes backend. Cette indirection permet d’ajouter du filtrage, de la résilience ou du rate limiting dans des évolutions futures.</p>
+    <p>Les <strong>notifications temps réel</strong> peuvent transiter par des endpoints WebSocket dédiés (configuration Spring côté user-service, alignement des chemins et autorisations de sécurité avec le front SockJS/STOMP).</p>
+
+    <h2 id="c9-2">9.2 Tests et bonnes pratiques</h2>
+    <p>Le dépôt prévoit des scripts npm (<code>npm test</code>) et la chaîne Maven pour les tests unitaires / d’intégration selon ce qui est implémenté dans chaque module. Pour le PFE, il est recommandé de documenter un <strong>plan de tests manuels</strong> (jeux de données, comptes de test, parcours critique) et, si le temps le permet, des tests automatisés sur les services les plus sensibles (authentification, publication mission).</p>
+
+    <div id="c9-c" class="concl-box">
+      <h4>Synthèse du chapitre 9</h4>
+      <p>L’intégration repose sur des <strong>standards Spring Cloud</strong> ; la qualité repose sur une combinaison de <strong>tests</strong>, de <strong>revue de code</strong> et de <strong>déploiement conteneurisé</strong> pour détecter tôt les erreurs de configuration inter-services.</p>
+    </div>
+  </section>
+
+  <section id="c10" class="chapter">
+    <h1 class="doc-title">Chapitre 10 — Bilan, difficultés rencontrées et perspectives</h1>
+    <div class="chapter-intro">Retour d’expérience honnête et pistes d’évolution professionnelles.</div>
+
+    <h2>Bilan fonctionnel</h2>
+    <p>Le livrable couvre un spectre large : identité, CV, missions, quiz, codingame, chat, BI. Ce large périmètre constitue à la fois une <strong>force pour la démonstration</strong> et un enjeu de <strong>priorisation</strong> pour stabiliser les flux critiques avant la soutenance.</p>
+
+    <h2>Difficultés techniques (exemples réalistes)</h2>
+    <ul>
+      <li>Alignement des <strong>rôles</strong> entre enum JPA, base de données et paramètres d’URL Angular (risque d’erreurs 400).</li>
+      <li>Configuration <strong>MySQL 8.4</strong> (authentification, clés publiques RSA, scripts d’init compatibles).</li>
+      <li>Démarrage de <strong>Metabase</strong> et temps d’initialisation (réponses 503 transitoires sur les endpoints de santé).</li>
+      <li>Politiques <strong>CSP / iframe</strong> pour l’intégration BI : contournement par ouverture externe.</li>
+      <li>Gestion des <strong>réponses d’erreur</strong> non JSON côté API, corrigée par des corps structurés <code>application/json</code>.</li>
+    </ul>
+
+    <h2>Perspectives</h2>
+    <ul>
+      <li>Pipeline CI/CD (build, tests, scan de vulnérabilités, publication d’images).</li>
+      <li>Observabilité centralisée (logs agrégés, traces OpenTelemetry).</li>
+      <li>Renforcement des tests de charge sur la Gateway et MySQL.</li>
+      <li>Harmonisation API (contrat OpenAPI par service, génération client TypeScript).</li>
+    </ul>
+
+    <div id="c10-c" class="concl-box">
+      <h4>Synthèse du chapitre 10</h4>
+      <p>Le projet démontre une <strong>maîtrise des architectures distribuées</strong> et des défis réels d’intégration. Les difficultés rencontrées sont typiques des systèmes modulaires et ont conduit à des choix d’ingénierie documentés (scripts SQL, format des erreurs, UX BI).</p>
+    </div>
+  </section>
+
+  <section id="conclusion" class="chapter">
+    <h1 class="doc-title">Conclusion générale</h1>
+    <p>Ce rapport a présenté, de manière structurée, le projet <strong>Find-Me</strong> : depuis le <strong>contexte métier et la problématique</strong> (chapitre 1), jusqu’aux <strong>besoins fonctionnels et non fonctionnels</strong> (chapitre 2), en passant par les <strong>spécifications et le plan de réalisation</strong> (chapitre 3), la <strong>conception microservices</strong> (chapitre 4), les <strong>réalisations backend et frontend</strong> (chapitres 5 et 6), la <strong>couche données / fichiers / BI</strong> (chapitre 7), le <strong>déploiement Docker</strong> (chapitre 8), l’<strong>intégration et la qualité</strong> (chapitre 9), et enfin le <strong>bilan et les perspectives</strong> (chapitre 10).</p>
+    <p>En synthèse des conclusions partielles : le système atteint les objectifs d’<strong>architecture modulaire</strong> et de <strong>déploiement reproductible</strong> ; l’interface répond aux exigences d’<strong>ergonomie multi-rôles</strong> ; les choix technologiques sont <strong>alignés sur les pratiques de l’industrie</strong> (Spring Cloud, Angular, conteneurs). Les pistes d’amélioration portent surtout sur l’<strong>industrialisation des tests</strong>, la <strong>sécurisation opérationnelle des secrets</strong> et l’<strong>observabilité</strong> — sujets naturels d’une poursuite en milieu professionnel.</p>
+    <p>À titre personnel, ce PFE a permis de consolider des compétences en <strong>conception logicielle</strong>, <strong>développement full-stack</strong> et <strong>DevOps léger</strong>, et de livrer un artefact tangible exploitable pour une soutenance devant jury.</p>
+  </section>
+
+  <section id="biblio" class="chapter">
+    <h1 class="doc-title">Bibliographie et webographie</h1>
+    <ol>
+      <li>Spring — Documentation officielle Spring Boot 3 et Spring Cloud (<a href="https://spring.io/projects/spring-boot">spring.io</a>).</li>
+      <li>Angular — Guide du développeur Angular 17 (<a href="https://angular.dev">angular.dev</a>).</li>
+      <li>MySQL 8.4 — Reference Manual (<a href="https://dev.mysql.com/doc/">dev.mysql.com</a>).</li>
+      <li>Docker — Documentation Compose (<a href="https://docs.docker.com/compose/">docs.docker.com</a>).</li>
+      <li>Metabase — Documentation d’administration (<a href="https://www.metabase.com/docs/">metabase.com/docs</a>).</li>
+      <li>MinIO — Documentation object storage (<a href="https://min.io/docs/">min.io</a>).</li>
+    </ol>
+  </section>
+
+  <section id="annexe" class="chapter">
+    <h1 class="doc-title">Annexe A — Inventaire des services exposés (configuration actuelle du dépôt)</h1>
+    <p class="note">Les ports sont ceux publiés sur la machine hôte dans <code>docker-compose.yml</code> ; ils peuvent être modifiés selon l’environnement.</p>
+    <table class="spec">
+      <thead><tr><th>Service</th><th>Port hôte (indicatif)</th><th>Rôle</th></tr></thead>
+      <tbody>
+        <tr><td>MySQL</td><td>(interne 3306)</td><td>SGBD</td></tr>
+        <tr><td>MinIO API</td><td>9000</td><td>Stockage objet</td></tr>
+        <tr><td>MinIO Console</td><td>9001</td><td>Administration MinIO</td></tr>
+        <tr><td>Eureka (Discovery)</td><td>8761</td><td>Registre</td></tr>
+        <tr><td>Gateway</td><td>9082</td><td>Passerelle API</td></tr>
+        <tr><td>User service</td><td>9068</td><td>Utilisateurs / auth</td></tr>
+        <tr><td>CV service</td><td>9158</td><td>CV</td></tr>
+        <tr><td>Mission service</td><td>9055</td><td>Missions</td></tr>
+        <tr><td>Quiz service</td><td>9074</td><td>Quiz</td></tr>
+        <tr><td>Codingame service</td><td>9056</td><td>Codingame</td></tr>
+        <tr><td>Python service</td><td>8000</td><td>API Python</td></tr>
+        <tr><td>Metabase</td><td>3030</td><td>BI</td></tr>
+        <tr><td>Frontend (nginx)</td><td>4200</td><td>Application Angular</td></tr>
+      </tbody>
+    </table>
+
+    <h1 id="annexe-comptes" class="doc-title" style="margin-top:14mm;">Annexe B — Récapitulatif des comptes démonstration</h1>
+    <p class="note">Identiques au chapitre 7.3 ; pratique pour la feuille de route jury. Démo locale uniquement.</p>
+    <table class="spec">
+      <thead><tr><th>Service</th><th>URL / contexte</th><th>Identifiant</th><th>Mot de passe</th></tr></thead>
+      <tbody>
+        <tr><td>Metabase (admin BI)</td><td><code>http://localhost:3030</code></td><td><code>bi-admin@findme.local</code></td><td><code>FindMe_BI_Auto_2026!xQ7vM2</code></td></tr>
+        <tr><td>MinIO Console</td><td><code>http://localhost:9001</code></td><td><code>minioadmin</code></td><td><code>minioadmin</code></td></tr>
+        <tr><td>MySQL (root, compose)</td><td>hôte <code>localhost</code> port <code>3306</code></td><td><code>root</code></td><td><code>root</code></td></tr>
+        <tr><td>MySQL — appli Metabase</td><td>base <code>metabase_app</code></td><td><code>metabase_app</code></td><td><code>FindMe_MetabaseApp_2026_xQ9</code></td></tr>
+        <tr><td>MySQL — lecture BI</td><td>données analytiques</td><td><code>findme_bi</code></td><td><code>findme_bi_readonly</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="soft" />
+  <p style="font-size:10pt;color:#718096;text-align:center;">Document généré pour le dépôt Find-Me — Projet PFE — à personnaliser (page de garde, captures d’écran, plan de tests détaillé).</p>
+
+</body>
+</html>

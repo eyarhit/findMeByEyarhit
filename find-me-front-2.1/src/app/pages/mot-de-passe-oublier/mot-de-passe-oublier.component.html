@@ -1,0 +1,94 @@
+<div class="flex flex-col min-h-screen items-center justify-center bg-gray-50 px-4 sm:px-8">
+  
+  <!-- Image and Form Container -->
+  <div class="flex flex-col lg:flex-row items-center lg:items-stretch lg:justify-center w-full max-w-5xl space-y-6 lg:space-y-0 lg:space-x-16">
+    
+    <!-- Left Side (Bigger Image) -->
+    <div class="flex justify-center w-full lg:w-3/6"> 
+      <img
+        src="assets/images/Page_Register/Register_Image.png"
+        alt="Hiring Illustration"
+        class="w-full h-auto max-h-[500px] object-cover"
+      />
+    </div>
+    
+    <!-- Right Side (Reset Password Form) -->
+    <div class="border-t-4 border-[#5A50D7] bg-white rounded-lg shadow-xl p-6 sm:p-8 w-full lg:w-3/6 flex items-center relative">
+      <div class="w-full">
+        <h2 class="text-xl font-semibold text-center text-gray-800 mb-6">Réinitialiser le mot de passe</h2>
+
+        <form [formGroup]="forgotPasswordForm" (ngSubmit)="onSubmit()">
+          <div class="mb-4 relative">
+            <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="Entrez votre email"
+              formControlName="email"
+              (mouseenter)="showEmailHint()"
+              (mouseleave)="hideEmailHint()"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline placeholder-gray-400
+              {{ forgotPasswordForm.get('email')!.invalid && forgotPasswordForm.get('email')!.touched ? 'border-red-500' : '' }}"
+            />
+            
+            <!-- Email Hint Popup -->
+            <div *ngIf="showHint" class="email-hint-popup">
+              <div class="hint-content">
+                <p class="text-sm font-medium mb-2">Format d'email requis :</p>
+                <ul class="list-disc pl-4 text-xs">
+                  <li>Entrer un email existant</li>
+                  <li>Doit contenir un &#64;</li>
+                  <li>Exemple : contact&#64;entreprise.com</li>
+                </ul>
+              </div>
+              <div class="hint-arrow"></div>
+            </div>
+
+            <!-- Validation Messages -->
+            <div *ngIf="forgotPasswordForm.get('email')!.hasError('required') && forgotPasswordForm.get('email')!.touched" 
+                 class="text-red-500 text-xs italic mt-2">
+              <i class="fas fa-exclamation-circle mr-1"></i>L'email est requis.
+            </div>
+            <div *ngIf="forgotPasswordForm.get('email')!.hasError('email') && forgotPasswordForm.get('email')!.touched" 
+                 class="text-red-500 text-xs italic mt-2">
+              <i class="fas fa-exclamation-circle mr-1"></i>Veuillez entrer un email valide.
+            </div>
+            <div *ngIf="forgotPasswordForm.get('email')!.hasError('invalidEmailFormat') && forgotPasswordForm.get('email')!.touched" 
+                 class="text-red-500 text-xs italic mt-2">
+              <i class="fas fa-exclamation-circle mr-1"></i>Veuillez entrer un email existant. (ex: contact&#64;entreprise.com).
+            </div>
+          </div>
+
+          <!-- Messages Section -->
+          <div class="flex flex-col items-center mb-4">
+            <div *ngIf="successMessage" class="success-message">
+              <i class="fas fa-check-circle mr-2"></i>{{ successMessage }}
+            </div>
+            <div *ngIf="errorMessage && !showTempMessage" class="error-message">
+              <i class="fas fa-exclamation-triangle mr-2"></i>{{ errorMessage }}
+            </div>
+            <div *ngIf="showTempMessage" class="temp-message animate-fade-in">
+              <i class="fas fa-paper-plane mr-2"></i>Un e-mail de confirmation a été envoyé.
+            </div>
+          </div>
+
+          <div class="flex items-center justify-center">
+            <button 
+              class="submit-button"
+              type="submit"
+              [disabled]="!forgotPasswordForm.valid"
+            >
+              Restaurer mot de passe
+              <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+          </div>
+        </form>
+
+        <app-CompteCreerWithSucess *ngIf="showPopup" 
+                                  (close)="closePopup()" 
+                                  [successMessage]="'Consulter votre e-mail.'">
+        </app-CompteCreerWithSucess>
+      </div>
+    </div>
+  </div>
+</div>

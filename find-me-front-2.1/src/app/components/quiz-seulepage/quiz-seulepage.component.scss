@@ -1,0 +1,115 @@
+/* Custom scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #c7d2fe #f3f4f6;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f3f4f6;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: #c7d2fe;
+    border-radius: 20px;
+  }
+}
+
+/* Radio button styling */
+input[type="radio"] {
+  accent-color: #4f46e5; /* Indigo-600 */
+  cursor: pointer;
+  height: 1.25rem;
+  width: 1.25rem;
+  transition: all 0.2s ease;
+  
+  &:checked {
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+  }
+}
+
+/* Quiz section styling */
+.quiz-section {
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  
+  &:hover {
+    background-color: rgba(238, 242, 255, 0.5);
+  }
+  
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: -1rem;
+    left: 1rem;
+    right: 1rem;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #e0e7ff, transparent);
+  }
+}
+
+/* Animation for popup */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+/* Button hover effect */
+button[type="submit"] {
+  position: relative;
+  overflow: hidden;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+  }
+  
+  &:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  20% {
+    transform: scale(25, 25);
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(40, 40);
+  }
+}
+
+/* Focus styles for better accessibility */
+button:focus, input:focus {
+  outline: 2px solid rgba(79, 70, 229, 0.5);
+  outline-offset: 2px;
+}
+
+/* Progress bar animation */
+@keyframes progress {
+  0% { width: 0; }
+  100% { width: 100%; }
+}

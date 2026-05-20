@@ -1,0 +1,721 @@
+// Variables
+$primary: #5A50D7;
+$primary-light: rgba(90, 80, 215, 0.1);
+$primary-lighter: rgba(90, 80, 215, 0.05);
+$text-dark: #333;
+$text-medium: #555;
+$text-light: #777;
+$border-color: #e0e0e0;
+$error-color: #e53e3e;
+$error-bg: #fff5f5;
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+$transition: all 0.3s ease;
+
+// Layout principal
+.selection-page {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+// Partie gauche améliorée
+.left-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: white;
+  
+  @media (min-width: 768px) {
+    max-width: 50%;
+  }
+  
+  .content-container {
+    width: 100%;
+    max-width: 480px;
+    
+    .header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      
+      .title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: $text-dark;
+        margin-bottom: 0.5rem;
+      }
+      
+      .subtitle {
+        color: $text-light;
+        font-size: 1rem;
+      }
+    }
+    
+    .selection-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+      
+      .selection-card {
+        display: flex;
+        align-items: center;
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 1px solid $border-color;
+        background-color: white;
+        cursor: pointer;
+        transition: $transition;
+        position: relative;
+        overflow: hidden;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 4px;
+          background-color: $primary;
+          opacity: 0;
+          transition: $transition;
+        }
+        
+        &:hover {
+          border-color: $primary;
+          box-shadow: $shadow-sm;
+          
+          .card-icon {
+            color: $primary;
+          }
+        }
+        
+        &.active {
+          border-color: $primary;
+          background-color: $primary-light;
+          box-shadow: $shadow-md;
+          
+          &::before {
+            opacity: 1;
+          }
+          
+          .card-icon {
+            color: $primary;
+          }
+          
+          .card-text h3 {
+            color: $primary;
+          }
+          
+          .card-radio .checkmark {
+            border-color: $primary;
+            
+            &::after {
+              display: block;
+            }
+          }
+        }
+        
+        .card-icon {
+          width: 48px;
+          height: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: $text-medium;
+          transition: $transition;
+          margin-right: 1rem;
+          
+          svg {
+            width: 24px;
+            height: 24px;
+          }
+        }
+        
+        .card-text {
+          flex: 1;
+          
+          h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: $text-dark;
+            margin-bottom: 0.25rem;
+            transition: $transition;
+          }
+          
+          p {
+            font-size: 0.9rem;
+            color: $text-light;
+            margin: 0;
+          }
+        }
+        
+        .card-radio {
+          position: relative;
+          width: 22px;
+          height: 22px;
+          margin-left: 0.5rem;
+          
+          input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+          }
+          
+          .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 22px;
+            width: 22px;
+            background-color: white;
+            border: 2px solid $border-color;
+            border-radius: 50%;
+            transition: $transition;
+            
+            &::after {
+              content: "";
+              position: absolute;
+              display: none;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 12px;
+              height: 12px;
+              border-radius: 50%;
+              background: $primary;
+            }
+          }
+        }
+      }
+    }
+    
+    .error-message {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem;
+      background-color: $error-bg;
+      color: $error-color;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      
+      svg {
+        width: 18px;
+        height: 18px;
+        margin-right: 0.5rem;
+      }
+    }
+    
+    .action-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      
+      .register-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: $primary;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: $transition;
+        width: 180px;
+        
+        svg {
+          width: 18px;
+          height: 18px;
+          margin-left: 0.5rem;
+          transition: $transition;
+        }
+        
+        &:hover {
+          background-color: darken($primary, 5%);
+          
+          svg {
+            transform: translateX(3px);
+          }
+        }
+      }
+      
+      .login-link {
+        margin-top: 1.5rem;
+        font-size: 0.95rem;
+        color: $text-medium;
+        
+        a {
+          color: $primary;
+          font-weight: 600;
+          text-decoration: none;
+          transition: $transition;
+          
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Nouvelle partie droite (simplifiée et jolie)
+.right-panel {
+  display: none;
+  
+  @media (min-width: 768px) {
+    display: flex;
+    flex: 1;
+    background-color: $primary-lighter;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .welcome-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
+    padding: 3rem;
+    position: relative;
+    z-index: 2;
+    
+    .logo-area {
+      .logo {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: $primary;
+        letter-spacing: -0.5px;
+      }
+      
+      .tagline {
+        font-size: 0.9rem;
+        color: $text-light;
+        margin-top: 0.25rem;
+      }
+    }
+    
+    .illustration-simple {
+      position: relative;
+      height: 300px;
+      width: 100%;
+      margin: 2rem 0;
+      
+      .shape {
+        position: absolute;
+        border-radius: 50%;
+        
+        &-1 {
+          width: 180px;
+          height: 180px;
+          background: linear-gradient(135deg, $primary 0%, lighten($primary, 15%) 100%);
+          top: 20%;
+          left: 50%;
+          transform: translateX(-50%);
+          opacity: 0.8;
+          animation: float 8s ease-in-out infinite;
+        }
+        
+        &-2 {
+          width: 120px;
+          height: 120px;
+          background: linear-gradient(135deg, lighten($primary, 10%) 0%, lighten($primary, 25%) 100%);
+          top: 10%;
+          right: 20%;
+          opacity: 0.6;
+          animation: float 6s ease-in-out infinite 1s;
+        }
+        
+        &-3 {
+          width: 80px;
+          height: 80px;
+          background: linear-gradient(135deg, lighten($primary, 20%) 0%, lighten($primary, 35%) 100%);
+          bottom: 15%;
+          left: 25%;
+          opacity: 0.4;
+          animation: float 7s ease-in-out infinite 0.5s;
+        }
+      }
+      
+      .dots-pattern {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: radial-gradient($primary 1px, transparent 1px);
+        background-size: 20px 20px;
+        opacity: 0.1;
+      }
+    }
+    
+    .welcome-text {
+      text-align: center;
+      max-width: 400px;
+      margin: 0 auto;
+      
+      h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: $text-dark;
+        margin-bottom: 1rem;
+      }
+      
+      p {
+        color: $text-light;
+        line-height: 1.6;
+      }
+    }
+  }
+  
+  // Effet de fond subtil
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+    z-index: 1;
+  }
+}
+
+// Animations
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 767px) {
+  .left-panel {
+    max-width: 100%;
+    padding: 1.5rem;
+    
+    .content-container {
+      .header {
+        margin-bottom: 2rem;
+        
+        .title {
+          font-size: 1.5rem;
+        }
+      }
+      
+      .selection-cards {
+        .selection-card {
+          padding: 1rem;
+          
+          .card-icon {
+            width: 40px;
+            height: 40px;
+            
+            svg {
+              width: 20px;
+              height: 20px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-option {
+  width: 100%;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-option:hover {
+  border-color: #3f51b5;
+  background-color: #f5f7ff;
+}
+
+.modal-option h4 {
+  margin: 0 0 4px 0;
+  color: #333;
+}
+
+.modal-option p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.modal-overlay .register-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #5b47f2; /* Purple background */
+  color: white;
+  border: none;
+  border-radius: 8px; /* Rounded corners */
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  gap: 8px; /* Space between text and icon */
+}
+
+.modal-overlay .register-button:hover {
+  background-color: #4a3cd0; /* Slightly darker on hover */
+}
+
+.modal-overlay .register-button svg {
+  width: 20px;
+  height: 20px;
+  stroke: white;
+}
+.modal-overlay .action-area{
+  display: flex;
+  flex-direction: column;
+}
+/* Update your modal styles to match the selection cards */
+.modal-overlay {
+  .modal-content {
+    .modal-body {
+      padding: 1.25rem;
+      
+      /* Style for both the selection-card and modal-option to match left panel cards */
+      .selection-card, .modal-option {
+        display: flex;
+        align-items: center;
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 1px solid $border-color;
+        background-color: white;
+        cursor: pointer;
+        transition: $transition;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+        width: 100%;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 4px;
+          background-color: $primary;
+          opacity: 0;
+          transition: $transition;
+        }
+        
+        &:hover {
+          border-color: $primary;
+          box-shadow: $shadow-sm;
+          
+          .card-icon {
+            color: $primary;
+          }
+        }
+        
+        &.active {
+          border-color: $primary;
+          background-color: $primary-light;
+          box-shadow: $shadow-md;
+          
+          &::before {
+            opacity: 1;
+          }
+          
+          .card-icon {
+            color: $primary;
+          }
+          
+          h4 {
+            color: $primary;
+          }
+          
+          .card-radio .checkmark {
+            border-color: $primary;
+            
+            &::after {
+              display: block;
+            }
+          }
+        }
+        
+        .card-icon {
+          width: 48px;
+          height: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: $text-medium;
+          transition: $transition;
+          margin-right: 1rem;
+          
+          svg {
+            width: 24px;
+            height: 24px;
+          }
+        }
+        
+        .card-text {
+          flex: 1;
+          
+          h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: $text-dark;
+            margin-bottom: 0.25rem;
+            transition: $transition;
+          }
+          
+          p {
+            font-size: 0.9rem;
+            color: $text-light;
+            margin: 0;
+          }
+        }
+        
+        .card-radio {
+          position: relative;
+          width: 22px;
+          height: 22px;
+          margin-left: 0.5rem;
+          
+          input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+          }
+          
+          .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 22px;
+            width: 22px;
+            background-color: white;
+            border: 2px solid $border-color;
+            border-radius: 50%;
+            transition: $transition;
+            
+            &::after {
+              content: "";
+              position: absolute;
+              display: none;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 12px;
+              height: 12px;
+              border-radius: 50%;
+              background: $primary;
+            }
+          }
+        }
+      }
+      
+      /* Specific adjustments for modal-option (if you keep both) */
+      .modal-option {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        
+        h4, p {
+          width: 100%;
+          text-align: left;
+        }
+      }
+    }
+    
+    .action-area {
+      padding: 1.25rem;
+      border-top: 1px solid $border-color;
+      
+      .register-button {
+        width: 100%;
+        max-width: none;
+      }
+    }
+  }
+}
+

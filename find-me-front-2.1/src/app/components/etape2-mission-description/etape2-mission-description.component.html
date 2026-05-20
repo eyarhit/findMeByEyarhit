@@ -1,0 +1,98 @@
+
+<div class="job-posting-container">
+    <button class="ios-close-button" routerLink="/dashboard">
+    <span class="ios-close-icon"></span>
+  </button>
+  <div class="job-posting-form">
+    <div class="form-header">
+      <h2>1 sur 2 : détails de la mission</h2>
+      <p class="required-fields-info">* indique que tous les champs sont obligatoires</p>
+    </div>
+
+    <form [formGroup]="jobPostingForm" (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <div class="form-group">
+          <div class="select-container">
+            <select formControlName="jobType" class="form-control">
+              <option value="" disabled selected>Type contrat (Freelance, Mission)</option>
+              <option value="freelance">Freelance</option>
+              <option value="mission">Mission</option>
+              <option value="cdd">CDD</option>
+              <option value="cdi">CDI</option>
+            </select>
+            <div class="select-arrow"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="select-container">
+            <select formControlName="experienceLevel" class="form-control">
+              <option value="" disabled selected>Norme d'anné d'expérience</option>
+              <option value="junior">Junior (0-2 ans)</option>
+              <option value="intermediaire">Intermédiaire (2-5 ans)</option>
+              <option value="senior">Senior (5+ ans)</option>
+              <option value="expert">Expert (8+ ans)</option>
+            </select>
+            <div class="select-arrow"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <input type="text" formControlName="urgency" class="form-control" placeholder="Urgence">
+        </div>
+
+        <div class="form-group">
+          <input type="text" formControlName="status" class="form-control" placeholder="Status">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <input type="text" formControlName="salary" class="form-control" placeholder="Salaire">
+        </div>
+
+        <div class="form-group">
+          <input type="text" formControlName="recruiterCount" class="form-control" placeholder="Nombres de recruteurs">
+        </div>
+      </div>
+
+      <div class="form-row full-width">
+        <div class="form-group">
+          <textarea formControlName="benefits" class="form-control" placeholder="Avantages" rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="form-row full-width">
+        <div class="form-group">
+          <textarea formControlName="tasks" class="form-control" placeholder="Futures tâches" rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="form-row full-width">
+        <div class="form-group">
+          <textarea formControlName="skills" class="form-control" placeholder="Compétences" rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" routerLink="/etape1-mission">Retour</button>
+        <button type="submit" class="btn btn-primary" routerLink="/etape3-mission">Suivant</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="company-info">
+    <div class="company-card">
+      <div class="company-header">
+        <img src="assets/olx-logo.png" alt="Company Logo" class="company-logo">
+        <div class="company-name">
+          <h3>OLX</h3>
+          <p>Tunis, Gouvernorat Tunis, Tunisie (Sur site)</p>
+          <p class="registration-status">J'enregistre en tant que brouillon</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

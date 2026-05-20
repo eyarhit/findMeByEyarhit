@@ -1,0 +1,56 @@
+<div class="cv-container">
+  <!-- Étape 1: Sélection du template -->
+  <div *ngIf="currentStep === 'selection'" class="selection-view">
+    <h3>Choisissez Sauvegarder et Télécharger</h3>
+    <p>Sélectionnez un modèle qui correspond à votre profil professionnel.</p>
+
+    <div class="templates-grid">
+      <div *ngFor="let template of templates" 
+           class="template-card" 
+           [class.selected]="template.selected"
+           (click)="selectTemplate(template)"
+           >
+        <div class="template-preview">
+          <div *ngIf="template.thumbnail === 'developpeur'" class="dev-preview">
+            <div class="preview-header">
+              <h3>Développeur Full Stack</h3>
+              <p style="color: white; font-size: small;">{{getFullName()}}</p>
+            </div>
+            <div class="preview-skills">
+              <span *ngFor="let skill of cvDataDev.competences.developpement.slice(0, 4)">{{skill}}</span>
+            </div>
+          </div>
+          
+          <div *ngIf="template.thumbnail === 'devops'" class="devops-preview">
+            <div class="preview-header">
+              <h3>Développeur Full Stack</h3>
+              <p style="color: white; font-size: small;">{{getFullName()}}</p>
+            </div>
+            <div class="preview-skills">
+              <span *ngFor="let tool of cvDataDevOps.competences.programmation.slice(0, 4)">{{tool}}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="template-info">
+          <h3>{{template.name}}</h3>
+          <p>{{template.description}}</p>
+          <div class="template-footer">
+            <span>Modèle #{{template.id}}</span>
+            <button>Voir le modèle</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Étape 2: Prévisualisation -->
+  <div *ngIf="currentStep === 'preview'" class="selection-view">
+
+
+    <div class="flex justify-center">
+      <app-visualisation-cv [selectedTemplate]="selectedTemplate"></app-visualisation-cv>
+    </div>
+    <br>
+  </div>
+</div>

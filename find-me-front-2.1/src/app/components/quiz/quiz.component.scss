@@ -1,0 +1,82 @@
+/* quiz.component.scss */
+
+/* Page number buttons */
+.page-number {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin: 0 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.page-number.active {
+  background-color: #4f46e5; /* Indigo-600 */
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+}
+
+/* Ensure radio button accent color */
+input[type="radio"] {
+  accent-color: #4f46e5; /* Indigo-600 */
+  cursor: pointer;
+  height: 1.25rem;
+  width: 1.25rem;
+}
+
+/* Hover effect for radio labels */
+label {
+  transition: all 0.2s ease;
+}
+
+label:hover {
+  background-color: rgba(79, 70, 229, 0.05);
+}
+
+/* Animation for popup */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
+
+/* Popup animations */
+.popup-enter {
+  animation: fadeIn 0.3s forwards;
+}
+
+.popup-leave {
+  animation: fadeOut 0.3s forwards;
+}
+
+/* Focus styles for better accessibility */
+button:focus, input:focus {
+  outline: 2px solid rgba(79, 70, 229, 0.5);
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar for quiz sections */
+.quiz-section {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.quiz-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.quiz-section::-webkit-scrollbar-track {
+  background: #f7fafc;
+}
+
+.quiz-section::-webkit-scrollbar-thumb {
+  background-color: #cbd5e0;
+  border-radius: 3px;
+}

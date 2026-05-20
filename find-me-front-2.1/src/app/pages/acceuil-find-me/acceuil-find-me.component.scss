@@ -1,0 +1,97 @@
+// Variables de couleurs
+$primary-color: #5A50D7;
+$secondary-color: #FF6B35;
+$text-color: #002160;
+$light-bg: #f8f9fa;
+
+// Styles pour la section hero
+.hero-section {
+  background: linear-gradient(135deg, #ffffff 0%, #f5f7ff 100%);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba($primary-color, 0.05);
+    z-index: 0;
+  }
+}
+
+.hero-title {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 80px;
+    height: 3px;
+    background-color: $secondary-color;
+  }
+}
+
+// Animation pour le bouton
+.btn-primary {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba($primary-color, 0.3);
+  }
+}
+
+// Styles pour les cartes
+.feature-card {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.resource-card {
+  transition: all 0.3s ease;
+  
+  img {
+    transition: all 0.5s ease;
+  }
+  
+  &:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    
+    img {
+      transform: scale(1.05);
+    }
+  }
+}
+
+// Animation pour les icônes
+.icon-container {
+  position: relative;
+  overflow: hidden;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba($primary-color, 0.1) 0%, rgba(255,255,255,0) 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  &:hover::after {
+    opacity: 1;
+  }
+}

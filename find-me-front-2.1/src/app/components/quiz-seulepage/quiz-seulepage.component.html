@@ -1,0 +1,387 @@
+<div class="relative flex flex-col min-h-screen bg-gradient-to-br from-indigo-50 to-white">
+    <button
+      (click)="closeQuizPopup()"
+      class="absolute top-4 right-4 text-gray-500 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-colors duration-200 z-10"
+      aria-label="Fermer"
+    >
+      <svg
+        class="h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+    </button>
+    <div class="overflow-y-auto custom-scrollbar p-6 md:p-8">
+      <main class="container mx-auto flex-grow flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-xl w-full md:w-3/4 lg:w-2/3 xl:w-1/2 overflow-hidden border border-indigo-100">
+          <section>
+            <div class="p-6">
+              <div>
+                <p class="text-xs text-indigo-400 font-medium">
+                  {{ startDate.toLocaleDateString('fr-FR', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  }) }} - {{ startTime }}
+                </p>
+              </div>
+              <h1 class="text-2xl font-bold text-indigo-800 mt-2 mb-4">
+                Test D'évaluation
+              </h1>
+  
+              <div class="mt-4 p-5 bg-indigo-50 rounded-lg border-l-4 border-indigo-500 shadow-sm">
+                <p class="font-bold text-indigo-800">Merci d'avoir participé</p>
+                <p class="text-gray-700 mt-1">
+                  Veuillez répondre à toutes les questions avant de soumettre le formulaire.
+                </p>
+              </div>
+              <form [formGroup]="quizForm" (ngSubmit)="submitQuiz()" class="mt-6">
+                <!-- All Quizzes on One Page -->
+                <div class="p-4 space-y-8">
+                  <div class="quiz-section">
+                    <h3 class="text-lg font-semibold text-indigo-700 mb-4 flex items-center">
+                      <span class="flex items-center justify-center bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 mr-3">1</span>
+                      Notions de Base en Programmation
+                    </h3>
+                    <div class="space-y-3 ml-11">
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz1"
+                          type="radio"
+                          value="10"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">A) 10</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz1"
+                          type="radio"
+                          value="37"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">B) 37</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz1"
+                          type="radio"
+                          value="Erreur de syntaxe"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">C) Erreur de syntaxe</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz1"
+                          type="radio"
+                          value="null"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">D) null</span>
+                      </label>
+                    </div>
+                  </div>
+  
+                  <div class="quiz-section">
+                    <h3 class="text-lg font-semibold text-indigo-700 mb-4 flex items-center">
+                      <span class="flex items-center justify-center bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 mr-3">2</span>
+                      Concepts de Réseau
+                    </h3>
+                    <div class="space-y-3 ml-11">
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz2"
+                          type="radio"
+                          value="127.0.0.1"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">A) 127.0.0.1</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz2"
+                          type="radio"
+                          value="192.168.0.1"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">B) 192.168.0.1</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz2"
+                          type="radio"
+                          value="8.8.8.8"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">C) 8.8.8.8</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz2"
+                          type="radio"
+                          value="255.255.255.0"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">D) 255.255.255.0</span>
+                      </label>
+                    </div>
+                  </div>
+  
+                  <div class="quiz-section">
+                    <h3 class="text-lg font-semibold text-indigo-700 mb-4 flex items-center">
+                      <span class="flex items-center justify-center bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 mr-3">3</span>
+                      Sécurité Informatique
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 ml-11">
+                      <button
+                        type="button"
+                        class="bg-white border border-gray-200 hover:bg-indigo-50 hover:border-indigo-300 rounded-lg py-3 px-4 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 shadow-sm"
+                        (click)="quizForm.get('quiz3')?.setValue('Antivirus')"
+                        [ngClass]="{
+                          'bg-indigo-100 border-indigo-400 text-indigo-700 font-medium':
+                            quizForm.get('quiz3')?.value === 'Antivirus'
+                        }"
+                      >
+                        A) Antivirus
+                      </button>
+                      <button
+                        type="button"
+                        class="bg-white border border-gray-200 hover:bg-indigo-50 hover:border-indigo-300 rounded-lg py-3 px-4 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 shadow-sm"
+                        (click)="quizForm.get('quiz3')?.setValue('Spyware')"
+                        [ngClass]="{
+                          'bg-indigo-100 border-indigo-400 text-indigo-700 font-medium':
+                            quizForm.get('quiz3')?.value === 'Spyware'
+                        }"
+                      >
+                        B) Spyware
+                      </button>
+                      <button
+                        type="button"
+                        class="bg-white border border-gray-200 hover:bg-indigo-50 hover:border-indigo-300 rounded-lg py-3 px-4 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 shadow-sm"
+                        (click)="quizForm.get('quiz3')?.setValue('Firewall')"
+                        [ngClass]="{
+                          'bg-indigo-100 border-indigo-400 text-indigo-700 font-medium':
+                            quizForm.get('quiz3')?.value === 'Firewall'
+                        }"
+                      >
+                        C) Firewall
+                      </button>
+                      <button
+                        type="button"
+                        class="bg-white border border-gray-200 hover:bg-indigo-50 hover:border-indigo-300 rounded-lg py-3 px-4 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 shadow-sm"
+                        (click)="quizForm.get('quiz3')?.setValue('Proxy')"
+                        [ngClass]="{
+                          'bg-indigo-100 border-indigo-400 text-indigo-700 font-medium':
+                            quizForm.get('quiz3')?.value === 'Proxy'
+                        }"
+                      >
+                        D) Proxy
+                      </button>
+                    </div>
+                  </div>
+  
+                  <div class="quiz-section">
+                    <h3 class="text-lg font-semibold text-indigo-700 mb-4 flex items-center">
+                      <span class="flex items-center justify-center bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 mr-3">4</span>
+                      Systèmes d'Exploitation
+                    </h3>
+                    <div class="space-y-3 ml-11">
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz4"
+                          type="radio"
+                          value="Windows"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">A) Windows</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz4"
+                          type="radio"
+                          value="MacOS"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">B) MacOS</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz4"
+                          type="radio"
+                          value="Linux"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">C) Linux</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz4"
+                          type="radio"
+                          value="Android"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">D) Android</span>
+                      </label>
+                    </div>
+                  </div>
+  
+                  <div class="quiz-section">
+                    <h3 class="text-lg font-semibold text-indigo-700 mb-4 flex items-center">
+                      <span class="flex items-center justify-center bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 mr-3">5</span>
+                      Langages de Programmation
+                    </h3>
+                    <div class="space-y-3 ml-11">
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz5"
+                          type="radio"
+                          value="Java"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">A) Java</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz5"
+                          type="radio"
+                          value="Python"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">B) Python</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz5"
+                          type="radio"
+                          value="C++"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">C) C++</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz5"
+                          type="radio"
+                          value="JavaScript"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">D) JavaScript</span>
+                      </label>
+                    </div>
+                  </div>
+  
+                  <div class="quiz-section">
+                    <h3 class="text-lg font-semibold text-indigo-700 mb-4 flex items-center">
+                      <span class="flex items-center justify-center bg-indigo-100 text-indigo-700 rounded-full w-8 h-8 mr-3">6</span>
+                      Bases de Données
+                    </h3>
+                    <div class="space-y-3 ml-11">
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz6"
+                          type="radio"
+                          value="MySQL"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">A) MySQL</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz6"
+                          type="radio"
+                          value="PostgreSQL"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">B) PostgreSQL</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz6"
+                          type="radio"
+                          value="MongoDB"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">C) MongoDB</span>
+                      </label>
+                      <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                        <input
+                          formControlName="quiz6"
+                          type="radio"
+                          value="SQLite"
+                          class="form-radio h-5 w-5 text-indigo-600"
+                        />
+                        <span class="ml-3 text-gray-800">D) SQLite</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="px-4 mt-8 mb-6">
+                  <div class="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>Progression</span>
+                    <span>{{ getCompletionPercentage() }}%</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" 
+                         [style.width.%]="getCompletionPercentage()"></div>
+                  </div>
+                </div>
+                
+                <div class="flex justify-end px-4 pb-6">
+                  <button
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    type="submit"
+                    [disabled]="!quizForm.valid"
+                  >
+                    <span class="flex items-center">
+                      <span>Soumettre</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                      </svg>
+                    </span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+    
+    <!-- Popup de confirmation -->
+    <div *ngIf="showSuccessPopup" class="fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300">
+      <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300"></div>
+      <div class="bg-white rounded-xl shadow-2xl p-8 relative z-10 w-full max-w-md transform transition-all duration-300 scale-100 opacity-100">
+        <!-- Success Icon -->
+        <div class="flex justify-center mb-6">
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+            <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+        </div>
+        
+        <h3 class="text-xl font-bold text-center text-gray-800 mb-2">Quiz terminé avec succès</h3>
+        <p class="text-gray-600 text-center mb-6">
+          Votre quiz a été soumis. Vous recevrez votre note par e-mail prochainement.
+        </p>
+        
+        <div class="flex justify-center">
+          <button (click)="closeSuccessPopup()"
+                  class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-300 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+            Continuer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>

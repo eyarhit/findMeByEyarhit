@@ -1,0 +1,219 @@
+<!-- Navbar Header -->
+<header class="navbar-container">
+  <div class="navbar-content">
+    <!-- Logo Section -->
+    <div class="navbar-logo">
+      <a routerLink="/acceuil-find-me" class="logo-link">
+        <span class="logo-text">Find<span class="logo-accent">Me</span></span>
+      </a>
+    </div>
+
+    <!-- Navigation Links (Desktop) -->
+    <nav class="navbar-links">
+        <a routerLink="/acceuil-find-me" class="nav-link" routerLinkActive="active">
+          <i class="fas fa-home nav-icon"></i>
+          <span>Accueil</span>
+        </a>
+
+
+        <a *ngIf="roleFromToken==='ADMIN'" routerLink="/utilisateur" class="nav-link" routerLinkActive="active" 
+            [routerLinkActiveOptions]="{ exact: false }">
+          <svg _ngcontent-ng-c781405345="" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-4 h-4"><path _ngcontent-ng-c781405345="" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+          <span>Utilisateur</span>
+        </a>
+
+
+        <a *ngIf="roleFromToken==='CANDIDAT' || roleFromToken==='ESN_ADMIN' || roleFromToken==='CHARGEDERECRUTEMENT'" routerLink="/Offres" class="nav-link" routerLinkActive="active" 
+          [routerLinkActiveOptions]="{ exact: false }">
+          <i class="fas fa-briefcase nav-icon"></i>
+          <span>Offres d'emplois</span>
+        </a>
+
+
+
+       <a *ngIf="!['ADMIN', 'ESN_ADMIN','ESN_COMMERCIAL','CHARGEDERECRUTEMENT'].includes(roleFromToken!)"  
+          routerLink="/cv" 
+          class="nav-link" 
+          routerLinkActive="active" 
+          [routerLinkActiveOptions]="{ exact: false }">
+          <i class="fas fa-file-alt nav-icon"></i>
+          <span>Dossier de compétences</span>
+        </a>
+
+          <!-- <a *ngIf="roleFromToken==='ADMIN'" 
+            routerLink="/cv" 
+            class="nav-link" 
+            routerLinkActive="active" 
+            [routerLinkActiveOptions]="{ exact: false }">
+            <i class="fas fa-file-alt nav-icon"></i>
+            <span>CV</span>
+          </a> -->
+    </nav>
+
+    <app-notification-bell *ngIf="this.userId"></app-notification-bell>
+
+    <!-- Auth Buttons (Desktop) — basé sur le token valide, pas seulement le claim role -->
+    <div *ngIf="authResolved && !isLoggedIn" class="navbar-auth">
+
+      <button routerLink="/login" class="btn-login">
+        <i class="fas fa-sign-in-alt btn-icon"></i>
+        <span>Connexion</span>
+      </button>
+
+
+      <button routerLink="/session-login" class="btn-register">
+        <i class="fas fa-user-plus btn-icon"></i>
+        <span>Inscription</span>
+      </button>
+
+    </div>
+
+    <!-- User Profile (Desktop) -->
+    <div class="navbar-profile" *ngIf="authResolved && isLoggedIn">
+
+      <div #dropdownToggle class="profile-toggle" (click)="toggleDropdown()" 
+           [attr.aria-expanded]="showDropdown" aria-haspopup="true" role="button" tabindex="0">
+
+        <div class="profile-info">
+          <span class="profile-name">{{this.profile?.firstName}} {{this.profile?.lastName}}</span>
+          <i class="fas fa-chevron-down profile-arrow" [class.rotate]="showDropdown"></i>
+        </div>
+
+
+        <div class="profile-avatar">
+          <img *ngIf="this.ImageProfile" [src]="this.ImageProfile" alt="Profile" class="avatar-img">
+          <div *ngIf="!this.ImageProfile" class="avatar-placeholder">
+            <span>{{getInitials()}}</span>
+          </div>
+        </div>
+
+      </div>
+      
+    
+      <div #dropdownMenu *ngIf="showDropdown" class="profile-dropdown" id="DopdownProfile">
+        <div class="dropdown-header">
+          <span class="dropdown-name">{{this.profile?.firstName}} {{this.profile?.lastName}}</span>
+          <span class="dropdown-email">{{this.email}}</span>
+        </div>
+
+        <div class="dropdown-divider"></div>
+
+        <button routerLink="/profil" (click)="toggleDropdown()" class="dropdown-item">
+          <i class="fas fa-user dropdown-icon"></i>
+          <span>Mon Profil</span>
+        </button>
+
+        <button *ngIf="!['ADMIN', 'ESN_ADMIN','ESN_COMMERCIAL','CHARGEDERECRUTEMENT'].includes(roleFromToken!)"   routerLink="/cv" (click)="toggleDropdown()" class="dropdown-item">
+          <i class="fas fa-file-alt dropdown-icon"></i>
+          <span>Dossier de compétences</span>
+        </button>
+
+        <button (click)="logout(); toggleDropdown()" class="dropdown-item dropdown-item-danger">
+          <i class="fas fa-sign-out-alt dropdown-icon"></i>
+          <span>Déconnexion</span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Hamburger Button (Mobile) -->
+    <button
+      (click)="toggleSideBar()"
+      class="navbar-toggle"
+      aria-label="Ouvrir le menu"
+    >
+      <span class="toggle-bar"></span>
+      <span class="toggle-bar"></span>
+      <span class="toggle-bar"></span>
+    </button>
+  </div>
+</header>
+
+  <!-- Sidebar Overlay -->
+  <div
+    class="sidebar-overlay"
+    [class.active]="showSideBar"
+    (click)="toggleSideBar()"
+  ></div>
+
+  <!-- Sidebar (Mobile) -->
+  <aside
+    class="sidebar"
+    [class.active]="showSideBar"
+  >
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <span class="logo-text">Find<span class="logo-accent">Me</span></span>
+      </div>
+      <button (click)="toggleSideBar()" class="sidebar-close" aria-label="Fermer le menu">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="sidebar-content">
+      <!-- User Profile (if logged in) -->
+      <div class="sidebar-user" *ngIf="authResolved && isLoggedIn">
+        <div class="sidebar-avatar">
+          <img *ngIf="this.ImageProfile" [src]="this.ImageProfile" alt="Profile" class="avatar-img">
+          <div *ngIf="!this.ImageProfile" class="avatar-placeholder">
+            <span>{{getInitials()}}</span>
+          </div>
+        </div>
+        <div class="sidebar-user-info">
+          <span class="sidebar-user-name">{{this.profile?.firstName}} {{this.profile?.lastName}}</span>
+          <span class="sidebar-user-email">{{this.email}}</span>
+        </div>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Navigation Links -->
+      <nav class="sidebar-nav">
+        <a routerLink="/acceuil-find-me" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
+          <i class="fas fa-home sidebar-icon"></i>
+          <span>Accueil</span>
+        </a>
+
+        <!-- <a routerLink="/" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
+          <i class="fas fa-briefcase sidebar-icon"></i>
+          <span>Missions & Offres</span>
+        </a> -->
+
+
+        <a *ngIf="this.roleFromToken==='CANDIDAT'" routerLink="/Offres/Liste" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
+          <i class="fas fa-file-alt dropdown-icon"></i>
+          <span>Offres</span>
+        </a>
+
+        <a *ngIf="roleFromToken" routerLink="/cv" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
+          <i class="fas fa-file-alt sidebar-icon"></i>
+          <span>Mon CV</span>
+        </a>
+
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Auth Buttons -->
+      <div class="sidebar-actions">
+        <div *ngIf="authResolved && !isLoggedIn" class="sidebar-auth">
+          <button routerLink="/login" (click)="toggleSideBar()" class="sidebar-btn sidebar-btn-login">
+            <i class="fas fa-sign-in-alt sidebar-btn-icon"></i>
+            <span>Connexion</span>
+          </button>
+
+          <button routerLink="/session-login" (click)="toggleSideBar()" class="sidebar-btn sidebar-btn-register">
+            <i class="fas fa-user-plus sidebar-btn-icon"></i>
+            <span>Inscription</span>
+          </button>
+
+        </div>
+        
+        <button *ngIf="authResolved && isLoggedIn" (click)="logout(); toggleSideBar()" class="sidebar-btn sidebar-btn-logout">
+          <i class="fas fa-sign-out-alt sidebar-btn-icon"></i>
+          <span>Déconnexion</span>
+        </button>
+        
+      </div>
+    </div>
+</aside>

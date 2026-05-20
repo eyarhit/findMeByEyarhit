@@ -1,0 +1,71 @@
+<div class="favorites-container">
+  <!-- Status Count Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+    <!-- EN COURS -->
+    <div class="status-card status-card-pending">
+      <div class="status-card-content">
+        <div class="status-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div class="status-info">
+          <h3 class="status-title">En cours</h3>
+          <p class="status-description">Candidatures en cours de traitement</p>
+        </div>
+      </div>
+      <div class="status-count">
+        <span>{{ countEnCours }}</span>
+      </div>
+    </div>
+
+    <!-- ACCEPTER -->
+    <div class="status-card status-card-accepted">
+      <div class="status-card-content">
+        <div class="status-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <div class="status-info">
+          <h3 class="status-title">Acceptées</h3>
+          <p class="status-description">Candidatures approuvées par l’employeur</p>
+        </div>
+      </div>
+      <div class="status-count">
+        <span>{{ countAccepter }}</span>
+      </div>
+    </div>
+
+    <!-- REFUSER -->
+    <div class="status-card status-card-rejected">
+      <div class="status-card-content">
+        <div class="status-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        <div class="status-info">
+          <h3 class="status-title">Refusées</h3>
+          <p class="status-description">Candidatures non retenues</p>
+        </div>
+      </div>
+      <div class="status-count">
+        <span>{{ countRefuser }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Left Side (Job Listings) -->
+  <app-search-filter (searchCriteria)="onSearchCriteria($event)" style="width: 80%;"></app-search-filter>
+  <div class="no-favorites" *ngIf="!isLoading && filteredJobs.length === 0">
+  <i class="far fa-heart"></i>
+  <p>Vous n'avez pas encore d'annonces postuler dans cette catégorie</p>
+</div>
+<div *ngIf="isLoading" class="flex flex-col items-center justify-center my-12 space-y-4">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
+    <p class="text-lg font-semibold text-gray-700 animate-pulse">Chargement des annonces...</p>
+  </div>
+  <app-condidate-card style="width: 100%;" *ngFor="let job of filteredJobs" [job]="job"
+    (jobSelected)="onJobSelected(job)" [isSelected]="selectedJob === job"></app-condidate-card>
+</div>

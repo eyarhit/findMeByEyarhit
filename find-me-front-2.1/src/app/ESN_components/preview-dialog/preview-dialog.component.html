@@ -1,0 +1,46 @@
+<div class="preview-container">
+  <div class="preview-header">
+    <h2>Aperçu de la mission</h2>
+    <p>Découvrez comment votre mission apparaîtra aux ESN disponibles</p>
+  </div>
+
+  <div class="preview-content">
+    <div class="company-card">
+      <div class="company-header">
+        <div class="company-logo-placeholder">
+          <span>OLX</span>
+        </div>
+        <div class="company-info">
+          <h3>{{data.companyInfo.name}}</h3>
+          <p class="location">{{data.companyInfo.location}}</p>
+          <p class="type">{{data.companyInfo.type}}</p>
+          <p class="status">{{data.companyInfo.status}}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mission-details">
+      <div class="section">
+        <h4>Description</h4>
+        <div class="description-content" [innerHTML]="formatDescription(data.formData.description)"></div>
+      </div>
+
+      <div class="section" *ngIf="data.formData.responsibilities">
+        <h4>Responsabilités</h4>
+        <p>{{data.formData.responsibilities}}</p>
+      </div>
+
+      <div class="section" *ngIf="data.formData.qualifications">
+        <h4>Qualifications</h4>
+        <p>{{data.formData.qualifications}}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-actions">
+    <button mat-stroked-button mat-dialog-close>Retour aux modifications</button>
+    <!-- <button mat-flat-button color="primary" [mat-dialog-close]="true">
+      <span>Publier la mission</span>
+    </button> -->
+  </div>
+</div>

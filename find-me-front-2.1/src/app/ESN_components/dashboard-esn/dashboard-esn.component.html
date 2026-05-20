@@ -1,0 +1,193 @@
+<div class="dashboard-container">
+  <!-- Navigation Bar -->
+  <!-- <nav class="dashboard-nav">
+    <div class="nav-brand">
+      <div class="nav-logo">
+        <div class="logo-icon">⚡</div>
+        <span class="logo-text">AdminPro</span>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <div class="nav-search">
+        <input type="text" placeholder="Rechercher..." class="search-input">
+        <span class="search-icon">🔍</span>
+      </div>
+      <div class="nav-notifications">
+        <span class="notification-icon">🔔</span>
+        <span class="notification-badge">3</span>
+      </div>
+      <div class="nav-profile">
+        <div class="profile-avatar">
+          <span>👤</span>
+        </div>
+        <span class="profile-name">Admin</span>
+      </div>
+    </div>
+  </nav> -->
+
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="dashboard-title">
+          <span class="title-gradient">Tableau de Bord</span>
+          <span class="title-subtitle">Administrateur</span>
+        </h1>
+        <div class="dashboard-subtitle">
+          <span class="subtitle-icon">📈</span>
+          Aperçu en temps réel de vos indicateurs clés de performance
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-section">
+    <div class="section-header">
+      <h2 class="section-title">Vue d'ensemble</h2>
+      <div class="section-filters">
+        <button 
+          class="filter-btn" 
+          [class.filter-btn--active]="selectedPeriod === 'today'"
+          (click)="onPeriodFilterClick('today')">
+          Aujourd'hui
+        </button>
+        <button 
+          class="filter-btn" 
+          [class.filter-btn--active]="selectedPeriod === 'week'"
+          (click)="onPeriodFilterClick('week')">
+          Cette semaine
+        </button>
+        <button 
+          class="filter-btn" 
+          [class.filter-btn--active]="selectedPeriod === 'month'"
+          (click)="onPeriodFilterClick('month')">
+          Ce mois
+        </button>
+      </div>
+    </div>
+    
+    <div class="stats-grid" #statsGrid>
+      <div class="stat-card" 
+           *ngFor="let card of statCards; let i = index"
+           [ngClass]="'stat-card--' + card.color"
+           [style.animation-delay]="(i * 150) + 'ms'">
+        <div class="stat-card__glow"></div>
+        <div class="stat-card__content">
+          <div class="stat-card__header">
+            <div class="stat-card__icon-wrapper">
+              <div class="stat-card__icon">{{ card.icon }}</div>
+              <div class="icon-pulse"></div>
+            </div>
+            <div class="stat-card__trend" [ngClass]="card.trendDirection">
+              <div class="trend-wrapper">
+                <span class="trend-arrow">{{ card.trendDirection === 'up' ? '↗️' : '↘️' }}</span>
+                <span class="trend-value">{{ card.trend }}%</span>
+              </div>
+              <div class="trend-label">vs période précédente</div>
+            </div>
+          </div>
+          <div class="stat-card__body">
+            <div class="stat-card__value-wrapper">
+              <div class="stat-card__value">{{ formatLargeNumber(card.value) }}</div>
+              <div class="value-animation"></div>
+            </div>
+            <div class="stat-card__title">{{ card.title }}</div>
+            <div class="stat-card__progress">
+              <div class="progress-line">
+                <div class="progress-fill" [style.width]="getProgressWidth(card.value, 1000)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card__pattern"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Insights & Activity Section -->
+  <div class="insights-section">
+    <div class="section-header">
+      <h2 class="section-title">Insights & Activités</h2>
+    </div>
+
+    <div class="insights-grid">
+      <!-- Enhanced Activity Feed -->
+      <div class="activity-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-icon">⚡</span>
+            <div class="title-content">
+              <h3>Activités en Temps Réel</h3>
+              <p>Dernières actions du système</p>
+            </div>
+          </div>
+          <div class="panel-controls">
+            <button 
+              class="control-btn" 
+              [class.control-btn--active]="activityFilter === 'all'"
+              (click)="onActivityFilterClick('all')">
+              Tout
+            </button>
+            <button 
+              class="control-btn" 
+              [class.control-btn--active]="activityFilter === 'missions'"
+              (click)="onActivityFilterClick('missions')">
+              Missions
+            </button>
+            <button 
+              class="control-btn" 
+              [class.control-btn--active]="activityFilter === 'candidatures'"
+              (click)="onActivityFilterClick('candidatures')">
+              Candidatures
+            </button>
+          </div>
+        </div>
+        <div class="activity-feed">
+          <div class="activity-item" 
+               *ngFor="let activity of getFilteredActivities(); let i = index"
+               [style.animation-delay]="(i * 100) + 'ms'">
+            <div class="activity-timeline">
+              <div class="timeline-dot" [ngClass]="'timeline-dot--' + activity.type"></div>
+              <div class="timeline-line" *ngIf="i !== getFilteredActivities().length - 1"></div>
+            </div>
+            <div class="activity-content">
+              <div class="activity-header">
+                <div class="activity-icon">{{ getActivityIcon(activity.type) }}</div>
+                <div class="activity-meta">
+                  <div class="activity-action">{{ activity.action }}</div>
+                  <div class="activity-time">{{ activity.time }}</div>
+                </div>
+              </div>
+              <div class="activity-details">
+                <div class="activity-description">
+                  {{ getActivityDescription(activity.type) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="activity-footer">
+          <button class="view-all-btn" (click)="onViewAllActivities()">
+            Voir toutes les activités
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Tooltip -->
+  <div class="custom-tooltip" 
+       #tooltip 
+       [style.display]="tooltipVisible ? 'block' : 'none'"
+       [style.left]="tooltipX + 'px'"
+       [style.top]="tooltipY + 'px'">
+    <div class="tooltip-content">
+      <div class="tooltip-title">{{ tooltipTitle }}</div>
+      <div class="tooltip-value">{{ tooltipValue }}</div>
+    </div>
+  </div>
+</div>

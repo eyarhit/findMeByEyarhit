@@ -1,0 +1,21 @@
+:host {
+  display: block;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+:host ::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Webkit */
+}
+
+/* Appliquer également aux éléments enfants si nécessaire */
+:host .min-h-screen,
+:host .max-w-4xl {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+:host .min-h-screen::-webkit-scrollbar,
+:host .max-w-4xl::-webkit-scrollbar {
+  display: none;
+}

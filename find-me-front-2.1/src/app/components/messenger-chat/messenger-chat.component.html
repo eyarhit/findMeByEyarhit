@@ -1,0 +1,38 @@
+<div class="chat-wrapper" *ngIf="show" [ngClass]="{ 'minimized': minimized }">
+  <div class="chat-box" [ngClass]="{ 'minimized': minimized }">
+
+    <!-- ✅ HEADER -->
+    <div class="chat-header" (click)="minimized ? toggleMinimize() : null">
+      <img [src]="companyLogo" class="chat-logo" alt="Logo" />
+      <div class="chat-company">
+        <h3>{{ companyName }}</h3>
+        <span>Messagerie directe</span>
+      </div>
+      <button class="chat-minimize" (click)="toggleMinimize(); $event.stopPropagation()">_</button>
+      <button class="chat-close" (click)="close(); $event.stopPropagation()">×</button>
+    </div>
+
+    <!-- ✅ BODY -->
+    <div class="chat-body" *ngIf="!minimized">
+      <div
+        *ngFor="let msg of messages"
+        class="chat-message"
+        [ngClass]="{ 'user': msg.senderId === currentUserId, 'receiver': msg.senderId !== currentUserId }"
+      >
+        <div class="chat-bubble">{{ msg.content }}</div>
+        <div class="chat-date">{{ msg.timestamp | date: 'short' }}</div>
+      </div>
+    </div>
+
+    <!-- ✅ FOOTER -->
+    <div class="chat-footer" *ngIf="!minimized">
+      <input
+        [(ngModel)]="newMessage"
+        placeholder="Écrire un message..."
+        (keyup.enter)="sendMessage()"
+      />
+      <button (click)="sendMessage()" [disabled]="!newMessage.trim()">Envoyer</button>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,197 @@
+<div id="cv-content" class="cv-content" class="a4-page" >
+  
+  <!-- Template DevOps Beehive-->
+  <div *ngIf="selectedTemplate?.thumbnail === 'devops'" class="devops-template">
+    <!-- <div class="page-header">
+      <img src="assets/images/Modele-cv/DPC-2-GOLD.PNG" 
+           alt="En-tête DevOps" 
+           class="header-image">
+    </div> -->
+  
+    <div class="cv-content">
+      <!-- Header Section -->
+      <div class="cv-header">
+        <div class="cv-section">
+        <h3 >{{ getFullName() }}</h3>
+      </div>
+        <h2>
+          <span>{{ getCurrentData()?.title }}</span>
+          <!-- <span> {{ getCurrentData()?.techStack }}</span><br> -->
+          <span style="font-weight: bold;">{{ getCurrentData()?.experience }}</span>
+        </h2>
+      
+        <div class="contact-info">
+          <p *ngIf="getCurrentData()?.user?.email">
+            <a [href]="'mailto:' + getCurrentData()?.user?.email" style="color: #007bff; font-weight: bold;font-size: medium">
+              Email : {{ getCurrentData()?.user?.email }}
+            </a>
+          </p>
+      
+          <p *ngIf="getCurrentData()?.user?.phone" style="color: #007bff; font-weight: bold;font-size: medium;">
+            Num : {{ getCurrentData()?.user?.phone }}
+          </p>
+        </div>
+      </div>
+          <!-- Education Section -->
+          <div class="cv-section" *ngIf="getCurrentData()?.educations?.length > 0">
+            <h3>Formations Académiques</h3>
+            <div class="section-content">
+              <div *ngFor="let edu of getCurrentData().educations" class="education">
+                <p class="diploma"> <span class="year">{{edu.year}}</span></p>
+                <p class="institution">{{edu.institution}}<br>{{edu.diploma}}</p>
+              </div>
+            </div>
+          </div>
+          
+      <!-- Technical Skills Section -->
+      <div class="cv-section" *ngIf="getCurrentData()?.competences">
+        <h3>COMPÉTENCES TECHNIQUES</h3>
+        <div class="section-content">
+          
+          <div class="competence-group" *ngIf="getCurrentData().competences.langages_balisage?.length > 0">
+            <h4>Langages de balisage :</h4>
+            <p>{{getCurrentData().competences.langages_balisage?.join(', ')}}</p>
+          </div>
+
+          <div class="competence-group" *ngIf="getCurrentData().competences.programmation?.length > 0">
+            <h4>Langages de programmation :</h4>
+            <p>{{getCurrentData().competences.programmation?.join(', ')}}</p>
+          </div>
+          
+          <div class="competence-group" *ngIf="getCurrentData().competences.frameworks?.length > 0">
+            <h4>Frameworks :</h4>
+            <p>{{getCurrentData().competences.frameworks?.join(', ')}}</p>
+          </div>
+          
+          <div class="competence-group" *ngIf="getCurrentData().competences.bibliotheques?.length > 0">
+            <h4>Bibliothèques :</h4>
+            <p>{{getCurrentData().competences.bibliotheques?.join(', ')}}</p>
+          </div>
+          
+          <div class="competence-group" *ngIf="getCurrentData().competences.api?.length > 0">
+            <h4>APIs :</h4>
+            <p>{{getCurrentData().competences.api?.join(', ')}}</p>
+          </div>
+
+          <div class="competence-group" *ngIf="getCurrentData().competences.base_donnees?.length > 0">
+            <h4>Bases de données :</h4>
+            <p>{{getCurrentData().competences.base_donnees?.join(', ')}}</p>
+          </div>
+          
+          <!-- Add other competence groups here -->
+          <div class="competence-group" *ngIf="getCurrentData().competences.systeme_exploitation?.length > 0">
+            <h4>Système d’exploitation :</h4>
+            <p>{{getCurrentData().competences.systeme_exploitation?.join(', ')}}</p>
+          </div>
+
+          <div class="competence-group" *ngIf="getCurrentData().competences.conception?.length > 0">
+            <h4>Conception  :</h4>
+            <p>{{getCurrentData().competences.conception?.join(', ')}}</p>
+          </div>
+
+          <div class="competence-group" *ngIf="getCurrentData().competences.methodologies?.length > 0">
+            <h4>Méthodologie :</h4>
+            <p>{{getCurrentData().competences.methodologies?.join(', ')}}</p>
+          </div>
+
+          <div class="competence-group" *ngIf="getCurrentData().competences.design_patterns?.length > 0">
+            <h4>Design pattern :</h4>
+            <p>{{getCurrentData().competences.design_patterns?.join(', ')}}</p>
+          </div>
+
+          <div class="competence-group" *ngIf="getCurrentData().competences.architectures?.length > 0">
+            <h4>Architecture :</h4>
+            <p>{{getCurrentData().competences.architectures?.join(', ')}}</p>
+          </div>           
+
+          <div class="competence-group" *ngIf="getCurrentData().competences.outils?.length > 0">
+            <h4>Outils :</h4>
+            <p>{{getCurrentData().competences.outils?.join(', ')}}</p>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Languages Section -->
+      <div class="cv-section" *ngIf="getCurrentData()?.languages?.length > 0">
+        <h3>LANGUES</h3>
+        <div style="margin-bottom: 5%;">
+          <div *ngFor="let lang of getCurrentData().languages" class="language">
+            <p>{{lang.name}} : {{lang.level}}</p>
+          </div>
+        </div>
+      </div>
+     <!-- Experience Section -->
+     <div class="cv-section experience" *ngIf="getCurrentData()?.experiences?.length > 0">
+      <h3>CARRIÈRE PROFESSIONNELLE</h3>
+      <div class="section-content">
+        <div *ngFor="let exp of getCurrentData().experiences" class="experience">
+          <div class="exp-header">
+            <div class="header-content">
+              <div class="working-stage">
+                <span class="period">{{exp.period}}</span>
+                <div class="competence-group">  
+                  <h4 class="project-label">Société :</h4>
+                  <span class="project-value">{{exp.position}}</span>
+                </div>
+              </div>
+              <h5 class="company">{{exp.company}}</h5>
+            </div>
+          </div>
+          
+          <div *ngFor="let project of exp.projects" class="project">
+
+         
+            <div class="competence-group">
+              <h4 class="project-label">Projet :</h4>
+              <span class="project-value">{{project.name}}</span>
+            </div>
+            
+            <div class="competence-group" *ngIf="project.equipe" >
+              <h4 class="detail-label">Equipe :</h4>
+              <span class="detail-value">{{project.equipe}}</span>
+            </div>
+            
+            <div *ngIf="project.workDone" class="work-done">
+              <h4>Travail réalisé:</h4>
+              <p [innerHTML]="formatTextWithLineBreaks(project.workDone)"></p>
+            </div>
+            
+            <div class="competence-group" *ngIf="project.environment" >
+              <h4 class="detail-label">Environnements :</h4>
+              <span class="detail-value">{{project.environment}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  
+      <!-- Projects Section -->
+      <div class="cv-section" *ngIf="getCurrentData()?.projets?.length > 0">
+        <h3>PROJETS</h3>
+        <div class="section-content">
+          <div *ngFor="let project of getCurrentData().projets" class="project">
+            <h4 class="project-name">{{project.name}}</h4>
+            <p class="project-description" [innerHTML]="formatTextWithLineBreaks(project.description)"></p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Certifications Section -->
+      <div class="cv-section" *ngIf="getCurrentData()?.certifications?.length > 0">
+        <h3>CERTIFICATIONS</h3>
+        <ul>
+          <li *ngFor="let cert of getCurrentData().certifications">{{cert}}</li>
+        </ul>
+      </div>
+  
+      <!-- Interests Section -->
+      <div class="cv-section" *ngIf="getCurrentData()?.interests?.length > 0">
+        <h3>CENTRES D'INTÉRÊT</h3>
+        <p>{{getCurrentData().interests?.join(', ')}}</p>
+      </div>
+  
+    </div>
+  </div>
+  
+</div>

@@ -1,0 +1,370 @@
+<!-- Conteneur global pour les cartes -->
+<div class="profile-dashboard">
+  <div class="dashboard-header">
+  
+    <div class="breadcrumb">
+      <a href="#">Accueil</a>
+      <span class="separator">/</span>
+      <span>Profil</span>
+    </div>
+  </div>
+
+  <!-- Conteneur principal des cartes -->
+  <div class="cards-wrapper">
+    <!-- Carte 1 : Profil Personnel -->
+    <div class="full-width-card">
+      <app-carte-profil-candiat [profileId]="profileId" [profileEmail]="profileEmail" [profileRole]="this.profileRole" ></app-carte-profil-candiat>
+    </div>
+
+    <!-- Carte 2 : Information Professionnelle -->
+    <div class="full-width-card" *ngIf="((this.role!='ESN_ADMIN' && this.role!='ESN_COMMERCIAL'&& this.role!='INGENIEURDAFFAIRE'&& this.role!='CHARGEDERECRUTEMENT') || (this.profileRole!='ESN_ADMIN'&& this.profileRole!='ESN_COMMERCIAL' && this.profileRole!=''&& this.profileRole!='INGENIEURDAFFAIRE'&& this.profileRole!='CHARGEDERECRUTEMENT'))">
+      <div class="card professional-info-card">
+        <div class="card-header">
+          <h1 class="title"><i class="fas fa-briefcase"></i> Information Professionnelle</h1>
+        </div>
+        <hr />
+        
+        <div class="card-body">
+          <!-- Formation Académique -->
+          <div class="section-header">
+            <h3 class="formation">Formation Académique</h3>
+            <button (click)="openAcademicPopup()" class="consult-link">Consulter</button>
+          </div>
+
+          <!-- Compétences Techniques -->
+          <div class="section-header">
+            <h3 class="competences">Compétences Techniques</h3>
+            <button (click)="openSkillsPopup()" class="consult-link">Consulter</button>
+          </div>
+          
+          <!-- Langues -->
+          <div class="section-header">
+            <h3 class="langues">Langues</h3>
+            <button (click)="openLanguagePopup()" class="consult-link">Consulter</button>
+          </div>
+
+          <!-- Carrière Professionnelle -->
+          <div class="section-header">
+            <h3 class="experience">Carrière Professionnelle</h3>
+            <button (click)="openProfessionalExperiencePage()" class="consult-link">Consulter</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rangée des 3 cartes de documents -->
+    <div class="documents-row" > 
+      <!-- Carte 3 : Liste des Cvs Sauvegardées -->
+            <div class="document-card" *ngIf="this.role === 'FREELANCER'|| this.role === 'CANDIDAT'|| (this.role === 'ESN_ADMIN' && (this.profileRole==='ESN_ADMIN' || this.profileRole==='')) || this.role === 'PORTAGE_SALARIAL' || this.role === 'PORTAGE_SALARIAL'">
+        <app-carte-type-sejour [profileId]="profileId" [typedocument]="'CvFindMe'" [profilerole]="this.profileRole!"></app-carte-type-sejour>
+      </div>
+      <!-- Carte 3 : Liste des Diplômes -->
+      <div class="document-card" *ngIf="((this.role!='ESN_ADMIN' && this.role!='ESN_COMMERCIAL' && this.role!='INGENIEURDAFFAIRE' && this.role!='CHARGEDERECRUTEMENT') || (this.profileRole!='ESN_ADMIN'&& this.profileRole!='ESN_COMMERCIAL' && this.profileRole!=''&& this.profileRole!='INGENIEURDAFFAIRE' && this.profileRole!='CHARGEDERECRUTEMENT'))">
+        <app-list-document [profileId]="profileId"  [typedocument]="'Diplome'" [profilerole]="this.profileRole!"></app-list-document>
+      </div>
+      
+      <!-- Carte 4 : Liste des Certificats -->
+      <div class="document-card" *ngIf="((this.role!='ESN_ADMIN' && this.role!='ESN_COMMERCIAL' && this.role!='INGENIEURDAFFAIRE' && this.role!='CHARGEDERECRUTEMENT') || (this.profileRole!='ESN_ADMIN'&& this.profileRole!='ESN_COMMERCIAL' && this.profileRole!=''&& this.profileRole!='INGENIEURDAFFAIRE' && this.profileRole!='CHARGEDERECRUTEMENT'))" >
+        <app-interface-certif [profileId]="profileId"  [profilerole]="this.profileRole!"></app-interface-certif>
+      </div>
+
+      <!-- Carte 5 : Liste des documents Type de séjour -->
+      <div class="document-card" *ngIf="this.role === 'FREELANCER'|| this.role === 'CANDIDAT'|| (this.role === 'ESN_ADMIN' && (this.profileRole==='ESN_ADMIN' || this.profileRole==='')) || this.role === 'PORTAGE_SALARIAL' || this.role === 'PORTAGE_SALARIAL'">
+        <app-carte-type-sejour [profileId]="profileId"  [profilerole]="this.profileRole!"></app-carte-type-sejour>
+      </div>
+    </div>
+
+    <!-- Carte 6 : Résultat coding game (masquée tant que showCodingameOnProfil est false) -->
+    <div *ngIf="showCodingameOnProfil && ((this.role!='ESN_ADMIN' && this.role!='ESN_COMMERCIAL'&& this.role!='INGENIEURDAFFAIRE'&& this.role!='CHARGEDERECRUTEMENT') || (this.profileRole!='ESN_ADMIN'&& this.profileRole!='ESN_COMMERCIAL' && this.profileRole!=''&& this.profileRole!='INGENIEURDAFFAIRE'&& this.profileRole!='CHARGEDERECRUTEMENT'))" class="full-width-card">
+      <div class="card codingame-card">
+        <div class="card-header">
+          <h1 class="title">Coding Game</h1>
+          <div class="codingame-logo">
+            <img src="assets/images/Logo/FindMeLogo.png" alt="Codingame Logo" />
+          </div>
+        </div>
+        <hr />
+        <div class="card-body codingame-body">
+          <p class="codingame-description">
+            Consultez vos résultats aux tests techniques Codingame et suivez votre progression pour améliorer vos compétences de développement.
+          </p>
+          <button class="codingame-button" (click)="openCodingameResults()">
+            <i class="fas fa-code"></i> Voir mes résultats
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Popup Modal pour Formation Académique -->
+<div *ngIf="showAcademicPopup" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-content">
+      <!-- En-tête du popup -->
+      <div class="modal-header">
+        <h4><i class="fas fa-graduation-cap"></i> Formation Académique</h4>
+        <button type="button" class="btn-add" (click)="addAcademicFormation()">
+          <i class="fa fa-plus"></i> Ajouter
+        </button>
+      </div>
+      <hr class="divider" />
+
+      <!-- Liste des formations académiques -->
+      <form [formGroup]="form" class="academic-form">
+        <div formArrayName="academicFormations">
+          <div *ngFor="let formation of academicFormations.controls; let i = index" [formGroupName]="i" class="academic-section">
+            <div class="grid">
+              <div class="form-group">
+                <label>Date de début:</label>
+                <input type="date" formControlName="dateDebut" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label>Date de fin:</label>
+                <input type="date" formControlName="dateFin" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label>Université:</label>
+                <input type="text" formControlName="university" placeholder="Université" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label>Diplôme:</label>
+                <input type="text" formControlName="diplome" placeholder="Diplôme" class="form-control" />
+              </div>
+            </div>
+            <!-- Bouton Supprimer -->
+            <button (click)="removeAcademicFormation(i)" type="button" class="btn-remove">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Footer avec les boutons Annuler et Terminer -->
+      <div class="modal-footer">
+        <button (click)="closeAcademicPopup()" type="button" class="btn-cancel">Annuler</button>
+        <button type="button" class="save-button" (click)="saveEducations()">
+          <i class="fas fa-save"></i> Terminer
+        </button>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+   <!-- Popup Compétences Techniques -->
+<div *ngIf="showSkillsPopup" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4><i class="fas fa-cogs"></i> Compétences Techniques</h4>
+        <button (click)="closeSkillsPopup()" class="close">&times;</button>
+      </div>
+      <hr class="divider" />
+
+      <form class="skills-form">
+        <div class="skills-list">
+          <div class="skill-item" *ngFor="let field of [
+            { label: 'Langage de balisage', key: 'langageBallsage' },
+            { label: 'Langages de programmation', key: 'languageProgrammation' },
+            { label: 'Framework', key: 'framework' },
+            { label: 'Bibliothèque', key: 'bibliotheque' },
+            { label: 'API', key: 'api' },
+            { label: 'Bases de données', key: 'db' },
+            { label: 'Système d\'exploitation', key: 'systemExploitation' },
+            { label: 'Conception', key: 'conception' },
+            { label: 'Méthodologie', key: 'methodologie' },
+            { label: 'Design Pattern', key: 'designPattern' },
+            { label: 'Architecture', key: 'architechture' },
+            { label: 'Outils', key: 'outils' }
+          ]">
+            <label>{{ field.label }} :</label>
+            <input
+            type="text"
+            [ngModel]="getSkillValue(field.key)"
+            (ngModelChange)="setSkillValue(field.key, $event)"
+            [name]="field.key"
+            [ngModelOptions]="{ standalone: true }"
+          />
+                    </div>
+        </div>
+      </form>
+
+      <div class="modal-footer">
+        <button (click)="closeSkillsPopup()" class="btn-cancel">Annuler</button>
+        <button class="save-button" (click)="saveCompetence()">
+          <i class="fas fa-save"></i> Terminer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+      <!-- popup pour les langues -->
+
+<div *ngIf="showLanguagePopup" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4><i class="fas fa-language"></i> Langues</h4>
+        <button (click)="closeLanguagePopup()" class="close">&times;</button>
+      </div>
+      <hr class="divider" />
+
+      <form [formGroup]="fb.group({ languages: languageFormArray })">
+        <div formArrayName="languages">
+          <div *ngFor="let lang of languageFormArray.controls; let i = index" [formGroupName]="i" class="language-row">
+            <div class="form-group">
+              <label>Langue :</label>
+              <select formControlName="name" class="form-control">
+                <option value="" disabled>Choisir une langue</option>
+                <option *ngFor="let l of languages" [value]="l">{{ l }}</option>
+              </select>
+            </div>
+      
+            <div class="form-group">
+              <label>Niveau :</label>
+              <select formControlName="niveau" class="form-control">
+                <option value="" disabled>Choisir un niveau</option>
+                <option value="Débutant">Débutant</option>
+                <option value="Intermédiaire">Intermédiaire</option>
+                <option value="Avancé">Avancé</option>
+                <option value="Courant">Courant</option>
+              </select>
+            </div>
+      
+            <button type="button" (click)="removeLanguage(i)" class="btn-remove"><i class="fa fa-trash"></i></button>
+          </div>
+        </div>
+      </form>
+      
+      <div class="modal-footer">
+        <button type="button" (click)="addLanguage()" class="btn-add"><i class="fa fa-plus"></i> Ajouter</button>
+        <button type="button" class="btn-cancel" (click)="closeLanguagePopup()">Annuler</button>
+        <button type="button" class="save-button" (click)="saveLangues()">
+          <i class="fas fa-save"></i> Sauvegarder
+        </button>
+      </div>
+      
+      <div class="existing-languages" *ngIf="cvLangues.length === 0">
+        <p>Aucune langue enregistrée.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Popup Codingame (masquée tant que showCodingameOnProfil est false) -->
+<div *ngIf="showCodingameOnProfil && showCodingameResultsPopup" class="modal-overlay">
+  <div class="modal codingame-modal">
+    <div class="modal-content">
+      <div class="modal-header codingame-modal-header">
+        <h4><i class="fas fa-trophy"></i> Résultats du Codingame</h4>
+        <button class="close" (click)="closeCodingameResults()">&times;</button>
+      </div>
+      <hr />
+      
+      <div class="codingame-stats" *ngIf="codingameResults.length > 0">
+        <div class="stat-card">
+          <span class="stat-value">{{ codingameResults.length }}</span>
+          <span class="stat-label">Tests complétés</span>
+        </div>
+        <div class="stat-card" *ngIf="codingameResults.length > 0">
+          <span class="stat-value">{{ getAverageScore() | number:'1.0-0' }}%</span>
+          <span class="stat-label">Score moyen</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">{{ getMostRecentTest() | date:'dd/MM/yyyy' }}</span>
+          <span class="stat-label">Dernier test</span>
+        </div>
+      </div>
+      
+      <div class="performance-chart-container" *ngIf="codingameResults.length > 1">
+        <h5><i class="fas fa-chart-line"></i> Évolution de vos performances</h5>
+        <canvas id="performanceChart" width="400" height="200"></canvas>
+      </div>
+      
+      <div class="filters-container">
+        <div class="filter-group">
+          <label for="frameworkFilter">Framework:</label>
+          <select id="frameworkFilter" [(ngModel)]="frameworkFilter" (change)="applyFilters()">
+            <option value="">Tous</option>
+            <option *ngFor="let framework of getUniqueFrameworks()" [value]="framework">{{ framework }}</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="levelFilter">Niveau:</label>
+          <select id="levelFilter" [(ngModel)]="levelFilter" (change)="applyFilters()">
+            <option value="">Tous</option>
+            <option *ngFor="let level of getUniqueLevels()" [value]="level">{{ level }}</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="sortBy">Trier par:</label>
+          <select id="sortBy" [(ngModel)]="sortBy" (change)="applyFilters()">
+            <option value="date">Date (récent → ancien)</option>
+            <option value="dateAsc">Date (ancien → récent)</option>
+            <option value="score">Score (élevé → bas)</option>
+            <option value="scoreAsc">Score (bas → élevé)</option>
+          </select>
+        </div>
+        
+        <button class="reset-filters" (click)="resetFilters()">
+          <i class="fas fa-undo"></i> Réinitialiser
+        </button>
+      </div>
+      
+      <div class="table-container">
+        <table class="result-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Durée</th>
+              <th>Framework</th>
+              <th>Score</th>
+              <th>Niveau</th>
+              <th>Domaine</th>
+            </tr>
+          </thead>
+          <tbody *ngIf="codingameResults.length > 0; else noResults">
+            <tr *ngFor="let result of filteredCodingameResults" [ngClass]="{'high-score': result.score > 80}">
+              <td>{{ result.date | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ formatDuration(result.duration) }}</td>
+              <td><span class="framework-badge">{{ result.framework }}</span></td>
+              <td>
+                <div class="score-container">
+                  <div class="score-bar" [style.width.%]="result.score"></div>
+                  <span class="score-text">{{ result.score | number:'1.0-0' }}%</span>
+                </div>
+              </td>
+              <td><span class="level-badge" [ngClass]="getLevelClass(result.level)">{{ result.level }}</span></td>
+              <td>{{ result.domain }}</td>
+            </tr>
+          </tbody>
+          <ng-template #noResults>
+            <tbody>
+              <tr>
+                <td colspan="6" class="no-results">
+                  <i class="fas fa-info-circle"></i> Aucun résultat disponible
+                </td>
+              </tr>
+            </tbody>
+          </ng-template>
+        </table>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeCodingameResults()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+

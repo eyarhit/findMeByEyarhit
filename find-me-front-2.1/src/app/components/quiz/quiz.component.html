@@ -1,0 +1,237 @@
+<div class="min-h-screen flex flex-col bg-gray-50">
+    <!-- Main Content -->
+    <main class="container mx-auto flex-grow flex items-center justify-center p-16">
+      <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-3xl">
+        <!-- Step Navigation -->
+        <div class="flex justify-center items-center mb-6">
+          <div class="flex items-center">
+            <button
+              (click)="goToPage(1)"
+              class="w-10 h-10 mx-2 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none"
+              [ngClass]="{ 'bg-indigo-600 text-white shadow-md': currentPage === 1, 'bg-gray-200 text-gray-700 hover:bg-gray-300': currentPage !== 1 }"
+            >
+              1
+            </button>
+            <div class="h-1 w-12 bg-gray-200" [ngClass]="{'bg-indigo-400': currentPage === 2}"></div>
+            <button
+              (click)="goToPage(2)"
+              class="w-10 h-10 mx-2 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none"
+              [ngClass]="{ 'bg-indigo-600 text-white shadow-md': currentPage === 2, 'bg-gray-200 text-gray-700 hover:bg-gray-300': currentPage !== 2 }"
+            >
+              2
+            </button>
+          </div>
+        </div>
+  
+        <!-- Quiz Content -->
+        <section>
+            <div class="p-4">
+                <!-- Date and Time -->
+                <div class="mb-2">
+                  <p class="text-[11px] text-gray-500 font-medium">        
+                      {{ startDate.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }} - {{ startTime }}</p>                
+                </div>
+                <!-- Title -->
+                <h1 class="text-2xl font-bold text-indigo-800 mb-4">Test D'évaluation</h1>
+              
+                <!-- Card -->
+                <div class="mb-6 p-4 bg-indigo-50 border-l-4 border-indigo-500 rounded-lg shadow-sm">
+                  <p class="font-bold text-indigo-800">Merci d'avoir participé</p>
+                  <p class="text-gray-700 mt-1">
+                    Veuillez répondre à cette question avant de passer à l'étape suivante.
+                  </p>
+                </div>
+                           
+  
+          <!-- Quiz Questions (Page 1) -->
+          <div *ngIf="currentPage === 1" class="p-6 bg-white rounded-lg shadow-sm">
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-indigo-700 mb-3">Quiz 1: Notions de Base en Programmation</h3>
+              <div class="space-y-3">
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz1" value="10" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">A) 10</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz1" value="37" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">B) 37</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz1" value="Erreur de syntaxe" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">C) Erreur de syntaxe</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz1" value="null" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">D) null</span>
+                </label>
+              </div>
+            </div>
+  
+            <!-- Quiz 2 -->
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-indigo-700 mb-3">Quiz 2: Concepts de Réseau</h3>
+              <div class="space-y-3">
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz2" value="127.0.0.1" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">A) 127.0.0.1</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz2" value="192.168.0.1" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">B) 192.168.0.1</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz2" value="8.8.8.8" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">C) 8.8.8.8</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz2" value="255.255.255.0" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">D) 255.255.255.0</span>
+                </label>
+              </div>
+            </div>
+  
+            <!-- Quiz 3 -->
+            <div class="mb-4">
+              <h3 class="text-lg font-semibold text-indigo-700 mb-3">Quiz 3: Sécurité Informatique</h3>
+              <div class="grid grid-cols-2 gap-4">
+                <button
+                  class="bg-white border border-indigo-200 hover:bg-indigo-50 rounded-lg py-3 px-4 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
+                >
+                  A) Antivirus
+                </button>
+                <button
+                  class="bg-white border border-indigo-200 hover:bg-indigo-50 rounded-lg py-3 px-4 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
+                >
+                  B) Spyware
+                </button>
+                <button
+                  class="bg-white border border-indigo-200 hover:bg-indigo-50 rounded-lg py-3 px-4 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
+                >
+                  C) Firewall
+                </button>
+                <button
+                  class="bg-white border border-indigo-200 hover:bg-indigo-50 rounded-lg py-3 px-4 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
+                >
+                  D) Proxy
+                </button>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Quiz Questions (Page 2) -->
+          <div *ngIf="currentPage === 2" class="p-6 bg-white rounded-lg shadow-sm">
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-indigo-700 mb-3">Quiz 4: Systèmes d'Exploitation</h3>
+              <div class="space-y-3">
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz4" value="Windows" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">A) Windows</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz4" value="MacOS" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">B) MacOS</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz4" value="Linux" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">C) Linux</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz4" value="Android" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">D) Android</span>
+                </label>
+              </div>
+            </div>
+  
+            <div class="mb-6">
+              <h3 class="text-lg font-semibold text-indigo-700 mb-3">Quiz 5: Langages de Programmation</h3>
+              <div class="space-y-3">
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz5" value="Java" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">A) Java</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz5" value="Python" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">B) Python</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz5" value="C++" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">C) C++</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz5" value="JavaScript" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">D) JavaScript</span>
+                </label>
+              </div>
+            </div>
+  
+            <div class="mb-4">
+              <h3 class="text-lg font-semibold text-indigo-700 mb-3">Quiz 6: Bases de Données</h3>
+              <div class="space-y-3">
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz6" value="MySQL" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">A) MySQL</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz6" value="PostgreSQL" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">B) PostgreSQL</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz6" value="MongoDB" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">C) MongoDB</span>
+                </label>
+                <label class="flex items-center p-3 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer">
+                  <input type="radio" name="quiz6" value="SQLite" class="form-radio h-5 w-5 text-indigo-600" />
+                  <span class="ml-3 text-gray-800">D) SQLite</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div> 
+        </section>
+  
+        <div class="flex justify-end mt-6">
+            <button (click)="showPopup()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                Envoyer
+            </button>
+        </div>
+    </div>
+    </main>  
+    <!-- Popup de confirmation -->
+    <div class="fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300"
+         [ngClass]="{'opacity-0 pointer-events-none': !isPopupVisible, 'opacity-100': isPopupVisible}">
+      <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300"></div>
+      <div class="bg-white rounded-xl shadow-2xl p-8 relative z-10 w-full max-w-md transform transition-all duration-300"
+           [ngClass]="{'scale-95 opacity-0': !isPopupVisible, 'scale-100 opacity-100': isPopupVisible}">
+        <!-- Close Button (X) -->
+        <button (click)="closePopup()"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button> 
+        
+        <!-- Message Section -->
+        <div class="flex flex-col items-center mb-6">
+          <!-- Success Icon -->
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">Quiz terminé avec succès</h3>
+          <p class="text-gray-600 text-center">
+            Votre quiz a été soumis. Vous recevrez votre note par e-mail prochainement.
+          </p>
+        </div>
+        
+        <!-- Button Section -->
+        <div class="flex justify-center">
+          <button (click)="closePopup()"
+                  class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-300 w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+            Continuer
+          </button>
+        </div>
+      </div>
+    </div>
+</div>    

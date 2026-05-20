@@ -1,0 +1,64 @@
+<section class="bi-page">
+  <header class="bi-header">
+    <div>
+      <h1>Dashboard BI Find-Me</h1>
+      <p>Pilotage des utilisateurs, missions, competences et evaluations via Metabase (liens externes — pas d’iframe, donc pas de blocage CSP).</p>
+    </div>
+    <div class="bi-actions">
+      <span class="status-badge" [class.connected]="healthState === 'connected'" [class.unavailable]="healthState === 'unavailable'">
+        <span class="dot"></span>
+        {{ healthMessage }}
+      </span>
+      <button type="button" class="open-btn" (click)="openMetabaseHome()">Ouvrir Metabase</button>
+    </div>
+  </header>
+
+  <div class="connection-box">
+    <button type="button" class="collapse-btn" (click)="toggleConnectionInfo()">
+      Info connexion
+      <span>{{ showConnectionInfo ? '▲' : '▼' }}</span>
+    </button>
+    <div *ngIf="showConnectionInfo" class="connection-content">
+      <p><strong>URL:</strong> {{ connectionInfo.url }}</p>
+      <p><strong>Acces:</strong> {{ connectionInfo.accessNote }}</p>
+      <p><strong>MySQL BI:</strong> {{ connectionInfo.mysqlUser }}</p>
+    </div>
+  </div>
+
+  <article class="dashboard-wrapper">
+    <h2>Tableau de bord complet</h2>
+    <div class="metabase-link-panel">
+      <p class="panel-lead">
+        Metabase interdit l’integration en iframe par defaut (<code>frame-ancestors 'none'</code>). Ouvrez le dashboard dans un nouvel onglet.
+      </p>
+      <button type="button" class="open-btn primary" (click)="openDashboard()">Ouvrir le dashboard #{{ dashboardId }}</button>
+      <p class="muted-url">{{ dashboardAbsoluteUrl }}</p>
+    </div>
+  </article>
+
+  <div class="bi-layout">
+    <aside class="tabs">
+      <button
+        *ngFor="let tab of tabs"
+        type="button"
+        class="tab-btn"
+        [class.active]="selectedTabKey === tab.key"
+        (click)="selectTab(tab.key)">
+        {{ tab.label }}
+      </button>
+    </aside>
+
+    <section class="reports">
+      <h2>{{ selectedTab.label }}</h2>
+      <div class="cards-grid">
+        <article class="report-card" *ngFor="let cardId of selectedTab.cardIds">
+          <h3>Carte #{{ cardId }}</h3>
+          <div class="card-actions">
+            <button type="button" class="card-open-btn" (click)="openQuestion(cardId)">Ouvrir dans Metabase</button>
+            <span class="muted-url small">{{ questionAbsoluteUrl(cardId) }}</span>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</section>

@@ -1,0 +1,371 @@
+<div
+  class="container mx-auto p-4"
+>
+
+  <!-- Status Count Cards utilisatuer -->
+  <div *ngIf="missionId === ''" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <!-- PENDING -->
+    <div *ngIf="this.role==='ADMIN'" class="bg-white rounded-lg shadow-md p-4 flex items-center justify-between transition-transform duration-500 hover:scale-105">
+      <div class="flex items-center gap-2">
+        <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" stroke-width="2"
+          viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="text-gray-700 font-semibold">PENDING</span>
+      </div>
+      <span class="text-blue-500 text-2xl font-bold animate-pulse">{{ countByStatus['PENDING'] }}</span>
+    </div>
+  
+    <!-- ACTIVE -->
+ <div class="bg-white rounded-lg shadow-md p-4 flex flex-col gap-1 transition-transform duration-500 hover:scale-105">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" stroke-width="2"
+        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M5 13l4 4L19 7"></path>
+      </svg>
+      <span class="text-gray-700 font-semibold">ACTIVE</span>
+    </div>
+    <span class="text-green-500 text-2xl font-bold animate-pulse">{{ countByStatus['ACTIVE'] }}</span>
+  </div>
+  <p class="text-sm text-gray-500 pl-8">Membre actuellement actif.</p>
+</div>
+
+  
+    <!-- INACTIVE -->
+<div class="bg-white rounded-lg shadow-md p-4 flex flex-col gap-1 transition-transform duration-500 hover:scale-105">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" stroke-width="2"
+        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+      <span class="text-gray-700 font-semibold">ARCHIVÉ</span>
+    </div>
+    <span class="text-red-500 text-2xl font-bold animate-pulse">{{ countByStatus['INACTIVE'] }}</span>
+  </div>
+  <p class="text-sm text-gray-500 pl-8">Membre inactif.</p>
+</div>
+
+  </div>
+  <!-- Count Candidature -->
+<!-- Status Count Cards -->
+<div *ngIf="missionId != ''" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+  <!-- ENCOURS -->
+  <div class="bg-white rounded-lg shadow-md p-4 flex items-center justify-between transition-transform duration-500 hover:scale-105">
+    <div class="flex items-center gap-2">
+      <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" stroke-width="2"
+        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <span class="text-gray-700 font-semibold">En cours</span>
+    </div>
+    <span class="text-blue-500 text-2xl font-bold animate-pulse">{{ countByStatusCandidature['ENCOURS'] }}</span>
+  </div>
+
+  <!-- ACCEPTER -->
+  <div class="bg-white rounded-lg shadow-md p-4 flex items-center justify-between transition-transform duration-500 hover:scale-105">
+    <div class="flex items-center gap-2">
+      <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" stroke-width="2"
+        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M5 13l4 4L19 7"></path>
+      </svg>
+      <span class="text-gray-700 font-semibold">Acceptées</span>
+    </div>
+    <span class="text-green-500 text-2xl font-bold animate-pulse">{{ countByStatusCandidature['ACCEPTER'] }}</span>
+  </div>
+
+  <!-- REFUSER -->
+  <div class="bg-white rounded-lg shadow-md p-4 flex items-center justify-between transition-transform duration-500 hover:scale-105">
+    <div class="flex items-center gap-2">
+      <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" stroke-width="2"
+        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+      <span class="text-gray-700 font-semibold">Refusées</span>
+    </div>
+    <span class="text-red-500 text-2xl font-bold animate-pulse">{{ countByStatusCandidature['REFUSER'] }}</span>
+  </div>
+</div>
+
+
+
+  <!-- Filters -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      (input)="applyFilter()"
+      placeholder="Rechercher par nom, e-mail"
+      class="form-control w-full sm:w-3/4 px-4 py-2 border rounded-lg"
+    />
+
+
+   <button *ngIf="(userRole!='ESN_COMMERCIAL' && accountRole==='ESN_COMMERCIAL') || accountRole==='ESN_ADMIN'" class="rechercher-btn ml-12"(click)="openAjouterPopUp()">Inviter</button>
+
+   
+ <div *ngIf="userRole!='ESN_COMMERCIAL' && (accountRole==='ESN_ADMIN' || accountRole==='ESN_COMMERCIAL')" class="relative w-full sm:w-1/4">
+  <!-- The dropdown button -->
+  <div 
+    (click)="toggleUserDropdown()" 
+    class="border rounded px-4 py-2 cursor-pointer bg-white flex justify-between items-center"
+  >
+    <span>
+      {{ selectedUser ? (selectedUser.firstName + ' ' + selectedUser.lastName) : 'Inviter par' }}
+    </span>
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+    </svg>
+  </div>
+
+  <!-- Dropdown panel -->
+  <div 
+    *ngIf="userDropdownOpen" 
+    class="absolute z-50 mt-1 w-full bg-white border rounded shadow max-h-60 overflow-auto"
+  >
+    <!-- Search input -->
+    <input 
+      type="text" 
+      placeholder="Rechercher..."
+      [(ngModel)]="userSearchTerm"
+      (input)="filterUserOptions()"
+      class="w-full border-b px-3 py-2 focus:outline-none"
+    />
+
+    <!-- Options list -->
+    <ul class="max-h-48 overflow-auto">
+      <!-- Add "All" option at the top -->
+      <li 
+        (click)="selectUser(null)"
+        class="border rounded px-4 py-2 cursor-pointer bg-white flex justify-between items-center" 
+      >
+        Tous
+      </li>
+      
+      <li 
+        *ngFor="let user of filteredUserOptions" 
+        (click)="selectUser(user)" 
+        class="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+      >
+        {{ user.firstName }} {{ user.lastName }} <small *ngIf="user.role">({{ user.role.role }})</small>
+      </li>
+      <li *ngIf="filteredUserOptions.length === 0" class="px-4 py-2 text-gray-500">Aucun résultat</li>
+    </ul>
+  </div>
+</div>
+
+
+    <select *ngIf="missionId === ''"
+      [(ngModel)]="statusFilter"
+      (change)="applyFilter()"
+      class="form-control w-full sm:w-1/4 px-4 py-2 border rounded-lg"
+    >
+      <option value="">Status des membres</option>
+      <option  *ngIf="this.role==='ADMIN'" value="PENDING">PENDING</option>
+      <option value="ACTIVE">ACTIVE</option>
+      <option value="INACTIVE">ARCHIVÉ</option>
+    </select>
+    
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="flex flex-col items-center justify-center my-12 space-y-4">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
+    <p class="text-lg font-semibold text-gray-700 animate-pulse">Chargement des utilisateurs...</p>
+  </div>
+<!-- Empty State -->
+<div *ngIf="!isLoading && filteredUsers.length === 0" class="flex flex-col items-center justify-center py-12">
+  <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+  </svg>
+  <h3 class="mt-4 text-lg font-medium text-gray-900">Aucun utilisateur trouvé</h3>
+</div>
+  <!-- User Cards Grid -->
+  <div *ngIf="!isLoading" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+
+<div 
+  *ngFor="let user of paginatedUsers; let i = index"
+  class="w-full px-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700"
+  [class.pt-8]="missionId != ''">
+      <div  class="flex justify-end px-4 pt-4 relative">
+        <button
+        *ngIf="missionId === ''"
+          (click)="toggleDropdown(i)"
+          class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none rounded-lg text-sm p-1.5"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 16 3" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
+          </svg>
+        </button>
+
+        <div 
+          *ngIf="activeDropdown === i "
+          class="absolute top-10 right-4 z-20 w-44 bg-white rounded-lg shadow dark:bg-gray-700"
+        >
+          <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
+            <li>
+              <button
+              class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white w-full " style="text-align: left;"
+              (click)="updateUserStatus(user.id, 'INACTIVE'); activeDropdown = null">
+              Archiver
+            </button>
+              <button
+              class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white w-full " style="text-align: left;"
+              (click)="updateUserStatus(user.id, 'ACTIVE'); activeDropdown = null">
+              Activer
+            </button>
+<button
+  class="block px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900 dark:text-red-400 w-full" 
+  style="text-align: left;"
+  (click)="supprimeUser(user.id); activeDropdown = null">
+  Supprimer
+</button>
+            </li>
+             </ul>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center pb-10">
+        <img *ngIf="user.imageProfile"
+          class="w-24 h-24 mb-3 rounded-full shadow-lg"
+          [src]="user.imageProfile"
+          alt="User image"
+        />
+        <img *ngIf="!user.imageProfile"
+          class="w-24 h-24 mb-3 rounded-full shadow-lg"
+          [src]="'https://ui-avatars.com/api/?name=' + user.name + '&background=random'"
+          alt="User image"
+        />
+        <span *ngIf="missionId===''" class="text-sm text-gray-500 dark:text-gray-400">({{ user.role }})</span>
+        <h5 class="mb-1 text-xl font-medium text-gray-900 dark:text-white">{{ user.name }}</h5>
+        <span class="text-sm text-gray-500 dark:text-gray-400">{{ user.email }}</span>
+        <span class="text-sm text-gray-500 dark:text-gray-400">{{ user.numTelephone }}</span>
+        
+        <!-- <span *ngIf="missionId===''" class="text-sm text-gray-500 dark:text-gray-400">{{ user.status }}</span> -->
+
+        
+        <!-- <span *ngIf="missionId!=''" class="text-sm text-gray-500 dark:text-gray-400">{{ user.candidature?.statutCandidature }}</span> -->
+    
+<span *ngIf="missionId !== ''" class="text-sm text-gray-500 dark:text-gray-400 mt-2 mb-3">
+  <select
+    [ngModel]="user.candidature?.statutCandidature"
+    (ngModelChange)="onStatusChange($event, user)"
+    [ngClass]="{
+      'statut-encours': user.candidature?.statutCandidature === 'ENCOURS',
+      'statut-accepter': user.candidature?.statutCandidature === 'ACCEPTER',
+      'statut-refuser': user.candidature?.statutCandidature === 'REFUSER'
+    }"
+    class="border rounded px-4 py-1 text-sm font-semibold">
+    <option value="ENCOURS">En cours</option>
+    <option value="ACCEPTER">Accepté</option>
+    <option value="REFUSER">Refusé</option>
+  </select>
+</span>
+         <button *ngIf="missionId !== ''"
+  (click)="viewDossierCompethence(user.candidature?.dossiercompetence!, user.candidature?.idCandidat!)"
+  class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#5A3FC9] rounded-lg hover:bg-[#3C1DA5] focus:outline-none"
+>
+  Voir Dossier de compétence
+</button>
+
+        
+        <div  *ngIf="missionId===''" class="flex mt-4 md:mt-6" style="gap: 0.2vw;">
+          <button
+            (click)="viewProfile(user.id,user.email)"
+            class="btn-espace inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#5A3FC9] rounded-lg hover:bg-[#3C1DA5] focus:outline-none"
+          >
+            Voir Profil
+          </button>
+                    <button *ngIf="user.role==='ESN_ADMIN'||user.role==='ESN_COMMERCIAL'||user.role==='INGENIEURDAFFAIRE'"
+            (click)="viewContrat(user.id,user.email,'Mission publier')"
+            class="btn-espace inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#5A3FC9] rounded-lg hover:bg-[#3C1DA5] focus:outline-none"
+          >
+            Espace Mission
+          </button>
+                    <button *ngIf="user.role==='ESN_ADMIN'||user.role==='CHARGEDERECRUTEMENT'"
+            (click)="viewContrat(user.id,user.email,'Offres publier')"
+            class="btn-espace inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-[#5A3FC9] rounded-lg hover:bg-[#3C1DA5] focus:outline-none"
+          >
+            Espace Offre
+          </button>
+        </div>
+                <div class="flex mt-4 md:mt-6">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="flex justify-center items-center my-4 gap-3">
+    <button
+      (click)="changePage(currentPage - 1)"
+      [disabled]="currentPage === 1"
+      class="px-4 py-2 bg-[#5A3FC9] text-white rounded-lg hover:bg-[#3C1DA5] disabled:bg-gray-300"
+    >
+      Prev
+    </button>
+
+    <span class="px-3 py-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+      Page {{ currentPage }} of {{ totalPages() }}
+    </span>
+
+    <button
+      (click)="changePage(currentPage + 1)"
+      [disabled]="currentPage === totalPages()"
+      class="px-4 py-2 bg-[#5A3FC9] text-white rounded-lg hover:bg-[#3C1DA5] disabled:bg-gray-300"
+    >
+      Next
+    </button>
+  </div>
+</div>
+<div  class="notification-container "  *ngIf="ajouter_employer">
+    <!-- Bouton Fermer -->
+  <button
+    (click)="ajouter_employer = false"
+    class="absolute top-10 right-10 text-white hover:text-red-600  focus:outline-none" style="font-size: xx-large !important"
+  >
+    &times;
+  </button>
+<app-inviter-employer-esn [userRole]="userRole" [id_societer]="this.id_societer!"></app-inviter-employer-esn>
+
+</div>
+<div class="notification-container-2 relative" *ngIf="profile">
+  <button (click)="profile = false" class="absolute top-8 right-16  text-white hover:text-red-600 focus:outline-none text-xl" style="
+    right: 14vw;
+"
+  > 
+    &times;
+  </button>
+  <app-profil [profileId]="profileId" [profileEmail]="profileEmail" [profileRole]="this.userRole"></app-profil>
+</div> 
+
+<div class="notification-container-3 relative" *ngIf="contrat">
+  <button (click)="contrat = false" class="absolute top-8 right-16  text-white hover:text-red-600 focus:outline-none text-xl" style="
+    right: 14vw;
+"
+  > 
+    &times;
+  </button>
+  <app-missions-page [profileId]="this.profileId" [espace]="this.espace"></app-missions-page>
+  </div>
+
+<div class="notification-container" *ngIf="this.visible"> 
+  <button (click)="this.visible= false" class="absolute top-8 right-16  text-white hover:text-red-600 focus:outline-none text-xl" style="
+    right: 14vw;
+"
+  > 
+    &times;
+  </button>
+    <app-dossier-competences 
+    (visible)="handDossierCompethenceVisibility($event)" 
+    [espace]="this.espace"
+    [profileId]="selectedDossierCandidatId"
+    [dossierIds]="selectedDossierIds"> 
+  </app-dossier-competences>
+</div> 

@@ -1,0 +1,366 @@
+.job-card {
+  
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: background-color 0.3s ease;
+
+  &.selected {
+    background-color: #f4f7fe; // Light gray background when selected
+  }
+
+  &:hover {
+    cursor: pointer;
+    background-color: #f4f7fe; // Same as selected background on hover
+  }
+
+  .job-card-left {
+    display: flex;
+    align-items: center;
+
+    .job-logo {
+      width: 50px;
+      height: 50px;
+      min-width: 50px;
+      min-height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 16px;
+      background-color: #f2f4f7;
+      display: block;
+    }
+
+    .job-details {
+      display: flex;
+      flex-direction: column;
+
+      .job-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #101828;
+        margin-bottom: 4px;
+      }
+
+      .job-company,
+      .job-location,
+      .job-salary {
+        font-size: 14px;
+        color: #667085;
+        margin-bottom: 2px;
+
+        &:last-child {
+          margin-bottom: 0; // Remove bottom margin for the last detail
+        }
+      }
+    }
+  }
+
+  .job-card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    .job-ref {
+      font-size: 12px;
+      color: #667085;
+      margin-bottom: 8px; // Space between ref and type
+    }
+
+    .job-type {
+      font-size: 14px;
+      font-weight: bold;
+      color: #101828;
+      margin-bottom: 8px; // Space between type and experience
+    }
+
+    .job-experience {
+      font-size: 14px;
+      color: #667085;
+      margin-bottom: 12px; // Space between experience and button
+    }
+
+    .view-button {
+      background-color: #6941c6; // Purple button background
+      color: #ffffff; // White text
+      border-radius: 8px; // Rounded corners
+      padding: 8px 16px; // Padding inside the button
+      border: none; // Remove default border
+      font-size: 14px; // Button text size
+      cursor: pointer;
+
+      &:hover {
+        background-color: #53389e; // Darker purple on hover
+        transition: background-color 0.3s ease; // Smooth hover effect
+      }
+    }
+  }
+}
+.notification-container {
+padding-left: 12vw !important;
+z-index: 10;
+padding-top: 3vw;
+margin-top: 3vw !important;
+position: fixed;
+top: 0;
+right: 0;
+bottom: 0;
+left: 0;
+background-color: rgba(31, 41, 55, 0.5); /* Gray with 50% opacity */
+overflow-y: auto;
+height: 100%;
+width: 100%;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+.candidature-existante {
+  color: green;
+  font-weight: bold;
+  margin-top: 4px;
+  margin-left: 10px;
+  font-size:smaller;
+}
+
+.notification-container-3 {
+      z-index: 9;
+  padding-bottom: 2vw;
+  padding-right: 14svw;
+  padding-top: 4vw;
+  padding-left: 10vw;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 10vw; /* 30% de la largeur de l'écran (viewport width) */
+  background-color: rgba(31, 41, 55, 0.5); /* gris foncé semi-transparent */
+  overflow-y: auto;
+  width: 100vw; /* prend 70% de la largeur de l'écran */
+  height: 100vh; /* prend toute la hauteur de l'écran */
+  margin-top: 4vw; /* au lieu de 4%, utilisons des unités rem */
+  margin-right: 100;
+}
+
+
+
+// new scss with contatct in the cart
+
+// .job-card {
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
+//   background-color: #ffffff;
+//   border-radius: 8px;
+//   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+//   padding: 16px;
+//   margin-bottom: 16px;
+//   transition: background-color 0.3s ease;
+
+//   &.selected {
+//     background-color: #f4f7fe;
+//   }
+
+//   &:hover {
+//     cursor: pointer;
+//     background-color: #f4f7fe;
+//   }
+
+//   .job-card-left {
+//     display: flex;
+//     align-items: center;
+
+//     .job-logo {
+//       width: 50px;
+//       height: 50px;
+//       border-radius: 50%;
+//       object-fit: cover;
+//       margin-right: 16px;
+//     }
+
+//     .job-details {
+//       display: flex;
+//       flex-direction: column;
+
+//       .job-title {
+//         font-size: 16px;
+//         font-weight: bold;
+//         color: #101828;
+//         margin-bottom: 4px;
+//       }
+
+//       .job-poste,
+//       .job-location,
+//       .job-salary {
+//         font-size: 14px;
+//         color: #667085;
+//         margin-bottom: 2px;
+//       }
+//     }
+//   }
+
+//   .job-card-right {
+//     display: flex;
+//     flex-direction: column;
+//     align-items: flex-end;
+
+//     .job-ref {
+//       font-size: 12px;
+//       color: #667085;
+//       margin-bottom: 8px;
+//     }
+
+//     .job-type {
+//       font-size: 14px;
+//       font-weight: bold;
+//       color: #101828;
+//       margin-bottom: 8px;
+//     }
+
+//     .job-experience {
+//       font-size: 14px;
+//       color: #667085;
+//       margin-bottom: 12px;
+//     }
+
+//     .view-button {
+//       background-color: #6941c6;
+//       color: #ffffff;
+//       border-radius: 8px;
+//       padding: 8px 16px;
+//       border: none;
+//       font-size: 14px;
+//       cursor: pointer;
+
+//       &:hover {
+//         background-color: #53389e;
+//         transition: background-color 0.3s ease;
+//       }
+//     }
+//   }
+// }
+
+// .notification-container,
+// .notification-container-3 {
+//   z-index: 10;
+//   padding: 8vw 10vw;
+//   position: fixed;
+//   top: 0;
+//   right: 0;
+//   bottom: 0;
+//   left: 0;
+//   background-color: rgba(31, 41, 55, 0.5);
+//   overflow-y: auto;
+//   height: 100vh;
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+// }
+
+// .candidature-existante {
+//   color: green;
+//   font-weight: bold;
+//   margin-top: 4px;
+//   margin-left: 10px;
+//   font-size: smaller;
+// }
+
+// .contact-form-modal {
+//   background-color: white;
+//   padding: 24px;
+//   border-radius: 12px;
+//   max-width: 500px;
+//   width: 100%;
+//   text-align: center;
+//   position: relative;
+//   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+
+//   .header {
+//     display: flex;
+//     align-items: center;
+//     gap: 16px;
+//     margin-bottom: 16px;
+
+//     .company-logo {
+//       width: 50px;
+//       height: 50px;
+//       object-fit: cover;
+//       border-radius: 50%;
+//     }
+
+//     h2 {
+//       font-size: 1.2rem;
+//       margin: 0;
+//     }
+//   }
+
+//   textarea {
+//     width: 100%;
+//     padding: 12px;
+//     border-radius: 8px;
+//     border: 1px solid #ccc;
+//     resize: vertical;
+//     margin-bottom: 12px;
+//   }
+
+//   .send-button {
+//     background-color: #0078fe;
+//     color: white;
+//     border: none;
+//     padding: 10px 20px;
+//     border-radius: 8px;
+//     cursor: pointer;
+
+//     &:hover {
+//       background-color: #005bb5;
+//     }
+
+//     &:disabled {
+//       background-color: #8cb3e8;
+//       cursor: not-allowed;
+//     }
+//   }
+
+// }
+
+.contact-button {
+  background-color: #6941c6; // Même violet que le bouton "Voir plus"
+  color: #ffffff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(105, 65, 198, 0.2);
+  min-width: 110px;
+  text-align: center;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  i {
+    font-size: 14px;
+  }
+
+  &:hover {
+    background-color: #53389e;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(83, 56, 158, 0.25);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(105, 65, 198, 0.3);
+  }
+}
+
+
+
+

@@ -1,0 +1,82 @@
+<div class="favorites-container">
+  <!-- Status Count Cards -->
+  <div class="grid grid-cols-1 mb-6">
+     <!-- Favoris -->
+     <div class="stats-card">
+        <div class="stats-card-content">
+           <div class="stats-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+              </svg>
+           </div>
+           <div class="stats-info">
+              <h3 class="stats-title">Mes {{this.espace}}s favorites</h3>
+              <p class="stats-description">{{this.espace}}s que vous avez ajoutées à votre liste de favoris</p>
+           </div>
+        </div>
+        <div class="stats-count">
+           <span>{{ countFavoris }}</span>
+        </div>
+     </div>
+  </div>
+
+  <app-search-filter></app-search-filter>
+  <!-- Message si aucune offre favorite -->
+<div class="no-favorites" *ngIf="!isLoading && favorites.length === 0">
+  <i class="far fa-heart"></i>
+  <p>Vous n’avez encore ajouté aucune annonce à vos favoris dans cette catégorie.</p>
+</div>
+<div *ngIf="isLoading" class="flex flex-col items-center justify-center my-12 space-y-4">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
+    <p class="text-lg font-semibold text-gray-700 animate-pulse">Chargement des annonces...</p>
+  </div>
+  <div class="job-cards-container">
+    <div class="job-card" *ngFor="let job of favorites">
+      <div class="job-card-left">
+        <img [src]="job.logo" alt="Logo" class="job-logo" />
+        <div class="job-details">
+          <h3 class="job-title">{{ job.title }}</h3>
+          <p class="job-company">{{ job.company }}</p>
+          <div class="location-info">
+            <i class="fas fa-map-marker-alt"></i>
+            <p class="job-location">{{ job.pays }}, {{ job.ville }}</p>
+          </div>
+          <div class="salary-info">
+            <i class="fas fa-money-bill-wave"></i>
+            <p class="job-salary">{{ job.salary }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="job-card-right">
+        <div class="favorite-icon active" (click)="removeFavorite(job.id)" title="Retirer des favoris">
+          <i class="fas fa-heart remove-heart"></i>
+        </div>
+        <p class="job-ref">Réf: {{ job.ref }}</p>
+        <p class="job-type">{{ job.type }}</p>
+        <p class="job-experience">{{ job.experience }} d'expériences </p>
+        <button class="view-button" (click)="viewMission(job.id)" >Voir plus</button>
+      </div>
+    </div>
+  </div>
+  
+  
+  <!-- Message si aucune offre favorite -->
+  <div class="no-favorites" *ngIf="false">
+    <i class="far fa-heart"></i>
+    <p>Vous n’avez encore sélectionné aucune offre comme favorite.</p>
+    <button class="browse-button">Parcourir les offres</button>
+  </div>
+  
+  <!-- Notification toast pour la suppression -->
+  <div class="notification-toast" [class.show]="showNotification">
+    <div class="notification-content">
+      <div class="notification-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="notification-message">
+        <p class="notification-title">Supprimé des favoris</p>
+        <p class="notification-desc">Votre offre avec la réf: {{ removedJobRef }} a été supprimée avec succès</p>
+      </div>
+    </div>
+  </div>
+</div>

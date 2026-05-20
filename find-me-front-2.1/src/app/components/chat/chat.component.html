@@ -1,0 +1,41 @@
+<div class="chat-toggle" (click)="toggleChat()" *ngIf="!isOpen">
+  💬
+</div>
+
+<div class="chat-wrapper" *ngIf="isOpen">
+  <div class="chat-header">
+    <div class="user-info">
+      <div class="avatar">{{ getInitials(receiverId) }}</div>
+      <div class="username">Chat avec ID {{ receiverId }}</div>
+    </div>
+    <button class="close-btn" (click)="toggleChat()">✖</button>
+  </div>
+
+  <div id="chat-messages" class="chat-body">
+    <ng-container *ngFor="let group of groupMessagesByDate(messages)">
+      <div class="date-divider">{{ group.date }}</div>
+      <div *ngFor="let msg of group.messages" class="message-row" [ngClass]="{ 'sent': msg.senderId === userId, 'received': msg.senderId !== userId }">
+        <div class="message-bubble">
+          <div class="message-content">{{ msg.content }}</div>
+          <div class="timestamp">{{ msg.timestamp | date:'shortTime' }}</div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <div class="chat-footer">
+    <button class="emoji-btn" (click)="toggleEmojiPicker()" type="button">😊</button>
+    <input
+      [(ngModel)]="messageContent"
+      placeholder="Écris un message..."
+      (keyup.enter)="sendMessage()"
+    />
+<button (click)="sendMessage()" [disabled]="!messageContent.trim()" class="send-btn">
+  <i class="fas fa-paper-plane"></i>
+</button>
+  </div>
+
+  <div *ngIf="showEmojiPicker" class="emoji-picker-container">
+    <emoji-mart (emojiSelect)="addEmoji($event)"></emoji-mart>
+  </div>
+</div>

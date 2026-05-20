@@ -1,0 +1,85 @@
+<!-- upload-cv-card.component.html -->
+<div class="upload-cv-container">
+  <div class="upload-card">
+    <div class="card-header">
+      <h2>Commencer à partir du CV PDF</h2>
+      <p>Si vous avez déjà un CV PDF, vous pouvez l'utiliser pour créer rapidement votre profil Find Me.</p>
+    </div>
+
+    <!-- Upload Area -->
+    <div class="upload-area" 
+         [ngClass]="{'active-drag': isDragging, 'has-file': selectedFile}"
+         (dragover)="onDragOver($event)" 
+         (dragleave)="onDragLeave($event)" 
+         (drop)="onDrop($event)">
+      
+      <div class="upload-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+        </svg>
+      </div>
+      
+      <div class="upload-content">
+        <p>Glissez-déposez votre fichier ici ou</p>
+        <button class="btn-select-file" (click)="triggerFileInput()">
+          Sélectionner un fichier
+        </button>
+        <p class="file-info">Formats acceptés: PDF. Taille maximale: 20 Mo.</p>
+      </div>
+      
+      <input type="file" class="hidden" (change)="onFileSelected($event)" accept=".pdf" #fileInput>
+    </div>
+
+    <!-- Selected File -->
+    <div *ngIf="selectedFile" class="selected-file">
+      <div class="file-preview">
+        <div class="file-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M7 3C5.9 3 5 3.9 5 5v14c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V7.4L13.6 3H7zm0 2h6v4h4v10H7V5zm9 1.4L17.4 8H16V6.4z"/>
+          </svg>
+        </div>
+        <div class="file-details">
+          <span class="file-name">{{ selectedFile.name }}</span>
+          <span class="file-size">{{ (selectedFile.size / 1024 / 1024).toFixed(2) }} Mo</span>
+        </div>
+        <button class="btn-remove-file" (click)="removeFile()">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="progress-container">
+        <div class="progress-bar" [style.width.%]="uploadProgress"></div>
+      </div>
+      <p>Analyse du CV en cours... {{ uploadProgress }}%</p>
+      <p class="loading-info">Nous extrayons les informations pertinentes de votre CV</p>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-message">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+      </svg>
+      <p>{{ errorMessage }}</p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button type="button" class="btn-cancel">
+        Annuler
+      </button>
+      <button 
+        [disabled]="!selectedFile || isLoading"
+        type="button" 
+        class="btn-save"
+        (click)="saveModal()">
+        <span *ngIf="!isLoading">Sauvegarder</span>
+        <span *ngIf="isLoading">Traitement...</span>
+      </button>
+    </div>
+  </div>
+</div>

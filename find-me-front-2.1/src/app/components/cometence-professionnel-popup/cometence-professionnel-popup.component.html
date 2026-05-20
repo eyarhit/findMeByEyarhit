@@ -1,0 +1,88 @@
+<div class="popup-overlay" *ngIf="isOpen" (click)="closePopup()">
+  <div class="popup-content" (click)="$event.stopPropagation()">
+    <div class="experience-form">
+      <div class="header">
+        <h2>Expériences Professionnelles</h2>
+        <div class="close-button-container">
+          <button type="button" class="close-button" (click)="closePopup()">×</button>
+        </div>
+        <span class="add-experience-link" (click)="addExperience()">
+          <i class="fas fa-plus-circle"></i> Ajouter une expérience
+        </span>
+      </div>
+
+      <form [formGroup]="experienceForm" (ngSubmit)="onSubmit()">
+        <div formArrayName="experiences">
+          <div *ngFor="let experience of getExperienceFormArray().controls; let i = index" [formGroupName]="i" class="experience-section">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Date de début</label>
+                <input type="date" formControlName="dateDebut" class="form-control" />
+                <div *ngIf="experience.get('dateDebut')?.invalid && experience.get('dateDebut')?.touched" class="error">Champ requis</div>
+              </div>
+
+              <div class="form-group">
+                <label>Date de fin</label>
+                <input type="date" formControlName="dateFin" class="form-control" />
+                <div *ngIf="experience.get('dateFin')?.invalid && experience.get('dateFin')?.touched" class="error">Champ requis</div>
+              </div>
+
+              <div class="form-group">
+                <label>Poste</label>
+                <input type="text" formControlName="poste" placeholder="Ex: Développeur Full Stack" class="form-control" />
+                <div *ngIf="experience.get('poste')?.invalid && experience.get('poste')?.touched" class="error">Champ requis</div>
+              </div>
+
+              <div class="form-group">
+                <label>Nom du projet</label>
+                <input type="text" formControlName="nomProjet" placeholder="Ex: Refonte du site e-commerce" class="form-control" />
+              </div>
+
+              <div class="form-group">
+                <label>Entreprise</label>
+                <input type="text" formControlName="entreprise" placeholder="Ex: Tech Solutions Inc." class="form-control" />
+                <div *ngIf="experience.get('entreprise')?.invalid && experience.get('entreprise')?.touched" class="error">Champ requis</div>
+              </div>
+
+              <div class="form-group">
+                <label>Client</label>
+                <input type="text" formControlName="client" placeholder="Ex: Retail Company" class="form-control" />
+              </div>
+
+              <div class="form-group">
+                <label>Équipe</label>
+                <textarea formControlName="equipe" placeholder="Composition de l'équipe" class="form-control"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Travail réalisé</label>
+                <textarea formControlName="travailRealise" placeholder="Responsabilités et tâches" class="form-control"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Environnement</label>
+                <textarea formControlName="environnement" placeholder="Technologies utilisées" class="form-control"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Description</label>
+                <textarea formControlName="description" placeholder="Contexte du projet" class="form-control"></textarea>
+              </div>
+            </div>
+
+            <div class="actions">
+              <span class="delete-button" (click)="removeExperience(i)">
+                <i class="fas fa-trash-alt"></i> Supprimer
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="cancel-button" (click)="cancelPopup()">Annuler</button>
+          <button type="submit" class="submit-button">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,122 @@
+<div class="card">
+  <div class="card-header">
+    <h1 class="title">
+      <i [class.fa-file]="typedocument === 'CvFindMe'" 
+         [class.fa-graduation-cap]="typedocument !== 'CvFindMe'"
+         class="fas title-icon"></i>
+      {{ typedocument === 'CvFindMe' ? 'CV FindMe' : 'Diplômes' }}
+    </h1>
+    <button class="add-button" (click)="openFileUpload()">
+      <i class="fas fa-plus"></i>
+    </button>
+  </div>
+  <hr />
+  <div class="card-body">
+    <div class="section-item" *ngFor="let doc of this.documents">
+      <span class="section-title">{{ doc.fileName }}</span>
+      <div class="section-actions">
+        <button class="edit-button" 
+                (click)="confirmDelete(doc.document, doc.fileName)"
+                [disabled]="isDeleting">
+          <i class="fas" [class.fa-trash]="!isDeleting" [class.fa-spinner]="isDeleting" [class.fa-spin]="isDeleting"></i>
+        </button>
+        <a (click)="viewDocument(doc)" class="consult-link"></a>
+      </div>
+    </div>
+    
+    <!-- Show message if no documents -->
+    <div *ngIf="documents.length === 0" class="no-documents">
+      <p>Aucun diplôme trouvé.</p>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showPdf" class="pdf-viewer-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>{{ selectedDocument?.document?.fileName }}</h3>
+      <button (click)="closePdf()" class="close-button">&times;</button>
+    </div>
+    <div class="modal-body">
+      <iframe 
+        [src]="sanitizedPdfSrc" 
+        frameborder="0" 
+        width="100%" 
+        height="500px"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showUploadModal" class="pdf-viewer-modal">
+  <div class="modal-content upload-modal">
+    <div class="modal-header">
+      <h3>Ajouter un diplôme</h3>
+      <button (click)="closeUploadModal()" class="close-button">&times;</button>
+    </div>
+    <div class="modal-body upload-modal-body">
+      <div class="upload-container">
+        <input 
+          type="file" 
+          #fileInput
+          accept="application/pdf" 
+          (change)="onFileSelected($event)" 
+          style="display: none">
+        
+        <div class="upload-area" 
+             (click)="triggerFileInput()" 
+             [class.has-file]="selectedFile"
+             [class.drag-over]="isDragOver"
+             (dragover)="onDragOver($event)" 
+             (dragleave)="onDragLeave($event)"
+             (drop)="onDrop($event)">
+          
+          <div class="upload-icon">
+            <i *ngIf="!selectedFile" class="fas fa-cloud-upload-alt"></i>
+            <i *ngIf="selectedFile" class="fas fa-file-pdf"></i>
+          </div>
+          
+          <div class="upload-text">
+            <h4 *ngIf="!selectedFile">Déposez votre fichier ici</h4>
+            <p *ngIf="!selectedFile">ou cliquez pour sélectionner un fichier PDF</p>
+            <p *ngIf="selectedFile" class="file-name">{{ selectedFile.name }}</p>
+            <p *ngIf="selectedFile" class="file-size">{{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB</p>
+          </div>
+          
+          <button *ngIf="selectedFile" 
+                  type="button" 
+                  class="change-file-btn"
+                  (click)="$event.stopPropagation(); triggerFileInput()">
+            Changer de fichier
+          </button>
+        </div>
+        
+        <div class="upload-actions">
+          <button 
+            class="cancel-button" 
+            (click)="closeUploadModal()"
+            [disabled]="isUploading">
+            Annuler
+          </button>
+          
+          <button 
+            class="upload-button" 
+            [disabled]="!selectedFile || isUploading" 
+            (click)="uploadDocument()">
+            <i *ngIf="isUploading" class="fas fa-spinner fa-spin"></i>
+            <span *ngIf="!isUploading">Importer</span>
+            <span *ngIf="isUploading">Importation en cours...</span>
+          </button>
+        </div>
+        
+        <div *ngIf="isUploading" class="upload-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+          </div>
+          <span class="progress-text">{{ uploadProgress }}%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

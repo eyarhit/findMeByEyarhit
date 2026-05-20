@@ -1,0 +1,73 @@
+<div class="search-filter-container">
+  <div class="search-bar flex items-center p-4 border-b border-gray-200">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-2 text-gray-400">
+      <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+    </svg>
+    <input type="text" [(ngModel)]="searchText" placeholder="Intitulé de poste, mots-clés ou entreprise" (input)="onSearchInput()" class="flex-grow p-2 border rounded focus:outline-none focus:ring focus:border-blue-300">
+   </div>
+
+  <div class="filters p-4">
+    <!-- <select [(ngModel)]="selectedExperience" (change)="onFilterChange()" class="filter-select" style="width: 15%;">
+      <option value="">Experience</option>
+      <option value="2 ans d'expériences">2 ans d'expériences</option>
+      <option value="5 ans d'expériences">5 ans d'expériences</option>
+      <option value="6 ans d'expériences">6 ans d'expériences</option>
+    </select> -->
+        <select [(ngModel)]="typeContrat" class="filter-select" (change)="emitSearchCriteria()" style="width: 15%;">
+  <option  value="">Type contrat</option>
+  <option *ngIf="userRole==='CANDIDAT' || this.userRole==='ESN_ADMIN' || this.userRole==='ESN_COMMERCIAL'" value="CDI">CDI</option>
+  <option *ngIf="userRole==='CANDIDAT' || this.userRole==='ESN_ADMIN' || this.userRole==='ESN_COMMERCIAL'" value="CDD">CDD</option>
+  <option *ngIf="userRole==='FREELANCER' || userRole==='PORTAGE_SALARIAL' || this.userRole==='ESN_ADMIN' || this.userRole==='ESN_COMMERCIAL'" value="FREELANCE">FREELANCE</option>
+  <option *ngIf="userRole==='FREELANCER' || userRole==='PORTAGE_SALARIAL'  || this.userRole==='ESN_ADMIN' || this.userRole==='ESN_COMMERCIAL'" value="MISSION">MISSION</option>
+</select>
+<select *ngIf="targetmarket === 'Francais'" [(ngModel)]="selectedCity" (change)="onFilterChange()" class="filter-select" style="width: 15%;">
+  <option value="">Ville</option>
+  <option>Paris</option>
+  <option>Versailles</option>
+  <option>Boulogne-Billancourt</option>
+  <option>Lyon</option>
+  <option>Grenoble</option>
+  <option>Clermont-Ferrand</option>
+  <option>Marseille</option>
+  <option>Nice</option>
+  <option>Toulon</option>
+  <option>Toulouse</option>
+  <option>Montpellier</option>
+  <option>Nîmes</option>
+  <option>Bordeaux</option>
+  <option>Limoges</option>
+  <option>Poitiers</option>
+</select>
+
+<select *ngIf="targetmarket === 'Tunisien'" [(ngModel)]="selectedCity" (change)="onFilterChange()" class="filter-select" style="width: 15%;">
+  <option value="">Ville</option>
+  <option>Tunis</option>
+  <option>La Marsa</option>
+  <option>Carthage</option>
+  <option>Sfax</option>
+  <option>Sousse</option>
+  <option>Monastir</option>
+  <option>Mahdia</option>
+  <option>Kairouan</option>
+  <option>Gafsa</option>
+  <option>Gabès</option>
+  <option>Tozeur</option>
+  <option>Bizerte</option>
+  <option>Béja</option>
+  <option>Jendouba</option>
+</select>
+
+
+
+    <!-- <select [(ngModel)]="selectedSalary" (change)="onFilterChange()" class="filter-select" style="width: 10%;">
+      <option value="">Salaires</option>
+      <option value="1254">1254</option>
+      <option value="2000">2000+</option>
+    </select> -->
+    <!-- <select [(ngModel)]="selectedSkills" (change)="onFilterChange()" class="filter-select">
+      <option value="">Skills</option>
+      <option value="Angular">Angular</option>
+      <option value="React">React</option>
+    </select> -->
+  </div>
+</div>

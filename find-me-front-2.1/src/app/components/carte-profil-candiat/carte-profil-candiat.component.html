@@ -1,0 +1,139 @@
+<div class="profile-container">
+  <!-- Section photo de profil -->
+  <div class="profile-header">
+    <div class="profile-picture-container">
+      <div class="profile-picture">
+        <button class="add-picture" (click)="triggerFileInput()">
+          <img *ngIf="profilePicture" [src]="profilePicture" alt="Profile" class="add-picture">
+          <i *ngIf="!profilePicture" class="fas fa-user-circle"></i>
+        </button>
+        <button class="camera-button" (click)="triggerFileInput()">
+          <i class="fas fa-camera"></i>
+        </button>
+        <input type="file" id="fileInput" style="display:none" (change)="onFileSelected($event)" accept="image/*" />
+      </div>
+
+      <button *ngIf="selectedFile && !isUploading" (click)="uploadProfilePicture()" class="save-button">
+        <i class="fas fa-save"></i> Enregistrer
+      </button>
+      <div *ngIf="isUploading" class="uploading-indicator">
+        <i class="fas fa-spinner fa-spin"></i> Téléchargement...
+      </div>
+    </div>
+    <div class="profile-name">
+      <h2>{{ profilePrenom }} {{ profileName }}</h2>
+      <p *ngIf="role!='ESN_ADMIN'">{{ formatExperience(totalYears) }}</p>
+      <p *ngIf="role==='ESN_ADMIN'">{{profileSocieter}}</p>
+    </div>
+  </div>
+
+  <!-- Sections d'information -->
+  <div class="info-sections-row">
+    <!-- Informations Personnelles -->
+    <div class="info-section">
+      <div class="info-header">
+        <h3><i class="fas fa-user"></i> Informations Personnelles</h3>
+        <button (click)="editBlock('personal')" class="edit-button">
+          <i class="fas fa-pen"></i>
+        </button>
+      </div>
+      
+      <div *ngIf="isEditingPersonal">
+        <div class="form-group">
+          <input [(ngModel)]="profileName" class="form-control" placeholder="Nom" />
+          <input [(ngModel)]="profilePrenom" class="form-control" placeholder="Prénom" />
+          <!-- <input type="date" [(ngModel)]="profileBirthDate" class="form-control" /> -->
+          <!-- <textarea [(ngModel)]="profileDescription" class="form-control" placeholder="Résumé professionnel"></textarea> -->
+        </div>
+        <button (click)="saveBlock('personal')" class="save-button">
+          <i class="fas fa-save"></i> Enregistrer
+        </button>
+      </div>
+      
+      <div *ngIf="!isEditingPersonal" class="info-content">
+        <div class="info-item">
+          <span class="info-label">Nom:</span>
+          <span class="info-value">{{ profileName }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Prénom:</span>
+          <span class="info-value">{{ profilePrenom }}</span>
+        </div>
+        <!-- <div class="info-item">
+          <span class="info-label">Naissance:</span>
+          <span class="info-value">{{ profileBirthDate}}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Sexe:</span>
+          <span class="info-value">{{ profileDescription }}</span>
+        </div> -->
+      </div>
+    </div>
+
+    <!-- Coordonnées -->
+    <div class="info-section">
+      <div class="info-header">
+        <h3><i class="fas fa-address-book"></i> Coordonnées</h3>
+        <button (click)="editBlock('contact')" class="edit-button">
+          <i class="fas fa-pen"></i>
+        </button>
+      </div>
+      
+      <div *ngIf="isEditingContact">
+        <div class="form-group">
+          <input [(ngModel)]="profileEmail" class="form-control" placeholder="Email" />
+          <input [(ngModel)]="profilePhone" class="form-control" placeholder="Numéro de téléphone" />
+          <!-- <input [(ngModel)]="profileLinkedIn" class="form-control" placeholder="LinkedIn URL" /> -->
+        </div>
+        <button (click)="saveBlock('contact')" class="save-button">
+          <i class="fas fa-save"></i> Enregistrer
+        </button>
+      </div>
+      
+      <div *ngIf="!isEditingContact" class="info-content">
+        <div class="info-item">
+          <span class="info-label">Email:</span>
+          <span class="info-value">
+            <a [href]="'mailto:' + profileEmail">{{ profileEmail }}</a>
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Téléphone:</span>
+          <span class="info-value">{{ profilePhone }}</span>
+        </div>
+        <!-- <div class="info-item">
+          <span class="info-label">LinkedIn:</span>
+          <span class="info-value">
+            <a [href]="profileLinkedIn" target="_blank">Profil LinkedIn</a>
+          </span>
+        </div> -->
+      </div>
+    </div>
+
+    <!-- Localisation -->
+    <!-- <div class="info-section">
+      <div class="info-header">
+        <h3><i class="fas fa-map-marker-alt"></i> Localisation</h3>
+        <button (click)="editBlock('location')" class="edit-button">
+          <i class="fas fa-pen"></i>
+        </button>
+      </div>
+      
+      <div *ngIf="isEditingLocation">
+        <div class="form-group">
+          <input [(ngModel)]="profileLocation" class="form-control" placeholder="Localisation" />
+        </div>
+        <button (click)="saveBlock('location')" class="save-button">
+          <i class="fas fa-save"></i> Enregistrer
+        </button>
+      </div>
+      
+      <div *ngIf="!isEditingLocation" class="info-content">
+        <div class="info-item">
+          <span class="info-label">Adresse:</span>
+          <span class="info-value">{{ profileLocation }}</span>
+        </div>
+      </div>
+    </div> -->
+  </div>
+</div>
