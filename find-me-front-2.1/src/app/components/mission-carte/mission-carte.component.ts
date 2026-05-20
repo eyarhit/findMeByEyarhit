@@ -77,6 +77,10 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CandidatureService } from '../../services/candidature';
+import {
+  isRecruiterRole,
+  offerListDetailEspace,
+} from '../../shared/constants/role-utils';
 
 interface Job {
   id: number;
@@ -120,7 +124,7 @@ export class MissionCarteComponent {
 
   type_contrat: string = 'annonce';
   storedtargetmarket: string | null = null;
-
+  currentUserId: number | null = null;
 
   constructor(
     private router: Router,
@@ -131,6 +135,35 @@ export class MissionCarteComponent {
   ngOnInit(): void {
     const profile = JSON.parse(sessionStorage.getItem('profile') || '{}');
     this.storedtargetmarket = profile.targetmarket || '';
+    this.currentUserId = this.authService.getUserId();
+  }
+
+  isRecruiter(): boolean {
+    return isRecruiterRole(this.role ?? this.authService.getRole());
+  }
+
+  isOwnOffer(): boolean {
+    return (
+      this.job?.user_id != null &&
+      this.currentUserId != null &&
+      Number(this.job.user_id) === Number(this.currentUserId)
+    );
+  }
+
+  showCandidaturesAction(): boolean {
+    return (
+      this.espace === 'Mission publier' ||
+      this.espace === 'Offres publier' ||
+      (this.espace === 'Liste Offres' && this.isRecruiter() && this.isOwnOffer())
+    );
+  }
+
+  /** Espace passé au panneau mission-details (modal). */
+  detailEspace(): string {
+    if (this.espace === 'Liste Offres') {
+      return offerListDetailEspace(this.role ?? this.authService.getRole());
+    }
+    return this.espace;
   }
 
   selectJob(): void {
@@ -138,6 +171,10 @@ export class MissionCarteComponent {
   }
 
   viewCandidature(jobId: number): void {
+    if (this.espace === 'Liste Offres' && this.isRecruiter()) {
+      this.router.navigate(['/Offres/candidatures', jobId]);
+      return;
+    }
     this.candidature = true;
     this.missionId = String(jobId);
   }
@@ -154,7 +191,14 @@ export class MissionCarteComponent {
       else this.router.navigate(['/MissionDetails', jobId]);
     } else if (this.espace === 'Liste Offres') {
       if (this.visiteur) this.IsMission = true;
-      else this.router.navigate(['/OffreDetails', jobId]);
+      else {
+        const role = this.role ?? this.authService.getRole();
+        if (isRecruiterRole(role)) {
+          this.router.navigate(['/OffreConsultation', jobId]);
+        } else {
+          this.router.navigate(['/OffreDetails', jobId]);
+        }
+      }
     }
   }
 

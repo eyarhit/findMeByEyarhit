@@ -6,6 +6,7 @@ import { ApiRoutingServiceUser } from '../../services/api-routing-user.service';
 import { DocumentServiceService } from '../../services/document-service.service';
 import { Subscription } from 'rxjs';
 import { CvService } from '../../services/cv.service';
+import { isRecruiterRole } from '../../shared/constants/role-utils';
 
 @Component({
   selector: 'app-sidebar-espace',
@@ -54,7 +55,21 @@ export class SidebarEspaceComponent implements OnInit, OnDestroy {
   ngOnInit() {
     if (!isPlatformBrowser(this.platformId)) return;
     this.role=this.authService.getRole()!;
-    //console.log(this.role)
+    if (isRecruiterRole(this.role)) {
+      const url = this.router.url.replace(/\/$/, '');
+      if (url === '/Offres' || url.startsWith('/gestion-employer')) {
+        this.router.navigate(['/Offres/publier'], { replaceUrl: true });
+      }
+    }
+  }
+
+  /** Menu Espace Offres visible pour RH même hors route /Offres. */
+  showOffresSidebar(): boolean {
+    return (
+      this.urlContains('Offres') ||
+      this.role === 'ESN_ADMIN' ||
+      this.role === 'CHARGEDERECRUTEMENT'
+    );
   }
 
   /** Libellé affiché sous le nom dans la sidebar ; le rôle JWT (`role`) ne change pas. */

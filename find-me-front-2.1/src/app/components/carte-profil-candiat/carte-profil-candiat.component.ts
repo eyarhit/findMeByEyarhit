@@ -7,6 +7,12 @@ import { User } from '../../models/User.model';
 import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { ExperienceService } from '../../services/experience.service';
+import {
+  GENDER_OPTIONS,
+  genderDisplayLabel,
+  normalizeGender,
+} from '../../shared/constants/form-options';
+import { AppValidators } from '../../shared/validators/app-validators';
 
 
 @Component({
@@ -28,9 +34,10 @@ export class CarteProfilCandiatComponent implements OnInit {
   profilePhone: string = 'Non spécifié';
   profileLinkedIn: string = 'Entrer lien de LinkedIn';
   profileLocation: string = 'Non spécifié';
-  profileBirthDate: string = 'Année-moi-jour';
-  profileDescription: string = 'Non spécifié';
-  profileSexe: any;
+  profileBirthDate: string = '';
+  profileSexe: string = '';
+  readonly genderOptions = GENDER_OPTIONS;
+  validationError: string = '';
   titreDeProfilControl = new FormControl('');
   totalYears: number = 0;
   userId!: number;
@@ -211,33 +218,82 @@ export class CarteProfilCandiatComponent implements OnInit {
   }
 
   
-    private setDefaultBirthDate(): void {
-    // Set default to 18 years ago
-    const defaultDate = 'Non spécifié';
-    this.profileBirthDate = defaultDate;
-  }
-  
-
   updateProfile(): void {
-    if (this.userData) {
-      this.profileSocieter = this.userData.nomSociete 
-      this.profileName = this.userData.lastName;
-      this.profilePrenom= this.userData.firstName ;
-      this.profileEmail = this.userData.email || 'Non spécifié';
-      this.profilePhone = this.userData.phone || 'Non spécifié';
-      this.profileLinkedIn = this.userData.linkedinUrl || 'Entrer lien de LinkedIn';
-      this.profileLocation = this.userData.address || 'Non spécifié';
-      this.profileBirthDate = this.userData.dateOfBirth ? this.formatDate(this.userData.dateOfBirth) :this.formatDate(Date.now().toString());
-      this.profileDescription = this.userData.sexe || 'Non spécifié';
-    this.setDefaultBirthDate()
+    if (!this.userData) {
+      return;
     }
+    this.profileSocieter = this.userData.nomSociete;
+    this.profileName = this.userData.lastName;
+    this.profilePrenom = this.userData.firstName;
+    this.profileEmail = this.userData.email || 'Non spécifié';
+    this.profilePhone = this.userData.phone || 'Non spécifié';
+    this.profileLinkedIn = this.userData.linkedinUrl || 'Entrer lien de LinkedIn';
+    this.profileLocation = this.userData.address || 'Non spécifié';
+    this.profileBirthDate = this.toInputDateValue(this.userData.dateOfBirth);
+    this.profileSexe = normalizeGender(this.userData.sexe);
   }
 
-  private formatDate(date: Date | string): string {
-    if (typeof date === 'string') {
-      return date;
+  genderLabel(value: string): string {
+    return genderDisplayLabel(value);
+  }
+
+  private clearValidation(): void {
+    this.validationError = '';
+  }
+
+  private validatePersonalBlock(): boolean {
+    const err =
+      AppValidators.validatePersonName(this.profileName) ||
+      AppValidators.validatePersonName(this.profilePrenom) ||
+      AppValidators.validateBirthDate(this.profileBirthDate, true) ||
+      AppValidators.validateGender(this.profileSexe);
+    this.validationError = err ?? '';
+    return !err;
+  }
+
+  private validateContactBlock(): boolean {
+    const err =
+      AppValidators.validateEmail(this.profileEmail) ||
+      AppValidators.validatePhone(this.profilePhone) ||
+      AppValidators.validateLinkedIn(this.profileLinkedIn);
+    this.validationError = err ?? '';
+    return !err;
+  }
+
+  private validateLocationBlock(): boolean {
+    const err = AppValidators.validateAddress(this.profileLocation, true);
+    this.validationError = err ?? '';
+    return !err;
+  }
+
+  /** Format pour <input type="date"> (yyyy-MM-dd) ou chaîne vide si absent. */
+  private toInputDateValue(date: Date | string | null | undefined): string {
+    if (date == null || date === '' || date === 'Non spécifié') {
+      return '';
     }
-    return date.toISOString().split('T')[0];
+    if (typeof date === 'string') {
+      const trimmed = date.trim();
+      if (!trimmed || trimmed === 'Non spécifié') {
+        return '';
+      }
+      if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+        return trimmed.substring(0, 10);
+      }
+      const parsed = new Date(trimmed);
+      return isNaN(parsed.getTime()) ? '' : parsed.toISOString().split('T')[0];
+    }
+    if (date instanceof Date && !isNaN(date.getTime())) {
+      return date.toISOString().split('T')[0];
+    }
+    return '';
+  }
+
+  /** Valeur envoyée à l'API (yyyy-MM-dd) ou null si invalide. */
+  private toApiDateValue(value: string | Date | null | undefined): string | null {
+    const input = this.toInputDateValue(
+      value instanceof Date ? value : (value as string | null | undefined)
+    );
+    return input || null;
   }
 
   updateUserData(): void {
@@ -247,33 +303,30 @@ export class CarteProfilCandiatComponent implements OnInit {
       return;
     }
 
+    const birthForApi = this.toApiDateValue(this.userData.dateOfBirth as string | Date);
     const updatedData = {
       firstName: this.userData.firstName,
       lastName: this.userData.lastName,
       phone: this.userData.phone,
       linkedinUrl: this.userData.linkedinUrl,
       address: this.userData.address,
-      dateOfBirth: this.userData.dateOfBirth instanceof Date ?
-        this.userData.dateOfBirth.toISOString() :
-        this.userData.dateOfBirth,
-      sexe: this.userData.sexe,
+      dateOfBirth: birthForApi ?? '',
+      sexe: normalizeGender(this.userData.sexe) || this.userData.sexe,
       nomSociete: this.userData.nomSociete
     };
 
     this.apiServiceUser.updateUserByEmail(this.userData.email, updatedData, token).subscribe({
       next: (response) => {
-        //console.log('User updated successfully:', response);
+        if (response && typeof response === 'object') {
+          this.userData = { ...this.userData, ...response };
+        }
         const storedProfile = sessionStorage.getItem('profile');
-const existingProfile = storedProfile ? JSON.parse(storedProfile) : {};
-
-existingProfile.firstName = updatedData.firstName;
-existingProfile.lastName = updatedData.lastName;
-
-sessionStorage.setItem('profile', JSON.stringify(existingProfile));
-
-        
+        const existingProfile = storedProfile ? JSON.parse(storedProfile) : {};
+        existingProfile.firstName = updatedData.firstName;
+        existingProfile.lastName = updatedData.lastName;
+        sessionStorage.setItem('profile', JSON.stringify(existingProfile));
+        this.updateProfile();
         this.authService.notifyProfileUpdate();
-        this.loadUserData();
       },
       error: (error) => {
         console.error('Error updating user:', error);
@@ -282,6 +335,7 @@ sessionStorage.setItem('profile', JSON.stringify(existingProfile));
   }
 
   editBlock(block: string): void {
+    this.clearValidation();
     if (block === 'contact') {
       this.isEditingContact = !this.isEditingContact;
       this.isSavedContact = false;
@@ -304,12 +358,17 @@ sessionStorage.setItem('profile', JSON.stringify(existingProfile));
         this.profileName = this.userData.lastName;
         this.profilePrenom = this.userData.firstName;
       } else if (field === 'birthdate') {
-     
-        this.userData.dateOfBirth = new Date(newValue);
-        this.profileBirthDate = newValue;
+        const apiDate = this.toApiDateValue(newValue);
+        if (apiDate) {
+          this.userData.dateOfBirth = apiDate as unknown as Date;
+          this.profileBirthDate = apiDate;
+        }
       } else if (field === 'description') {
-        this.userData.sexe = newValue;
-        this.profileDescription = newValue;
+        const gender = normalizeGender(newValue);
+        if (gender) {
+          this.userData.sexe = gender;
+          this.profileSexe = gender;
+        }
       } else if (field === 'phone') {
         this.userData.phone = newValue;
         this.profilePhone = newValue;
@@ -327,7 +386,18 @@ sessionStorage.setItem('profile', JSON.stringify(existingProfile));
 
   saveBlock(block: string): void {
     if (!this.userData) return;
-  
+    this.clearValidation();
+
+    if (block === 'personal' && !this.validatePersonalBlock()) {
+      return;
+    }
+    if (block === 'contact' && !this.validateContactBlock()) {
+      return;
+    }
+    if (block === 'location' && !this.validateLocationBlock()) {
+      return;
+    }
+
     if (block === 'Titre') {
       this.isSavedTitre = true;
       this.isEditingTitle = false;
@@ -348,22 +418,26 @@ sessionStorage.setItem('profile', JSON.stringify(existingProfile));
   
       this.userData.firstName = this.profilePrenom;
       this.userData.lastName = this.profileName;
-      this.userData.dateOfBirth = this.profileBirthDate as any;
-      this.userData.sexe = this.profileDescription;
-      this.userData.email = this.profileEmail; 
+      const birth = this.toApiDateValue(this.profileBirthDate);
+      if (birth) {
+        this.userData.dateOfBirth = birth as unknown as Date;
+      }
+      this.userData.sexe = this.profileSexe;
+      this.userData.email = this.profileEmail;
     }
-  
+
     this.updateUserData();
   }
-    formatDisplayDate(dateString: string): string {
-    if (!dateString) return 'Non spécifiée';
-    
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('fr-FR');
-    } catch {
-      return dateString; // Return raw string if parsing fails
+  formatDisplayDate(dateString: string): string {
+    if (!dateString || dateString === 'Non spécifié') {
+      return 'Non spécifié';
     }
+    const iso = this.toInputDateValue(dateString);
+    if (!iso) {
+      return 'Non spécifié';
+    }
+    const date = new Date(iso + 'T12:00:00');
+    return isNaN(date.getTime()) ? 'Non spécifié' : date.toLocaleDateString('fr-FR');
   }
   
 }

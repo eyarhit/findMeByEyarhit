@@ -156,13 +156,13 @@ export class LoginComponent {
         this.router.navigate(['/gestion-employer/esn-commercial']);
         break;        
       case 'ESN_ADMIN':
-        this.router.navigate(['/gestion-employer/esn-commercial']);
+        this.router.navigate(['/Offres/publier']);
         break;      
       case'PORTAGE_SALARIAL':
         this.router.navigate(['/cv']);
         break;
       case 'CHARGEDERECRUTEMENT':
-        this.router.navigate(['/Offres/Liste']);
+        this.router.navigate(['/Offres/publier']);
         break;
       case 'ADMIN':
         this.router.navigate(['/utilisateur']);

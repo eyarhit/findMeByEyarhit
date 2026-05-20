@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, isDevMode } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
@@ -177,7 +177,8 @@ import { MessengerChatComponent } from './components/messenger-chat/messenger-ch
     InformationCvComponent
   ],
   providers: [
-    provideClientHydration(),
+    // Hydratation désactivée en dev : évite page blanche / inaccessible au F5 (token dans localStorage).
+    ...(isDevMode() ? [] : [provideClientHydration()]),
     provideHttpClient(withFetch()),
     AuthService,
     provideAnimationsAsync(),

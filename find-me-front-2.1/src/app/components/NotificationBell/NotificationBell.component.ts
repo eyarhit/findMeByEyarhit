@@ -3,6 +3,8 @@ import { isPlatformBrowser } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { Notification, NotificationService } from '../../services/notificationService';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { isRecruiterRole } from '../../shared/constants/role-utils';
 
 @Component({
   selector: 'app-notification-bell',
@@ -24,7 +26,8 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   constructor(
     public notificationService: NotificationService,
     @Inject(PLATFORM_ID) private platformId: object,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -81,8 +84,10 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     }
 
     if (notification.targetId) {
-      // Fallback route when only target id is present.
-      this.router.navigate(['/OffreDetails', notification.targetId]);
+      const route = isRecruiterRole(this.authService.getRole())
+        ? ['/OffreConsultation', notification.targetId]
+        : ['/OffreDetails', notification.targetId];
+      this.router.navigate(route);
     }
   }
  markAllAsread(){

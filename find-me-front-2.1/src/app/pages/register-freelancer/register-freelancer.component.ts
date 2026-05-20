@@ -8,6 +8,7 @@ import { ApiRoutingServiceQuiz } from '../../services/api-routing-quiz.service';
 import { AuthService } from '../../services/auth.service';
 import { DocumentServiceService } from '../../services/document-service.service';
 import { apiRoutingServiceFlusk } from '../../services/api-routing-flusk.services';
+import { AppValidators } from '../../shared/validators/app-validators';
 
 @Component({
   selector: 'app-register-freelancer',
@@ -66,9 +67,9 @@ export class RegisterFeelancerComponent implements OnInit {
   ) {
     // Initialisation du form sans nomSociete pour l'instant
     this.registerFormTunisie = this.fb.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      firstName: ['', [Validators.required, AppValidators.personName]],
+      lastName: ['', [Validators.required, AppValidators.personName]],
+      email: ['', [Validators.required, Validators.email, AppValidators.email]],
       country: [''],
       targetmarket: [''],
       residenceType: [''],

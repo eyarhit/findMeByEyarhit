@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import { ActivatedRoute } from '@angular/router';
 import { NotificationService } from '../../services/notificationService';
 import { catchError, forkJoin, of } from 'rxjs';
+import { isRecruiterRole } from '../../shared/constants/role-utils';
 
 @Component({
   selector: 'app-publier_contrat',
@@ -476,9 +477,14 @@ this.isEditing.emit(false);
       ''
     ).toUpperCase();
     const offreTypes = ['CDI', 'CDD', 'ALTERNANCE'];
+    const recruiter = isRecruiterRole(this.accountRole);
     const targetRoute = offreTypes.includes(typeContrat)
-      ? `/OffreDetails/${missionId}`
-      : `/MissionDetails/${missionId}`;
+      ? recruiter
+        ? `/OffrePublierDetails/${missionId}`
+        : `/OffreDetails/${missionId}`
+      : recruiter
+        ? `/MissionPublierDetails/${missionId}`
+        : `/MissionDetails/${missionId}`;
 
     const missionName = createdMission?.descrip_mission?.mission_name || formData?.descrip_mission?.mission_name || 'nouvelle annonce';
     const message = `Nouvelle annonce publiée: ${missionName}`;

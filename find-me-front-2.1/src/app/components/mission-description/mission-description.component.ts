@@ -2,6 +2,10 @@
   import { Router } from '@angular/router';
   import { FavoriService } from '../../services/favori.service';
   import { AuthService } from '../../services/auth.service';
+  import {
+    isRecruiterRole,
+    offerListDetailEspace,
+  } from '../../shared/constants/role-utils';
   
 
 interface Job {
@@ -63,23 +67,31 @@ export class MissionDescriptionComponent {
       else this.router.navigate(['/MissionDetails', jobId]);
     } else if (this.espace === 'Liste Offres') {
       if (this.visiteur) this.IsMission = true;
-      else this.router.navigate(['/OffreDetails', jobId]);
+      else {
+        const role = this.authService.getRole();
+        if (isRecruiterRole(role)) {
+          this.router.navigate(['/OffreConsultation', jobId]);
+        } else {
+          this.router.navigate(['/OffreDetails', jobId]);
+        }
+      }
     } else if (
       this.authService.getRole() === 'FREELANCER' ||
-      this.authService.getRole() === 'PORTAGE_SALARIAL' ||
-      this.authService.getRole() === 'ESN_ADMIN' ||
-      this.authService.getRole() === 'ESN_COMMERCIAL'
+      this.authService.getRole() === 'PORTAGE_SALARIAL'
     ) {
       if (this.visiteur) this.IsMission = true;
       else this.router.navigate(['/MissionDetails', jobId]);
-    } else if (
-      this.authService.getRole() === 'CANDIDAT' ||
-      this.authService.getRole() === 'ESN_ADMIN' ||
-      this.authService.getRole() === 'ESN_COMMERCIAL'
-    ) {
+    } else if (this.authService.getRole() === 'CANDIDAT') {
       if (this.visiteur) this.IsMission = true;
       else this.router.navigate(['/OffreDetails', jobId]);
     }
+  }
+
+  detailEspace(): string {
+    if (this.espace === 'Liste Offres') {
+      return offerListDetailEspace(this.authService.getRole());
+    }
+    return this.espace;
   }
  
     addToFavorites(): void {

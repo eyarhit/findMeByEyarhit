@@ -248,3 +248,17 @@
     grid-template-columns: 1fr;
   }
 }
+
+.field-error {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  color: #374151;
+}

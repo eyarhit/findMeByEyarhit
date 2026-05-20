@@ -7,6 +7,7 @@ import { ApiRoutingServiceUser } from '../../services/api-routing-user.service';
 import { ApiRoutingServiceQuiz } from '../../services/api-routing-quiz.service';
 import { AuthService } from '../../services/auth.service';
 import { DocumentServiceService } from '../../services/document-service.service';
+import { AppValidators } from '../../shared/validators/app-validators';
 
 @Component({
   selector: 'app-register-candidat-tunisie',
@@ -79,9 +80,9 @@ export class RegisterCandidatTunisieComponent implements OnInit {
     private documentService: DocumentServiceService
   ) {
     this.registerFormTunisie = this.fb.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      firstName: ['', [Validators.required, AppValidators.personName]],
+      lastName: ['', [Validators.required, AppValidators.personName]],
+      email: ['', [Validators.required, Validators.email, AppValidators.email]],
       country: [''],
       targetmarket: [''],
       residenceType:[''],
@@ -189,7 +190,12 @@ export class RegisterCandidatTunisieComponent implements OnInit {
                 },
                 error: (error) => {
                     console.error('Registration failed:', error);
-                    alert(`Registration failed: ${error.error}`);
+                    const msg =
+                      error?.error?.message ??
+                      error?.error?.error ??
+                      (typeof error?.error === 'string' ? error.error : null) ??
+                      'Inscription refusée (OTP expiré, e-mail déjà utilisé ou données invalides).';
+                    alert(`Échec de l'inscription : ${msg}`);
                 }
             });
     } else {

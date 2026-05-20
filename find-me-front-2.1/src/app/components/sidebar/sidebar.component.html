@@ -112,7 +112,7 @@
         </ul>
         
         <!-- Missions/Offers Section -->
-        <ul *ngIf="(role === 'CANDIDAT'||role === 'CHARGEDERECRUTEMENT'||role === 'FREELANCER' || role === 'ADMIN' || role === 'ESN_ADMIN' || role === 'ESN_COMMERCIAL' || role === 'INTERCONTRAT' || role === 'INGENIEURDAFFAIRE' || role === 'PORTAGE_SALARIAL') && (urlContains('Missions') || urlContains('Offres'))" class="space-y-1">
+        <ul *ngIf="(role === 'CANDIDAT'||role === 'CHARGEDERECRUTEMENT'||role === 'FREELANCER' || role === 'ADMIN' || role === 'ESN_ADMIN' || role === 'ESN_COMMERCIAL' || role === 'INTERCONTRAT' || role === 'INGENIEURDAFFAIRE' || role === 'PORTAGE_SALARIAL') && (urlContains('Missions') || showOffresSidebar())" class="space-y-1">
           <!-- Missions Section -->
           <li *ngIf="false && urlContains('Missions')">
             <h3 class="text-xs uppercase font-semibold text-gray-500 tracking-wider px-3 py-2">Espace Missions</h3>
@@ -167,9 +167,9 @@
             </a>
           </li> 
           <!-- Offers Section -->
-        <li *ngIf="urlContains('Offres')">
+        <li *ngIf="showOffresSidebar()">
           <h3 class="text-xs uppercase font-semibold text-gray-500 tracking-wider px-3 py-2">Espace Offres</h3>
-            <a *ngIf="role === 'CANDIDAT' || role === 'ESN_ADMIN' || this.role === 'CHARGEDERECRUTEMENT'"
+            <a *ngIf="role === 'CANDIDAT'"
                [routerLink]="['/Offres/Liste']" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }"
                class="nav-link flex items-center text-gray-700 hover:text-[#5A3FC9] px-3 py-3 rounded-lg hover:bg-[#5A3FC9]/10 cursor-pointer transition-all duration-200">
               <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -42,18 +42,40 @@
             <h1 class="mission-title">{{ jobs[0]?.title }}</h1>
             <span class="mission-ref">Réf: {{ jobs[0]?.ref }}</span>
           </div>
-          <button *ngIf=" this.espace==='Postuler Mission' ||  this.espace==='Postuler Offre'" class="btn btn-primary apply-btn" (click)="PostulerCard()">
+          <button *ngIf="canPostuler" class="btn btn-primary apply-btn" (click)="PostulerCard()">
             <i class="fas fa-paper-plane"></i>
             <span class="btn-text">Postuler</span>
           </button>
-<button *ngIf="(espace==='Mission publier' || espace==='Offres publier') && !visiteur" 
+          <button
+            *ngIf="canViewCandidatures"
+            type="button"
+            class="btn btn-primary apply-btn"
+            (click)="goToCandidatures()"
+          >
+            <i class="fas fa-users"></i>
+            <span class="btn-text">Voir candidatures</span>
+          </button>
+          <button
+            *ngIf="espace === 'Consultation Offre' && isOwnOffer && !visiteur"
+            type="button"
+            class="btn btn-outline apply-btn"
+            (click)="goToManageOffer()"
+          >
+            <i class="fas fa-edit"></i>
+            <span class="btn-text">Gérer l'offre</span>
+          </button>
+<button *ngIf="canManagePublishedOffer" 
         class="btn btn-primary apply-btn" 
         (click)="isEditing = true">
   <i class="fas" [class.fa-edit]="!isEditing" [class.fa-save]="isEditing"></i>
-  <span class="btn-text">Modifier {{ espace === 'Mission' ? 'la mission' : "l'offre d'emplois" }}</span>
+  <span class="btn-text">Modifier {{ espace === 'Mission publier' ? 'la mission' : "l'offre d'emplois" }}</span>
 </button>
         </div>
       </div>
+
+      <p *ngIf="showConsultationHint" class="consultation-hint">
+        Consultation du catalogue des offres — en tant que recruteur, vous ne pouvez pas postuler à cette annonce.
+      </p>
 
       <div class="mission-description">
         <div class="content-section" *ngFor="let section of [

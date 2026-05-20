@@ -58,8 +58,12 @@
               ],
               "outputHashing": "all",
               "optimization": {
-                "styles": true,
-                "scripts": true
+                "scripts": true,
+                "fonts": false,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                }
               }
             },
             "development": {

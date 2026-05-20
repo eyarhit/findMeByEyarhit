@@ -3,6 +3,7 @@ import { FavoriService } from '../../services/favori.service';
 import { AuthService } from '../../services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DocumentServiceService } from '../../services/document-service.service';
+import { isRecruiterRole } from '../../shared/constants/role-utils';
 import { catchError, forkJoin, map, of } from 'rxjs';
 
 interface FavoriteMission {
@@ -69,10 +70,17 @@ export class OffresfavoriesComponent implements OnInit {
   ) {}
 
   viewMission(jobId: number): void {
-    if (this.espace === "Mission") {
-      this.router.navigate(['/MissionDetails', jobId]);
-    } else if (this.espace === "Offre") {
-      this.router.navigate(['/OffreDetails', jobId]);
+    const recruiter = isRecruiterRole(this.userType);
+    if (this.espace === 'Mission') {
+      this.router.navigate([
+        recruiter ? '/MissionPublierDetails' : '/MissionDetails',
+        jobId,
+      ]);
+    } else if (this.espace === 'Offre') {
+      this.router.navigate([
+        recruiter ? '/OffreConsultation' : '/OffreDetails',
+        jobId,
+      ]);
     }
   }
 

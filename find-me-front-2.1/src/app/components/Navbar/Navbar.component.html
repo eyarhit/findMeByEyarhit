@@ -10,28 +10,30 @@
 
     <!-- Navigation Links (Desktop) -->
     <nav class="navbar-links">
-        <a routerLink="/acceuil-find-me" class="nav-link" routerLinkActive="active">
+        <a *ngIf="showAccueilNav" routerLink="/acceuil-find-me" class="nav-link" routerLinkActive="active">
           <i class="fas fa-home nav-icon"></i>
           <span>Accueil</span>
         </a>
 
-
-        <a *ngIf="roleFromToken==='ADMIN'" routerLink="/utilisateur" class="nav-link" routerLinkActive="active" 
+        <a *ngIf="showSessionNav && roleFromToken==='ADMIN'" routerLink="/utilisateur" class="nav-link" routerLinkActive="active" 
             [routerLinkActiveOptions]="{ exact: false }">
-          <svg _ngcontent-ng-c781405345="" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-4 h-4"><path _ngcontent-ng-c781405345="" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
           <span>Utilisateur</span>
         </a>
 
-
-        <a *ngIf="roleFromToken==='CANDIDAT' || roleFromToken==='ESN_ADMIN' || roleFromToken==='CHARGEDERECRUTEMENT'" routerLink="/Offres" class="nav-link" routerLinkActive="active" 
+        <a *ngIf="showOffresNav" routerLink="/Offres/Liste" class="nav-link" routerLinkActive="active" 
           [routerLinkActiveOptions]="{ exact: false }">
           <i class="fas fa-briefcase nav-icon"></i>
           <span>Offres d'emplois</span>
         </a>
 
+        <a *ngIf="showRhOffresNav" routerLink="/Offres/publier" class="nav-link" routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: false }">
+          <i class="fas fa-briefcase nav-icon"></i>
+          <span>Offres d'emplois</span>
+        </a>
 
-
-       <a *ngIf="!['ADMIN', 'ESN_ADMIN','ESN_COMMERCIAL','CHARGEDERECRUTEMENT'].includes(roleFromToken!)"  
+       <a *ngIf="showDossierCompetencesNav"
           routerLink="/cv" 
           class="nav-link" 
           routerLinkActive="active" 
@@ -103,7 +105,7 @@
           <span>Mon Profil</span>
         </button>
 
-        <button *ngIf="!['ADMIN', 'ESN_ADMIN','ESN_COMMERCIAL','CHARGEDERECRUTEMENT'].includes(roleFromToken!)"   routerLink="/cv" (click)="toggleDropdown()" class="dropdown-item">
+        <button *ngIf="showDossierCompetencesNav" routerLink="/cv" (click)="toggleDropdown()" class="dropdown-item">
           <i class="fas fa-file-alt dropdown-icon"></i>
           <span>Dossier de compétences</span>
         </button>
@@ -169,25 +171,29 @@
 
       <!-- Navigation Links -->
       <nav class="sidebar-nav">
-        <a routerLink="/acceuil-find-me" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
+        <a *ngIf="showAccueilNav" routerLink="/acceuil-find-me" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
           <i class="fas fa-home sidebar-icon"></i>
           <span>Accueil</span>
         </a>
 
-        <!-- <a routerLink="/" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
+        <a *ngIf="showOffresNav" routerLink="/Offres/Liste" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
           <i class="fas fa-briefcase sidebar-icon"></i>
-          <span>Missions & Offres</span>
-        </a> -->
-
-
-        <a *ngIf="this.roleFromToken==='CANDIDAT'" routerLink="/Offres/Liste" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
-          <i class="fas fa-file-alt dropdown-icon"></i>
-          <span>Offres</span>
+          <span>Offres d'emplois</span>
         </a>
 
-        <a *ngIf="roleFromToken" routerLink="/cv" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
+        <a *ngIf="showRhOffresNav" routerLink="/Offres/publier" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
+          <i class="fas fa-briefcase sidebar-icon"></i>
+          <span>Offres d'emplois</span>
+        </a>
+
+        <a *ngIf="showDossierCompetencesNav" routerLink="/cv" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
           <i class="fas fa-file-alt sidebar-icon"></i>
-          <span>Mon CV</span>
+          <span>Dossier de compétences</span>
+        </a>
+
+        <a *ngIf="showSessionNav && roleFromToken==='ADMIN'" routerLink="/utilisateur" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
+          <i class="fas fa-users sidebar-icon"></i>
+          <span>Utilisateur</span>
         </a>
 
       </nav>

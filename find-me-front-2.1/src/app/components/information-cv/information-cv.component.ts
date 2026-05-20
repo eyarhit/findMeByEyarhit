@@ -1,16 +1,24 @@
 import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, FormArray, ValidationErrors, Validators, FormControl } from '@angular/forms';
 import { CvService } from '../../services/cv.service';
 import { isPlatformBrowser } from '@angular/common';
 import { jsPDF } from 'jspdf';
 import { PdfService } from '../../services/pdf.service';
 import { AuthService } from '../../services/auth.service';
 import { Cv } from '../../_model/Cv';
+import { Langue } from '../../_model/Langue';
 import { ChangeDetectorRef } from '@angular/core';
 import { StepTrackerService } from '../../services/step-tracker.service';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 import { DocumentServiceService } from '../../services/document-service.service';
+import {
+  LANGUAGE_LEVEL_OPTIONS,
+  LANGUAGE_NAME_OPTIONS,
+  normalizeLanguageLevel,
+  normalizeLanguageName,
+} from '../../shared/constants/form-options';
+import { AppValidators } from '../../shared/validators/app-validators';
 
 
 
@@ -170,17 +178,15 @@ popupTitle: string = '';
   }
 
   populateForm(cv: Cv): void {
-    cv.educations.forEach((edu) => this.addAcademicFormation(edu));
-    cv.experiences.forEach((exp) => this.addProfessionalExperience(exp));
-    cv.langues.forEach((lang) => this.addLanguage(lang));
-  
-    //console.log("✅ Backend a renvoyé ces compétences :", cv.competences);
-  
+    this.academicFormations.clear();
+    this.professionalExperiences.clear();
+    this.languages.clear();
+
     if (cv.titreDeProfil) {
       this.titreDeProfilControl.setValue(cv.titreDeProfil);
     }
-    
-    if (cv.competences && cv.competences.length > 0) {
+
+    if (cv.competences?.length) {
       const competence = cv.competences[0];
       this.form.patchValue({
         technicalSkills: {
@@ -196,12 +202,31 @@ popupTitle: string = '';
           methodologie: competence.methodologie || '',
           designPattern: competence.designPattern || '',
           architechture: competence.architechture || '',
-          outils: competence.outils || ''
-        }
+          outils: competence.outils || '',
+        },
       });
     }
 
-    
+    (cv.educations ?? []).forEach((edu) => this.addAcademicFormation(edu));
+    (cv.experiences ?? []).forEach((exp) => this.addProfessionalExperience(exp));
+    (cv.langues ?? []).forEach((lang) => {
+      const ext = lang as Langue & {
+        language?: string;
+        proficiency?: string;
+        level?: string;
+        langue?: string;
+      };
+      const name = normalizeLanguageName(
+        ext.name ?? ext.language ?? ext.langue ?? ''
+      );
+      const niveau = normalizeLanguageLevel(
+        ext.niveau ?? ext.proficiency ?? ext.level ?? ''
+      );
+      if (name || niveau) {
+        this.addLanguage({ name, niveau });
+      }
+    });
+    this.cdr.detectChanges();
   }
 
   // Academic Formations
@@ -217,10 +242,10 @@ popupTitle: string = '';
     };
   
     this.academicFormations.push(this.fb.group({
-      university: [data?.university || '', Validators.required],
-      diplome: [data?.diplome || '', Validators.required],
+      university: [data?.university || '', [Validators.required, Validators.maxLength(120)]],
+      diplome: [data?.diplome || '', [Validators.required, Validators.maxLength(120)]],
       dateDebut: [formatDate(data?.dateDebut)],
-      dateFin: [formatDate(data?.dateFin)]
+      dateFin: [formatDate(data?.dateFin)],
     }));
   }
   
@@ -241,6 +266,7 @@ popupTitle: string = '';
       return date.toISOString().substring(0, 10);
     };
   
+    const desc = data?.description || data?.travailRealise || '';
     this.professionalExperiences.push(this.fb.group({
       entreprise: [data?.entreprise || '', Validators.required],
       dateDebut: [formatDate(data?.dateDebut)],
@@ -249,9 +275,9 @@ popupTitle: string = '';
       nomProjet: [data?.nomProjet || ''],
       client: [data?.client || ''],
       equipe: [data?.equipe || ''],
-      description: [data?.description || ''],
-      travailRealise: [data?.travailRealise || ''],
-      environnement: [data?.environnement || '']
+      description: [desc],
+      travailRealise: [data?.travailRealise || desc],
+      environnement: [data?.environnement || ''],
     }));
   }
   
@@ -265,11 +291,23 @@ popupTitle: string = '';
     return this.form.get('languages') as FormArray;
   }
 
-  addLanguage(data?: any): void {
-    this.languages.push(this.fb.group({
-      name: [data?.name || '', Validators.required],
-      niveau: [data?.niveau || '', Validators.required]
-    }));
+  addLanguage(data?: Record<string, unknown>): void {
+    const raw = data ?? {};
+    const name = normalizeLanguageName(
+      raw['name'] ?? raw['language'] ?? raw['langue'] ?? ''
+    );
+    const niveau = normalizeLanguageLevel(
+      raw['niveau'] ?? raw['proficiency'] ?? raw['level'] ?? ''
+    );
+    this.languages.push(
+      this.fb.group(
+        {
+          name: [name, Validators.required],
+          niveau: [niveau, Validators.required],
+        },
+        { validators: (ctrl) => this.languageEntryValidator(ctrl) }
+      )
+    );
   }
 
   removeLanguage(index: number): void {
@@ -281,6 +319,14 @@ popupTitle: string = '';
     if (!this.userId) {
       if (this.activeStep === 1) {
         this.showAlert('Erreur', 'userId non trouvé !', 'error');
+      }
+      return;
+    }
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      if (this.activeStep === 1) {
+        this.showAlert('Attention', 'Veuillez corriger les champs du formulaire avant enregistrement.', 'info');
       }
       return;
     }
@@ -449,8 +495,23 @@ private async uploadDocument(pdfBlob: Blob, fileName: string): Promise<void> {
     throw new Error('Échec de l\'envoi du document');
   }
 }
-  languageList: string[] = ['Français', 'Anglais', 'Allemand', 'Arabe', 'Italien', 'Espagnol'];
-  levels: string[] = ['Débutant', 'Intermédiaire', 'Avancé', 'Courant', 'Langue Maternelle'];
+  languageList: string[] = LANGUAGE_NAME_OPTIONS.map((o) => o.value);
+  levels: string[] = LANGUAGE_LEVEL_OPTIONS.map((o) => o.value);
+
+  private languageEntryValidator = (
+    control: AbstractControl
+  ): ValidationErrors | null => {
+    const group = control as FormGroup;
+    const name = String(group.get('name')?.value ?? '').trim();
+    const niveau = String(group.get('niveau')?.value ?? '').trim();
+    if (!name && !niveau) {
+      return null;
+    }
+    if (!name || !niveau) {
+      return { languageIncomplete: true };
+    }
+    return null;
+  };
 
   AjouterTitreDeProfil(): void {
     if (this.titreDeProfilControl.value) {

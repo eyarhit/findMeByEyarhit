@@ -4,11 +4,16 @@ import { CvService } from '../../services/cv.service';
 import { Router } from '@angular/router';
 import { apiRoutingServiceFlusk } from '../../services/api-routing-flusk.services';
 import { AuthService } from '../../services/auth.service';
+import { DocumentServiceService } from '../../services/document-service.service';
 import { Cv } from '../../_model/Cv';
 import {
   CvParseValidationService,
   ParseCVResponse,
 } from '../../services/cv-parse-validation.service';
+import {
+  normalizeLanguageLevel,
+  normalizeLanguageName,
+} from '../../shared/constants/form-options';
 
 @Component({
   selector: 'app-upload-cv',
@@ -34,7 +39,8 @@ export class UploadCvComponent {
     @Inject(PLATFORM_ID) private platformId: object,
     private router: Router,
     private apiRoutingServiceFlusk: apiRoutingServiceFlusk,
-    private parseValidation: CvParseValidationService
+    private parseValidation: CvParseValidationService,
+    private documentService: DocumentServiceService
   ) {}
 
   ngOnInit(): void {
@@ -139,15 +145,16 @@ export class UploadCvComponent {
     const cvData: Cv = {
       id_cv: this.idCv ?? undefined,
       userId: this.userId,
-      titreDeProfil: transformed.titreDeProfil,
-      competences: [transformed.competencesTechniques],
-      educations: transformed.education,
-      experiences: transformed.workExperiences,
-      langues: transformed.langues,
+      titreDeProfil: transformed.titreDeProfil || undefined,
+      competences: [{ ...transformed.competencesTechniques }],
+      educations: transformed.education ?? [],
+      experiences: transformed.workExperiences ?? [],
+      langues: transformed.langues ?? [],
     };
 
     this.cvService.saveCv(this.userId, cvData).subscribe({
       next: () => {
+        this.uploadCvPdfToDocuments();
         this.isLoading = false;
         if (transformed.projects.length) {
           sessionStorage.setItem(
@@ -164,9 +171,31 @@ export class UploadCvComponent {
     });
   }
 
-  private safeJoin(arr: unknown): string {
+  /** Enregistre le PDF importé dans MinIO pour la postulation (dossier CvFindMe). */
+  private uploadCvPdfToDocuments(): void {
+    if (!this.selectedFile || !this.userId) return;
+    const email = this.authService.getEmail();
+    const baseName = this.selectedFile.name.replace(/\.[^.]+$/, '');
+    const fileName = `FIND ME-${baseName}`.replace(/\s+/g, '.');
+    this.documentService
+      .uploadDocument(this.selectedFile, fileName, 'CvFindMe', email ?? undefined)
+      .subscribe({
+        error: (err) =>
+          console.warn('CV structuré enregistré, mais upload PDF CvFindMe échoué:', err),
+      });
+  }
+
+  private extractInstitutionFromText(text: string): string {
+    const m = text.match(
+      /(ESPRIT[\w\s\-]*|Université[\w\sÀ-ÿ\-]*|École[\w\sÀ-ÿ\-]*|Ecole[\w\sÀ-ÿ\-]*|Institut[\w\sÀ-ÿ\-]*|Lycée[\w\sÀ-ÿ\-]*|Lycee[\w\sÀ-ÿ\-]*)/i
+    );
+    return m ? m[0].trim() : '';
+  }
+
+  private safeJoin(arr: unknown, maxLen = 255): string {
     if (!Array.isArray(arr)) return '';
-    return arr.filter(Boolean).join(', ');
+    const joined = arr.filter(Boolean).join(', ');
+    return joined.length > maxLen ? joined.slice(0, maxLen - 3) + '...' : joined;
   }
 
   private transformResponse(data: ParseCVResponse['data']) {
@@ -177,12 +206,19 @@ export class UploadCvComponent {
       titreDeProfil: pi?.job_title ?? '',
       personalInfo: pi,
       education:
-        data?.education?.map((edu) => ({
-          diplome: edu.degree ?? '',
-          university: edu.institution ?? '',
-          dateDebut: edu.start_date ?? '',
-          dateFin: edu.end_date ?? '',
-        })) ?? [],
+        data?.education?.map((edu) => {
+          let university = (edu.institution ?? '').trim();
+          const diplome = (edu.degree ?? '').trim();
+          if (!university && diplome) {
+            university = this.extractInstitutionFromText(diplome);
+          }
+          return {
+            diplome,
+            university,
+            dateDebut: edu.start_date ?? '',
+            dateFin: edu.end_date ?? '',
+          };
+        }) ?? [],
 
       competencesTechniques: {
         db: this.safeJoin(ts['databases']),
@@ -200,10 +236,12 @@ export class UploadCvComponent {
       },
 
       langues:
-        data?.languages?.map((lang) => ({
-          name: lang.language ?? '',
-          niveau: lang.proficiency ?? '',
-        })) ?? [],
+        data?.languages
+          ?.map((lang) => ({
+            name: normalizeLanguageName(lang.language ?? ''),
+            niveau: normalizeLanguageLevel(lang.proficiency ?? ''),
+          }))
+          .filter((l) => l.name && l.niveau) ?? [],
 
       workExperiences:
         data?.work_experiences
@@ -214,10 +252,10 @@ export class UploadCvComponent {
             dateDebut: w.start_date ?? '',
             dateFin: w.end_date ?? '',
             description: w.description ?? '',
+            travailRealise: w.description ?? '',
             nomProjet: '',
             client: '',
             equipe: '',
-            travailRealise: '',
             environnement: '',
           })) ?? [],
 

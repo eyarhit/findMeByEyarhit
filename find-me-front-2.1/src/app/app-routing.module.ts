@@ -112,7 +112,7 @@ const routes: Routes = [
     path: 'gestion-employer',
     component: SidebarEspaceComponent,
     canActivate: [AuthGuard, roleGuard],
-    data: { expectedRole: ['ESN_ADMIN', 'ESN_COMMERCIAL'] },
+    data: { expectedRole: ['ESN_COMMERCIAL'] },
     children: [
       { path: '', redirectTo: 'esn-commercial', pathMatch: 'full' },
       { path: 'esn-commercial', component: ListUtilisateurComponent,data: { userRole: 'ESN_COMMERCIAL' }},
@@ -192,8 +192,9 @@ const routes: Routes = [
   { path: 'ListDocuments', component: ListDocumentComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT','PORTAGE_SALARIAL','FREELANCER'] } },
   { path: 'information-cv', component: InformationCvComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT','PORTAGE_SALARIAL','FREELANCER'] } },
   { path: 'cv-manuelle', component: CvManuelleComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT','PORTAGE_SALARIAL','FREELANCER'] } },
-  { path: 'MissionDetails/:jobId', component: MissionDetailsComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['PORTAGE_SALARIAL','FREELANCER','ESN_ADMIN','ESN_COMMERCIAL'], espace: 'Postuler Mission'  } },
- { path: 'OffreDetails/:jobId', component: MissionDetailsComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT','ESN_ADMIN','ESN_COMMERCIAL','CHARGEDERECRUTEMENT'], espace: 'Postuler Offre'  } },
+  { path: 'MissionDetails/:jobId', component: MissionDetailsComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['PORTAGE_SALARIAL','FREELANCER'], espace: 'Postuler Mission'  } },
+ { path: 'OffreDetails/:jobId', component: MissionDetailsComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT'], espace: 'Postuler Offre'  } },
+ { path: 'OffreConsultation/:jobId', component: MissionDetailsComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['ESN_ADMIN','ESN_COMMERCIAL','CHARGEDERECRUTEMENT'], espace: 'Consultation Offre'  } },
   { path: 'MissionPublierDetails/:jobId', component: MissionDetailsComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['ESN_ADMIN','ESN_COMMERCIAL'] , espace: 'Mission publier' } },
  { path: 'OffrePublierDetails/:jobId', component: MissionDetailsComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['ESN_ADMIN','ESN_COMMERCIAL','CHARGEDERECRUTEMENT'] , espace: 'Offres publier' } },
 
@@ -204,7 +205,12 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [
+    RouterModule.forRoot(routes, {
+      scrollPositionRestoration: 'enabled',
+      anchorScrolling: 'enabled',
+    }),
+  ],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

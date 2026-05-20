@@ -1,6 +1,7 @@
 import { Component, Inject, PLATFORM_ID, OnInit, OnDestroy, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
 import { DocumentServiceService } from '../../services/document-service.service';
@@ -27,6 +28,21 @@ export class NavbarComponent implements OnInit, OnDestroy {
   showDropdown = false;
   showSideBar = false;
 
+  /** Pages invité : header minimal (Accueil + Connexion / Inscription uniquement). */
+  isPublicGuestPage = false;
+
+  /** Pages login / inscription : navbar = Accueil + Connexion + Inscription uniquement. */
+  private readonly minimalAuthNavPrefixes = [
+    '/login',
+    '/session-login',
+    '/register-candidat',
+    '/register-freelancer',
+    '/register-portage-salarial',
+    '/register-ESN',
+    '/mot-de-passe-oublier',
+    '/reinitialiser-mot-passe',
+  ];
+
   private subscription = new Subscription();
 
   @ViewChild('dropdownToggle') dropdownToggle!: ElementRef;
@@ -52,8 +68,53 @@ export class NavbarComponent implements OnInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
+    this.updatePublicGuestPageFlag(this.router.url);
+    this.subscription.add(
+      this.router.events
+        .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+        .subscribe((e) => this.updatePublicGuestPageFlag(e.urlAfterRedirects))
+    );
     this.subscription.add(
       this.authService.authStateChange.subscribe(() => this.applyAuthState())
+    );
+  }
+
+  /** Accueil : uniquement pages login / inscription (jamais en session candidat ou RH). */
+  get showAccueilNav(): boolean {
+    return this.authResolved && this.isPublicGuestPage && !this.isLoggedIn;
+  }
+
+  /** Liens métier (offres, CV, admin…) : session connectée uniquement. */
+  get showSessionNav(): boolean {
+    return this.authResolved && this.isLoggedIn;
+  }
+
+  get showDossierCompetencesNav(): boolean {
+    return (
+      this.showSessionNav &&
+      !['ADMIN', 'ESN_ADMIN', 'ESN_COMMERCIAL', 'CHARGEDERECRUTEMENT'].includes(
+        this.roleFromToken ?? ''
+      )
+    );
+  }
+
+  get showOffresNav(): boolean {
+    return this.showSessionNav && this.roleFromToken === 'CANDIDAT';
+  }
+
+  /** RH : lien unique vers l'espace offres (pas de gestion membres). */
+  get showRhOffresNav(): boolean {
+    return (
+      this.showSessionNav &&
+      (this.roleFromToken === 'ESN_ADMIN' ||
+        this.roleFromToken === 'CHARGEDERECRUTEMENT')
+    );
+  }
+
+  private updatePublicGuestPageFlag(url: string): void {
+    const path = (url.split('?')[0] || '/').replace(/\/$/, '') || '/';
+    this.isPublicGuestPage = this.minimalAuthNavPrefixes.some(
+      (prefix) => path === prefix || path.startsWith(prefix + '/')
     );
   }
 

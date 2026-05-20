@@ -23,13 +23,17 @@
               <input type="text" formControlName="firstName" placeholder="Nom" class="field"
                 [ngClass]="{'border-red-500': registerFormTunisie.get('firstName')?.invalid && (registerFormTunisie.get('firstName')?.dirty || registerFormTunisie.get('firstName')?.touched)}">
               <div *ngIf="registerFormTunisie.get('firstName')?.invalid && (registerFormTunisie.get('firstName')?.dirty || registerFormTunisie.get('firstName')?.touched)"
-                class="field-input">Nom est obligatoire.</div>
+                class="field-input">
+                {{ registerFormTunisie.get('firstName')?.getError('personName')?.message || 'Nom est obligatoire.' }}
+              </div>
             </div>
             <div>
               <input type="text" formControlName="lastName" placeholder="Prénom" class="field"
                 [ngClass]="{'border-red-500': registerFormTunisie.get('lastName')?.invalid && (registerFormTunisie.get('lastName')?.dirty || registerFormTunisie.get('lastName')?.touched)}">
               <div *ngIf="registerFormTunisie.get('lastName')?.invalid && (registerFormTunisie.get('lastName')?.dirty || registerFormTunisie.get('lastName')?.touched)"
-                class="field-input">Prénom est obligatoire.</div>
+                class="field-input">
+                {{ registerFormTunisie.get('lastName')?.getError('personName')?.message || 'Prénom est obligatoire.' }}
+              </div>
             </div>
           </div>
           <!--Email-->

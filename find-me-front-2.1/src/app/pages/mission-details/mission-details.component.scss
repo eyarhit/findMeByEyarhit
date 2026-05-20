@@ -25,6 +25,16 @@ $border-radius: 0.5rem;
   padding: 2rem 0;
   font-family: 'Roboto', sans-serif;
 }
+
+.consultation-hint {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: $border-radius;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
 .notification-container {
  z-index: 10; 
 padding-top: 4cm !important;

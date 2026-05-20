@@ -73,23 +73,16 @@ export class StepTrackerService {
     this.cvService.getCvByUserId(userId).subscribe({
       next: (cv) => {
         const updatedCv = {
-          ...(cv || this.createEmptyCv(userId)),
-          completedSteps: Array.from(steps)
-        };
-        this.cvService.saveCv(userId, updatedCv).subscribe();
+          userId,
+          id_cv: cv?.id_cv,
+          completedSteps: Array.from(steps),
+        } as Cv;
+        this.cvService.saveCv(userId, updatedCv).subscribe({
+          error: (err) => console.error('Error saving completed steps:', err),
+        });
       },
-      error: (err) => console.error('Error updating CV:', err)
+      error: (err) => console.error('Error updating CV:', err),
     });
-  }
-
-  private createEmptyCv(userId: number): Cv {
-    return {
-      userId: userId,
-      competences: [],
-      educations: [],
-      experiences: [],
-      langues: []
-    };
   }
 
 

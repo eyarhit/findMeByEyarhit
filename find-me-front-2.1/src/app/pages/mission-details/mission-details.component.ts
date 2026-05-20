@@ -12,6 +12,12 @@ import { ApiRoutingServiceUser } from '../../services/api-routing-user.service';
 import { HttpParams } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { NotificationService } from '../../services/notificationService';
+import { Router } from '@angular/router';
+import {
+  canApplyToJobOffer,
+  canApplyToMission,
+  isRecruiterRole,
+} from '../../shared/constants/role-utils';
 
 @Component({
   selector: 'app-mission-details',
@@ -56,7 +62,8 @@ errorMessage: string = '';
       private documentService: DocumentServiceService,
       private apiRoutingServiceUser: ApiRoutingServiceUser,
       private notificationService: NotificationService,
-    private cvService: CvService) {}
+      private cvService: CvService,
+      private router: Router) {}
 
   ngOnInit(): void {
     // console.log('espaece',this.espace)
@@ -68,7 +75,9 @@ errorMessage: string = '';
 if(this.storedtargetmarket === 'Tunisien'){this.currency=' TND'}else  {this.currency=' €'}
 
     this.userId  = this.authService.getUserId();
-   this.VérifierCandidatureExist()
+   if (this.canPostuler) {
+     this.VérifierCandidatureExist();
+   }
 
     this.role  = this.authService.getRole();
     this.email = this.authService.getEmail();
@@ -112,6 +121,71 @@ if(this.storedtargetmarket === 'Tunisien'){this.currency=' TND'}else  {this.curr
     handleEditStatus(isEditing: boolean) {
     this.isEditing=isEditing;
     this.LoadMissionData()
+  }
+
+  get canPostuler(): boolean {
+    if (this.visiteur) {
+      return false;
+    }
+    if (this.espace === 'Postuler Offre') {
+      return canApplyToJobOffer(this.role);
+    }
+    if (this.espace === 'Postuler Mission') {
+      return canApplyToMission(this.role);
+    }
+    return false;
+  }
+
+  get canManagePublishedOffer(): boolean {
+    return (
+      (this.espace === 'Mission publier' || this.espace === 'Offres publier') &&
+      !this.visiteur &&
+      isRecruiterRole(this.role)
+    );
+  }
+
+  get isOwnOffer(): boolean {
+    const ownerId = this.jobs[0]?.ownerId;
+    return (
+      ownerId != null &&
+      this.userId != null &&
+      Number(ownerId) === Number(this.userId)
+    );
+  }
+
+  get canViewCandidatures(): boolean {
+    return (
+      !this.visiteur &&
+      isRecruiterRole(this.role) &&
+      (this.canManagePublishedOffer ||
+        (this.espace === 'Consultation Offre' && this.isOwnOffer))
+    );
+  }
+
+  get showConsultationHint(): boolean {
+    return this.espace === 'Consultation Offre' && !this.isOwnOffer && !this.visiteur;
+  }
+
+  goToCandidatures(): void {
+    if (!this.mission_id) {
+      return;
+    }
+    const base =
+      this.espace === 'Mission publier' || this.type_contrat === 'de la mission'
+        ? '/Missions/candidatures'
+        : '/Offres/candidatures';
+    this.router.navigate([base, this.mission_id]);
+  }
+
+  goToManageOffer(): void {
+    if (!this.mission_id) {
+      return;
+    }
+    if (this.espace === 'Mission publier' || this.type_contrat === 'de la mission') {
+      this.router.navigate(['/MissionPublierDetails', this.mission_id]);
+    } else {
+      this.router.navigate(['/OffrePublierDetails', this.mission_id]);
+    }
   }
 
   LoadMissionData() {

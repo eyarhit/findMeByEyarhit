@@ -225,22 +225,21 @@ services:
       mysql:
         condition: service_healthy
 
-  # frontend:
-  #   build:
-  #     context: ./find-me-front-2.1
-  #   container_name: findme-frontend
-  #   restart: unless-stopped
-  #   ports:
-  #     - "4200:80"
-  #   depends_on:
-  #     - gateway-service
-  #     - user-service
-  #     - cv-service
-  #     - mission-service
-  #     - quiz-service
-  #     - codingame-service
-  #     - python-service
-  #     - metabase
+  frontend:
+    build:
+      context: ./find-me-front-2.1
+    container_name: findme-frontend
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    depends_on:
+      - gateway-service
+      - user-service
+      - cv-service
+      - mission-service
+      - quiz-service
+      - codingame-service
+      - python-service
 
 volumes:
   mysql_data:
