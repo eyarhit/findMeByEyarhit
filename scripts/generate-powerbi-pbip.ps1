@@ -246,7 +246,7 @@ expression fn_MySQLTable =
 		let
 		    fn = (tableName as text) =>
 		    let
-		        Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase, [ReturnServerDateTime=true, CreateNavigationProperties=false]),
+		        Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase, [CreateNavigationProperties=false]),
 		        Nav = try Source{[Schema=PBI_MySqlDatabase, Item=tableName]}[Data]
 		            otherwise try Source{[Item=tableName, Kind="Table"]}[Data]
 		            otherwise try Source{[Item=tableName]}[Data]

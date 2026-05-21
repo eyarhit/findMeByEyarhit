@@ -77,6 +77,7 @@ puis lancer `ONE_COMMANDE_POWERBI.cmd` → ouverture directe avec visuels.
 | `layoutOptimization` dans report.json | Retirer cette ligne (schéma PBIR 3.2.0) ; `git pull` ou regénérer le dashboard |
 | Volet **Donnees** vide / tous les visuels en erreur | `git pull` puis `ONE_COMMANDE_POWERBI.cmd` (colonnes TMDL) ; **Actualiser** + `findme_bi` / `findme_bi_readonly` |
 | Triangles rouges (vue Modele) | Serveur `localhost:3306`, base `findme_dw` ; *Parametres de la source de donnees* → ressaisir `findme_bi` |
+| Erreur `ReturnServerDateTime` | `git pull` + `FIX_POWERBI_REFRESH.cmd` (option retiree du modele M) |
 | `git pull` bloqué | `git checkout -- bi/powerbi/` puis `git pull` |
 | Écran vide | Actualiser + identifiants MySQL ; ou utiliser `.pbix` |
 | Docker | Lancer **Docker Desktop** avant la commande |
