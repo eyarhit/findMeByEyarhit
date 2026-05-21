@@ -1,0 +1,6 @@
+Mode developpeur PBIP uniquement.
+
+NE PAS ouvrir FindMe-BI.pbip depuis l'accueil Power BI.
+
+Pour la BI du PFE, utilisez :
+  bi\powerbi\OUVRIR_POWER_BI.cmd

@@ -1,7 +1,5 @@
 @echo off
-REM Supprime l'ancien .pbip casse et ouvre la connexion MySQL (pbids)
+REM Supprime FindMe-BI.pbip (erreur dataset) puis ouvre findme_dw.pbids
 cd /d "%~dp0.."
-if exist "bi\powerbi\FindMe-BI\FindMe-BI.pbip" del /f /q "bi\powerbi\FindMe-BI\FindMe-BI.pbip"
-echo Ancien .pbip supprime si present.
-call scripts\powerbi-open.cmd
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0powerbi-fix.ps1" %*
 exit /b %ERRORLEVEL%

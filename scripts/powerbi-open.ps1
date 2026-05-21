@@ -9,25 +9,34 @@ $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 Set-Location $Root
 
-$PbipPath = Join-Path $Root "bi\powerbi\FindMe-BI\FindMe-BI.pbip"
+$LegacyPbipPath = Join-Path $Root "bi\powerbi\FindMe-BI\FindMe-BI.pbip"
+$DevPbipPath = Join-Path $Root "bi\powerbi\_dev-pbip-project\FindMe-BI.pbip"
 $PbixPath = Join-Path $Root "bi\powerbi\reports\FindMe_BI_Auto.pbix"
-$PbidsPath = Join-Path $Root "bi\powerbi\starter\findme_dw.pbids"
+$PbidsPaths = @(
+    (Join-Path $Root "bi\powerbi\CONNEXION_FindMe_MySQL.pbids"),
+    (Join-Path $Root "bi\powerbi\starter\findme_dw.pbids")
+)
 $GenScript = Join-Path $PSScriptRoot "generate-powerbi-pbip.ps1"
 
 function Write-Step($msg) { Write-Host "`n=== $msg ===" -ForegroundColor Cyan }
 
-function Remove-BrokenPbip {
-    if (-not (Test-Path $PbipPath)) { return }
-    $raw = [System.IO.File]::ReadAllText($PbipPath)
-    if ($raw -match '"dataset"\s*:') {
-        Write-Host ""
-        Write-Host "ATTENTION : ancien FindMe-BI.pbip invalide (propriete dataset)." -ForegroundColor Yellow
-        Write-Host "Suppression - utilisez .pbids / .pbix, pas le .pbip." -ForegroundColor Yellow
-        Remove-Item -LiteralPath $PbipPath -Force
+function Remove-PbipTraps {
+    foreach ($p in @($LegacyPbipPath, $DevPbipPath)) {
+        if (Test-Path $p) {
+            Remove-Item -LiteralPath $p -Force
+            Write-Host "Supprime (ne pas ouvrir) : $p" -ForegroundColor Yellow
+        }
     }
 }
 
-Remove-BrokenPbip
+function Get-PbidsPath {
+    foreach ($p in $PbidsPaths) {
+        if (Test-Path $p) { return $p }
+    }
+    return $null
+}
+
+if (-not $UsePbip) { Remove-PbipTraps }
 
 function Wait-MySql {
     $max = 60
@@ -162,12 +171,12 @@ if (Test-Path $PbixPath) {
     Write-Host ""
     Write-Host "========== POWER BI (.pbix) ==========" -ForegroundColor Green
     Write-Host "Rapport pret - actualisez si besoin (Accueil - Actualiser)."
-} elseif ($UsePbip -and (Test-Path $PbipPath)) {
-    $openPath = $PbipPath
-    Write-Host "Fichier : $openPath" -ForegroundColor Green
+} elseif ($UsePbip -and (Test-Path $DevPbipPath)) {
+    $openPath = $DevPbipPath
+    Write-Host "Fichier (mode dev) : $openPath" -ForegroundColor Green
     Open-PowerBiReport -ReportPath $openPath
-} elseif (Test-Path $PbidsPath) {
-    $openPath = $PbidsPath
+} elseif ($pbids = Get-PbidsPath) {
+    $openPath = $pbids
     Write-Host "Connexion MySQL : $openPath" -ForegroundColor Green
     Open-PowerBiReport -ReportPath $openPath
     Write-Host ""

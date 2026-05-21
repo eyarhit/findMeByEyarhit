@@ -1,9 +1,0 @@
-NE PAS double-cliquer sur FindMe-BI.pbip (erreur "dataset" possible).
-
-Utilisez a la place :
-  bi\powerbi\OUVRIR_POWER_BI.cmd
-ou depuis la racine du projet :
-  scripts\powerbi-open.cmd
-
-Premiere fois : enregistrez bi\powerbi\reports\FindMe_BI_Auto.pbix
-(voir bi\powerbi\starter\CREER_PBIX.md)

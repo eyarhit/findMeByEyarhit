@@ -1,7 +1,7 @@
 # Genere le projet Power BI Desktop (PBIP) - toutes les tables findme_dw
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
-$Base = Join-Path $Root "bi\powerbi\FindMe-BI"
+$Base = Join-Path $Root "bi\powerbi\_dev-pbip-project"
 $Sm = Join-Path $Base "FindMe-BI.SemanticModel"
 $Def = Join-Path $Sm "definition"
 $TablesDir = Join-Path $Def "tables"

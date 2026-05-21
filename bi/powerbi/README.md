@@ -24,9 +24,9 @@ Importer les `.pbix` depuis `bi/powerbi/reports/`. Source MySQL : `host.docker.i
 scripts\powerbi-open.cmd
 ```
 
-Ou double-clic : `bi\powerbi\OUVRIR_POWER_BI.cmd`
+Double-clic : **`bi\powerbi\OUVRIR_POWER_BI.cmd`** ou **`CONNEXION_FindMe_MySQL.pbids`**
 
-**Ne pas ouvrir** `FindMe-BI\FindMe-BI.pbip` (erreur `dataset` sur anciennes copies). Si l’erreur revient : `scripts\powerbi-fix.cmd`
+**Interdit** : `FindMe-BI\FindMe-BI.pbip` (erreur `dataset`). Correction : `scripts\powerbi-fix.cmd` (supprime l’ancien fichier).
 
 Fait : MySQL → ETL Talend → ouverture Power BI.
 
@@ -38,7 +38,7 @@ Fait : MySQL → ETL Talend → ouverture Power BI.
 **Créer le `.pbix` une fois** : guide `bi/powerbi/starter/CREER_PBIX.md`  
 (Identifiants `findme_bi` / `findme_bi_readonly`, cocher les tables, **Enregistrer sous** `reports/FindMe_BI_Auto.pbix`).
 
-> Le dossier `FindMe-BI/*.pbip` est optionnel (mode développeur). Préférez **.pbix** pour éviter les erreurs de schéma PBIP.
+> Le dossier `_dev-pbip-project/` est optionnel (mode développeur). Ne pas ouvrir le `.pbip` depuis l’accueil Power BI.
 
 ## Prérequis
 
