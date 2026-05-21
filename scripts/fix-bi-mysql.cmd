@@ -13,7 +13,7 @@ echo Verifier la ligne: build ETL : 852bbf6-fk-grants
 docker compose run --rm bi-etl
 if errorlevel 1 exit /b 1
 echo.
-echo === Seed Metabase ===
-docker compose build metabase-seed
+echo === Seed Metabase (rebuild sans cache) ===
+docker compose build --no-cache metabase-seed
 docker compose run --rm metabase-seed
 exit /b %errorlevel%

@@ -16,7 +16,7 @@ if errorlevel 1 (
 )
 echo.
 echo === Seed Metabase + manifest BI ===
-docker compose build metabase-seed
+docker compose build --no-cache metabase-seed
 docker compose run --rm metabase-seed
 if errorlevel 1 (
   echo ERREUR metabase-seed. Logs : docker compose logs metabase-seed
