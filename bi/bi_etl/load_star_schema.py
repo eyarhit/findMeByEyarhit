@@ -8,6 +8,7 @@ from __future__ import annotations
 import os
 import re
 import sys
+import time
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
@@ -47,6 +48,35 @@ def connect(db: str | None = None):
     )
 
 
+def _col(row: dict | None, *names: str, default=0):
+    """Accès insensible à la casse (MySQL peut renvoyer C, N, TOTAL_ROWS…)."""
+    if not row:
+        return default
+    lower = {str(k).lower(): v for k, v in row.items()}
+    for name in names:
+        key = name.lower()
+        if key in lower:
+            return lower[key]
+    return default
+
+
+def wait_for_mysql(max_wait_sec: int = 90) -> None:
+    """Au compose up, MySQL peut être healthy avant d'accepter les connexions."""
+    deadline = time.time() + max_wait_sec
+    last_err: Exception | None = None
+    while time.time() < deadline:
+        try:
+            conn = connect()
+            conn.close()
+            print(f"MySQL prêt ({MYSQL_HOST}:{MYSQL_PORT})")
+            return
+        except pymysql.err.OperationalError as exc:
+            last_err = exc
+            print(f"En attente MySQL… ({exc})", flush=True)
+            time.sleep(2)
+    raise RuntimeError(f"MySQL indisponible après {max_wait_sec}s : {last_err}")
+
+
 def date_key_from_date(d: date | None) -> int:
     if d is None:
         return UNKNOWN_DATE_KEY
@@ -62,7 +92,7 @@ def populate_dim_date(cur) -> None:
         """
     )
     cur.execute("SELECT COUNT(*) AS c FROM dim_date WHERE date_key > 19000101")
-    if cur.fetchone()["c"] > 0:
+    if _col(cur.fetchone(), "c") > 0:
         print("dim_date : déjà peuplée")
         return
     start = date(2020, 1, 1)
@@ -615,9 +645,19 @@ def ensure_dw_schema(conn) -> None:
             print(f"findme_dw : complément DDL pour {_missing_required_tables()}")
             _apply_sql_file(Path(SCHEMA_SQL), "complément")
 
-    if _missing_required_tables():
-        _reset_dw_database(conn)
-        _apply_sql_file(Path(SCHEMA_SQL), "DDL complet (reset)")
+    still_after_ddl = _missing_required_tables()
+    if still_after_ddl:
+        # Ne reset que si l'entrepôt est vraiment vide / incohérent (évite DROP à chaque up)
+        present = _existing_dw_tables()
+        if not present or "dim_date" not in present:
+            _reset_dw_database(conn)
+            _apply_sql_file(Path(SCHEMA_SQL), "DDL complet (reset)")
+        else:
+            print(
+                f"ATTENTION: tables encore manquantes {still_after_ddl} "
+                f"mais {len(present)} objet(s) présents — pas de DROP auto",
+                file=sys.stderr,
+            )
 
     still_missing = _missing_required_tables()
     if still_missing:
@@ -667,7 +707,7 @@ def run_dq_checks(cur) -> None:
     print("--- Contrôles qualité ---")
     for label, sql in checks:
         cur.execute(sql)
-        n = cur.fetchone()["n"]
+        n = _col(cur.fetchone(), "n")
         status = "OK" if n == 0 else f"ATTENTION ({n})"
         print(f"  {label}: {status}")
 
@@ -684,7 +724,8 @@ def _etl_log_finish(cur, run_id: int, status: str, rows: int | None = None, err:
 
 
 def main() -> None:
-    print("ETL Find-Me → findme_dw (schéma en étoile)")
+    print("ETL Find-Me → findme_dw (schéma en étoile)", flush=True)
+    wait_for_mysql()
     root = connect()
     ensure_dw_schema(root)
     src = connect()
@@ -713,7 +754,7 @@ def main() -> None:
                 + (SELECT COUNT(*) FROM fact_cv) AS total_rows
                 """
             )
-            total_rows = cur.fetchone()["total_rows"]
+            total_rows = _col(cur.fetchone(), "total_rows")
             run_dq_checks(cur)
             _etl_log_finish(cur, run_id, "SUCCESS", total_rows)
         dw.commit()

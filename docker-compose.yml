@@ -230,16 +230,7 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      user-service:
-        condition: service_started
-      cv-service:
-        condition: service_started
-      mission-service:
-        condition: service_started
-      quiz-service:
-        condition: service_started
-      codingame-service:
-        condition: service_started
+    # ETL lit les bases MySQL déjà persistées ; pas besoin d'attendre les microservices Java
 
   metabase-seed:
     build:

@@ -93,7 +93,15 @@ Ou à la main :
 
 ```cmd
 docker compose rm -sf bi-etl metabase-seed
+docker compose build bi-etl
+docker compose up -d --force-recreate bi-etl metabase-seed
 docker compose up -d
+```
+
+Si `bi-etl` échoue encore, lire les logs :
+
+```cmd
+docker compose logs bi-etl
 ```
 
 > **Pourquoi ?** `docker compose run --rm bi-etl` crée un conteneur **temporaire**. Un ancien `findme-bi-etl` en exit 1 fait échouer `docker compose up -d` en 0,7 s sans relancer l’ETL. La commande `rm` supprime ces conteneurs one-shot avant le `up`.
