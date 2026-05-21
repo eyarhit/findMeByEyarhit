@@ -22,12 +22,22 @@ cd findMeByEyarhit
 git pull
 ```
 
+**Erreur** `bi-manifest.json would be overwritten by merge` (ancien Metabase en local) :
+
+```cmd
+git checkout -- find-me-front-2.1/src/assets/bi/bi-manifest.json
+git pull
+```
+
+*(On abandonne le manifest Metabase local ; la version Git est **Talend + Power BI**.)*
+
 Vérifier que le clone est complet :
 
 ```cmd
 dir find-me-back-2.1\Cv_service
 dir find-me-python-2.1\app
-dir bi\bi_etl
+dir bi\talend\docker
+dir bi\powerbi
 ```
 
 Si un dossier est vide → refaire un `git clone` propre.
