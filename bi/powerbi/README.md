@@ -18,6 +18,16 @@
 
 Importer les `.pbix` depuis `bi/powerbi/reports/`. Source MySQL : `host.docker.internal:3306`, base `findme_dw`, user `findme_bi`.
 
+## Une commande (recommandé)
+
+```cmd
+scripts\powerbi-open.cmd
+```
+
+Fait : attente MySQL → ETL Talend → ouverture du projet **`bi/powerbi/FindMe-BI/FindMe-BI.pbip`** avec **toutes les tables** `findme_dw` déjà configurées.
+
+**Première fois seulement** dans Power BI : identifiants `findme_bi` / `findme_bi_readonly`, puis **Enregistrer sous** (`.pbix`) pour mémoriser la connexion.
+
 ## Prérequis
 
 1. **ETL Talend** exécuté (automatique via `bi-hub`, ou manuel) :

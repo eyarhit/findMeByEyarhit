@@ -1,0 +1,12 @@
+﻿
+table etl_run_log
+    lineageTag: 32b2623f-5b80-44a0-933a-1a5a9ff16168
+
+    partition etl_run_log = m
+        mode: import
+        source =
+            let
+                Data = fn_MySQLTable("etl_run_log")
+            in
+                Data
+

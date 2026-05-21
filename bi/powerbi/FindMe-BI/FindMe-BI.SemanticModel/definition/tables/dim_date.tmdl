@@ -1,0 +1,12 @@
+﻿
+table dim_date
+    lineageTag: 7bd99a9e-7861-4a66-8a51-406ed8ae9553
+
+    partition dim_date = m
+        mode: import
+        source =
+            let
+                Data = fn_MySQLTable("dim_date")
+            in
+                Data
+

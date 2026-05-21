@@ -1,0 +1,12 @@
+﻿
+table v_bi_candidature
+    lineageTag: 40be83f9-0d89-4a45-995d-854b6de8da86
+
+    partition v_bi_candidature = m
+        mode: import
+        source =
+            let
+                Data = fn_MySQLTable("v_bi_candidature")
+            in
+                Data
+

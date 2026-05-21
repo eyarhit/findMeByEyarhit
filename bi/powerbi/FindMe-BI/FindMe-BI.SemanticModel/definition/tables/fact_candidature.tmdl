@@ -1,0 +1,12 @@
+﻿
+table fact_candidature
+    lineageTag: 3b3b1c7b-3b7a-4ae3-b5e3-9587726d8565
+
+    partition fact_candidature = m
+        mode: import
+        source =
+            let
+                Data = fn_MySQLTable("fact_candidature")
+            in
+                Data
+

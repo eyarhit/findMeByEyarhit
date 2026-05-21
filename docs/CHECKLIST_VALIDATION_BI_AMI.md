@@ -80,7 +80,15 @@ Utile pour la **démo visuelle** du job Talend, pas obligatoire si l’ETL CLI f
 
 ---
 
-## Partie 2 — Power BI (OLAP) — le minimum à valider
+## Partie 2 — Power BI (OLAP) — une commande
+
+```cmd
+scripts\powerbi-open.cmd
+```
+
+Ouvre Power BI avec le projet préconfiguré (17 tables/vues). Première fois : saisir `findme_bi` / `findme_bi_readonly`.
+
+### Validation manuelle (si besoin)
 
 **Ce que c’est :** Power BI **lit** `findme_dw` pour graphiques, filtres, drill-down (analyse du cours).
 

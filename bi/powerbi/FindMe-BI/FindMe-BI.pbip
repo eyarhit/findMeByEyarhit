@@ -1,0 +1,8 @@
+﻿{
+  "version": "1.0",
+  "artifacts": [
+    { "report": { "path": "FindMe-BI.Report" } },
+    { "dataset": { "path": "FindMe-BI.SemanticModel" } }
+  ],
+  "settings": { "enableAutoRecovery": true }
+}
