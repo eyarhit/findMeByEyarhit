@@ -276,7 +276,10 @@ database
 $queryOrder = (@('PBI_MySqlServer', 'PBI_MySqlDatabase') + $tables) | ForEach-Object { "`"$_`"" }
 $queryOrderJson = $queryOrder -join ','
 $relRefs = Write-ModelRelationships $Def
-$tableRefs = ($tables | ForEach-Object { "ref table $_" }) -join "`n"
+function Format-TmdlTableRef([string]$tableName) {
+    if ($tableName -match '\s') { "ref table '$tableName'" } else { "ref table $tableName" }
+}
+$tableRefs = ($tables | ForEach-Object { Format-TmdlTableRef $_ }) -join "`n"
 $refs = ($tableRefs, ($relRefs -join "`n")) -join "`n`n"
 @"
 

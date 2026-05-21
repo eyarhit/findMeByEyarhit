@@ -8,7 +8,7 @@ model Model
 expression PBI_MySqlServer = "localhost:3306" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 expression PBI_MySqlDatabase = "findme_dw" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 
-ref table _Mesures BI
+ref table '_Mesures BI'
 ref table dim_date
 ref table dim_user
 ref table dim_user_scd2
