@@ -18,17 +18,24 @@
 
 Importer les `.pbix` depuis `bi/powerbi/reports/`. Source MySQL : `host.docker.internal:3306`, base `findme_dw`, user `findme_bi`.
 
-## Une commande (dashboard avec visuels)
+## Une commande (3 pages dashboard, zero config)
 
 ```cmd
 ONE_COMMANDE_POWERBI.cmd
 ```
 
-(ou `scripts\powerbi-open.cmd` — meme chose)
+- Genere le projet **`FindMe-Dashboard.pbip`** (3 pages : Executive, Managerial, Operationnel)
+- ETL Talend → `findme_dw`
+- Ouvre Power BI avec **cartes KPI, barres, tableaux** deja places
 
-- ETL Talend → remplit `findme_dw`
-- Ouvre **`reports/FindMe_BI_Auto.pbix`** (cartes KPI, tableaux, graphiques)
-- Si absent : copie depuis **`template/FindMe_BI_Seed.pbix`**
+**Premiere ouverture seulement** : identifiants `findme_bi` / `findme_bi_readonly` puis **Actualiser**.
+
+Pages :
+| Page | Contenu |
+|------|---------|
+| 01 Executive | KPI candidatures, acceptees, taux + tableau KPI |
+| 02 Managerial | Barres missions / statuts + tableau candidatures |
+| 03 Operationnel | KPI users/CV/notifications + tableaux |
 
 **Publier le modele** (eyarh, une fois apres avoir finalise le rapport) :
 

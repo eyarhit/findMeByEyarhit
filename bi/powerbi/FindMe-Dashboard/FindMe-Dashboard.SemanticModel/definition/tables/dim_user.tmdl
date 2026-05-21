@@ -1,0 +1,11 @@
+
+table dim_user
+    lineageTag: 7e096a21-15fb-4940-b358-98e45a8de3e0
+
+    partition dim_user = m
+        mode: import
+        source =
+            let
+                Data = fn_MySQLTable("dim_user")
+            in
+                Data

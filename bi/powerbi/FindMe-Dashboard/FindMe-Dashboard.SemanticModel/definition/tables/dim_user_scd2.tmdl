@@ -1,0 +1,11 @@
+
+table dim_user_scd2
+    lineageTag: 89dd55db-6ecc-48e3-80dc-b8e9b4dfd501
+
+    partition dim_user_scd2 = m
+        mode: import
+        source =
+            let
+                Data = fn_MySQLTable("dim_user_scd2")
+            in
+                Data

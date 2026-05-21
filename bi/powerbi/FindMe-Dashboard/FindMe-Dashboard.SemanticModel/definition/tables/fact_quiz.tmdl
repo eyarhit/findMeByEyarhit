@@ -1,0 +1,11 @@
+
+table fact_quiz
+    lineageTag: 82e33dac-976e-4ce1-9b89-533a314ea573
+
+    partition fact_quiz = m
+        mode: import
+        source =
+            let
+                Data = fn_MySQLTable("fact_quiz")
+            in
+                Data

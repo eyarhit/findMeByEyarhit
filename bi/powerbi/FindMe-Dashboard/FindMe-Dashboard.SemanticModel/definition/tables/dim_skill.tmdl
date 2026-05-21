@@ -1,0 +1,11 @@
+
+table dim_skill
+    lineageTag: 258b90be-3729-43a1-b5e5-1db54f44c0e7
+
+    partition dim_skill = m
+        mode: import
+        source =
+            let
+                Data = fn_MySQLTable("dim_skill")
+            in
+                Data

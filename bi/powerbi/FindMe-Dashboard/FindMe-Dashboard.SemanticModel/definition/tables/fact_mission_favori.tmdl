@@ -1,0 +1,11 @@
+
+table fact_mission_favori
+    lineageTag: c08f4cd0-b3a6-4e9b-96e7-6a0c6c49e170
+
+    partition fact_mission_favori = m
+        mode: import
+        source =
+            let
+                Data = fn_MySQLTable("fact_mission_favori")
+            in
+                Data

@@ -1,0 +1,11 @@
+
+table v_bi_kpi_recrutement
+    lineageTag: 1d500f64-3fce-4c9f-90b2-8a3770b003c5
+
+    partition v_bi_kpi_recrutement = m
+        mode: import
+        source =
+            let
+                Data = fn_MySQLTable("v_bi_kpi_recrutement")
+            in
+                Data

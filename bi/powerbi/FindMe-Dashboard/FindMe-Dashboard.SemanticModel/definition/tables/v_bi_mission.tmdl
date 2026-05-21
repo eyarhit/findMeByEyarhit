@@ -1,0 +1,11 @@
+
+table v_bi_mission
+    lineageTag: b1cbc39b-29e4-47cb-9c20-3178ad412dd9
+
+    partition v_bi_mission = m
+        mode: import
+        source =
+            let
+                Data = fn_MySQLTable("v_bi_mission")
+            in
+                Data

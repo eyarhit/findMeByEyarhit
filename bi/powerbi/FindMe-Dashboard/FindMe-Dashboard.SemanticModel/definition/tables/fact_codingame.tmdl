@@ -1,0 +1,11 @@
+
+table fact_codingame
+    lineageTag: b531c9e2-4bcc-46a8-a024-61b36a7f5d59
+
+    partition fact_codingame = m
+        mode: import
+        source =
+            let
+                Data = fn_MySQLTable("fact_codingame")
+            in
+                Data

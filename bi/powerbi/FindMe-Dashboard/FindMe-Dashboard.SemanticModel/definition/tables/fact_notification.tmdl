@@ -1,0 +1,11 @@
+
+table fact_notification
+    lineageTag: 933f1365-efd2-4301-9f15-b75218072854
+
+    partition fact_notification = m
+        mode: import
+        source =
+            let
+                Data = fn_MySQLTable("fact_notification")
+            in
+                Data
