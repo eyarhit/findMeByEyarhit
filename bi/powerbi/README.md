@@ -20,7 +20,7 @@ docker compose run --rm talend-etl
 
 2. **Power BI Desktop** (Windows) installé — [téléchargement Microsoft](https://www.microsoft.com/power-platform/products/power-bi/desktop).
 
-3. MySQL accessible sur `localhost:3306` (Docker `findme-mysql`).
+3. MySQL accessible sur `localhost:3306` (Docker `findme-mysql` — le port **3306** doit être publié dans `docker-compose.yml`).
 
 ## Connexion Power BI → findme_dw
 
