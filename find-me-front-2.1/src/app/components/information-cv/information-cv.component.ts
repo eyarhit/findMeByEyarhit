@@ -6,6 +6,8 @@ import { jsPDF } from 'jspdf';
 import { PdfService } from '../../services/pdf.service';
 import { AuthService } from '../../services/auth.service';
 import { Cv } from '../../_model/Cv';
+import { Education } from '../../_model/Education';
+import { Experience } from '../../_model/Experience';
 import { Langue } from '../../_model/Langue';
 import { ChangeDetectorRef } from '@angular/core';
 import { StepTrackerService } from '../../services/step-tracker.service';
@@ -346,38 +348,95 @@ popupTitle: string = '';
     };
   }
 
-  private filterFilledAcademicFormations(items: Record<string, unknown>[]): Record<string, unknown>[] {
-    return items.filter((e) => {
-      const u = String(e['university'] ?? '').trim();
-      const d = String(e['diplome'] ?? '').trim();
-      return u || d || e['dateDebut'] || e['dateFin'];
-    });
-  }
-
-  private filterFilledProfessionalExperiences(items: Record<string, unknown>[]): Record<string, unknown>[] {
-    return items.filter((e) => {
-      const ent = String(e['entreprise'] ?? '').trim();
-      const poste = String(e['poste'] ?? '').trim();
-      const desc = String(e['description'] ?? e['travailRealise'] ?? '').trim();
-      return (
-        ent ||
-        poste ||
-        desc ||
-        e['dateDebut'] ||
-        e['dateFin'] ||
-        String(e['nomProjet'] ?? '').trim() ||
-        String(e['client'] ?? '').trim()
-      );
-    });
-  }
-
-  private filterFilledLanguages(items: Record<string, unknown>[]): Record<string, unknown>[] {
+  private filterFilledAcademicFormations(items: unknown[]): Education[] {
     return items
-      .map((l) => ({
-        name: normalizeLanguageName(l['name'] ?? ''),
-        niveau: normalizeLanguageLevel(l['niveau'] ?? ''),
-      }))
-      .filter((l) => l.name || l.niveau);
+      .filter((e) => this.rowHasAcademicData(e as Record<string, unknown>))
+      .map((e) => this.mapAcademicRow(e as Record<string, unknown>));
+  }
+
+  private filterFilledProfessionalExperiences(items: unknown[]): Experience[] {
+    return items
+      .filter((e) => this.rowHasProfessionalData(e as Record<string, unknown>))
+      .map((e) => this.mapProfessionalRow(e as Record<string, unknown>));
+  }
+
+  private filterFilledLanguages(items: unknown[]): Langue[] {
+    return items
+      .filter((e) => this.rowHasLanguageData(e as Record<string, unknown>))
+      .map((e) => this.mapLanguageRow(e as Record<string, unknown>));
+  }
+
+  private rowHasAcademicData(e: Record<string, unknown>): boolean {
+    const u = String(e['university'] ?? '').trim();
+    const d = String(e['diplome'] ?? '').trim();
+    return !!(u || d || e['dateDebut'] || e['dateFin']);
+  }
+
+  private rowHasProfessionalData(e: Record<string, unknown>): boolean {
+    const ent = String(e['entreprise'] ?? '').trim();
+    const poste = String(e['poste'] ?? '').trim();
+    const desc = String(e['description'] ?? e['travailRealise'] ?? '').trim();
+    return !!(
+      ent ||
+      poste ||
+      desc ||
+      e['dateDebut'] ||
+      e['dateFin'] ||
+      String(e['nomProjet'] ?? '').trim() ||
+      String(e['client'] ?? '').trim()
+    );
+  }
+
+  private rowHasLanguageData(e: Record<string, unknown>): boolean {
+    const name = normalizeLanguageName(e['name'] ?? e['language'] ?? e['langue'] ?? '');
+    const niveau = normalizeLanguageLevel(e['niveau'] ?? e['proficiency'] ?? e['level'] ?? '');
+    return !!(name || niveau);
+  }
+
+  private mapAcademicRow(e: Record<string, unknown>): Education {
+    const formatDate = (v: unknown) => {
+      if (!v) return '';
+      const s = String(v);
+      if (!s) return '';
+      const d = new Date(s);
+      return Number.isNaN(d.getTime()) ? '' : d.toISOString().substring(0, 10);
+    };
+    return {
+      university: String(e['university'] ?? ''),
+      diplome: String(e['diplome'] ?? ''),
+      dateDebut: formatDate(e['dateDebut']),
+      dateFin: formatDate(e['dateFin']),
+    };
+  }
+
+  private mapProfessionalRow(e: Record<string, unknown>): Experience {
+    const formatDate = (v: unknown) => {
+      if (!v) return '';
+      const s = String(v);
+      if (!s) return '';
+      const d = new Date(s);
+      return Number.isNaN(d.getTime()) ? '' : d.toISOString().substring(0, 10);
+    };
+    const desc = String(e['description'] ?? e['travailRealise'] ?? '');
+    return {
+      entreprise: String(e['entreprise'] ?? ''),
+      dateDebut: formatDate(e['dateDebut']),
+      dateFin: formatDate(e['dateFin']),
+      poste: String(e['poste'] ?? ''),
+      nomProjet: String(e['nomProjet'] ?? ''),
+      client: String(e['client'] ?? ''),
+      equipe: String(e['equipe'] ?? ''),
+      description: desc,
+      travailRealise: String(e['travailRealise'] ?? desc),
+      environnement: String(e['environnement'] ?? ''),
+    };
+  }
+
+  private mapLanguageRow(e: Record<string, unknown>): Langue {
+    return {
+      name: normalizeLanguageName(e['name'] ?? e['language'] ?? e['langue'] ?? ''),
+      niveau: normalizeLanguageLevel(e['niveau'] ?? e['proficiency'] ?? e['level'] ?? ''),
+    };
   }
 
   // Form Submission

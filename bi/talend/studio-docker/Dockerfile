@@ -5,6 +5,7 @@ USER root
 
 # JRE headless en priorite (plus leger, miroirs apt plus fiables que openjdk-17-jdk seul)
 RUN set -eux; \
+    rm -f /etc/apt/sources.list.d/google-chrome.list 2>/dev/null || true; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         wget ca-certificates fonts-dejavu; \
