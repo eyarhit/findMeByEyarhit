@@ -146,8 +146,8 @@ def _clear_user_dimension(cur) -> None:
     cur.execute("DELETE FROM dim_user WHERE user_key > 0")
 
 
-def ensure_metabase_grants(root_conn) -> None:
-    """Volumes MySQL créés avant findme_dw : findme_bi doit avoir SELECT sur l'entrepôt."""
+def ensure_powerbi_readonly_grants(root_conn) -> None:
+    """Compte lecture seule pour Power BI (findme_bi) sur findme_dw."""
     with root_conn.cursor() as cur:
         cur.execute("GRANT SELECT ON findme_dw.* TO 'findme_bi'@'%'")
         cur.execute("FLUSH PRIVILEGES")
@@ -747,7 +747,7 @@ def main() -> None:
     wait_for_mysql()
     root = connect()
     ensure_dw_schema(root)
-    ensure_metabase_grants(root)
+    ensure_powerbi_readonly_grants(root)
     src = connect()
     dw = connect(DW)
     run_id = 0

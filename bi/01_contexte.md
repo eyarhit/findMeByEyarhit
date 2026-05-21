@@ -12,7 +12,7 @@
 ## Architecture
 
 ```
-OLTP → bi_etl → findme_dw → Metabase (3 dashboards) → bi-manifest.json → Admin Angular
+OLTP → Talend ETL → findme_dw → Power BI (OLAP, 3 rapports) → Admin Angular
 ```
 
 → Suite : [Bloc 2 — dw/schema.md](dw/schema.md)

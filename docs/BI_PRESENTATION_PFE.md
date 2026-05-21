@@ -28,8 +28,8 @@ Pilotage RH Recrutement & Opérations missions
 | Objectif | Indicateur de réussite |
 |----------|------------------------|
 | Modèle décisionnel | Entrepôt `findme_dw` schéma en étoile |
-| Automatisation | ETL Docker + seed Metabase |
-| Pilotage multi-niveaux | 3 dashboards (Executive, Managérial, Opérationnel) |
+| Automatisation | ETL Talend (Docker) + modèle Power BI |
+| Pilotage multi-niveaux | 3 rapports Power BI (Executive, Managérial, Opérationnel) |
 | Gouvernance | Catalogue 23 KPIs + DQ + RGPD |
 
 ---
@@ -58,12 +58,12 @@ Référence : `bi/01_contexte/moscow.md`
 
 ```
 Microservices → MySQL (OLTP, 5 bases)
-       ↓ ETL (bi_etl)
+       ↓ ETL Talend (talend-etl)
 findme_dw (étoile : dimensions + faits)
        ↓ lecture seule (findme_bi)
-Metabase :3030 → 3 dashboards
+Power BI Desktop → 3 rapports OLAP
        ↓ manifest JSON
-Admin Angular (liens BI)
+Admin Angular (guide BI)
 ```
 
 *Schéma détaillé : `bi/dw/schema.md`*
@@ -84,12 +84,12 @@ Admin Angular (liens BI)
 
 | Étape | Outil |
 |-------|------|
-| Extract | `user_bd`, `mission_bd`, `cv_bd`, `quiz_bd`, `codingame_bd` |
-| Transform | Règles COALESCE, flags statut, clés dates |
-| Load | Full refresh `findme_dw` |
+| Extract | Talend `tMysqlInput` — 5 bases OLTP |
+| Transform | Talend `tMap` — COALESCE, statuts, dates |
+| Load | Talend `tMysqlOutput` → `findme_dw` |
 | Qualité | `run_dq_checks()` + `etl_run_log` |
 
-Commande : `docker compose run --rm bi-etl`
+Commande : `docker compose run --rm talend-etl`
 
 ---
 

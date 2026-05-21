@@ -1,6 +1,6 @@
 # Guide pour un ami — lancer Find-Me avec Docker (version actuelle)
 
-Ce guide couvre **tout ce qui a changé** : correctifs RH/candidatures/CV/notifications, e-mails OTP, parser CV Python, **BI Metabase** (entrepôt en étoile + 3 dashboards), admin BI dans l’app.
+Ce guide couvre **tout ce qui a changé** : correctifs RH/candidatures/CV/notifications, e-mails OTP, parser CV Python, **BI Talend + Power BI** (entrepôt en étoile + OLAP), admin BI dans l’app.
 
 **Prérequis :** [Docker Desktop](https://www.docker.com/products/docker-desktop/) installé et **démarré** (icône verte).
 
@@ -62,14 +62,14 @@ Le build Java en parallèle peut échouer (réseau lent). **Méthode recommandé
 ```cmd
 cd findMeByEyarhit
 scripts\docker-build-backend.cmd
-docker compose build frontend python-service metabase-seed bi-etl
+docker compose build frontend python-service talend-etl
 ```
 
 PowerShell :
 
 ```powershell
 .\scripts\docker-build-backend.ps1
-docker compose build frontend python-service metabase-seed bi-etl
+docker compose build frontend python-service talend-etl
 ```
 
 **Mise à jour normale** (changements front/back/python/BI) :
@@ -83,28 +83,23 @@ docker compose build frontend python-service user-service metabase-seed bi-etl
 
 ## 4. Démarrer toute la plateforme
 
-**Recommandé** (sous Windows, `docker compose up -d` seul peut faire échouer `bi-etl` ; le script utilise `compose run`, qui fonctionne) :
+**Recommandé (BI formation BIS — Talend + Power BI) :**
 
 ```cmd
 scripts\docker-compose-up.cmd
 ```
 
-Équivalent manuel :
+Ou :
 
 ```cmd
-docker compose up -d
-docker compose build bi-etl metabase-seed
-docker compose run --rm bi-etl
-docker compose run --rm metabase-seed
+scripts\fix-bi-pfe.cmd
 ```
 
-> **Note :** `bi-etl` et `metabase-seed` sont dans le profil **`bi`** — ils ne sont **plus** lancés par un simple `docker compose up -d` (évite le blocage `exit 1`). La BI se lance avec le script ci-dessus ou les commandes `run`.
+**Ordre :**
 
-**Ordre avec le script :**
-
-1. MySQL, MinIO, microservices, Metabase, frontend (`docker compose up -d`)  
-2. **`docker compose run --rm bi-etl`** — charge `findme_dw`  
-3. **`docker compose run --rm metabase-seed`** — dashboards + `bi-manifest.json`  
+1. `docker compose up -d` — application  
+2. **`docker compose run --rm talend-etl`** — ETL → `findme_dw`  
+3. **Power BI Desktop** — ouvrir `bi/powerbi/README.md` et les rapports `.pbix`  
 
 La **première fois** : compter **5 à 15 minutes** (Maven déjà en cache = plus rapide).
 
@@ -112,8 +107,7 @@ La **première fois** : compter **5 à 15 minutes** (Maven déjà en cache = plu
 
 ```cmd
 docker compose ps -a
-docker compose logs bi-etl
-docker compose logs metabase-seed
+docker compose run --rm talend-etl
 ```
 
 Messages attendus :
@@ -262,8 +256,7 @@ docker compose up -d --no-deps frontend gateway-service user-service cv-service 
 ### Le frontend ne démarre pas (bloqué sur bi-etl ou metabase-seed)
 
 ```cmd
-docker compose logs bi-etl
-docker compose logs metabase-seed
+docker compose run --rm talend-etl
 ```
 
 Relancer seulement ces services :

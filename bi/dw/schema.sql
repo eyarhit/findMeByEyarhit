@@ -235,25 +235,3 @@ FROM fact_candidature fc
 JOIN dim_date d ON d.date_key = fc.date_key
 WHERE fc.date_key > 19000101
 GROUP BY d.year_num, d.month_num;
-
--- Dimension Localisation (exigence cours BI — grain ville + pays)
-CREATE OR REPLACE VIEW dim_localisation AS
-SELECT
-  ROW_NUMBER() OVER (ORDER BY pays, ville) AS localisation_key,
-  ville,
-  pays,
-  CASE
-    WHEN pays IN ('France', 'Tunisie', 'Maroc', 'Algérie') THEN pays
-    WHEN pays = 'Non renseigné' THEN 'Non classé'
-    ELSE 'International'
-  END AS zone_geo
-FROM (
-  SELECT DISTINCT COALESCE(NULLIF(TRIM(ville), ''), 'Non renseigné') AS ville,
-         COALESCE(NULLIF(TRIM(pays), ''), 'Non renseigné') AS pays
-  FROM dim_mission
-  UNION
-  SELECT DISTINCT 'Non renseigné' AS ville,
-         COALESCE(NULLIF(TRIM(country), ''), 'Non renseigné') AS pays
-  FROM dim_user
-  WHERE user_key > 0
-) AS loc;

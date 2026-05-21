@@ -1,3 +1,4 @@
 @echo off
-REM Alias vers la stack Talend + Power BI (remplace l'ancien fix Metabase)
-call "%~dp0docker-compose-up-bi.cmd"
+REM Alias : BI PFE Talend + Power BI (remplace ancien flux Metabase)
+cd /d "%~dp0"
+call fix-bi-pfe.cmd %*

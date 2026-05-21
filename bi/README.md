@@ -1,42 +1,38 @@
-# Module BI Find-Me — Talend + Power BI (PFE ESB)
+# Module BI Find-Me — PFE BIS (Talend + Power BI)
 
-## Architecture
+## Stack (alignée formation)
 
 ```
 OLTP (5 bases)  →  Talend ETL (talend-etl)  →  findme_dw (étoile)
                                               ↓
-                                    Power BI Desktop (.pbix)
+                                    Power BI Desktop (OLAP)
                                               ↓
-                              Admin Angular (bi-manifest.json)
+                              Admin Angular (guide + KPIs)
 ```
 
-## Démarrage Docker
+**Metabase supprimé** — remplacé par **Power BI** (analyse OLAP du cours).
+
+## Démarrage rapide
 
 ```cmd
-scripts\docker-compose-up-bi.cmd
+docker compose up -d
+docker compose run --rm talend-etl
 ```
 
-Profil Compose : `bi` (services `talend-etl`, `powerbi-guide`, `powerbi-seed`).
+Puis Power BI Desktop → `bi/powerbi/README.md`
 
-## Structure
+## Les 6 blocs méthodologiques
 
-| Dossier | Rôle |
-|---------|------|
-| `01_contexte/` | Cadrage, personas, MoSCoW |
-| `dw/` | Schéma en étoile + `dim_localisation` |
-| `talend/` | Job Talend (Studio) + runtime Docker |
-| `powerbi/` | Rapports Power BI + guide web |
-| `kpis/` | Catalogue indicateurs (SQL sur `findme_dw`) |
-| `governance/` | DQ, RGPD, dictionnaire |
-| `metabase/` | **Archive** (ancienne stack, non branchée) |
-| `bi_etl/` | **Archive** (runtime Python historique) |
+| Bloc | Dossier |
+|------|---------|
+| 1. Cadrage | [01_contexte/](01_contexte/) |
+| 2. Modèle DW | [dw/](dw/) |
+| 3. Alimentation ETL | [talend/](talend/) |
+| 4. KPIs | [kpis/](kpis/) |
+| 5. Dashboards OLAP | [powerbi/](powerbi/) |
+| 6. Gouvernance | [governance/](governance/) |
 
-## Dimensions cours (Temps + Localisation)
+## Documentation
 
-- **Temps** : `dim_date` (jour → année, trimestre, week-end)
-- **Localisation** : `dim_localisation` (vue ville / pays / zone) + attributs sur `dim_mission`, `dim_user`
-
-## Soutenance
-
-- Slides : `docs/BI_PRESENTATION_PFE.md` (adapter les slides Metabase → Power BI)
-- Guide jury : `docs/PROJET_BI_ESB.md`
+- [BI_POWERBI.md](../BI_POWERBI.md)
+- [docs/BI_PFE_TALEND_POWERBI.md](../docs/BI_PFE_TALEND_POWERBI.md)

@@ -1,26 +1,22 @@
 @echo off
-REM Stack sans bi-etl au "up" (evite exit 1). BI via "compose run" (fiable sous Windows).
+REM Stack Find-Me + BI formation (Talend ETL + Power BI sur findme_dw)
 cd /d "%~dp0.."
-echo === Demarrage services (sans ETL BI) ===
+echo === Demarrage application ===
 docker compose up -d %*
 if errorlevel 1 exit /b 1
 echo.
-echo === GRANT MySQL BI ===
-docker exec -i findme-mysql mysql -uroot -proot -e "GRANT SELECT ON findme_dw.* TO 'findme_bi'@'%%'; FLUSH PRIVILEGES;" 2>nul
-echo === ETL findme_dw (rebuild image) ===
-docker compose build --no-cache bi-etl
-docker compose run --rm bi-etl
+echo === ETL Talend (runtime Docker) ===
+docker compose build --no-cache talend-etl
+docker compose run --rm talend-etl
 if errorlevel 1 (
-  echo ERREUR bi-etl. Logs : docker compose logs bi-etl
+  echo ERREUR talend-etl. Voir logs ci-dessus.
   exit /b 1
 )
 echo.
-echo === Seed Metabase + manifest BI ===
-docker compose build --no-cache metabase-seed
-docker compose run --rm metabase-seed
-if errorlevel 1 (
-  echo ERREUR metabase-seed. Logs : docker compose logs metabase-seed
-  exit /b 1
-)
+echo === BI : ouvrir Power BI Desktop ===
+echo   1. Connexion MySQL localhost:3306 / findme_dw / findme_bi
+echo   2. Guide : bi\powerbi\README.md
+echo   3. Rapports : bi\powerbi\reports\*.pbix
+echo   4. Admin app : http://localhost:4200  (page BI)
 echo.
-echo OK — App http://localhost:4200  Metabase http://localhost:3030
+echo OK.

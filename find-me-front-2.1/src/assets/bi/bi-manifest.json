@@ -1,50 +1,66 @@
 {
-  "version": 2,
-  "stack": "talend-powerbi",
-  "generatedAt": null,
-  "problematic": "Pilotage recrutement et missions ESN — plateforme Find-Me",
-  "powerBiGuideUrl": "http://localhost:8088",
-  "mysql": {
-    "host": "localhost",
-    "port": 3306,
-    "database": "findme_dw",
-    "user": "findme_bi",
-    "passwordHint": "findme_bi_readonly"
-  },
-  "etl": {
-    "tool": "Talend Open Studio",
+  "version": 4,
+  "stack": "Talend ETL + Power BI OLAP",
+  "generatedAt": "2026-05-20T00:00:00Z",
+  "dwDatabase": "findme_dw",
+  "talend": {
     "jobName": "FindMe_Load_DW",
+    "studioPath": "bi/talend/studio/FindMe_Load_DW",
     "dockerService": "talend-etl",
-    "command": "docker compose run --rm talend-etl"
+    "buildId": "talend-findme-2026"
   },
-  "reports": [
-    {
-      "level": "executive",
-      "name": "Find-Me — Vue direction",
-      "file": "bi/powerbi/reports/01_Executive.pbix",
-      "pages": ["KPI globaux", "Candidatures par mois", "Taux de conversion"]
+  "powerBi": {
+    "desktopRequired": true,
+    "connection": {
+      "server": "localhost",
+      "port": 3306,
+      "database": "findme_dw",
+      "user": "findme_bi",
+      "password": "findme_bi_readonly"
     },
-    {
-      "level": "managerial",
-      "name": "Find-Me — Pilotage RH",
-      "file": "bi/powerbi/reports/02_Managerial.pbix",
-      "pages": ["Missions par statut", "Top villes", "Compétences CV"]
-    },
-    {
-      "level": "operational",
-      "name": "Find-Me — Opérationnel",
-      "file": "bi/powerbi/reports/03_Operational.pbix",
-      "pages": ["Notifications", "Quiz", "Codingame"]
-    }
-  ],
-  "dimensions": {
-    "temps": "dim_date",
-    "localisation": "dim_localisation",
-    "utilisateur": "dim_user",
-    "mission": "dim_mission"
+    "reports": [
+      {
+        "level": "executive",
+        "name": "Find-Me — BI Executive",
+        "file": "FindMe_BI_Executive.pbix",
+        "description": "Synthèse direction — KPIs globaux (OLAP)"
+      },
+      {
+        "level": "managerial",
+        "name": "Find-Me — BI Managérial",
+        "file": "FindMe_BI_Managerial.pbix",
+        "description": "Pilotage RH / missions / candidatures"
+      },
+      {
+        "level": "operational",
+        "name": "Find-Me — BI Opérationnel",
+        "file": "FindMe_BI_Operational.pbix",
+        "description": "Détail notifications, CV, évaluations"
+      }
+    ],
+    "guidePath": "bi/powerbi/README.md"
   },
   "credentials": {
     "mysqlReadOnlyUser": "findme_bi",
-    "powerBiNote": "Power BI Desktop → MySQL findme_dw (guide http://localhost:8088)"
-  }
+    "mysqlReadOnlyPassword": "findme_bi_readonly"
+  },
+  "dashboards": [
+    { "level": "executive", "name": "Find-Me — BI Executive", "reportFile": "FindMe_BI_Executive.pbix" },
+    { "level": "managerial", "name": "Find-Me — BI Managérial", "reportFile": "FindMe_BI_Managerial.pbix" },
+    { "level": "operational", "name": "Find-Me — BI Opérationnel", "reportFile": "FindMe_BI_Operational.pbix" }
+  ],
+  "tabs": [
+    { "key": "executive", "label": "Executive", "cardSlugs": ["executive_kpis", "users_by_role", "applications_by_month", "application_conversion_rate", "missions_by_month", "cvs_by_month"] },
+    { "key": "managerial", "label": "Managérial", "cardSlugs": ["users_by_status", "users_by_country", "missions_by_status", "applications_by_status", "missions_by_contract", "missions_top_cities", "top_missions_applications", "missions_remote_split", "favorites_by_user_type", "cv_top_skills", "quiz_pass_fail"] },
+    { "key": "operational", "label": "Opérationnel", "cardSlugs": ["notifications_by_month", "notifications_read_unread", "cv_steps_completed", "codingame_sessions", "codingame_avg_score", "codingame_by_framework"] }
+  ],
+  "cards": [
+    { "id": 1, "slug": "executive_kpis", "title": "KPI exécutifs", "domain": "executive", "display": "Matrix", "db": "findme_dw", "sqlFile": "bi/kpis/sql/05_kpi_executif.sql" },
+    { "id": 2, "slug": "users_by_role", "title": "Utilisateurs par rôle", "domain": "executive", "display": "Bar chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/01_utilisateurs_par_role.sql" },
+    { "id": 3, "slug": "applications_by_month", "title": "Candidatures par mois", "domain": "executive", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/12_candidatures_par_mois.sql" },
+    { "id": 4, "slug": "application_conversion_rate", "title": "Taux de conversion", "domain": "executive", "display": "Gauge", "db": "findme_dw", "sqlFile": "bi/kpis/sql/13_taux_conversion_candidatures.sql" },
+    { "id": 5, "slug": "missions_by_month", "title": "Missions par mois", "domain": "executive", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/07_missions_par_mois.sql" },
+    { "id": 6, "slug": "cvs_by_month", "title": "CV par mois", "domain": "executive", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/16_cv_par_mois.sql" }
+  ],
+  "_note": "Power BI : ouvrir les .pbix dans bi/powerbi/reports/ après ETL Talend. Metabase supprimé."
 }

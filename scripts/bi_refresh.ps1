@@ -1,16 +1,10 @@
-# Recharge l'entrepôt findme_dw (ETL) puis régénère le manifest Metabase.
+# Recharge findme_dw (ETL Talend) — PFE BIS
 Set-Location $PSScriptRoot\..
 
-Write-Host "=== ETL findme_dw (schéma en étoile) ===" -ForegroundColor Cyan
-docker compose run --rm bi-etl
+Write-Host "=== ETL Talend (findme_dw) ===" -ForegroundColor Cyan
+docker compose build talend-etl
+docker compose run --rm talend-etl
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-Write-Host "=== Seed Metabase + manifest ===" -ForegroundColor Cyan
-docker compose run --rm metabase-seed
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-Write-Host ""
-Write-Host "=== Export PDF (optionnel) ===" -ForegroundColor Cyan
-Write-Host "Lancez: .\scripts\export_metabase_pdfs.ps1" -ForegroundColor Gray
-Write-Host "Slides PFE: docs\BI_PRESENTATION_PFE.md" -ForegroundColor Gray
-exit 0
+Write-Host "=== Ouvrir Power BI Desktop et actualiser les .pbix ===" -ForegroundColor Cyan
+Write-Host "Guide : bi/powerbi/README.md"

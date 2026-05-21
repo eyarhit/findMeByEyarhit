@@ -1,6 +1,6 @@
 # Bloc 4 — Catalogue KPIs RH & Opérations (Find-Me)
 
-Base analytique : **`findme_dw`** uniquement. Requêtes SQL : `bi/kpis/sql/` (identiques à `bi/metabase/sql/dw/`).
+Base analytique : **`findme_dw`** uniquement. Requêtes SQL : `bi/kpis/sql/` (sources des visuels Power BI).
 
 ## Légende seuils (exemple PFE)
 

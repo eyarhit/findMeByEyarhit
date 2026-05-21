@@ -1,4 +1,3 @@
-# Runtime Docker du job Talend FindMe_Load_DW (voir bi/talend/studio/GUIDE_TALEND_OPEN_STUDIO.md)
 FROM python:3.12-slim
 
 WORKDIR /app

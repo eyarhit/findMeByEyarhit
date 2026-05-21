@@ -191,7 +191,7 @@ services:
     ports:
       - "8000:8000"
 
-  # --- BI PFE ESB : Talend (ETL) + Power BI (dashboards) — profil « bi » ---
+  # BI PFE (formation BIS) : Talend ETL → findme_dw → Power BI Desktop (OLAP)
   talend-etl:
     profiles: ["bi"]
     build:
@@ -203,35 +203,10 @@ services:
       MYSQL_ETL_USER: root
       MYSQL_ETL_PASSWORD: root
       DW_SCHEMA_SQL: /ddl/schema.sql
+      DW_PATCH_SQL: /ddl/migrations/001_patch_etl_log_scd2.sql
     volumes:
       - ./bi/dw/schema.sql:/ddl/schema.sql:ro
       - ./bi/dw/migrations/001_patch_etl_log_scd2.sql:/ddl/migrations/001_patch_etl_log_scd2.sql:ro
-    depends_on:
-      mysql:
-        condition: service_healthy
-
-  powerbi-guide:
-    profiles: ["bi"]
-    image: nginx:alpine
-    restart: unless-stopped
-    ports:
-      - "8088:80"
-    volumes:
-      - ./bi/powerbi/www:/usr/share/nginx/html:ro
-
-  powerbi-seed:
-    profiles: ["bi"]
-    build:
-      context: ./bi/powerbi
-      dockerfile: Dockerfile.seed
-    restart: "no"
-    environment:
-      BI_MANIFEST_PATH: /output/bi-manifest.json
-      POWERBI_GUIDE_URL: http://localhost:8088
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
-    volumes:
-      - ./find-me-front-2.1/src/assets/bi:/output
     depends_on:
       mysql:
         condition: service_healthy
@@ -243,8 +218,6 @@ services:
     restart: unless-stopped
     ports:
       - "4200:80"
-    volumes:
-      - ./find-me-front-2.1/src/assets/bi/bi-manifest.json:/usr/share/nginx/html/assets/bi/bi-manifest.json:ro
     depends_on:
       gateway-service:
         condition: service_started
