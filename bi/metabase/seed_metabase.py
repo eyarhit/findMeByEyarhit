@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Provisionnement Metabase Find-Me : setup admin (si besoin), bases MySQL,
-questions SQL natives, tableau de bord. Idempotent si le dashboard existe déjà.
+Provisionnement Metabase Find-Me : admin, bases MySQL, questions SQL natives,
+tableau de bord, manifest JSON pour l'admin Angular.
 """
 from __future__ import annotations
 
@@ -9,11 +9,13 @@ import json
 import os
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
 
 MB_URL = os.environ.get("METABASE_URL", "http://metabase:3000").rstrip("/")
+MB_EXTERNAL = os.environ.get("METABASE_EXTERNAL_URL", "http://localhost:3030").rstrip("/")
 MYSQL_HOST = os.environ.get("MYSQL_HOST", "mysql")
 MYSQL_PORT = int(os.environ.get("MYSQL_PORT", "3306"))
 MYSQL_USER = os.environ.get("MYSQL_USER", "findme_bi")
@@ -28,28 +30,262 @@ SETUP_LAST = os.environ.get("METABASE_SETUP_LAST_NAME", "BI")
 SITE_NAME = os.environ.get("METABASE_SITE_NAME", "Find-Me BI")
 
 COLLECTION_NAME = "Find-Me BI"
-DASHBOARD_NAME = "Find-Me — BI complet"
+USE_STAR_SCHEMA = os.environ.get("BI_USE_STAR_SCHEMA", "true").lower() in (
+    "1",
+    "true",
+    "yes",
+)
+DASHBOARD_NAME = (
+    "Find-Me — Entrepôt décisionnel"
+    if USE_STAR_SCHEMA
+    else "Find-Me — BI complet"
+)
+MANIFEST_PATH = Path(os.environ.get("BI_MANIFEST_PATH", "/output/bi-manifest.json"))
 
 SQL_ROOT = Path(__file__).resolve().parent / "sql"
 
-# (fichier relatif sql/, clé base = nom dbname, titre carte, type d'affichage Metabase)
-CARDS: list[tuple[str, str, str, str]] = [
-    ("user_bd/01_utilisateurs_par_role.sql", "user_bd", "Utilisateurs par rôle", "bar"),
-    ("user_bd/02_utilisateurs_par_statut.sql", "user_bd", "Utilisateurs par statut", "pie"),
-    ("mission_bd/01_missions_par_statut.sql", "mission_bd", "Missions par statut", "pie"),
-    ("mission_bd/02_missions_par_mois.sql", "mission_bd", "Missions créées par mois", "line"),
-    ("mission_bd/03_candidatures_par_statut.sql", "mission_bd", "Candidatures par statut", "bar"),
-    ("mission_bd/04_type_contrat.sql", "mission_bd", "Missions par type de contrat", "bar"),
-    ("mission_bd/05_top_villes.sql", "mission_bd", "Top villes (missions)", "bar"),
-    ("mission_bd/06_favoris_par_user_type.sql", "mission_bd", "Favoris par type utilisateur", "bar"),
-    ("mission_bd/07_candidatures_par_mois.sql", "mission_bd", "Candidatures par mois", "line"),
-    ("cv_bd/01_cv_par_mois.sql", "cv_bd", "CV créés par mois", "line"),
-    ("quiz_bd/01_quiz_reussite.sql", "quiz_bd", "Quiz — réussite / échec", "pie"),
-    ("codingame_bd/01_sessions_par_mois.sql", "codingame_bd", "Codingame — sessions par mois", "line"),
-    ("codingame_bd/02_score_moyen.sql", "codingame_bd", "Codingame — score moyen", "table"),
+# (fichier dw/, titre, display, slug, domain)
+_DW_SPECS: list[tuple[str, str, str, str, str]] = [
+    ("01_utilisateurs_par_role.sql", "Utilisateurs par rôle", "bar", "users_by_role", "users"),
+    ("02_utilisateurs_par_statut.sql", "Utilisateurs par statut", "pie", "users_by_status", "users"),
+    ("03_utilisateurs_par_pays.sql", "Utilisateurs par pays", "bar", "users_by_country", "users"),
+    ("04_notifications_par_mois.sql", "Notifications par mois", "line", "notifications_by_month", "users"),
+    ("05_kpi_executif.sql", "KPI — vue exécutive", "table", "executive_kpis", "overview"),
+    ("06_missions_par_statut.sql", "Missions par statut", "pie", "missions_by_status", "missions"),
+    ("07_missions_par_mois.sql", "Missions créées par mois", "line", "missions_by_month", "missions"),
+    ("08_candidatures_par_statut.sql", "Candidatures par statut", "bar", "applications_by_status", "missions"),
+    ("09_type_contrat.sql", "Missions par type de contrat", "bar", "missions_by_contract", "missions"),
+    ("10_top_villes.sql", "Top villes (missions)", "bar", "missions_top_cities", "missions"),
+    ("11_favoris_par_user_type.sql", "Favoris par type utilisateur", "bar", "favorites_by_user_type", "missions"),
+    ("12_candidatures_par_mois.sql", "Candidatures par mois", "line", "applications_by_month", "missions"),
+    ("13_taux_conversion_candidatures.sql", "Taux de conversion candidatures", "pie", "application_conversion_rate", "missions"),
+    ("14_top_missions_candidatures.sql", "Top missions (candidatures)", "bar", "top_missions_applications", "missions"),
+    ("15_missions_teletravail.sql", "Missions télétravail vs sur site", "pie", "missions_remote_split", "missions"),
+    ("16_cv_par_mois.sql", "CV créés par mois", "line", "cvs_by_month", "cv"),
+    ("17_top_competences.sql", "Top compétences CV", "bar", "cv_top_skills", "cv"),
+    ("18_cv_etapes_completees.sql", "CV — étapes complétées", "bar", "cv_completion_steps", "cv"),
+    ("19_quiz_reussite.sql", "Quiz — réussite / échec", "pie", "quiz_pass_fail", "evaluations"),
+    ("20_score_moyen_quiz.sql", "Quiz — score moyen", "table", "quiz_avg_score", "evaluations"),
+    ("21_codingame_sessions_mois.sql", "Codingame — sessions par mois", "line", "codingame_sessions_month", "evaluations"),
+    ("22_codingame_score_moyen.sql", "Codingame — score moyen global", "table", "codingame_avg_score", "evaluations"),
+    ("23_codingame_par_framework.sql", "Codingame — score par framework", "bar", "codingame_score_by_framework", "evaluations"),
 ]
 
-DB_NAMES = ["user_bd", "mission_bd", "cv_bd", "quiz_bd", "codingame_bd"]
+
+def _dw_cards() -> list[dict]:
+    return [
+        {
+            "file": f"dw/{fname}",
+            "db": "findme_dw",
+            "title": title,
+            "display": display,
+            "slug": slug,
+            "domain": domain,
+        }
+        for fname, title, display, slug, domain in _DW_SPECS
+    ]
+
+
+# slug : identifiant stable pour le front | domain : onglet admin
+_LEGACY_CARDS: list[dict] = [
+    {
+        "file": "user_bd/01_utilisateurs_par_role.sql",
+        "db": "user_bd",
+        "title": "Utilisateurs par rôle",
+        "display": "bar",
+        "slug": "users_by_role",
+        "domain": "users",
+    },
+    {
+        "file": "user_bd/02_utilisateurs_par_statut.sql",
+        "db": "user_bd",
+        "title": "Utilisateurs par statut",
+        "display": "pie",
+        "slug": "users_by_status",
+        "domain": "users",
+    },
+    {
+        "file": "user_bd/03_utilisateurs_par_pays.sql",
+        "db": "user_bd",
+        "title": "Utilisateurs par pays",
+        "display": "bar",
+        "slug": "users_by_country",
+        "domain": "users",
+    },
+    {
+        "file": "user_bd/04_notifications_par_mois.sql",
+        "db": "user_bd",
+        "title": "Notifications par mois",
+        "display": "line",
+        "slug": "notifications_by_month",
+        "domain": "users",
+    },
+    {
+        "file": "user_bd/05_kpi_executif.sql",
+        "db": "user_bd",
+        "title": "KPI — vue exécutive",
+        "display": "table",
+        "slug": "executive_kpis",
+        "domain": "overview",
+    },
+    {
+        "file": "mission_bd/01_missions_par_statut.sql",
+        "db": "mission_bd",
+        "title": "Missions par statut",
+        "display": "pie",
+        "slug": "missions_by_status",
+        "domain": "missions",
+    },
+    {
+        "file": "mission_bd/02_missions_par_mois.sql",
+        "db": "mission_bd",
+        "title": "Missions créées par mois",
+        "display": "line",
+        "slug": "missions_by_month",
+        "domain": "missions",
+    },
+    {
+        "file": "mission_bd/03_candidatures_par_statut.sql",
+        "db": "mission_bd",
+        "title": "Candidatures par statut",
+        "display": "bar",
+        "slug": "applications_by_status",
+        "domain": "missions",
+    },
+    {
+        "file": "mission_bd/04_type_contrat.sql",
+        "db": "mission_bd",
+        "title": "Missions par type de contrat",
+        "display": "bar",
+        "slug": "missions_by_contract",
+        "domain": "missions",
+    },
+    {
+        "file": "mission_bd/05_top_villes.sql",
+        "db": "mission_bd",
+        "title": "Top villes (missions)",
+        "display": "bar",
+        "slug": "missions_top_cities",
+        "domain": "missions",
+    },
+    {
+        "file": "mission_bd/06_favoris_par_user_type.sql",
+        "db": "mission_bd",
+        "title": "Favoris par type utilisateur",
+        "display": "bar",
+        "slug": "favorites_by_user_type",
+        "domain": "missions",
+    },
+    {
+        "file": "mission_bd/07_candidatures_par_mois.sql",
+        "db": "mission_bd",
+        "title": "Candidatures par mois",
+        "display": "line",
+        "slug": "applications_by_month",
+        "domain": "missions",
+    },
+    {
+        "file": "mission_bd/08_taux_conversion_candidatures.sql",
+        "db": "mission_bd",
+        "title": "Taux de conversion candidatures",
+        "display": "pie",
+        "slug": "application_conversion_rate",
+        "domain": "missions",
+    },
+    {
+        "file": "mission_bd/09_top_missions_candidatures.sql",
+        "db": "mission_bd",
+        "title": "Top missions (candidatures)",
+        "display": "bar",
+        "slug": "top_missions_applications",
+        "domain": "missions",
+    },
+    {
+        "file": "mission_bd/10_missions_teletravail.sql",
+        "db": "mission_bd",
+        "title": "Missions télétravail vs sur site",
+        "display": "pie",
+        "slug": "missions_remote_split",
+        "domain": "missions",
+    },
+    {
+        "file": "cv_bd/01_cv_par_mois.sql",
+        "db": "cv_bd",
+        "title": "CV créés par mois",
+        "display": "line",
+        "slug": "cvs_by_month",
+        "domain": "cv",
+    },
+    {
+        "file": "cv_bd/02_top_competences.sql",
+        "db": "cv_bd",
+        "title": "Top compétences CV",
+        "display": "bar",
+        "slug": "cv_top_skills",
+        "domain": "cv",
+    },
+    {
+        "file": "cv_bd/03_cv_etapes_completees.sql",
+        "db": "cv_bd",
+        "title": "CV — étapes complétées",
+        "display": "bar",
+        "slug": "cv_completion_steps",
+        "domain": "cv",
+    },
+    {
+        "file": "quiz_bd/01_quiz_reussite.sql",
+        "db": "quiz_bd",
+        "title": "Quiz — réussite / échec",
+        "display": "pie",
+        "slug": "quiz_pass_fail",
+        "domain": "evaluations",
+    },
+    {
+        "file": "quiz_bd/02_score_moyen_quiz.sql",
+        "db": "quiz_bd",
+        "title": "Quiz — score moyen",
+        "display": "table",
+        "slug": "quiz_avg_score",
+        "domain": "evaluations",
+    },
+    {
+        "file": "codingame_bd/01_sessions_par_mois.sql",
+        "db": "codingame_bd",
+        "title": "Codingame — sessions par mois",
+        "display": "line",
+        "slug": "codingame_sessions_month",
+        "domain": "evaluations",
+    },
+    {
+        "file": "codingame_bd/02_score_moyen.sql",
+        "db": "codingame_bd",
+        "title": "Codingame — score moyen global",
+        "display": "table",
+        "slug": "codingame_avg_score",
+        "domain": "evaluations",
+    },
+    {
+        "file": "codingame_bd/03_scores_par_framework.sql",
+        "db": "codingame_bd",
+        "title": "Codingame — score par framework",
+        "display": "bar",
+        "slug": "codingame_score_by_framework",
+        "domain": "evaluations",
+    },
+]
+
+CARDS: list[dict] = _dw_cards() if USE_STAR_SCHEMA else _LEGACY_CARDS
+DB_NAMES: list[str] = (
+    ["findme_dw"] if USE_STAR_SCHEMA else ["user_bd", "mission_bd", "cv_bd", "quiz_bd", "codingame_bd"]
+)
+
+TAB_LABELS = {
+    "overview": "Vue d'ensemble",
+    "users": "Utilisateurs & engagement",
+    "missions": "Missions & candidatures",
+    "cv": "CV & compétences",
+    "evaluations": "Quiz & Codingame",
+}
 
 
 def as_item_list(payload) -> list:
@@ -67,21 +303,23 @@ def _props_key(props: dict, *keys: str):
     return None
 
 
+def _truthy(val) -> bool:
+    return val in (True, "true", "TRUE", 1, "1")
+
+
 def wait_for_metabase(sess: requests.Session) -> None:
     for i in range(120):
         try:
             r = sess.get(f"{MB_URL}/api/health", timeout=5)
-            if r.ok:
-                data = r.json()
-                if data.get("status") == "ok":
-                    print("Metabase: /api/health OK")
-                    return
+            if r.ok and r.json().get("status") == "ok":
+                print("Metabase: /api/health OK")
+                return
         except requests.RequestException:
             pass
         time.sleep(2)
         if i % 10 == 0:
             print(f"… attente Metabase ({i * 2}s)")
-    print("ERREUR: Metabase ne répond pas à /api/health", file=sys.stderr)
+    print("ERREUR: Metabase ne répond pas", file=sys.stderr)
     sys.exit(1)
 
 
@@ -91,12 +329,7 @@ def get_session_properties(sess: requests.Session) -> dict:
     return r.json()
 
 
-def _truthy(val) -> bool:
-    return val in (True, "true", "TRUE", 1, "1")
-
-
 def ensure_setup(sess: requests.Session, props: dict) -> str:
-    """Retourne le jeton de session Metabase (X-Metabase-Session)."""
     setup_token = _props_key(props, "setup-token", "setup_token")
     has_setup = _props_key(props, "has-user-setup", "has_user_setup", "has-users-setup")
 
@@ -108,27 +341,15 @@ def ensure_setup(sess: requests.Session, props: dict) -> str:
             timeout=60,
         )
         if not r.ok:
-            print(
-                r.text[:500],
-                file=sys.stderr,
-            )
-            print(
-                "ERREUR: connexion impossible. Utilise les identifiants du premier setup "
-                "ou définis METABASE_SETUP_EMAIL / METABASE_SETUP_PASSWORD.",
-                file=sys.stderr,
-            )
+            print(r.text[:500], file=sys.stderr)
             sys.exit(1)
         token = r.json().get("id")
         if not token:
-            print("ERREUR: pas de session dans la réponse /api/session", file=sys.stderr)
             sys.exit(1)
         return token
 
     if not setup_token:
-        print(
-            "ERREUR: pas de setup-token et instance non marquée initialisée — état Metabase inattendu.",
-            file=sys.stderr,
-        )
+        print("ERREUR: setup-token manquant", file=sys.stderr)
         sys.exit(1)
 
     body = {
@@ -139,21 +360,16 @@ def ensure_setup(sess: requests.Session, props: dict) -> str:
             "email": SETUP_EMAIL,
             "password": SETUP_PASSWORD,
         },
-        "prefs": {
-            "site_name": SITE_NAME,
-            "allow_tracking": False,
-        },
+        "prefs": {"site_name": SITE_NAME, "allow_tracking": False},
     }
     r = sess.post(f"{MB_URL}/api/setup", json=body, timeout=120)
     if not r.ok:
-        print(f"POST /api/setup failed: {r.status_code} {r.text[:800]}", file=sys.stderr)
+        print(f"POST /api/setup failed: {r.status_code}", file=sys.stderr)
         sys.exit(1)
-    data = r.json()
-    token = data.get("id")
+    token = r.json().get("id")
     if token:
-        print("Setup Metabase terminé (compte admin créé).")
+        print("Setup Metabase terminé.")
         return token
-    # Certaines versions renvoient la session ailleurs
     r2 = sess.post(
         f"{MB_URL}/api/session",
         json={"username": SETUP_EMAIL, "password": SETUP_PASSWORD},
@@ -164,10 +380,7 @@ def ensure_setup(sess: requests.Session, props: dict) -> str:
 
 
 def mb_headers(session_id: str) -> dict:
-    return {
-        "X-Metabase-Session": session_id,
-        "Content-Type": "application/json",
-    }
+    return {"X-Metabase-Session": session_id, "Content-Type": "application/json"}
 
 
 def list_dashboards(sess: requests.Session, session_id: str) -> list[dict]:
@@ -183,6 +396,22 @@ def find_dashboard(sess: requests.Session, session_id: str, name: str) -> int | 
     return None
 
 
+def get_dashboard(sess: requests.Session, session_id: str, dash_id: int) -> dict:
+    r = sess.get(
+        f"{MB_URL}/api/dashboard/{dash_id}",
+        headers=mb_headers(session_id),
+        timeout=60,
+    )
+    r.raise_for_status()
+    return r.json()
+
+
+def list_cards(sess: requests.Session, session_id: str) -> list[dict]:
+    r = sess.get(f"{MB_URL}/api/card", headers=mb_headers(session_id), timeout=120)
+    r.raise_for_status()
+    return as_item_list(r.json())
+
+
 def list_databases(sess: requests.Session, session_id: str) -> list[dict]:
     r = sess.get(f"{MB_URL}/api/database", headers=mb_headers(session_id), timeout=60)
     r.raise_for_status()
@@ -190,9 +419,12 @@ def list_databases(sess: requests.Session, session_id: str) -> list[dict]:
 
 
 def ensure_database(sess: requests.Session, session_id: str, dbname: str) -> int:
-    dbs = list_databases(sess, session_id)
-    display = f"Find-Me | {dbname}"
-    for row in dbs:
+    display = (
+        "Find-Me | Entrepôt décisionnel (findme_dw)"
+        if dbname == "findme_dw"
+        else f"Find-Me | {dbname}"
+    )
+    for row in list_databases(sess, session_id):
         if row.get("name") == display and row.get("engine") == "mysql":
             return row["id"]
     payload = {
@@ -229,26 +461,20 @@ def ensure_collection(sess: requests.Session, session_id: str) -> int:
     for c in as_item_list(r2.json()):
         if c.get("name") == COLLECTION_NAME:
             return c["id"]
-    payload = {
-        "name": COLLECTION_NAME,
-        "color": "#5A3FC9",
-    }
     cr = sess.post(
         f"{MB_URL}/api/collection",
         headers=mb_headers(session_id),
-        data=json.dumps(payload),
+        data=json.dumps({"name": COLLECTION_NAME, "color": "#5A3FC9"}),
         timeout=60,
     )
-    if not cr.ok:
-        print(f"Collection: {cr.status_code} {cr.text[:500]}", file=sys.stderr)
-        sys.exit(1)
+    cr.raise_for_status()
     return cr.json()["id"]
 
 
 def read_sql(rel: str) -> str:
     path = SQL_ROOT / rel
     if not path.is_file():
-        print(f"ERREUR: fichier SQL manquant: {path}", file=sys.stderr)
+        print(f"ERREUR: SQL manquant: {path}", file=sys.stderr)
         sys.exit(1)
     return path.read_text(encoding="utf-8")
 
@@ -264,7 +490,11 @@ def create_native_card(
 ) -> int:
     payload = {
         "name": name,
-        "description": "Généré automatiquement — Find-Me BI",
+        "description": (
+            "Find-Me BI — entrepôt findme_dw (schéma en étoile)"
+            if USE_STAR_SCHEMA
+            else "Find-Me BI — aligné sur le schéma Hibernate / microservices"
+        ),
         "collection_id": collection_id,
         "dataset_query": {
             "type": "native",
@@ -289,7 +519,11 @@ def create_native_card(
 def create_dashboard(sess: requests.Session, session_id: str, collection_id: int) -> int:
     payload = {
         "name": DASHBOARD_NAME,
-        "description": "Analyse BI Find-Me (utilisateurs, missions, CV, quiz, codingame).",
+        "description": (
+            "Entrepôt décisionnel findme_dw (dimensions + faits) — pilotage Find-Me."
+            if USE_STAR_SCHEMA
+            else "Pilotage Find-Me : utilisateurs, missions, CV, quiz, Codingame."
+        ),
         "collection_id": collection_id,
         "parameters": [],
     }
@@ -323,63 +557,166 @@ def add_card_to_dashboard(
         timeout=60,
     )
     if not r.ok:
-        print(
-            f"Ajout carte {card_id} au dashboard: {r.status_code} {r.text[:600]}",
-            file=sys.stderr,
-        )
+        print(f"Ajout carte {card_id}: {r.status_code} {r.text[:600]}", file=sys.stderr)
         sys.exit(1)
+
+
+def build_tabs(card_entries: list[dict]) -> list[dict]:
+    domains: list[str] = []
+    for c in card_entries:
+        d = c.get("domain", "other")
+        if d not in domains:
+            domains.append(d)
+    tabs = []
+    for domain in domains:
+        slugs = [c["slug"] for c in card_entries if c.get("domain") == domain]
+        tabs.append(
+            {
+                "key": domain,
+                "label": TAB_LABELS.get(domain, domain.replace("_", " ").title()),
+                "cardSlugs": slugs,
+            }
+        )
+    return tabs
+
+
+def write_manifest(dash_id: int, card_entries: list[dict]) -> None:
+    manifest = {
+        "version": 2,
+        "generatedAt": datetime.now(timezone.utc).isoformat(),
+        "metabaseUrl": MB_EXTERNAL,
+        "dashboard": {
+            "id": dash_id,
+            "name": DASHBOARD_NAME,
+            "url": f"{MB_EXTERNAL}/dashboard/{dash_id}",
+        },
+        "cards": card_entries,
+        "tabs": build_tabs(card_entries),
+        "credentials": {
+            "metabaseAdminEmail": SETUP_EMAIL,
+            "mysqlReadOnlyUser": MYSQL_USER,
+        },
+    }
+    MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
+    MANIFEST_PATH.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(f"Manifest BI écrit : {MANIFEST_PATH}")
+
+
+def manifest_from_existing_dashboard(
+    sess: requests.Session, session_id: str, dash_id: int
+) -> list[dict]:
+    """Reconstruit le manifest à partir du dashboard Metabase existant."""
+    dash = get_dashboard(sess, session_id, dash_id)
+    title_to_meta = {c["title"]: c for c in CARDS}
+    all_cards = {c.get("id"): c for c in list_cards(sess, session_id)}
+    entries: list[dict] = []
+    seen: set[int] = set()
+
+    for dc in dash.get("ordered_cards") or dash.get("dashcards") or []:
+        card_id = dc.get("card_id") or (dc.get("card") or {}).get("id")
+        if not card_id or card_id in seen:
+            continue
+        seen.add(card_id)
+        card = all_cards.get(card_id) or {}
+        title = card.get("name") or f"Carte {card_id}"
+        meta = title_to_meta.get(title, {})
+        entries.append(
+            {
+                "id": card_id,
+                "slug": meta.get("slug", f"card_{card_id}"),
+                "title": title,
+                "domain": meta.get("domain", "other"),
+                "display": meta.get("display", card.get("display", "table")),
+                "db": meta.get("db", ""),
+                "url": f"{MB_EXTERNAL}/question/{card_id}",
+            }
+        )
+
+    if not entries:
+        for c in CARDS:
+            for card in all_cards.values():
+                if card.get("name") == c["title"]:
+                    entries.append(
+                        {
+                            "id": card["id"],
+                            "slug": c["slug"],
+                            "title": c["title"],
+                            "domain": c["domain"],
+                            "display": c["display"],
+                            "db": c["db"],
+                            "url": f"{MB_EXTERNAL}/question/{card['id']}",
+                        }
+                    )
+                    break
+    return entries
+
+
+def provision_fresh(sess: requests.Session, session_id: str) -> tuple[int, list[dict]]:
+    db_ids = {dbn: ensure_database(sess, session_id, dbn) for dbn in DB_NAMES}
+    collection_id = ensure_collection(sess, session_id)
+
+    card_entries: list[dict] = []
+    for spec in CARDS:
+        sql = read_sql(spec["file"])
+        cid = create_native_card(
+            sess,
+            session_id,
+            db_ids[spec["db"]],
+            collection_id,
+            spec["title"],
+            sql,
+            spec["display"],
+        )
+        card_entries.append(
+            {
+                "id": cid,
+                "slug": spec["slug"],
+                "title": spec["title"],
+                "domain": spec["domain"],
+                "display": spec["display"],
+                "db": spec["db"],
+                "url": f"{MB_EXTERNAL}/question/{cid}",
+            }
+        )
+        time.sleep(0.25)
+
+    dash_id = create_dashboard(sess, session_id, collection_id)
+    cols, sx, sy = 3, 6, 4
+    for i, entry in enumerate(card_entries):
+        row = (i // cols) * sy
+        col = (i % cols) * sx
+        add_card_to_dashboard(sess, session_id, dash_id, entry["id"], row, col, sx, sy)
+        time.sleep(0.15)
+
+    return dash_id, card_entries
 
 
 def main() -> None:
     sess = requests.Session()
     wait_for_metabase(sess)
-    time.sleep(3)
+    time.sleep(2)
 
     props = get_session_properties(sess)
     session_id = ensure_setup(sess, props)
 
     existing = find_dashboard(sess, session_id, DASHBOARD_NAME)
     if existing:
-        print(f"Dashboard « {DASHBOARD_NAME} » déjà présent (id={existing}). Rien à faire.")
-        print(f"Connexion Metabase : {SETUP_EMAIL}")
+        print(f"Dashboard « {DASHBOARD_NAME} » déjà présent (id={existing}).")
+        entries = manifest_from_existing_dashboard(sess, session_id, existing)
+        write_manifest(existing, entries)
+        print(f"Metabase : {MB_EXTERNAL} — {SETUP_EMAIL}")
         return
 
-    db_ids: dict[str, int] = {}
-    for dbn in DB_NAMES:
-        db_ids[dbn] = ensure_database(sess, session_id, dbn)
-        time.sleep(1)
+    dash_id, entries = provision_fresh(sess, session_id)
+    write_manifest(dash_id, entries)
 
-    collection_id = ensure_collection(sess, session_id)
-
-    card_ids: list[int] = []
-    for rel, db_key, title, display in CARDS:
-        sql = read_sql(rel)
-        cid = create_native_card(
-            sess,
-            session_id,
-            db_ids[db_key],
-            collection_id,
-            title,
-            sql,
-            display,
-        )
-        card_ids.append(cid)
-        time.sleep(0.3)
-
-    dash_id = create_dashboard(sess, session_id, collection_id)
-    cols, sx, sy = 3, 6, 4
-    for i, cid in enumerate(card_ids):
-        row = (i // cols) * sy
-        col = (i % cols) * sx
-        add_card_to_dashboard(sess, session_id, dash_id, cid, row, col, sx, sy)
-
-    ext_url = os.environ.get("METABASE_EXTERNAL_URL", "http://localhost:3030")
     print("—" * 50)
     print("BI Metabase : provisionnement terminé.")
-    print(f"  Ouvre dans le navigateur : {ext_url}")
-    print(f"  Email admin : {SETUP_EMAIL}")
-    print("  Mot de passe : celui défini par METABASE_SETUP_PASSWORD (voir docker-compose).")
-    print(f"  Tableau de bord : {DASHBOARD_NAME} (collection « {COLLECTION_NAME} »)")
+    print(f"  URL : {MB_EXTERNAL}")
+    print(f"  Dashboard : {DASHBOARD_NAME} (id={dash_id})")
+    print(f"  Cartes : {len(entries)}")
     print("—" * 50)
 
 

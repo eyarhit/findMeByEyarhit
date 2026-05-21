@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DocumentServiceService } from '../../services/document-service.service';
@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './list-document.component.html',
   styleUrls: ['./list-document.component.scss']
 })
-export class ListDocumentComponent implements OnInit {
+export class ListDocumentComponent implements OnInit, OnDestroy {
    @Input() typedocument: string ='';
      @Input() profileId : number | null = null;
       @Input() profilerole : string ='';
@@ -53,19 +53,31 @@ export class ListDocumentComponent implements OnInit {
     }
   }
 
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
   loadDocuments(): void {
-    if (this.userId) {
-      this.subscription = this.authService.documentUpdate$.subscribe(isAuthenticated => {
-    this.documentService.getDocumentsByUserAndFolder(this.userId!, this.typedocument).subscribe(
-      response => {
-        this.documents=response;
-      },
-      error => {
-        console.error('Erreur lors du chargement des Types de sejour', error);
-      }
-    );})
+    if (!this.userId || !this.typedocument) {
+      return;
     }
-    }
+
+    const fetch = () => {
+      this.documentService.getDocumentsByUserAndFolder(this.userId!, this.typedocument).subscribe({
+        next: (response) => {
+          this.documents = Array.isArray(response) ? response : [];
+        },
+        error: (error) => {
+          console.error('Erreur lors du chargement des documents', error);
+          this.documents = [];
+        },
+      });
+    };
+
+    fetch();
+    this.subscription?.unsubscribe();
+    this.subscription = this.authService.documentUpdate$.subscribe(() => fetch());
+  }
   viewDocument(documentData: any): void {
     this.selectedDocument = documentData;
     if (documentData.presignedUrl) {
@@ -210,9 +222,8 @@ deleteDocument(documentId: number): void {
         setTimeout(() => {
           this.isUploading = false;
           this.closeUploadModal();
-          this.loadDocuments();
-            this.showSuccessAlert('📜 Diplome ajouté', 'Vos diplomes ont bien été enregistrés.');
-          // alert('Diplôme ajouté avec succès');
+          this.authService.notifyDocumentUpdate();
+          this.showSuccessAlert('🎓 Diplôme ajouté', 'Vos diplômes ont bien été enregistrés.');
         }, 500);
       },
       error: (error) => {

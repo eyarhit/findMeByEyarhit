@@ -83,6 +83,8 @@ services:
       dockerfile: find-me-back-2.1/User_service/Dockerfile
     container_name: findme-user
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-service:8761/eureka
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/user_bd?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
@@ -92,6 +94,8 @@ services:
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
       MINIO_BUCKET_NAME: find-me
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: "587"
     ports:
       - "9068:9068"
     depends_on:
@@ -208,6 +212,33 @@ services:
       mysql:
         condition: service_healthy
 
+  bi-etl:
+    build:
+      context: ./bi/etl
+    container_name: findme-bi-etl
+    restart: "no"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_ETL_USER: root
+      MYSQL_ETL_PASSWORD: root
+      DW_SCHEMA_SQL: /ddl/schema.sql
+    volumes:
+      - ./docker/mysql-init/05-findme-dw-star-schema.sql:/ddl/schema.sql:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      cv-service:
+        condition: service_started
+      mission-service:
+        condition: service_started
+      quiz-service:
+        condition: service_started
+      codingame-service:
+        condition: service_started
+
   metabase-seed:
     build:
       context: ./bi/metabase
@@ -222,11 +253,17 @@ services:
       METABASE_ADMIN_FIRST_NAME: FindMe
       METABASE_ADMIN_LAST_NAME: BI
       METABASE_SITE_NAME: Find-Me BI
+      BI_USE_STAR_SCHEMA: "true"
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
       MYSQL_USER: findme_bi
       MYSQL_PASSWORD: findme_bi_readonly
+      BI_MANIFEST_PATH: /output/bi-manifest.json
+    volumes:
+      - ./find-me-front-2.1/src/assets/bi:/output
     depends_on:
+      bi-etl:
+        condition: service_completed_successfully
       metabase:
         condition: service_started
       mysql:
@@ -239,14 +276,28 @@ services:
     restart: unless-stopped
     ports:
       - "4200:80"
+    volumes:
+      # Manifest BI régénéré par metabase-seed — visible sans rebuild frontend
+      - ./find-me-front-2.1/src/assets/bi/bi-manifest.json:/usr/share/nginx/html/assets/bi/bi-manifest.json:ro
     depends_on:
-      - gateway-service
-      - user-service
-      - cv-service
-      - mission-service
-      - quiz-service
-      - codingame-service
-      - python-service
+      bi-etl:
+        condition: service_completed_successfully
+      metabase-seed:
+        condition: service_completed_successfully
+      gateway-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+      cv-service:
+        condition: service_started
+      mission-service:
+        condition: service_started
+      quiz-service:
+        condition: service_started
+      codingame-service:
+        condition: service_started
+      python-service:
+        condition: service_started
 
 volumes:
   mysql_data:

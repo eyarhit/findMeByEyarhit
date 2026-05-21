@@ -3,7 +3,7 @@ import { AuthService } from '../../services/auth.service';
 import { Component, Inject, PLATFORM_ID, OnInit, Input } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ApiRoutingServiceUser } from '../../services/api-routing-user.service';
-import { User } from '../../models/User.model';
+import { User } from '../../_model/User';
 import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { ExperienceService } from '../../services/experience.service';

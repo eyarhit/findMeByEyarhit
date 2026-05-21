@@ -29,6 +29,50 @@
   }
 }
 
+.alert {
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+}
+
+.alert.warn {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  color: #92400e;
+}
+
+.kpi-strip {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.kpi {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem 1.1rem;
+  min-width: 120px;
+}
+
+.kpi-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #4f46e5;
+}
+
+.kpi-value.kpi-small {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.kpi-label {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
 .bi-actions {
   display: flex;
   align-items: center;
@@ -88,8 +132,56 @@
   padding: 0.6rem 0.9rem;
 }
 
-.open-btn:hover {
+.open-btn:hover:not(:disabled) {
   background: #4338ca;
+}
+
+.open-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.reports-lead {
+  color: #64748b;
+  margin: 0 0 1rem;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+
+  h3 {
+    margin: 0;
+    flex: 1;
+  }
+}
+
+.chip {
+  font-size: 0.7rem;
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.card-meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.tab-count {
+  margin-left: 0.4rem;
+  font-size: 0.75rem;
+  opacity: 0.85;
 }
 
 .connection-box,

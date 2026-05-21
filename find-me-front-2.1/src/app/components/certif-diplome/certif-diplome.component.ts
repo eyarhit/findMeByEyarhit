@@ -96,6 +96,7 @@ export class CertifDiplomeComponent {
             if (uploadCount === allFiles.length) {
               this.documentsUploaded = true;
               this.documentsValidated.emit(true);
+              this.authService.notifyDocumentUpdate();
               this.showSuccessAlert('🎓 Diplôme ajouté', 'Votre document a été importé avec succès.');
             }
           },
@@ -129,6 +130,7 @@ export class CertifDiplomeComponent {
               Swal.close();
               this.documentsUploaded = true;
               this.documentsValidated.emit(true);
+              this.authService.notifyDocumentUpdate();
               this.showSuccessAlert('📜 Certificat ajouté', 'Vos certificats ont bien été enregistrés.');
               this.certificateFilesSelected = [];
             }

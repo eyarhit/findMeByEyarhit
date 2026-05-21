@@ -1,143 +1,137 @@
-# Find-Me BI - Metabase
+# Find-Me BI — Metabase (production & PFE)
 
-Ce dossier contient le seed automatique Metabase, les requetes SQL par domaine et la documentation d'exploitation BI pour la plateforme Find-Me.
+Stack BI : **ETL** → entrepôt **`findme_dw` (schéma en étoile)** → **Metabase** → `bi-manifest.json` → admin Angular.
 
-## Acces Metabase
+## Architecture
 
-- URL: `http://localhost:3030`
-- Email admin: `bi-admin@findme.local`
-- Mot de passe admin: `FindMe_BI_Auto_2026!xQ7vM2`
-- Utilisateur MySQL lecture seule: `findme_bi`
-- Mot de passe MySQL lecture seule: `findme_bi_readonly`
+```mermaid
+flowchart LR
+  App[Microservices] --> OLTP[(OLTP 5 bases)]
+  OLTP --> ETL[bi-etl]
+  ETL --> DW[(findme_dw étoile)]
+  DW --> Metabase[Metabase :3030]
+  Seed[metabase-seed] --> Metabase
+  Seed --> Manifest[bi-manifest.json]
+  Manifest --> Admin[Admin BI]
+```
 
-## Ce que mesurent les 12 requetes BI
+| Composant | Rôle |
+|-----------|------|
+| `bi-etl` | ETL Python → dimensions + faits |
+| `findme_dw` | Entrepôt décisionnel (étoile) |
+| `findme_bi` | SELECT sur `findme_dw` (et OLTP si legacy) |
+| `seed_metabase.py` | Dashboard + 23 requêtes `sql/dw/` |
+| `bi-manifest.json` | Lien admin ↔ cartes Metabase |
 
-1. `Utilisateurs par role`  
-   Mesure la repartition des profils (admin, candidat, roles recruteurs ESN) pour piloter la structure de la base utilisateurs.
-
-2. `Inscriptions par mois`  
-   Mesure la dynamique temporelle des profils utilisateurs (mois de reference base sur `date_of_birth` si `created_at` absent), utile pour detecter les periodes de croissance.
-
-3. `Top 10 competences CV`  
-   Mesure les competences techniques les plus frequentes dans les CV pour adapter les missions aux stacks dominantes.
-
-4. `Missions par statut`  
-   Mesure le stock des missions `OPEN`/`CLOSED` et met en evidence la pression sur le pipeline d'offres.
-
-5. `Candidatures par mission (Top 10)`  
-   Mesure les missions les plus sollicitees pour orienter les priorites de traitement RH.
-
-6. `Taux de conversion candidatures`  
-   Mesure la performance de transformation des candidatures en statuts acceptes.
-
-7. `Evolution candidatures par mois`  
-   Mesure la tendance de volume des postulations dans le temps, utile pour prevoir la charge recruteurs.
-
-8. `Score moyen par quiz`  
-   Mesure le niveau moyen global des passages quiz.
-
-9. `Taux de reussite quiz`  
-   Mesure le ratio de reussite global sur les quiz passes.
-
-10. `Score moyen CodingGame par defi`  
-    Mesure la performance moyenne par framework (utilise comme defi technique).
-
-11. `Taux de completion defis CodingGame`  
-    Mesure la capacite des candidats a terminer les sessions devaluation par framework.
-
-12. `Vue globale KPIs`  
-    Mesure les indicateurs executifs de pilotage: total utilisateurs, candidats, recruteurs.
-
-## Ajouter une nouvelle question Metabase manuellement
-
-1. Ouvrir Metabase puis `+ Nouveau`.
-2. Choisir `Question`.
-3. Selectionner la base cible (`user_bd`, `cv_bd`, `mission_bd`, `quiz_bd`, `codingame_bd`).
-4. Choisir `Requete native`.
-5. Coller la requete SQL.
-6. Executer la requete et regler la visualisation.
-7. Enregistrer la question dans la collection `Find-Me BI`.
-8. Ajouter la carte au dashboard `Find-Me — BI complet`.
-
-## Reset complet du seed
-
-Utiliser un reset total de volumes pour relancer setup + seed:
+## Démarrage (Docker complet)
 
 ```bash
-docker compose down -v
 docker compose up -d --build
 ```
 
-Si seul le seed doit etre relance sans reset global, supprimer le volume Metabase puis relancer les services `metabase` et `metabase-seed`.
+Attendre **`findme-bi-etl`** puis **`findme-metabase-seed`** (logs : `ETL terminé`, `Manifest BI écrit`). Puis :
 
-## Export dashboard en PDF
+- Metabase : http://localhost:3030  
+- Admin app : http://localhost:4200 → connexion **ADMIN** → **Tableaux de bord BI**
 
-1. Ouvrir le dashboard `Find-Me — BI complet`.
-2. Cliquer sur le menu du dashboard.
-3. Selectionner `Exporter`.
-4. Choisir le format `PDF`.
-5. Telecharger le document pour partage client/interne.
+### Identifiants par défaut
 
-## Troubleshooting
+| | Valeur |
+|---|--------|
+| Email Metabase | `bi-admin@findme.local` |
+| Mot de passe | `FindMe_BI_Auto_2026!xQ7vM2` |
+| MySQL BI | `findme_bi` / `findme_bi_readonly` |
 
-- `DB sync bloquee`  
-  Verifier que MySQL est joignable depuis `metabase-seed` (`MYSQL_HOST`, `MYSQL_PORT`) et que le compte `findme_bi` a bien les droits `SELECT`.
+## Catalogue des 23 indicateurs
 
-- `Seed deja lance`  
-  Le script est idempotent: s'il detecte la collection `Find-Me BI`, il sort immediatement avec code 0.
+### Utilisateurs (`user_bd`)
+| Fichier | Indicateur |
+|---------|------------|
+| `01_utilisateurs_par_role.sql` | Répartition par rôle (CANDIDAT, ESN, ADMIN…) |
+| `02_utilisateurs_par_statut.sql` | Comptes PENDING / ACTIVE / INACTIVE |
+| `03_utilisateurs_par_pays.sql` | Géographie des profils |
+| `04_notifications_par_mois.sql` | Volume notifications + lues / non lues |
+| `05_kpi_executif.sql` | KPI synthèse (users, candidats, docs…) |
 
-- `Conflit de ports`  
-  Si `3030` est occupe, changer le mapping du service Metabase (`ports`) puis mettre a jour l'URL frontend.
+### Missions (`mission_bd`)
+| `01` | Missions par statut |
+| `02` | Missions créées par mois |
+| `03` | Candidatures par statut |
+| `04` | Type de contrat |
+| `05` | Top villes |
+| `06` | Favoris par type utilisateur |
+| `07` | Candidatures par mois |
+| `08` | Taux de conversion candidatures |
+| `09` | Top 10 missions sollicitées |
+| `10` | Télétravail vs sur site |
 
-- `Erreur de login admin Metabase`  
-  Verifier les variables `METABASE_SETUP_EMAIL` et `METABASE_SETUP_PASSWORD` utilisees au premier setup.
+### CV (`cv_bd`)
+| `01` | CV créés par mois |
+| `02` | Top compétences (langages, frameworks, DB, outils) |
+| `03` | Étapes formulaire CV complétées |
 
-- `Visualisation vide`  
-  Verifier que les tables Hibernate existent bien dans chaque base, puis lancer une resynchronisation depuis Admin Metabase.
+### Évaluations
+| Quiz `01` | Réussite / échec |
+| Quiz `02` | Score moyen & taux de réussite |
+| Codingame `01` | Sessions par mois |
+| Codingame `02` | Score moyen global |
+| Codingame `03` | Score par framework |
 
-## Mapping entites Hibernate -> tables SQL
+## Alignement schéma application
+
+Les requêtes utilisent les tables Hibernate réelles (`users`, `roles`, `mission`, `candidature`, `descrip_mission`, `cv`, `competence`, `user_quiz_results`, `evaluation_session`, etc.). Voir le mapping détaillé en fin de ce fichier.
+
+## Reset / mise à jour BI
+
+**Nouveau dashboard complet** (après changement majeur des SQL) :
+
+```bash
+docker compose down
+docker volume rm findmebyeyarhit_metabase_data
+docker compose up -d --build metabase metabase-seed
+```
+
+**Manifest seulement** (dashboard déjà existant) : relancer `metabase-seed` — le script régénère `bi-manifest.json` sans recréer les cartes.
+
+```bash
+docker compose up -d --build metabase-seed
+```
+
+Puis rebuild frontend si besoin : `docker compose build frontend`
+
+## Export PDF (démo PFE)
+
+1. Ouvrir le dashboard **Find-Me — BI complet** dans Metabase  
+2. Menu ⋮ → **Exporter** → **PDF**  
+3. Joindre les captures de la page admin Angular (onglets par domaine)
+
+## Dépannage
+
+| Problème | Action |
+|----------|--------|
+| Manifest vide dans l’admin | Vérifier logs `findme-metabase-seed`, volume `./find-me-front-2.1/src/assets/bi` |
+| `findme_bi` absent | Exécuter `docker/mysql-init/02-findme-bi-readonly.sql` ou reset volume `mysql_data` |
+| Carte SQL en erreur | Vérifier nom de colonne (snake_case JPA) dans Metabase → question → éditer |
+| Port 3030 occupé | Modifier `ports` du service `metabase` |
+
+## Mapping entités → tables
 
 ### user-service (`user_bd`)
-
-- `User` -> `users`
-- `Role` -> `roles`
-- `UserProfile` -> `user_profiles`
-- `Notification` -> `notification`
-- `Message` -> `messages`
-- `ChatRoom` -> `chat_rooms`
-- `FileData` -> `file_data`
-- `Document` -> `document`
+- `User` → `users` · `Role` → `roles` · `Notification` → `notification` · `Document` → `document`
 
 ### cv-service (`cv_bd`)
-
-- `Cv` -> `cv`
-- `Competence` -> `competence`
-- `Experience` -> `experience`
-- `Education` -> `education`
-- `Langue` -> `langue`
-- Join tables -> `cv_competence`, `competence_cv`, `cv_langue`, `cv_completed_steps`
+- `Cv` → `cv` · `Competence` → `competence` · `cv_competence`, `cv_completed_steps`
 
 ### mission-service (`mission_bd`)
-
-- `Mission` -> `mission`
-- `Candidature` -> `candidature`
-- `Descrip_mission` -> `descrip_mission`
-- `ProfilDemande` -> `profil_demande`
-- `MissionFavori` -> `mission_favoris`
-- `Ville` -> `ville`
-- `Pays` -> `pays`
+- `Mission` → `mission` · `Candidature` → `candidature` · `Descrip_mission` → `descrip_mission` · `MissionFavori` → `mission_favoris` · `Ville` → `ville`
 
 ### quiz-service (`quiz_bd`)
-
-- `QuizQuestion` -> `quiz_questions`
-- `UserQuizResult` -> `user_quiz_results`
+- `UserQuizResult` → `user_quiz_results`
 
 ### codingame-service (`codingame_bd`)
+- `EvaluationSession` → `evaluation_session` · `EvaluationResult` → `evaluation_result` · `Framework` → `framework`
 
-- `EvaluationSession` -> `evaluation_session`
-- `EvaluationResult` -> `evaluation_result`
-- `Question` -> `question`
-- `UserAnswer` -> `user_answer`
-- `Framework` -> `framework`
-- `Domain` -> `domain`
-- `Experiencelevel` -> `experiencelevel`
+## Fichiers supprimés (legacy)
+
+- `seed.js` (Node) — remplacé par `seed_metabase.py`  
+- `sql/01_users.sql` … `05_codingame.sql` — doublons non utilisés par le seed

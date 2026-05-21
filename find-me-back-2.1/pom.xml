@@ -43,7 +43,6 @@
         <module>Mission_service</module>
         <module>QuizService</module>
         <module>User_service</module>
-        <module>twilio</module>
         <module>CodingameService</module>
     </modules>
 

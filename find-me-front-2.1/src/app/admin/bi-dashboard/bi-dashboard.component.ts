@@ -5,10 +5,30 @@ import { catchError, map, take } from 'rxjs/operators';
 
 type HealthState = 'checking' | 'connected' | 'unavailable';
 
-interface BiTab {
+export interface BiManifestCard {
+  id: number;
+  slug: string;
+  title: string;
+  domain: string;
+  display: string;
+  db: string;
+  url: string;
+}
+
+export interface BiManifestTab {
   key: string;
   label: string;
-  cardIds: number[];
+  cardSlugs: string[];
+}
+
+export interface BiManifest {
+  version: number;
+  generatedAt: string | null;
+  metabaseUrl: string;
+  dashboard: { id: number | null; name: string; url: string };
+  cards: BiManifestCard[];
+  tabs: BiManifestTab[];
+  credentials?: { metabaseAdminEmail?: string; mysqlReadOnlyUser?: string };
 }
 
 @Component({
@@ -17,52 +37,69 @@ interface BiTab {
   styleUrls: ['./bi-dashboard.component.scss'],
 })
 export class BiDashboardComponent implements OnInit, OnDestroy {
-  readonly metabaseBaseUrl =
-    (typeof window !== 'undefined' && (window as any).__env?.METABASE_URL) || 'http://localhost:3030';
+  readonly defaultMetabaseUrl = 'http://localhost:3030';
 
-  readonly connectionInfo = {
-    url: this.metabaseBaseUrl,
-    accessNote: 'Ouvrez chaque rapport dans Metabase (nouvel onglet). Compte admin Metabase : variables METABASE_SETUP_* dans docker-compose.',
-    mysqlUser: 'findme_bi (lecture seule)',
-  };
-
-  readonly dashboardId = 2;
-
-  readonly tabs: BiTab[] = [
-    { key: 'users', label: 'Utilisateurs', cardIds: [40, 41] },
-    { key: 'missions', label: 'Missions & Candidatures', cardIds: [43, 44, 45, 46] },
-    { key: 'skills', label: 'Competences', cardIds: [42] },
-    { key: 'evaluations', label: 'Evaluations', cardIds: [47, 48, 49, 50] },
-    { key: 'kpis', label: 'KPIs Globaux', cardIds: [51] },
-  ];
-
-  selectedTabKey = this.tabs[0].key;
+  manifest: BiManifest | null = null;
+  manifestError = '';
+  selectedTabKey = '';
   showConnectionInfo = false;
   healthState: HealthState = 'checking';
-  healthMessage = 'Verification en cours...';
+  healthMessage = 'Vérification Metabase…';
 
   private subscriptions = new Subscription();
 
   constructor(private http: HttpClient) {}
 
+  get metabaseBaseUrl(): string {
+    return this.manifest?.metabaseUrl || this.defaultMetabaseUrl;
+  }
+
+  get dashboardId(): number | null {
+    return this.manifest?.dashboard?.id ?? null;
+  }
+
+  get dashboardAbsoluteUrl(): string {
+    if (this.manifest?.dashboard?.url) {
+      return this.manifest.dashboard.url;
+    }
+    if (this.dashboardId != null) {
+      return `${this.metabaseBaseUrl}/dashboard/${this.dashboardId}`;
+    }
+    return this.metabaseBaseUrl;
+  }
+
+  get tabs(): BiManifestTab[] {
+    return this.manifest?.tabs?.length ? this.manifest.tabs : this.fallbackTabs();
+  }
+
+  get selectedTab(): BiManifestTab {
+    return this.tabs.find((t) => t.key === this.selectedTabKey) || this.tabs[0];
+  }
+
+  get selectedCards(): BiManifestCard[] {
+    const slugs = new Set(this.selectedTab?.cardSlugs || []);
+    const fromManifest = (this.manifest?.cards || []).filter((c) => slugs.has(c.slug));
+    if (fromManifest.length) {
+      return fromManifest;
+    }
+    return (this.manifest?.cards || []).filter((c) => c.domain === this.selectedTabKey);
+  }
+
+  get cardCount(): number {
+    return this.manifest?.cards?.length ?? 0;
+  }
+
+  get isProvisioned(): boolean {
+    return !!this.manifest?.cards?.length && this.dashboardId != null;
+  }
+
   ngOnInit(): void {
+    this.loadManifest();
     this.probeHealthOnce();
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
-  }
-
-  get selectedTab(): BiTab {
-    return this.tabs.find((tab) => tab.key === this.selectedTabKey) || this.tabs[0];
-  }
-
-  get dashboardAbsoluteUrl(): string {
-    return `${this.metabaseBaseUrl}/dashboard/${this.dashboardId}`;
-  }
-
-  questionAbsoluteUrl(cardId: number): string {
-    return `${this.metabaseBaseUrl}/question/${cardId}`;
   }
 
   selectTab(tabKey: string): void {
@@ -81,51 +118,74 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
     window.open(this.dashboardAbsoluteUrl, '_blank', 'noopener,noreferrer');
   }
 
-  openQuestion(cardId: number): void {
-    window.open(this.questionAbsoluteUrl(cardId), '_blank', 'noopener,noreferrer');
+  openCard(card: BiManifestCard): void {
+    const url = card.url || `${this.metabaseBaseUrl}/question/${card.id}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 
-  /** Une seule requete health au chargement (pas de polling = moins de bruit console / reseau). */
+  private loadManifest(): void {
+    this.subscriptions.add(
+      this.http
+        .get<BiManifest>('/assets/bi/bi-manifest.json', { params: { t: Date.now().toString() } })
+        .pipe(
+          catchError(() => {
+            this.manifestError =
+              'Manifest BI introuvable. Lancez docker compose (service metabase-seed) pour le générer.';
+            return of(null);
+          })
+        )
+        .subscribe((data) => {
+          if (!data) {
+            return;
+          }
+          this.manifest = data;
+          this.manifestError = '';
+          if (!data.cards?.length) {
+            this.manifestError =
+              'Manifest vide : exécutez « docker compose up » jusqu’à la fin de metabase-seed, ou reset du volume metabase_data.';
+          }
+          this.selectedTabKey = data.tabs?.[0]?.key || data.cards?.[0]?.domain || '';
+        })
+    );
+  }
+
+  private fallbackTabs(): BiManifestTab[] {
+    return [
+      { key: 'overview', label: "Vue d'ensemble", cardSlugs: [] },
+      { key: 'users', label: 'Utilisateurs', cardSlugs: [] },
+      { key: 'missions', label: 'Missions', cardSlugs: [] },
+      { key: 'cv', label: 'CV', cardSlugs: [] },
+      { key: 'evaluations', label: 'Évaluations', cardSlugs: [] },
+    ];
+  }
+
   private probeHealthOnce(): void {
     this.subscriptions.add(
       this.http
-        .get<{ status?: string; progress?: number }>(`${this.metabaseBaseUrl}/api/health`)
+        .get<{ status?: string }>(`${this.metabaseBaseUrl}/api/health`)
         .pipe(
           take(1),
-          map((body) => {
-            if (body?.status === 'ok') return { kind: 'ok' as const };
-            return { kind: 'unknown' as const };
-          }),
+          map((body) => (body?.status === 'ok' ? 'ok' : 'unknown')),
           catchError((err: HttpErrorResponse) => {
             if (err.status === 503) {
-              let b: unknown = err.error;
-              if (typeof b === 'string') {
-                try {
-                  b = JSON.parse(b);
-                } catch {
-                  /* ignore */
-                }
-              }
-              if (b && typeof b === 'object' && (b as { status?: string }).status === 'initializing') {
-                return of({ kind: 'initializing' as const });
-              }
+              return of('initializing' as const);
             }
-            return of({ kind: 'unavailable' as const });
+            return of('unavailable' as const);
           })
         )
-        .subscribe((res) => {
-          if (res.kind === 'ok') {
+        .subscribe((kind) => {
+          if (kind === 'ok') {
             this.healthState = 'connected';
             this.healthMessage = 'Metabase disponible';
-          } else if (res.kind === 'initializing') {
+          } else if (kind === 'initializing') {
             this.healthState = 'checking';
-            this.healthMessage = 'Metabase demarre — reessayez ou ouvrez le port 3030';
-          } else if (res.kind === 'unknown') {
+            this.healthMessage = 'Metabase démarre — patientez 1–2 min';
+          } else if (kind === 'unknown') {
             this.healthState = 'checking';
-            this.healthMessage = 'Metabase repond (statut inattendu)';
+            this.healthMessage = 'Metabase répond (statut inattendu)';
           } else {
             this.healthState = 'unavailable';
-            this.healthMessage = 'Metabase injoignable (ouvrez le lien pour verifier)';
+            this.healthMessage = 'Metabase injoignable sur le port 3030';
           }
         })
     );

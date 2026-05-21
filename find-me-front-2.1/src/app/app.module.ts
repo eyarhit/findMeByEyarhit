@@ -36,7 +36,6 @@ import { ModelCvComponent } from './components/model-cv/model-cv.component';
 import { ListDocumentComponent } from './components/list-document/list-document.component';
 import { CarteProfilCandiatComponent } from './components/carte-profil-candiat/carte-profil-candiat.component';
 import { VisualisationCvComponent } from './components/visualisation-cv/visualisation-cv.component';
-import { SauvegardeCvComponent } from './components/sauvegarde-cv/sauvegarde-cv.component';
 import { PopupCvComponent } from './components/popup-cv/popup-cv.component';
 import { MissionDetailsComponent } from './pages/mission-details/mission-details.component';
 import { MissionsPageComponent } from './pages/missions-page/missions-page.component';
@@ -49,14 +48,12 @@ import { InterfaceCertifComponent } from './components/interface-certif/interfac
 import { CarteTypeSejourComponent } from './components/carte-type-sejour/carte-type-sejour.component';
 import { ListUtilisateurComponent } from './components/list-utilisateur/list-utilisateur.component';
 import { StatistiqueUtilisateurPageComponent } from './pages/statistique-utilisateur/statistique-utilisateur-page.component';
-import { BiMetabasePageComponent } from './pages/bi-metabase/bi-metabase-page.component';
 import { NotificationBellComponent } from './components/NotificationBell/NotificationBell.component';
 import { RegisterFeelancerComponent } from './pages/register-freelancer/register-freelancer.component';
 import { SidebarEspaceComponent } from './components/sidebar/sidebar.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { Etape1MissionComponent } from './components/etape1-mission/etape1-mission.component';
 import { Etape2MissionDescriptionComponent } from './components/etape2-mission-description/etape2-mission-description.component';
-import { ShowMissionComponent } from './components/show-mission/show-mission.component';
 import { Etape3MissionComponent } from './components/etape3-mission/etape3-mission.component';
 import { PreviewDialogComponent } from './ESN_components/preview-dialog/preview-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -119,7 +116,6 @@ import { MessengerChatComponent } from './components/messenger-chat/messenger-ch
     ListDocumentComponent,
     CarteProfilCandiatComponent,
     VisualisationCvComponent,
-    SauvegardeCvComponent,
     PopupCvComponent,
     MissionDetailsComponent,
     MissionsPageComponent,
@@ -133,12 +129,10 @@ import { MessengerChatComponent } from './components/messenger-chat/messenger-ch
     CarteTypeSejourComponent,
     ListUtilisateurComponent,
     StatistiqueUtilisateurPageComponent,
-    BiMetabasePageComponent,
     NotificationBellComponent,
     RegisterFeelancerComponent,
     Etape1MissionComponent,
     Etape2MissionDescriptionComponent,
-    ShowMissionComponent,
     Etape3MissionComponent,
     PreviewDialogComponent,
     DossierCompetenceComponent,

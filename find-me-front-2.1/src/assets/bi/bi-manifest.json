@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "generatedAt": null,
+  "metabaseUrl": "http://localhost:3030",
+  "dashboard": {
+    "id": null,
+    "name": "Find-Me — BI complet",
+    "url": "http://localhost:3030"
+  },
+  "cards": [],
+  "tabs": [],
+  "credentials": {
+    "metabaseAdminEmail": "bi-admin@findme.local",
+    "mysqlReadOnlyUser": "findme_bi"
+  },
+  "_note": "Fichier régénéré par metabase-seed (docker compose). Ne pas éditer les IDs à la main."
+}

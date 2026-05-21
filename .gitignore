@@ -20,6 +20,17 @@ Thumbs.db
 $null
 $nulldocker
 
+# Debug / tests locaux (régénérables)
+parse-debug.json
+parse-api-test.json
+parse-test-output.json
+test-cv-sample.pdf
+metabase_openapi.json
+find-me-python-2.1/tests/output_*.json
+find-me-python-2.1/tests/output_*.txt
+**/hs_err_pid*.log
+**/.pytest_cache/
+
 # Env secrets (never commit)
 .env
 .env.*

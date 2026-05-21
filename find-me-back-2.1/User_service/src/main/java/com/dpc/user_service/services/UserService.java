@@ -14,6 +14,7 @@ import com.dpc.user_service.Repository.UserRepository;
 import com.dpc.user_service.file.FileUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
@@ -48,6 +49,10 @@ public class UserService {
     private final EmailService emailService;
     @Autowired
     FileStorageService fileStorageService;
+
+    @Value("${spring.mail.username}")
+    private String mailFrom;
+
     @Autowired
     public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, QuizClient quizClient, TwilioClient twilioClient, EmailService emailService, FileStorageService fileStorageService) {
         this.userRepository = userRepository;
@@ -62,7 +67,7 @@ public class UserService {
     public ResponseEntity<String> processConfirmEmail(String email) {
         User user = findByEmail(email);
         Mail mail = new Mail();
-        mail.setFrom("no-reply@FindMe.com");
+        mail.setFrom(mailFrom);
         mail.setTo(user.getEmail());
         mail.setSubject("Confirmation Création compte");
         Map<String, Object> mailModel = new HashMap<>();

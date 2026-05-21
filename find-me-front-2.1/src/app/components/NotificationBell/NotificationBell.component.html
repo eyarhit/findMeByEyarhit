@@ -1,10 +1,10 @@
 <div class="notification-container" 
-     [ngStyle]="{ top: posY + 'px', right: '20px', position: 'fixed' }" 
-     (mousedown)="onDragStart($event)" 
-     (touchstart)="onDragStart($event)">
+     [ngStyle]="{ top: posY + 'px', right: '20px', position: 'fixed' }">
   
   <!-- Bell Icon with Counter -->
-  <button (click)="toggleBell()" 
+  <button (click)="toggleBell()"
+          (mousedown)="onDragStart($event)"
+          (touchstart)="onDragStart($event)"
           class="notification-btn" 
           aria-label="Toggle notifications" 
           [attr.aria-expanded]="isBellOpen">
@@ -27,6 +27,8 @@
           class="notification-item animate-slide-in"
           [ngClass]="{'unread': !notification.read}"
           (click)="openNotification(notification)"
+          (mousedown)="$event.stopPropagation()"
+          (touchstart)="$event.stopPropagation()"
           style="cursor: pointer;">
         <div class="notification-content">
           <div class="notification-message">{{ notification.message }}</div>
@@ -44,8 +46,4 @@
       <li *ngIf="notifications.length === 0" class="empty">Vous n’avez aucune nouvelle notification.</li>
     </ul>
   </div>
-<!--  
-  <button class="btn" (click)="sendNotification('8', 'Bonjour à Aziz c est une paragraphe juste pour tester la partie message notification')" type="button" aria-label="Send Hello World notification">
-    Envoyer Bonjour à Aziz
-  </button> -->
 </div>

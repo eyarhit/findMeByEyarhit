@@ -1,0 +1,59 @@
+{
+  "job": "Ingénieur aérospatial diplômé, je dispose d'une expérience significative dans la modélisation numérique,",
+  "education": [
+    [
+      "ESPRIT - École Supérieure Privée d'Ingénierie et de Technologies",
+      "ESPRIT - École Supérieure Privée d'Ingénierie et de Technologies 2019 - 2023"
+    ],
+    [
+      "INSAT - Institut National des Sciences Appliquées et de Technologie",
+      "Diplôme d'Ingénieur en Génie Aérospatial - spécialité structures & propulsion"
+    ]
+  ],
+  "skills": {
+    "programming_languages": [
+      "Python",
+      "MATLAB",
+      "C++",
+      "Fortran"
+    ],
+    "methodologies": [
+      "Agile",
+      "V-cycle",
+      "gestion des risques projets spatiaux",
+      "ÉDUCATION",
+      "de Technologie 2017 - 2019"
+    ],
+    "tools": [
+      "Git",
+      "Linux",
+      "LaTeX",
+      "MS Project",
+      "Jupyter",
+      "CATIA V5",
+      "SolidWorks",
+      "SpaceClaim"
+    ],
+    "design": [
+      "ANSYS Fluent",
+      "OpenFOAM",
+      "Star-CCM+",
+      "CATIA",
+      "FEA",
+      "maillage hexa",
+      "tétra",
+      "post-traitement ParaView",
+      "Écoulements compressibles",
+      "couche limite",
+      "portance",
+      "trainée"
+    ]
+  },
+  "experiences": [
+    [
+      "Centre Spatial Tunisien (CST)",
+      "Stage ingénieur"
+    ]
+  ],
+  "can_save": true
+}

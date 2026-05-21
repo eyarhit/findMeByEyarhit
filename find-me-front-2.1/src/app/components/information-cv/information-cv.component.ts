@@ -108,6 +108,27 @@ popupTitle: string = '';
     
     // Charge les données du CV
     this.loadCvData();
+    this.restoreCvFileName();
+  }
+
+  private static readonly CV_FILE_NAME_KEY = 'cv_findme_display_name';
+
+  /** Réaffiche le dernier nom saisi (persisté après sauvegarde réussie). */
+  private restoreCvFileName(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    const saved = sessionStorage.getItem(InformationCvComponent.CV_FILE_NAME_KEY);
+    if (saved) {
+      this.fileNameControl.setValue(saved);
+    }
+  }
+
+  private persistCvFileName(displayName: string): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    sessionStorage.setItem(InformationCvComponent.CV_FILE_NAME_KEY, displayName);
   }
 
   private loadCompletedSteps(): void {
@@ -453,7 +474,8 @@ async SauvegarderCV(): Promise<void> {
     }
 
     element.classList.add('pdf-export-mode');
-    const fileName = `FIND ME-${this.fileNameControl.value}`.replace(/\s+/g, '.');
+    const displayName = String(this.fileNameControl.value ?? '').trim();
+    const fileName = `FIND ME-${displayName}`.replace(/\s+/g, '.');
 
     // Generate PDF
     const pdfBlob = await this.pdfService.SauvegarderMultiPagePdf(element, fileName);
@@ -461,8 +483,8 @@ async SauvegarderCV(): Promise<void> {
     // Upload document
     await this.uploadDocument(pdfBlob, fileName);
     
+    this.persistCvFileName(displayName);
     this.showNotification('CV généré et sauvegardé avec succès!', 'success');
-    this.fileNameControl.reset(); // Clear the input after successful save
     
   } catch (error) {
     console.error('Erreur lors de la sauvegarde:', error);

@@ -1,9 +1,13 @@
-FROM node:20-alpine
+FROM python:3.12-slim
 
 WORKDIR /app
 
-RUN npm init -y && npm install --omit=dev axios
+COPY requirements-seed.txt ./
+RUN pip install --no-cache-dir -r requirements-seed.txt
 
-COPY seed.js ./seed.js
+COPY seed_metabase.py ./
+COPY sql ./sql
 
-CMD ["sh", "-c", "attempt=1; max=5; until node seed.js; do if [ \"$attempt\" -ge \"$max\" ]; then echo '❌ Seed failed after retries'; exit 1; fi; echo \"🔄 Retry seed in 10s (attempt $attempt/$max)\"; attempt=$((attempt+1)); sleep 10; done"]
+ENV BI_MANIFEST_PATH=/output/bi-manifest.json
+
+CMD ["sh", "-c", "attempt=1; max=8; until python seed_metabase.py; do if [ \"$attempt\" -ge \"$max\" ]; then echo 'Seed failed after retries'; exit 1; fi; echo \"Retry seed in 15s (attempt $attempt/$max)\"; attempt=$((attempt+1)); sleep 15; done"]

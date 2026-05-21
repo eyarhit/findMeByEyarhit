@@ -1,42 +1,76 @@
 <section class="bi-page">
   <header class="bi-header">
     <div>
-      <h1>Dashboard BI Find-Me</h1>
-      <p>Pilotage des utilisateurs, missions, competences et evaluations via Metabase (liens externes — pas d’iframe, donc pas de blocage CSP).</p>
+      <h1>Business Intelligence Find-Me</h1>
+      <p>
+        Entrepôt décisionnel <strong>findme_dw</strong> (schéma en étoile : dimensions + tables de faits).
+        L’ETL recharge les données depuis l’application ; Metabase interroge l’entrepôt, pas les bases OLTP directement.
+      </p>
     </div>
     <div class="bi-actions">
-      <span class="status-badge" [class.connected]="healthState === 'connected'" [class.unavailable]="healthState === 'unavailable'">
+      <span
+        class="status-badge"
+        [class.connected]="healthState === 'connected'"
+        [class.unavailable]="healthState === 'unavailable'">
         <span class="dot"></span>
         {{ healthMessage }}
       </span>
-      <button type="button" class="open-btn" (click)="openMetabaseHome()">Ouvrir Metabase</button>
+      <button type="button" class="open-btn" (click)="openMetabaseHome()">Console Metabase</button>
     </div>
   </header>
 
+  <div class="alert warn" *ngIf="manifestError">{{ manifestError }}</div>
+
+  <div class="kpi-strip" *ngIf="isProvisioned">
+    <div class="kpi">
+      <span class="kpi-value">{{ cardCount }}</span>
+      <span class="kpi-label">indicateurs</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-value">{{ tabs.length }}</span>
+      <span class="kpi-label">domaines métier</span>
+    </div>
+    <div class="kpi" *ngIf="manifest?.generatedAt as generatedAt">
+      <span class="kpi-value kpi-small">{{ generatedAt | date : 'short' }}</span>
+      <span class="kpi-label">dernier seed BI</span>
+    </div>
+  </div>
+
   <div class="connection-box">
     <button type="button" class="collapse-btn" (click)="toggleConnectionInfo()">
-      Info connexion
+      Paramètres & accès
       <span>{{ showConnectionInfo ? '▲' : '▼' }}</span>
     </button>
     <div *ngIf="showConnectionInfo" class="connection-content">
-      <p><strong>URL:</strong> {{ connectionInfo.url }}</p>
-      <p><strong>Acces:</strong> {{ connectionInfo.accessNote }}</p>
-      <p><strong>MySQL BI:</strong> {{ connectionInfo.mysqlUser }}</p>
+      <p><strong>URL Metabase :</strong> {{ metabaseBaseUrl }}</p>
+      <p><strong>Admin Metabase :</strong> {{ manifest?.credentials?.metabaseAdminEmail || 'bi-admin@findme.local' }}</p>
+      <p><strong>MySQL lecture seule :</strong> {{ manifest?.credentials?.mysqlReadOnlyUser || 'findme_bi' }}</p>
+      <p class="hint">
+        Mot de passe admin : variable <code>METABASE_SETUP_PASSWORD</code> dans docker-compose.
+        Export PDF : dans Metabase → dashboard → menu → Exporter.
+      </p>
     </div>
   </div>
 
   <article class="dashboard-wrapper">
-    <h2>Tableau de bord complet</h2>
+    <h2>{{ manifest?.dashboard?.name || 'Tableau de bord complet' }}</h2>
     <div class="metabase-link-panel">
       <p class="panel-lead">
-        Metabase interdit l’integration en iframe par defaut (<code>frame-ancestors 'none'</code>). Ouvrez le dashboard dans un nouvel onglet.
+        Metabase n’autorise pas l’iframe par défaut (<code>frame-ancestors</code>). Ouvrez le dashboard
+        dans un nouvel onglet pour la démo PFE ou l’export PDF.
       </p>
-      <button type="button" class="open-btn primary" (click)="openDashboard()">Ouvrir le dashboard #{{ dashboardId }}</button>
+      <button
+        type="button"
+        class="open-btn primary"
+        [disabled]="!isProvisioned"
+        (click)="openDashboard()">
+        Ouvrir le dashboard{{ dashboardId != null ? ' #' + dashboardId : '' }}
+      </button>
       <p class="muted-url">{{ dashboardAbsoluteUrl }}</p>
     </div>
   </article>
 
-  <div class="bi-layout">
+  <div class="bi-layout" *ngIf="tabs.length">
     <aside class="tabs">
       <button
         *ngFor="let tab of tabs"
@@ -45,17 +79,22 @@
         [class.active]="selectedTabKey === tab.key"
         (click)="selectTab(tab.key)">
         {{ tab.label }}
+        <span class="tab-count" *ngIf="tab.cardSlugs?.length">{{ tab.cardSlugs.length }}</span>
       </button>
     </aside>
 
     <section class="reports">
       <h2>{{ selectedTab.label }}</h2>
+      <p class="reports-lead" *ngIf="!selectedCards.length">Aucune carte pour cet onglet — relancez le seed BI.</p>
       <div class="cards-grid">
-        <article class="report-card" *ngFor="let cardId of selectedTab.cardIds">
-          <h3>Carte #{{ cardId }}</h3>
+        <article class="report-card" *ngFor="let card of selectedCards">
+          <div class="card-head">
+            <h3>{{ card.title }}</h3>
+            <span class="chip">{{ card.db }}</span>
+          </div>
+          <p class="card-meta">Visualisation : {{ card.display }}</p>
           <div class="card-actions">
-            <button type="button" class="card-open-btn" (click)="openQuestion(cardId)">Ouvrir dans Metabase</button>
-            <span class="muted-url small">{{ questionAbsoluteUrl(cardId) }}</span>
+            <button type="button" class="card-open-btn" (click)="openCard(card)">Ouvrir dans Metabase</button>
           </div>
         </article>
       </div>

@@ -1,6 +1,6 @@
 # Business Intelligence — Metabase + MySQL Find-Me
 
-Cette intégration ajoute **Metabase** (outil BI open-source) branché sur les mêmes bases MySQL que les microservices (`user_bd`, `cv_bd`, `mission_bd`, `quiz_bd`, `codingame_bd`), avec un compte SQL **lecture seule** `findme_bi`.
+Cette intégration ajoute **Metabase** sur l’entrepôt **`findme_dw` (schéma en étoile)** : ETL `bi-etl` depuis les 5 bases OLTP, puis dashboards Metabase en lecture seule (`findme_bi`).
 
 ## Compte Metabase (admin UI) — créé automatiquement en Docker
 
@@ -11,7 +11,7 @@ Avec le **`docker compose`** du projet, le conteneur **`metabase-seed`** provisi
 | URL | [http://localhost:3030](http://localhost:3030) |
 | Email | `bi-admin@findme.local` |
 | Mot de passe | `FindMe_BI_Auto_2026!xQ7vM2` (défaut dans `docker-compose.yml`) |
-| Tableau de bord | **Find-Me — BI complet** (collection **Find-Me BI**) |
+| Tableau de bord | **Find-Me — Entrepôt décisionnel** (collection **Find-Me BI**) |
 
 Tu peux surcharger `METABASE_SETUP_EMAIL` et `METABASE_SETUP_PASSWORD` dans `docker-compose.yml` (service `metabase-seed`).
 
@@ -89,13 +89,14 @@ Connecté en **ADMIN**, menu **Espace Utilisateur** → **Tableaux de bord BI** 
 
 ---
 
-## Tableau de bord Find-Me (SQL prêt à l’emploi)
+## Tableau de bord Find-Me (automatique)
 
-Des requêtes **déjà alignées** sur les tables du projet (missions, candidatures, users, CV, quiz, codingame) sont dans le dossier :
+1. **`bi-etl`** — charge `findme_dw` (dimensions + faits)  
+2. **`metabase-seed`** — dashboard **« Find-Me — Entrepôt décisionnel »**, **23 indicateurs** sur l’entrepôt, **`bi-manifest.json`**
 
-**[`bi/metabase/README.md`](bi/metabase/README.md)** (procédure pas à pas + fichiers SQL dans `bi/metabase/sql/`).
+Documentation détaillée : [`bi/metabase/README.md`](bi/metabase/README.md) · Soutenance PFE : [`docs/BI_PFE.md`](docs/BI_PFE.md).
 
-Tu crées les questions dans Metabase en copiant ces SQL, puis un dashboard **« Find-Me — Vue opérationnelle »**.
+**Reset BI** : `docker volume rm findmebyeyarhit_metabase_data` puis `docker compose up -d --build metabase metabase-seed`.
 
 ---
 

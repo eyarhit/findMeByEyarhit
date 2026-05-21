@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DocumentServiceService } from '../../services/document-service.service';
@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
   templateUrl: './interface-certif.component.html',
   styleUrl: './interface-certif.component.scss'
 })
-export class InterfaceCertifComponent implements OnInit {
+export class InterfaceCertifComponent implements OnInit, OnDestroy {
    @Input() profileId : number | null = null;
     @Input() profilerole : string ='';
   private subscription?: Subscription;
@@ -36,10 +36,10 @@ export class InterfaceCertifComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if(this.profileId === null){
-     this.userId = this.authService.getUserId();
-    } else{
-     this.userId = this.profileId;
+    if (this.profileId === null) {
+      this.userId = this.authService.getUserId();
+    } else {
+      this.userId = this.profileId;
     }
     if (this.userId) {
       this.loadDocuments();
@@ -48,21 +48,31 @@ export class InterfaceCertifComponent implements OnInit {
     }
   }
 
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
 
-  
   loadDocuments(): void {
-    if (this.userId) {
-      this.subscription = this.authService.documentUpdate$.subscribe(isAuthenticated => {
-    this.documentService.getDocumentsByUserAndFolder(this.userId!, "Certificat").subscribe(
-      response => {
-        this.documents=response;
-      },
-      error => {
-        console.error('Erreur lors du chargement des Types de sejour', error);
-      }
-    );})
+    if (!this.userId) {
+      return;
     }
-    }
+
+    const fetch = () => {
+      this.documentService.getDocumentsByUserAndFolder(this.userId!, 'Certificat').subscribe({
+        next: (response) => {
+          this.documents = Array.isArray(response) ? response : [];
+        },
+        error: (error) => {
+          console.error('Erreur lors du chargement des certificats', error);
+          this.documents = [];
+        },
+      });
+    };
+
+    fetch();
+    this.subscription?.unsubscribe();
+    this.subscription = this.authService.documentUpdate$.subscribe(() => fetch());
+  }
 
   viewDocument(documentData: any): void {
     this.selectedDocument = documentData;
@@ -205,9 +215,8 @@ deleteDocument(documentId: number): void {
         setTimeout(() => {
           this.isUploading = false;
           this.closeUploadModal();
-          this.loadDocuments();
-           this.showSuccessAlert('📜 Cértificat ajouté', 'Vos cértificats ont bien été enregistrés.');
-          // alert('Certificat ajouté avec succès');
+          this.authService.notifyDocumentUpdate();
+          this.showSuccessAlert('📜 Certificat ajouté', 'Vos certificats ont bien été enregistrés.');
         }, 500);
       },
       error: (error) => {

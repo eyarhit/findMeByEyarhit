@@ -7,5 +7,6 @@ GRANT SELECT ON cv_bd.* TO 'findme_bi'@'%';
 GRANT SELECT ON mission_bd.* TO 'findme_bi'@'%';
 GRANT SELECT ON quiz_bd.* TO 'findme_bi'@'%';
 GRANT SELECT ON codingame_bd.* TO 'findme_bi'@'%';
+GRANT SELECT ON findme_dw.* TO 'findme_bi'@'%';
 
 FLUSH PRIVILEGES;
