@@ -160,7 +160,8 @@ private getReadableStatusLabel(status: string): string {
       return;
     }
     const offreTypes = ['CDI', 'CDD', 'ALTERNANCE'];
-    const targetRoute = offreTypes.includes(String(typeContrat || '').toUpperCase())
+    const isOffre = offreTypes.includes(String(typeContrat || '').toUpperCase());
+    const targetRoute = isOffre
       ? `/OffreDetails/${missionId}`
       : `/MissionDetails/${missionId}`;
     this.notificationService.sendNotificationToUserWithTarget(
@@ -168,7 +169,7 @@ private getReadableStatusLabel(status: string): string {
       message,
       targetRoute,
       missionId,
-      'MISSION'
+      isOffre ? 'OFFRE' : 'MISSION'
     );
   }
   ngOnInit():void{

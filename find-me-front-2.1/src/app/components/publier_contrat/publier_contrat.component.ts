@@ -477,14 +477,12 @@ this.isEditing.emit(false);
       ''
     ).toUpperCase();
     const offreTypes = ['CDI', 'CDD', 'ALTERNANCE'];
-    const recruiter = isRecruiterRole(this.accountRole);
-    const targetRoute = offreTypes.includes(typeContrat)
-      ? recruiter
-        ? `/OffrePublierDetails/${missionId}`
-        : `/OffreDetails/${missionId}`
-      : recruiter
-        ? `/MissionPublierDetails/${missionId}`
-        : `/MissionDetails/${missionId}`;
+    const isOffre = offreTypes.includes(typeContrat);
+    const targetType = isOffre ? 'OFFRE' : 'MISSION';
+    /** Route canonique candidat ; le clic notif est recalculé par rôle (resolveNotificationUrl). */
+    const targetRoute = isOffre
+      ? `/OffreDetails/${missionId}`
+      : `/MissionDetails/${missionId}`;
 
     const missionName = createdMission?.descrip_mission?.mission_name || formData?.descrip_mission?.mission_name || 'nouvelle annonce';
     const message = `Nouvelle annonce publiée: ${missionName}`;
@@ -507,7 +505,7 @@ this.isEditing.emit(false);
           message,
           targetRoute,
           Number(missionId),
-          'MISSION'
+          targetType
         );
       }
     });

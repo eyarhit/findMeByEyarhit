@@ -44,7 +44,7 @@
       <!-- Navigation -->
       <nav class="flex-1 overflow-y-auto px-4 py-2">
         <!-- CV Section for CANDIDAT/FREELANCER/PORTAGE_SALARIAL -->
-        <ul *ngIf="(role === 'CANDIDAT' || role === 'FREELANCER' || role === 'PORTAGE_SALARIAL') && urlContains('cv')" class="space-y-1">
+        <ul *ngIf="(role === 'CANDIDAT' || role === 'FREELANCER' || role === 'PORTAGE_SALARIAL') && showCvSidebar()" class="space-y-1">
           <li>
             <h3 class="text-xs uppercase font-semibold text-gray-500 tracking-wider px-3 py-2">Espace CV</h3>
             <a [routerLink]="['/cv/accueil']" routerLinkActive="active-link"

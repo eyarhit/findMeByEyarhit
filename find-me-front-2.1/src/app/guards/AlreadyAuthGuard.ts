@@ -4,6 +4,7 @@ import { CanActivateFn } from '@angular/router';
 import { Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
 import { isPlatformBrowser } from '@angular/common';
+import { getDefaultHomeUrl } from '../shared/constants/notification-navigation';
 
 function normalizeRole(raw: unknown): string | null {
   if (typeof raw === 'string') {
@@ -33,7 +34,7 @@ export const AlreadyAuthGuard: CanActivateFn = () => {
         normalizeRole(decoded?.roles);
       if (role) {
         //console.log(' AlreadyAuthGuard: utilisateur déjà connecté, redirection...');
-        router.navigate(['/acceuil-find-me']); 
+        router.navigateByUrl(getDefaultHomeUrl(role));
         return false;
       }
     } catch (e) {

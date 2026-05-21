@@ -335,9 +335,11 @@ private notifyMissionOwnerOnApplication(): void {
   }
 
   const offreTypes = ['CDI', 'CDD', 'ALTERNANCE'];
-  const targetRoute = offreTypes.includes(String(mission.type || '').toUpperCase())
+  const isOffre = offreTypes.includes(String(mission.type || '').toUpperCase());
+  const targetRoute = isOffre
     ? `/Offres/candidatures/${mission.id}`
     : `/Missions/candidatures/${mission.id}`;
+  const targetType = isOffre ? 'OFFRE' : 'MISSION';
   const reference = mission.ref ? ` (${mission.ref})` : '';
   const message = `Nouvelle postulation reçue${reference}.`;
 
@@ -346,7 +348,7 @@ private notifyMissionOwnerOnApplication(): void {
     message,
     targetRoute,
     mission.id,
-    'MISSION'
+    targetType
   );
 }
   handDossierCompethenceVisibility(visible: any) {

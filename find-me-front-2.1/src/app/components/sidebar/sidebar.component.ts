@@ -63,13 +63,21 @@ export class SidebarEspaceComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Menu Espace Offres visible pour RH même hors route /Offres. */
+  /** Menu Espace Offres (liste, détail, favoris, postuler…). */
   showOffresSidebar(): boolean {
+    const url = this.router.url;
     return (
       this.urlContains('Offres') ||
+      /\/OffreDetails\/|\/OffreConsultation\/|\/OffrePublierDetails\//i.test(url) ||
       this.role === 'ESN_ADMIN' ||
-      this.role === 'CHARGEDERECRUTEMENT'
+      this.role === 'CHARGEDERECRUTEMENT' ||
+      (this.role === 'CANDIDAT' && /\/Offre/i.test(url))
     );
+  }
+
+  /** Accueil CV uniquement dans l'espace /cv (pas sur offres / missions). */
+  showCvSidebar(): boolean {
+    return this.urlContains('/cv');
   }
 
   /** Libellé affiché sous le nom dans la sidebar ; le rôle JWT (`role`) ne change pas. */

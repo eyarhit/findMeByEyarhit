@@ -5,6 +5,7 @@ import { SessionLoginComponent } from './pages/session-login/session-login.compo
 import { MotDePasseOublierComponent } from './pages/mot-de-passe-oublier/mot-de-passe-oublier.component';
 import { ReinitialiserMotPasseComponent } from './pages/reinitialiser-mot-passe/reinitialiser-mot-passe.component';
 import { AcceuilFindMeComponent } from './pages/acceuil-find-me/acceuil-find-me.component';
+import { HomeRedirectComponent } from './pages/home-redirect/home-redirect.component';
 
 import { QuizComponent } from './components/quiz/quiz.component';
 
@@ -199,8 +200,8 @@ const routes: Routes = [
  { path: 'OffrePublierDetails/:jobId', component: MissionDetailsComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['ESN_ADMIN','ESN_COMMERCIAL','CHARGEDERECRUTEMENT'] , espace: 'Offres publier' } },
 
 
-  // Default and fallback routes
-  { path: '', redirectTo: '/cv', pathMatch: 'full' },
+  // Racine : accueil métier selon le rôle (pas toujours /cv)
+  { path: '', component: HomeRedirectComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '/login' },
 ];
 

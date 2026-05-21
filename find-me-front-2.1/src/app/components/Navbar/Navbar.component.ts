@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 import { DocumentServiceService } from '../../services/document-service.service';
 import { ApiRoutingServiceUser } from '../../services/api-routing-user.service';
 import { CvService } from '../../services/cv.service';
+import { getDefaultHomeUrl } from '../../shared/constants/notification-navigation';
 
 @Component({
   selector: 'app-Navbar',
@@ -109,6 +110,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
       (this.roleFromToken === 'ESN_ADMIN' ||
         this.roleFromToken === 'CHARGEDERECRUTEMENT')
     );
+  }
+
+  /** Logo : page publique si invité, sinon accueil métier du rôle (pas /acceuil-find-me pour un candidat connecté). */
+  get logoRouterLink(): string {
+    if (this.authResolved && this.isLoggedIn && this.roleFromToken) {
+      return getDefaultHomeUrl(this.roleFromToken);
+    }
+    return '/acceuil-find-me';
   }
 
   private updatePublicGuestPageFlag(url: string): void {

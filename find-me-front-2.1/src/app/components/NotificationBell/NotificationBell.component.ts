@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { Notification, NotificationService } from '../../services/notificationService';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { isRecruiterRole } from '../../shared/constants/role-utils';
+import { resolveNotificationUrl } from '../../shared/constants/notification-navigation';
 
 @Component({
   selector: 'app-notification-bell',
@@ -78,16 +78,14 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     this.markAsread(notification);
     this.isBellOpen = false;
 
-    if (notification.targetRoute) {
-      this.router.navigateByUrl(notification.targetRoute);
-      return;
-    }
+    const url = resolveNotificationUrl(this.authService.getRole(), {
+      targetRoute: notification.targetRoute,
+      targetId: notification.targetId,
+      targetType: notification.targetType,
+    });
 
-    if (notification.targetId) {
-      const route = isRecruiterRole(this.authService.getRole())
-        ? ['/OffreConsultation', notification.targetId]
-        : ['/OffreDetails', notification.targetId];
-      this.router.navigate(route);
+    if (url) {
+      this.router.navigateByUrl(url);
     }
   }
  markAllAsread(){

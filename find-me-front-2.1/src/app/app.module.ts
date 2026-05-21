@@ -81,6 +81,7 @@ import { InviterEmployerESNComponent } from './components/inviter-employer-esn/i
 import { PublierContratComponent } from './components/publier_contrat/publier_contrat.component';
 import { DossierCompetencesComponent } from './components/dossier-competences/dossier-competences.component';
 import { ChatComponent } from './components/chat/chat.component';
+import { HomeRedirectComponent } from './pages/home-redirect/home-redirect.component';
 import { PickerModule } from '@ctrl/ngx-emoji-mart';
 import { MessengerChatComponent } from './components/messenger-chat/messenger-chat.component';
 
@@ -152,7 +153,8 @@ import { MessengerChatComponent } from './components/messenger-chat/messenger-ch
     InviterEmployerESNComponent,
     PublierContratComponent,DossierCompetencesComponent,
     ChatComponent,
-    MessengerChatComponent
+    MessengerChatComponent,
+    HomeRedirectComponent,
   ],
   imports: [
     BrowserModule,

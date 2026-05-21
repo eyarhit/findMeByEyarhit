@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { getDefaultHomeUrl } from '../../shared/constants/notification-navigation';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { CvService } from '../../services/cv.service';
 import { AuthService } from '../../services/auth.service';
@@ -143,35 +144,13 @@ export class LoginComponent {
   }
 
   private redirectUser(role: string): void {
-    //console.log('🔄 Redirection en cours pour rôle:', role);
-
-    switch (role) {
-      case 'CANDIDAT':
-        this.router.navigate(['/cv']);
-        break;
-      case 'FREELANCER':
-        this.router.navigate(['/cv']);
-        break;
-      case 'ESN_COMMERCIAL':
-        this.router.navigate(['/gestion-employer/esn-commercial']);
-        break;        
-      case 'ESN_ADMIN':
-        this.router.navigate(['/Offres/publier']);
-        break;      
-      case'PORTAGE_SALARIAL':
-        this.router.navigate(['/cv']);
-        break;
-      case 'CHARGEDERECRUTEMENT':
-        this.router.navigate(['/Offres/publier']);
-        break;
-      case 'ADMIN':
-        this.router.navigate(['/utilisateur']);
-        break;
-      default:
-        console.warn('Rôle inconnu. Redirection vers /login.');
-        this.router.navigate(['/login']);
-        break;
+    const home = getDefaultHomeUrl(role);
+    if (home === '/acceuil-find-me') {
+      console.warn('Rôle inconnu. Redirection vers /login.');
+      this.router.navigate(['/login']);
+      return;
     }
+    this.router.navigateByUrl(home);
   }
 
   togglePasswordVisibility(): void {

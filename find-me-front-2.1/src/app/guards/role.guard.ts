@@ -2,6 +2,7 @@ import { inject, PLATFORM_ID } from '@angular/core';
 import { CanActivateFn, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
 import { isPlatformBrowser } from '@angular/common';
+import { getDefaultHomeUrl } from '../shared/constants/notification-navigation';
 
 function normalizeRole(raw: unknown): string | null {
   if (typeof raw === 'string') {
@@ -49,8 +50,7 @@ export const roleGuard: CanActivateFn = (
       //console.log("✅ RoleGuard: Accès autorisé pour le rôle:", userRole);
       return true;
     } else {
-      // console.warn("🚫 RoleGuard: Rôle non autorisé.");
-      router.navigate(['/login']);
+      router.navigateByUrl(getDefaultHomeUrl(userRole));
       return false;
     }
   } catch (error) {
