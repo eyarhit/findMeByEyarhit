@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .cv_parser import parse_cv_pdf
 from .models import ParseCVResponse, ParseData
+from .pdf_ocr import tesseract_available
 
 app = FastAPI(title="Find-Me CV Parser", version="1.0.0")
 
@@ -17,7 +18,11 @@ app.add_middleware(
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "ocr": tesseract_available(),
+        "parser": "rule_based_grounded_multilingual",
+    }
 
 
 @app.get("/recommendations/{user_id}")

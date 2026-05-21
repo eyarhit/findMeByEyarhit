@@ -14,9 +14,16 @@ Le parseur vise une **large couverture** des CV mondiaux en **texte sélectionna
 
 **Techniques :** double passe texte + mise en page PDF, sections multilingues, repli (fallback) formations/expériences/compétences, validation « grounded » (chaque champ doit apparaître dans le texte source).
 
+## PDF scannés (OCR)
+
+Si le PDF est une **image** (scan, photo), le service utilise **Tesseract OCR** automatiquement (langues `fra+eng+ara`, 300 DPI).
+
+Vérifier : `GET http://localhost:8000/health` → `"ocr": true`
+
 ## Limites honnêtes
 
-- **PDF scanné / image** : peu ou pas de texte → extraction impossible sans OCR (non inclus par défaut).
+- **0 % d’erreur garanti** : impossible ; toujours **vérifier** les champs après import (surtout OCR).
+- **Scan flou / basse résolution** : OCR partiel — rescanner en 300 DPI recommandé.
 - **Mise en page très créative** (colonnes imbriquées, tableaux complexes) : résultats partiels possibles.
 - **100 % des CV de la planète** : aucun système ne garantit cela sans IA lourde ; ce service privilégie **fiabilité** et **pas de hallucination**.
 

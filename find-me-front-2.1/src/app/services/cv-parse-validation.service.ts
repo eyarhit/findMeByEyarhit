@@ -45,6 +45,8 @@ export interface ParseCVResponse {
   };
   metadata?: {
     extraction_method?: string;
+    extraction_source?: string;
+    ocr_used?: boolean;
     ocr_quality_score?: number;
     ocr_acceptable?: boolean;
     overall_confidence?: number;

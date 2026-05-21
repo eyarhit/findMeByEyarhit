@@ -56,6 +56,8 @@ class ParseData(BaseModel):
 
 class ParseMetadata(BaseModel):
     extraction_method: str = "rule_based_grounded"
+    extraction_source: str = "native"  # native | ocr | native+ocr
+    ocr_used: bool = False
     ocr_quality_score: float = 1.0
     ocr_acceptable: bool = True
     overall_confidence: float = 0.0

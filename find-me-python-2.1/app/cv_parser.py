@@ -27,7 +27,9 @@ from .cv_sections import (
     LANGUAGE_NAMES,
     SKILL_CATEGORIES,
 )
-from .pdf_extract import extract_pdf_text
+from .field_mapper import apply_field_mapping
+from .ocr_cleanup import ocr_quality_score
+from .pdf_extract import extract_pdf_full
 from .validation import validate_and_score
 
 MONTHS_FR = {
@@ -150,16 +152,26 @@ def _merge_skills(dicts: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def parse_cv_pdf(file_bytes: bytes, filename: str = ""):
-    text, layout_text, page_count = extract_pdf_text(file_bytes)
+    extracted = extract_pdf_full(file_bytes)
+    text, layout_text, page_count = (
+        extracted.plain_text,
+        extracted.layout_text,
+        extracted.page_count,
+    )
     sources = _collect_source_texts(text, layout_text)
     source = max(sources, key=len)
 
     if len(source.strip()) < 40:
         data = ParseData()
         response = validate_and_score(data, source)
+        response.metadata.ocr_used = extracted.ocr_used
+        response.metadata.extraction_source = extracted.extraction_source
         response.metadata.warnings.append(
-            f"PDF illisible ou scanné ({page_count} page(s)) — privilégiez un PDF texte (non image)."
+            f"PDF illisible ({page_count} page(s)). "
+            "Utilisez un scan plus net (300 DPI) ou un PDF exporté depuis Word."
         )
+        if extracted.ocr_warnings:
+            response.metadata.warnings.extend(extracted.ocr_warnings)
         return response
 
     educations: list[list[EducationItem]] = []
@@ -185,16 +197,29 @@ def parse_cv_pdf(file_bytes: bytes, filename: str = ""):
         if title_from_name:
             personal.job_title = title_from_name
 
-    data = ParseData(
-        personal_info=personal,
-        education=_merge_education(educations),
-        technical_skills=_merge_skills(skills_list),
-        languages=_dedupe_languages(languages_all),
-        work_experiences=_merge_experiences(experiences),
-        projects=_dedupe_projects(projects_all),
+    data = apply_field_mapping(
+        ParseData(
+            personal_info=personal,
+            education=_merge_education(educations),
+            technical_skills=_merge_skills(skills_list),
+            languages=_dedupe_languages(languages_all),
+            work_experiences=_merge_experiences(experiences),
+            projects=_dedupe_projects(projects_all),
+        )
     )
     response = validate_and_score(data, source)
     response.metadata.extraction_method = "rule_based_grounded_multilingual"
+    response.metadata.extraction_source = extracted.extraction_source
+    response.metadata.ocr_used = extracted.ocr_used
+    response.metadata.ocr_quality_score = ocr_quality_score(source)
+    response.metadata.ocr_acceptable = len(source.strip()) >= 80
+    if extracted.ocr_used:
+        response.metadata.warnings.insert(
+            0,
+            "PDF scanné détecté — texte extrait par OCR (Tesseract). Vérifiez les champs avant enregistrement.",
+        )
+    if extracted.ocr_warnings:
+        response.metadata.warnings.extend(extracted.ocr_warnings)
     if len(sources) > 1:
         response.metadata.warnings.append(
             "Extraction multi-passes (texte + mise en page PDF) pour compatibilité élargie."
