@@ -105,13 +105,12 @@ Ou :
 scripts\fix-bi-pfe.cmd
 ```
 
-**Ordre :**
+**Ordre (zéro config manuelle) :**
 
-1. `docker compose up -d` — application  
-2. **`docker compose run --rm talend-etl`** — ETL → `findme_dw`  
-3. **Power BI Desktop** — ouvrir `bi/powerbi/README.md` et les rapports `.pbix`  
-   - Connexion : `localhost:3306`, base `findme_dw`, utilisateur `findme_bi` / `findme_bi_readonly`  
-   - Si **« Unable to connect to any MySQL hosts »** : `git pull` puis `docker compose up -d` (MySQL doit publier le port **3306** sur l’hôte).
+1. `docker compose up -d` — application + **console BI** (`findme-bi-hub` sur **http://localhost:3032**)  
+2. L’ETL Talend se lance **automatiquement** si `findme_dw` est vide (onglet **Talend ETL** dans la console).  
+3. Admin Angular → **Tableaux de bord BI** → boutons **Ouvrir Talend (console)** / **Ouvrir Power BI (console)**  
+4. **Power BI Desktop** (Windows, optionnel pour le rapport `.pbix`) — connexion déjà affichée dans la console ; MySQL sur `localhost:3306`.
 
 La **première fois** : compter **5 à 15 minutes** (Maven déjà en cache = plus rapide).
 

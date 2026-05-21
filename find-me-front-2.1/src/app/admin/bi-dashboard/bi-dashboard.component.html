@@ -8,11 +8,13 @@
       </p>
     </div>
     <div class="bi-actions">
-      <span class="status-badge connected">
+      <span class="status-badge" [class.connected]="hubStatus === 'ok'" [class.warn]="hubStatus === 'degraded' || hubStatus === 'unknown'" [class.error]="hubStatus === 'error'">
         <span class="dot"></span>
-        Stack formation : Talend + Power BI
+        {{ hubStatusLabel() }}
       </span>
-      <button type="button" class="open-btn" (click)="openPowerBiGuide()">Télécharger Power BI Desktop</button>
+      <button type="button" class="open-btn primary" (click)="openTalendConsole()">Ouvrir Talend (console)</button>
+      <button type="button" class="open-btn primary" (click)="openPowerBiConsole()">Ouvrir Power BI (console)</button>
+      <button type="button" class="open-btn ghost" (click)="openPowerBiGuide()">Installer Power BI Desktop</button>
     </div>
   </header>
 
@@ -37,26 +39,28 @@
     </div>
   </div>
 
+  <div class="hub-banner" *ngIf="manifest">
+    <p>
+      <strong>Zéro config :</strong> avec <code>docker compose up -d</code>, la console BI démarre sur
+      <a [href]="biHubBase" target="_blank" rel="noopener">{{ biHubBase }}</a>
+      — ETL Talend automatique si <code>findme_dw</code> est vide.
+    </p>
+  </div>
+
   <div class="connection-box">
     <button type="button" class="collapse-btn" (click)="toggleConnectionInfo()">
-      Talend ETL & connexion Power BI
+      Détails techniques (optionnel)
       <span>{{ showConnectionInfo ? '▲' : '▼' }}</span>
     </button>
     <div *ngIf="showConnectionInfo" class="connection-content">
-      <h3>1. Alimentation (Talend)</h3>
-      <p>Job : <code>{{ talendJob }}</code> — documentation : <code>bi/talend/studio/FindMe_Load_DW</code></p>
+      <h3>Console Docker (recommandé)</h3>
+      <p>Talend : <a [href]="talendConsoleUrl" target="_blank" rel="noopener">{{ talendConsoleUrl }}</a></p>
+      <p>Power BI : <a [href]="powerBiConsoleUrl" target="_blank" rel="noopener">{{ powerBiConsoleUrl }}</a></p>
+      <h3>ETL manuel (ligne de commande)</h3>
       <pre class="cmd">docker compose run --rm talend-etl</pre>
-      <p>Log attendu : <code>ETL terminé avec succès.</code> — build <code>{{ manifest?.talend?.buildId }}</code></p>
-
-      <h3>2. Analyse OLAP (Power BI Desktop)</h3>
+      <h3>Power BI Desktop (Windows)</h3>
       <p *ngIf="connection">
-        Serveur <strong>{{ connection.server }}:{{ connection.port }}</strong> —
-        base <strong>{{ connection.database }}</strong> —
-        utilisateur <strong>{{ connection.user }}</strong>
-      </p>
-      <p class="hint">
-        Guide complet : <code>bi/powerbi/README.md</code>.
-        Fichiers rapport : <code>bi/powerbi/reports/*.pbix</code> (à créer dans Power BI Desktop).
+        {{ connection.server }}:{{ connection.port }} · {{ connection.database }} · {{ connection.user }}
       </p>
     </div>
   </div>
@@ -77,8 +81,8 @@
       <p class="panel-lead">{{ selectedReport.description || selectedReport.name }}</p>
       <p><strong>Fichier :</strong> <code>bi/powerbi/reports/{{ selectedReport.file }}</code></p>
       <p class="hint">
-        Ouvrir Power BI Desktop → Fichier → Ouvrir → sélectionner le <code>.pbix</code>
-        après connexion à <code>findme_dw</code> (voir guide).
+        Utilisez <strong>Ouvrir Power BI (console)</strong> pour l’aperçu navigateur, ou téléchargez le
+        <code>.pbix</code> depuis la console si présent dans <code>bi/powerbi/reports/</code>.
       </p>
     </div>
   </article>

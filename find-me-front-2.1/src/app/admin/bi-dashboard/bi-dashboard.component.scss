@@ -108,6 +108,36 @@
   }
 }
 
+.status-badge.warn {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #92400e;
+  .dot { background: #f59e0b; }
+}
+
+.status-badge.error {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #991b1b;
+  .dot { background: #ef4444; }
+}
+
+.hub-banner {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  color: #1e3a8a;
+  a { color: #1d4ed8; font-weight: 600; }
+}
+
+.open-btn.ghost {
+  background: #fff;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
 .status-badge.unavailable {
   border-color: #fecaca;
   background: #fff1f2;

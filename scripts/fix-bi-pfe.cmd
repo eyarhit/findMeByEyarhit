@@ -9,5 +9,8 @@ docker compose build --no-cache talend-etl
 docker compose run --rm talend-etl
 if errorlevel 1 exit /b 1
 echo.
-echo === Power BI : ouvrir Desktop et bi\powerbi\README.md ===
+echo === Console BI (navigateur) ===
+echo http://localhost:3032/?tab=talend
+echo http://localhost:3032/?tab=powerbi
+echo Ou Admin Angular - Tableaux de bord BI
 exit /b 0

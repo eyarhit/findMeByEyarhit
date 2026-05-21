@@ -10,9 +10,17 @@
 | **OLAP** | Drill-down, filtres croisés, segments dans Power BI Desktop |
 | **Source** | MySQL `findme_dw` (alimenté par **Talend** avant ouverture des rapports) |
 
+## Accès rapide (recommandé)
+
+1. `docker compose up -d`
+2. Console BI : **http://localhost:3032** (onglets Talend / Power BI)
+3. Ou **Admin → Tableaux de bord BI** dans l’app → boutons **Ouvrir Talend** / **Ouvrir Power BI**
+
+L’ETL se lance automatiquement au premier démarrage si `findme_dw` est vide.
+
 ## Prérequis
 
-1. **ETL Talend** exécuté :
+1. **ETL Talend** exécuté (automatique via `bi-hub`, ou manuel) :
 
 ```cmd
 docker compose run --rm talend-etl

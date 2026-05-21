@@ -193,6 +193,34 @@ services:
     ports:
       - "8000:8000"
 
+  # Console BI (navigateur) : Talend ETL + aperçu Power BI — http://localhost:3032
+  bi-hub:
+    build:
+      context: ./bi/hub
+    container_name: findme-bi-hub
+    restart: unless-stopped
+    ports:
+      - "3032:8080"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_ETL_USER: root
+      MYSQL_ETL_PASSWORD: root
+      BI_AUTO_ETL: "1"
+      ETL_SCRIPT: /app/etl_load_dw.py
+      PBI_SERVER: localhost
+      PBI_PORT: 3306
+      PBI_USER: findme_bi
+      PBI_PASSWORD: findme_bi_readonly
+    volumes:
+      - ./bi/dw/schema.sql:/ddl/schema.sql:ro
+      - ./bi/dw/migrations/001_patch_etl_log_scd2.sql:/ddl/migrations/001_patch_etl_log_scd2.sql:ro
+      - ./bi/talend/docker/etl_load_dw.py:/app/etl_load_dw.py:ro
+      - ./bi/powerbi/reports:/app/reports:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+
   # BI PFE (formation BIS) : Talend ETL → findme_dw → Power BI Desktop (OLAP)
   talend-etl:
     profiles: ["bi"]

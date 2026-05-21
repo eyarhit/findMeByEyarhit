@@ -24,12 +24,27 @@ export interface BiPowerBiReport {
   description?: string;
 }
 
+export interface BiHubLinks {
+  port: number;
+  baseUrl: string;
+  talendUrl: string;
+  powerBiUrl: string;
+  healthUrl: string;
+}
+
 export interface BiManifest {
   version: number;
   stack?: string;
   generatedAt: string | null;
   dwDatabase: string;
-  talend?: { jobName: string; dockerService: string; buildId: string; studioPath?: string };
+  biHub?: BiHubLinks;
+  talend?: {
+    jobName: string;
+    dockerService: string;
+    hubService?: string;
+    buildId: string;
+    studioPath?: string;
+  };
   powerBi?: {
     connection: { server: string; port: number; database: string; user: string; password: string };
     reports: BiPowerBiReport[];
@@ -49,9 +64,10 @@ export interface BiManifest {
 export class BiDashboardComponent implements OnInit {
   manifest: BiManifest | null = null;
   manifestError = '';
+  hubStatus: 'unknown' | 'ok' | 'degraded' | 'error' = 'unknown';
   selectedTabKey = 'executive';
   selectedReportLevel = 'executive';
-  showConnectionInfo = true;
+  showConnectionInfo = false;
 
   constructor(private http: HttpClient) {}
 
@@ -92,6 +108,19 @@ export class BiDashboardComponent implements OnInit {
     return this.manifest?.powerBi?.connection;
   }
 
+  get biHubBase(): string {
+    const port = this.manifest?.biHub?.port ?? 3032;
+    return `http://${window.location.hostname}:${port}`;
+  }
+
+  get talendConsoleUrl(): string {
+    return this.manifest?.biHub?.talendUrl || `${this.biHubBase}/?tab=talend`;
+  }
+
+  get powerBiConsoleUrl(): string {
+    return this.manifest?.biHub?.powerBiUrl || `${this.biHubBase}/?tab=powerbi`;
+  }
+
   ngOnInit(): void {
     this.http
       .get<BiManifest>('/assets/bi/bi-manifest.json', { params: { t: Date.now().toString() } })
@@ -100,6 +129,7 @@ export class BiDashboardComponent implements OnInit {
           this.manifest = m;
           this.selectedTabKey = m.tabs?.[0]?.key || 'executive';
           this.selectedReportLevel = m.powerBi?.reports?.[0]?.level || 'executive';
+          this.checkBiHub();
         },
         error: () => {
           this.manifestError =
@@ -129,7 +159,37 @@ export class BiDashboardComponent implements OnInit {
     return map[level] || level;
   }
 
+  openTalendConsole(): void {
+    window.open(this.talendConsoleUrl, '_blank', 'noopener,noreferrer');
+  }
+
+  openPowerBiConsole(): void {
+    window.open(this.powerBiConsoleUrl, '_blank', 'noopener,noreferrer');
+  }
+
   openPowerBiGuide(): void {
     window.open('https://aka.ms/pbidesktop', '_blank', 'noopener,noreferrer');
+  }
+
+  private checkBiHub(): void {
+    const url = this.manifest?.biHub?.healthUrl || `${this.biHubBase}/api/health`;
+    this.http.get<{ status: string; dw: boolean }>(url).subscribe({
+      next: (h) => {
+        this.hubStatus = h.dw ? 'ok' : h.status === 'degraded' ? 'degraded' : 'error';
+      },
+      error: () => {
+        this.hubStatus = 'error';
+      },
+    });
+  }
+
+  hubStatusLabel(): string {
+    const map: Record<string, string> = {
+      ok: 'Console BI prête (findme_dw chargé)',
+      degraded: 'Console BI — lancer l’ETL',
+      error: 'Console BI — démarrer Docker (port 3032)',
+      unknown: 'Vérification console BI…',
+    };
+    return map[this.hubStatus] || map['unknown'];
   }
 }

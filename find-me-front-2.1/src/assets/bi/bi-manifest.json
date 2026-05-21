@@ -3,10 +3,18 @@
   "stack": "Talend ETL + Power BI OLAP",
   "generatedAt": "2026-05-20T00:00:00Z",
   "dwDatabase": "findme_dw",
+  "biHub": {
+    "port": 3032,
+    "baseUrl": "http://localhost:3032",
+    "talendUrl": "http://localhost:3032/?tab=talend",
+    "powerBiUrl": "http://localhost:3032/?tab=powerbi",
+    "healthUrl": "http://localhost:3032/api/health"
+  },
   "talend": {
     "jobName": "FindMe_Load_DW",
     "studioPath": "bi/talend/studio/FindMe_Load_DW",
     "dockerService": "talend-etl",
+    "hubService": "bi-hub",
     "buildId": "talend-findme-2026"
   },
   "powerBi": {
