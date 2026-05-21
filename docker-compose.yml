@@ -194,7 +194,9 @@ services:
       - "8000:8000"
 
   # Talend Open Studio (interface graphique Eclipse) — http://localhost:6080
+  # Profil optionnel : evite un build apt lourd si vous testez seulement l'app (scripts\docker-app-up.cmd)
   talend-studio:
+    profiles: ["talend-ui"]
     build:
       context: ./bi/talend
       dockerfile: studio-docker/Dockerfile
@@ -242,8 +244,6 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      talend-studio:
-        condition: service_started
 
   # BI PFE (formation BIS) : Talend ETL → findme_dw (appele par scripts/bi-start.cmd)
   talend-etl:

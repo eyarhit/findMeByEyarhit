@@ -3,13 +3,15 @@ FROM kasmweb/desktop:1.14.0
 
 USER root
 
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        openjdk-17-jdk \
-        wget \
-        ca-certificates \
-        fonts-dejavu \
-    && rm -rf /var/lib/apt/lists/*
+# JRE headless en priorite (plus leger, miroirs apt plus fiables que openjdk-17-jdk seul)
+RUN set -eux; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        wget ca-certificates fonts-dejavu; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        openjdk-17-jre-headless \
+        || DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends openjdk-17-jdk; \
+    rm -rf /var/lib/apt/lists/*
 
 COPY studio-docker/startup-talend.sh /dockerstartup/custom_user_startup.sh
 RUN chmod +x /dockerstartup/custom_user_startup.sh

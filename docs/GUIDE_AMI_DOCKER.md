@@ -93,6 +93,23 @@ docker compose build frontend python-service user-service metabase-seed bi-etl
 
 ## 4. Démarrer toute la plateforme
 
+**Tester l’app / CV seulement (sans Talend Studio — évite build `apt` 1 h+) :**
+
+```cmd
+scripts\docker-build-backend.cmd
+scripts\docker-app-up.cmd
+```
+
+Puis `git pull` + `docker compose build frontend` + `docker compose up -d --force-recreate frontend` pour la dernière version du front.
+
+**BI complet (Talend Studio optionnel) :**
+
+```cmd
+scripts\docker-compose-up.cmd
+```
+
+Talend interface graphique (lourd) : `powershell -File scripts\bi-start.ps1 -WithTalendStudio`
+
 **Recommandé (BI formation BIS — Talend + Power BI) :**
 
 ```cmd

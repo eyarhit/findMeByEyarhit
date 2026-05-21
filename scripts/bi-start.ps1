@@ -2,7 +2,9 @@
 param(
     [switch]$SkipBuild,
     [switch]$SkipEtl,
-    [switch]$NoOpenBrowser
+    [switch]$NoOpenBrowser,
+    [switch]$AppOnly,
+    [switch]$WithTalendStudio
 )
 
 $ErrorActionPreference = "Stop"
@@ -43,12 +45,24 @@ function Ensure-TalendInstaller {
 function Wait-MySql {
     $max = 90
     for ($i = 0; $i -lt $max; $i++) {
-        docker compose exec -T mysql mysqladmin ping -h localhost -uroot -proot --silent 2>$null
-        if ($LASTEXITCODE -eq 0) { return }
+        # mysqladmin ecrit un warning sur stderr : ne pas le traiter comme erreur PowerShell
+        $prevEap = $ErrorActionPreference
+        $ErrorActionPreference = "SilentlyContinue"
+        $null = docker compose exec -T mysql mysqladmin ping -h localhost -uroot -proot --silent 2>&1
+        $ready = $LASTEXITCODE -eq 0
+        $ErrorActionPreference = $prevEap
+        if ($ready) { return }
         Start-Sleep -Seconds 2
     }
     throw "MySQL non pret apres ${max}s"
 }
+
+# Services app (sans Talend Studio — build apt souvent lent / fragile)
+$script:AppStack = @(
+    "mysql", "minio", "discovery-service", "gateway-service",
+    "user-service", "cv-service", "mission-service", "quiz-service",
+    "codingame-service", "python-service", "frontend"
+)
 
 function Ensure-MySqlGrants {
     docker exec findme-mysql mysql -uroot -proot -e "GRANT SELECT ON findme_dw.* TO 'findme_bi'@'%'; FLUSH PRIVILEGES;" 2>$null
@@ -87,20 +101,40 @@ Ensure-TalendInstaller
 
 Write-Step "3/7 - Build images"
 if (-not $SkipBuild) {
-    docker compose build bi-hub talend-studio talend-etl frontend
+    if ($AppOnly) {
+        docker compose build frontend python-service
+    } else {
+        docker compose build frontend python-service bi-hub talend-etl
+        if ($WithTalendStudio) {
+            docker compose --profile talend-ui build talend-studio
+        } else {
+            Write-Host "Talend Studio : ignore (ajoutez -WithTalendStudio pour http://localhost:6080)" -ForegroundColor Yellow
+        }
+    }
+    Write-Host "Backends Java pas encore buildes ? Lancez : scripts\docker-build-backend.cmd" -ForegroundColor Yellow
 }
 
-Write-Step "4/7 - Demarrage stack (app + BI Linux)"
-docker compose up -d
+Write-Step "4/7 - Demarrage stack"
+if ($AppOnly) {
+    docker compose up -d @script:AppStack
+} elseif ($WithTalendStudio) {
+    docker compose --profile talend-ui up -d @script:AppStack bi-hub talend-studio
+} else {
+    docker compose up -d @script:AppStack bi-hub
+}
 
 Write-Step "5/7 - Attente MySQL"
 Wait-MySql
 
 Write-Step "6/7 - GRANT findme_bi + ETL Talend"
-Ensure-MySqlGrants
-if (-not $SkipEtl) {
-    docker compose run --rm talend-etl
-    if ($LASTEXITCODE -ne 0) { throw "talend-etl a echoue" }
+if ($AppOnly) {
+    Write-Host "Mode AppOnly : ETL BI ignore (utilisez sans -AppOnly pour la BI)" -ForegroundColor Yellow
+} else {
+    Ensure-MySqlGrants
+    if (-not $SkipEtl) {
+        docker compose run --rm talend-etl
+        if ($LASTEXITCODE -ne 0) { throw "talend-etl a echoue" }
+    }
 }
 
 Write-Step "7/7 - Power BI"
