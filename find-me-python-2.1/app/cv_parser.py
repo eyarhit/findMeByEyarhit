@@ -11,6 +11,22 @@ from .models import (
     ProjectItem,
     WorkExperienceItem,
 )
+from .cv_sections import (
+    DEFAULT_STOP_HEADERS,
+    DEGREE_KEYWORDS,
+    EXPERIENCE_ROLE_PREFIX,
+    GENERIC_PROJECT_LINE,
+    HEADERS_CERTIFICATIONS,
+    HEADERS_EDUCATION,
+    HEADERS_EXPERIENCE,
+    HEADERS_LANGUAGES,
+    HEADERS_PROFILE,
+    HEADERS_PROJECTS,
+    HEADERS_SKILLS,
+    INSTITUTION_MARKERS,
+    LANGUAGE_NAMES,
+    SKILL_CATEGORIES,
+)
 from .pdf_extract import extract_pdf_text
 from .validation import validate_and_score
 
@@ -54,68 +70,19 @@ MONTHS_FR = {
     "dec": 12,
 }
 
-DEGREE_KEYWORDS = re.compile(
-    r"\b(licence|master|baccalauréat|baccalaureat|ingénieur|ingenieur|ingénierie|ingenierie|"
-    r"doctorat|mba|dut|bts|diplôme|diplome|aérospatial|aerospatial|aéronautique|aeronautique)\b",
-    re.I,
-)
+def _skill_label_prefix_pattern() -> re.Pattern[str]:
+    labels = sorted(SKILL_CATEGORIES.keys(), key=len, reverse=True)
+    inner = "|".join(re.escape(l) for l in labels[:60])
+    return re.compile(rf"^({inner})\s*:", re.I)
 
-SKILL_LINE_PREFIX = re.compile(
-    r"^(langages de programmation|langages de balisage|bases de données|base de données|"
-    r"systèmes d'exploitation|systemes d'exploitation|modélisation|modelisation|"
-    r"simulation|outils|frameworks|méthodologie|methodologie|compétences|competences)\s*:",
-    re.I,
-)
+
+SKILL_LINE_PREFIX = _skill_label_prefix_pattern()
 
 VOLUNTEER_MARKERS = re.compile(
     r"\b(bénévolat|benevolat|associatif|croissant rouge|jci|actions communautaires|"
     r"solidarité|solidarite|engagement)\b",
     re.I,
 )
-
-SKILL_CATEGORIES: dict[str, str] = {
-    "langages de programmation": "programming_languages",
-    "langages de balisage": "markup_languages",
-    "bases de données": "databases",
-    "base de données": "databases",
-    "systèmes d'exploitation": "operating_systems",
-    "systemes d'exploitation": "operating_systems",
-    "modélisation et conception": "design",
-    "modelisation et conception": "design",
-    "frameworks": "frameworks",
-    "framework": "frameworks",
-    "bibliothèques": "libraries",
-    "bibliotheques": "libraries",
-    "apis": "apis",
-    "api": "apis",
-    "méthodologie": "methodologies",
-    "methodologie": "methodologies",
-    "design pattern": "design_patterns",
-    "architecture": "architectures",
-    "outils": "tools",
-    "soft skills": "methodologies",
-    "devops & outils": "tools",
-    "devops et outils": "tools",
-    "devops": "tools",
-    "intelligence artificielle": "methodologies",
-    "securite": "methodologies",
-    "sécurité": "methodologies",
-    "méthodologies": "methodologies",
-    "methodologies": "methodologies",
-    "compétences personnelles": "methodologies",
-    "competences personnelles": "methodologies",
-    "compétences techniques": "methodologies",
-    "modélisation numérique": "design",
-    "modelisation numerique": "design",
-    "simulation numérique": "design",
-    "simulation numerique": "design",
-    "aérodynamique": "design",
-    "aerodynamique": "design",
-    "mécanique": "design",
-    "mecanique": "design",
-    "cao": "tools",
-    "cfd": "tools",
-}
 
 # Limite alignée sur la colonne MySQL `competence.db` (varchar ~255)
 MAX_SKILL_FIELD_CHARS = 255
@@ -133,35 +100,196 @@ def _normalize_cv_text(text: str) -> str:
     return "\n".join(lines)
 
 
+def _collect_source_texts(text: str, layout_text: str) -> list[str]:
+    """Plusieurs vues du PDF (texte simple + mise en page) pour CV mondiaux variés."""
+    out: list[str] = []
+    for raw in (text, layout_text):
+        norm = _normalize_cv_text(raw)
+        if len(norm.strip()) >= 40 and norm not in out:
+            out.append(norm)
+    return out or [_normalize_cv_text(text or layout_text)]
+
+
+def _merge_education(items_list: list[list[EducationItem]]) -> list[EducationItem]:
+    merged: list[EducationItem] = []
+    seen: set[str] = set()
+    for items in items_list:
+        for edu in items:
+            key = f"{(edu.institution or '').lower()}|{(edu.degree or '').lower()}"
+            if key in seen or key == "|":
+                continue
+            seen.add(key)
+            merged.append(edu)
+    return merged[:8]
+
+
+def _merge_experiences(items_list: list[list[WorkExperienceItem]]) -> list[WorkExperienceItem]:
+    merged: list[WorkExperienceItem] = []
+    seen: set[str] = set()
+    for items in items_list:
+        for exp in items:
+            key = f"{(exp.company or '').lower()}|{(exp.position or '').lower()}"
+            if key in seen or key == "|":
+                continue
+            seen.add(key)
+            merged.append(exp)
+    return merged[:12]
+
+
+def _merge_skills(dicts: list[dict[str, Any]]) -> dict[str, Any]:
+    out: dict[str, list[str]] = {}
+    for d in dicts:
+        for key, val in d.items():
+            if not isinstance(val, list):
+                continue
+            bucket = out.setdefault(key, [])
+            for item in val:
+                if item not in bucket:
+                    bucket.append(item)
+    return out
+
+
 def parse_cv_pdf(file_bytes: bytes, filename: str = ""):
     text, layout_text, page_count = extract_pdf_text(file_bytes)
-    raw = text if len(text) >= 100 else layout_text
-    source = _normalize_cv_text(raw)
+    sources = _collect_source_texts(text, layout_text)
+    source = max(sources, key=len)
 
     if len(source.strip()) < 40:
         data = ParseData()
         response = validate_and_score(data, source)
         response.metadata.warnings.append(
-            f"PDF illisible ou scanné ({page_count} page(s))."
+            f"PDF illisible ou scanné ({page_count} page(s)) — privilégiez un PDF texte (non image)."
         )
         return response
 
-    layout = _normalize_cv_text(layout_text) if len(layout_text) > len(raw) * 0.5 else source
-    skills = _normalize_skill_categories(_parse_technical_skills(source))
+    educations: list[list[EducationItem]] = []
+    experiences: list[list[WorkExperienceItem]] = []
+    skills_list: list[dict[str, Any]] = []
+    languages_all: list[LanguageItem] = []
+    projects_all: list[ProjectItem] = []
+    personal = PersonalInfo()
+
+    for src in sources:
+        educations.append(_parse_education(src))
+        educations.append(_parse_education_fallback(src))
+        experiences.append(_parse_experiences(src))
+        experiences.append(_parse_experiences_fallback(src))
+        skills_list.append(_normalize_skill_categories(_parse_technical_skills(src)))
+        skills_list.append(_normalize_skill_categories(_parse_skills_fallback(src)))
+        languages_all.extend(_parse_languages(src))
+        projects_all.extend(_parse_projects(src))
+
     personal = _parse_personal(source)
     if filename and (not personal.job_title or len(personal.job_title or "") < 12):
         title_from_name = _job_title_from_filename(filename)
         if title_from_name:
             personal.job_title = title_from_name
+
     data = ParseData(
         personal_info=personal,
-        education=_parse_education(source),
-        technical_skills=skills,
-        languages=_parse_languages(source),
-        work_experiences=_parse_experiences(source),
-        projects=_parse_projects(source),
+        education=_merge_education(educations),
+        technical_skills=_merge_skills(skills_list),
+        languages=_dedupe_languages(languages_all),
+        work_experiences=_merge_experiences(experiences),
+        projects=_dedupe_projects(projects_all),
     )
-    return validate_and_score(data, source)
+    response = validate_and_score(data, source)
+    response.metadata.extraction_method = "rule_based_grounded_multilingual"
+    if len(sources) > 1:
+        response.metadata.warnings.append(
+            "Extraction multi-passes (texte + mise en page PDF) pour compatibilité élargie."
+        )
+    return response
+
+
+def _dedupe_languages(items: list[LanguageItem]) -> list[LanguageItem]:
+    out: list[LanguageItem] = []
+    seen: set[str] = set()
+    for lang in items:
+        key = (lang.language or "").lower()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        out.append(lang)
+    return out[:12]
+
+
+def _dedupe_projects(items: list[ProjectItem]) -> list[ProjectItem]:
+    out: list[ProjectItem] = []
+    seen: set[str] = set()
+    for p in items:
+        key = (p.title or "").lower()[:80]
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        out.append(p)
+    return out[:15]
+
+
+def _parse_education_fallback(text: str) -> list[EducationItem]:
+    """Repère formations même sans section « ÉDUCATION » explicite."""
+    items: list[EducationItem] = []
+    seen: set[str] = set()
+    year_line = re.compile(
+        r"^(.{4,90}?)\s+(\d{4})\s*[-–—]\s*(\d{4}|present|présent|present|current|aujourd)",
+        re.I | re.M,
+    )
+    for m in year_line.finditer(text):
+        line = m.group(1).strip(" -–—|:")
+        if not _looks_like_institution(line) and not DEGREE_KEYWORDS.search(line):
+            continue
+        inst = line if _looks_like_institution(line) else _institution_on_line(line)
+        degree = line if DEGREE_KEYWORDS.search(line) else _next_degree_line(text, m.end())
+        if not inst and not degree:
+            continue
+        key = f"{(inst or '').lower()}|{(degree or '').lower()}"
+        if key in seen:
+            continue
+        seen.add(key)
+        items.append(
+            EducationItem(
+                institution=inst or degree,
+                degree=degree if degree != inst else None,
+                start_date=_year_to_date(m.group(2)),
+                end_date=_year_to_date(m.group(3), end_of_period=True),
+                confidence=0.55,
+            )
+        )
+    return items[:6]
+
+
+def _parse_experiences_fallback(text: str) -> list[WorkExperienceItem]:
+    """Poste – Entreprise | dates (FR/EN) sans mot « Stage » obligatoire."""
+    items: list[WorkExperienceItem] = []
+    seen: set[str] = set()
+    for m in re.finditer(
+        r"^(.{3,90}?)\s+at\s+(.{2,70}?)(?:\s*\|\s*(.+))?$",
+        text,
+        re.I | re.M,
+    ):
+        _append_experience(
+            items, seen, text, m.group(1), m.group(2), (m.group(3) or ""), m.end(), m.end() + 500, 0.55
+        )
+    return items[:10]
+
+
+def _parse_skills_fallback(text: str) -> dict[str, Any]:
+    """Liste de technologies séparées par virgules (CV internationaux compacts)."""
+    known = re.compile(
+        r"\b(Java|Python|JavaScript|TypeScript|C\+\+|C#|PHP|Ruby|Go|Rust|Swift|Kotlin|"
+        r"HTML|CSS|SQL|MySQL|PostgreSQL|MongoDB|Redis|Docker|Kubernetes|AWS|Azure|GCP|"
+        r"React|Angular|Vue|Node\.?js|Spring|Django|Flask|Git|Linux|Windows|MATLAB|"
+        r"TensorFlow|PyTorch|Spark|Hadoop|Tableau|Power BI|Figma|Jira|UML|Agile|Scrum)\b",
+        re.I,
+    )
+    found: list[str] = []
+    for m in known.finditer(text):
+        token = m.group(0)
+        if token not in found:
+            found.append(token)
+    if len(found) < 3:
+        return {}
+    return {"programming_languages": found[:40]}
 
 
 def _job_title_from_filename(filename: str) -> str | None:
@@ -181,13 +309,21 @@ def _job_title_from_filename(filename: str) -> str | None:
 
 def _parse_personal(text: str) -> PersonalInfo:
     email = _first_match(r"[\w.\-+]+@[\w.\-]+\.[A-Za-z]{2,}", text)
-    phone = _first_match(r"(?<!\d)(?:\+216\s?)?[259]\d{7}(?!\d)", text.replace(" ", ""))
+    phone = _first_match(
+        r"(?<!\d)(?:\+?\d{1,3}[\s\-.]?)?\(?\d{2,4}\)?[\s\-.]?\d{2,4}[\s\-.]?\d{2,4}[\s\-.]?\d{0,4}(?!\d)",
+        text,
+    )
     if not phone:
-        phone = _first_match(r"(?<!\d)\d{8}(?!\d)", text)
+        phone = _first_match(r"(?<!\d)(?:\+216\s?)?[259]\d{7}(?!\d)", text.replace(" ", ""))
+
+    linkedin = _first_match(r"(?:https?://)?(?:www\.)?linkedin\.com/in/[\w\-]+", text)
+    full_name = _parse_name_from_header(text)
 
     location = None
     loc_m = re.search(
-        r"(Gouvernorat\s+[\wÀ-ÿ\-]+|Tunis(?:ie)?|Paris|Lyon|[\wÀ-ÿ\-]+\s*,\s*Tunisie)",
+        r"(Gouvernorat\s+[\wÀ-ÿ\-]+|"
+        r"Tunis(?:ie)?|Paris|Lyon|London|Berlin|New York|Dubai|Casablanca|"
+        r"[\wÀ-ÿ\-]{2,40}\s*,\s*[\wÀ-ÿ\-]{2,40})",
         text,
         re.I,
     )
@@ -195,7 +331,7 @@ def _parse_personal(text: str) -> PersonalInfo:
         location = loc_m.group(0).strip()
 
     job_title = None
-    profil = _section_slice(text, ["PROFIL", "PROFILE", "À PROPOS", "A PROPOS"])
+    profil = _section_slice(text, HEADERS_PROFILE)
     for block in (profil, text):
         if not block:
             continue
@@ -214,25 +350,38 @@ def _parse_personal(text: str) -> PersonalInfo:
             break
 
     return PersonalInfo(
+        full_name=full_name,
         email=email,
         phone=phone,
+        linkedin=linkedin,
         location=location,
         job_title=job_title,
         confidence=0.8 if job_title or email else 0.4,
     )
 
 
+def _parse_name_from_header(text: str) -> str | None:
+    """Première ligne type « JEAN DUPONT » ou « Jean Dupont »."""
+    for line in text.split("\n")[:8]:
+        line = line.strip()
+        if not line or len(line) > 60:
+            continue
+        if "@" in line or re.search(r"\d{5,}", line):
+            continue
+        if re.match(r"^(CONTACT|CV|CURRICULUM|RESUME|RÉSUMÉ)\b", line, re.I):
+            continue
+        words = line.split()
+        if 2 <= len(words) <= 5 and all(len(w) >= 2 for w in words):
+            if line.isupper() or all(w[0].isupper() for w in words if w):
+                return line[:80]
+    return None
+
+
 def _education_search_window(text: str) -> str:
     """PDF 2 colonnes : évite de couper sur EXPÉRIENCES au milieu des compétences."""
     upper = text.upper()
     start = -1
-    for header in (
-        "FORMATIONS ACADÉMIQUES",
-        "FORMATIONS ACADEMIQUES",
-        "ÉDUCATION",
-        "EDUCATION",
-        "FORMATION",
-    ):
+    for header in HEADERS_EDUCATION:
         i = upper.find(header)
         if i >= 0:
             start = i + len(header)
@@ -349,26 +498,10 @@ def _looks_like_institution(name: str) -> bool:
         return False
     if re.search(r"^(langages|bases|systèmes|stage|portfolio|plateforme)\b", name, re.I):
         return False
-    markers = (
-        "esprit",
-        "université",
-        "universite",
-        "école",
-        "ecole",
-        "school",
-        "institut",
-        "faculté",
-        "faculte",
-        "lycée",
-        "lycee",
-        "sup",
-        "enim",
-        "insat",
-        "ipeit",
-        "tek-up",
-    )
     low = name.lower()
-    return any(m in low for m in markers) or DEGREE_KEYWORDS.search(name) is None
+    return any(m in low for m in INSTITUTION_MARKERS) or (
+        DEGREE_KEYWORDS.search(name) is None and len(name) > 8
+    )
 
 
 def _degree_duplicates_institution(degree: str | None, institution: str) -> bool:
@@ -486,12 +619,7 @@ def _skills_search_window(text: str) -> str:
     """
     upper = text.upper()
     start = -1
-    for header in (
-        "COMPÉTENCES TECHNIQUES",
-        "COMPETENCES TECHNIQUES",
-        "COMPÉTENCES",
-        "COMPETENCES",
-    ):
+    for header in HEADERS_SKILLS:
         i = upper.find(header)
         if i >= 0:
             start = i
@@ -653,20 +781,18 @@ def _is_skill_token(token: str) -> bool:
 def _parse_languages(text: str) -> list[LanguageItem]:
     section = _section_slice(
         text,
-        ["LANGUES", "LANGUAGES", "LANGUE"],
-        stop_headers=["CERTIFICATIONS", "CERTIFICATION", "BÉNÉVOLAT", "BENEVOLAT", "PROJETS"],
+        HEADERS_LANGUAGES,
+        stop_headers=list(HEADERS_CERTIFICATIONS) + ["BÉNÉVOLAT", "BENEVOLAT", "PROJETS"],
     )
     search = section or text
     items: list[LanguageItem] = []
-    for m in re.finditer(
-        r"(Français|Francais|Anglais|Allemand|Arabe|Espagnol|Italien)\s*:\s*"
-        r"([A-Za-zÀ-ÿ\s\-]+?)(?=\s{2,}|\n|Certification|JCI\b|$)",
-        search,
-        re.I,
-    ):
+    lang_names = LANGUAGE_NAMES.pattern.strip(r"\b()")
+    pat = rf"({lang_names})\s*[:–—\-]\s*([A-Za-zÀ-ÿ\s\-]+?)(?=\s{{2,}}|\n|Certification|JCI\b|$)"
+    for m in re.finditer(pat, search, re.I):
         prof = m.group(2).strip()
         prof = re.split(r"\s{2,}|Certification|JCI\b", prof)[0].strip()
-        lang = m.group(1).capitalize().replace("Francais", "Français")
+        lang_raw = m.group(1).strip()
+        lang = lang_raw.capitalize().replace("Francais", "Français").replace("English", "Anglais")
         prof_norm = _normalize_language_proficiency(prof)
         items.append(
             LanguageItem(
@@ -752,38 +878,95 @@ def _parse_experience_dates(dates_raw: str) -> tuple[str | None, str | None]:
     return None, None
 
 
+def _append_experience(
+    items: list[WorkExperienceItem],
+    seen: set[str],
+    search: str,
+    position: str,
+    company: str,
+    dates_raw: str,
+    end_pos: int,
+    next_pos: int,
+    confidence: float = 0.75,
+) -> None:
+    position = position.strip()[:120]
+    company = company.strip()[:80]
+    if len(position) < 3 or len(company) < 2:
+        return
+    key = f"{company.lower()}|{position.lower()}"
+    if key in seen:
+        return
+    seen.add(key)
+    start, end = _parse_experience_dates(dates_raw) if dates_raw else (None, None)
+    desc = _collect_experience_description(search, end_pos, next_pos)
+    items.append(
+        WorkExperienceItem(
+            position=position,
+            company=company,
+            start_date=start,
+            end_date=end,
+            description=desc,
+            confidence=confidence if desc else confidence - 0.1,
+        )
+    )
+
+
 def _parse_experiences(text: str) -> list[WorkExperienceItem]:
     section = _section_slice(
         text,
-        ["EXPÉRIENCES PROFESSIONNELLES", "EXPERIENCES PROFESSIONNELLES", "EXPÉRIENCE", "EXPERIENCE"],
-        stop_headers=["BÉNÉVOLAT", "BENEVOLAT", "PROJETS ACADEMIQUES", "PROJETS", "LANGUES", "CERTIFICATIONS"],
+        HEADERS_EXPERIENCE,
+        stop_headers=list(HEADERS_PROJECTS + HEADERS_LANGUAGES + HEADERS_CERTIFICATIONS),
     )
     search = section or text
     items: list[WorkExperienceItem] = []
+    seen: set[str] = set()
+    match_spans: list[tuple[int, int]] = []
 
     stage_line_pattern = re.compile(
         r"^(Stage[^\n|]{3,120}?)\s*[-–—]\s*([^|\n]+?)(?:\s*\|\s*|\s+\|\s*)(.+)?$",
         re.I | re.M,
     )
-    matches = list(stage_line_pattern.finditer(search))
-    for idx, m in enumerate(matches):
+    stage_matches = list(stage_line_pattern.finditer(search))
+    for idx, m in enumerate(stage_matches):
+        match_spans.append((m.start(), m.end()))
+        next_pos = stage_matches[idx + 1].start() if idx + 1 < len(stage_matches) else len(search)
+        _append_experience(
+            items,
+            seen,
+            search,
+            m.group(1),
+            m.group(2),
+            (m.group(3) or ""),
+            m.end(),
+            next_pos,
+            0.85,
+        )
+
+    generic_pattern = re.compile(
+        r"^(.{3,90}?)\s*[-–—@]\s*(.{2,90}?)(?:\s*\|\s*(.+))?$",
+        re.I | re.M,
+    )
+    for m in generic_pattern.finditer(search):
+        if any(s <= m.start() <= e for s, e in match_spans):
+            continue
         position = m.group(1).strip()
-        company = m.group(2).strip().strip(" -–—")
-        dates_raw = (m.group(3) or "").strip()
-        start, end = _parse_experience_dates(dates_raw) if dates_raw else (None, None)
-
-        next_pos = matches[idx + 1].start() if idx + 1 < len(matches) else len(search)
-        desc = _collect_experience_description(search, m.end(), next_pos)
-
-        items.append(
-            WorkExperienceItem(
-                position=position[:120],
-                company=company[:80],
-                start_date=start,
-                end_date=end,
-                description=desc,
-                confidence=0.85 if desc else 0.7,
-            )
+        company = m.group(2).strip()
+        if not (
+            EXPERIENCE_ROLE_PREFIX.search(position)
+            or EXPERIENCE_ROLE_PREFIX.search(company)
+            or re.search(r"\b(manager|engineer|developer|consultant|analyst|lead)\b", position, re.I)
+        ):
+            continue
+        _append_experience(
+            items,
+            seen,
+            search,
+            position,
+            company,
+            (m.group(3) or ""),
+            m.end(),
+            min(len(search), m.end() + 800),
+            0.7,
         )
 
     return items[:10]
@@ -811,11 +994,23 @@ def _collect_experience_description(text: str, pos: int, end_pos: int) -> str:
 def _parse_projects(text: str) -> list[ProjectItem]:
     section = _section_slice(
         text,
-        ["PROJETS ACADEMIQUES", "PROJETS ACADÉMIQUES", "PROJETS", "PROJECTS"],
-        stop_headers=["LANGUES", "CERTIFICATIONS", "BÉNÉVOLAT", "BENEVOLAT"],
+        HEADERS_PROJECTS,
+        stop_headers=list(HEADERS_LANGUAGES + HEADERS_CERTIFICATIONS) + ["BÉNÉVOLAT", "BENEVOLAT"],
     )
     search = section or text
     items: list[ProjectItem] = []
+    for m in GENERIC_PROJECT_LINE.finditer(search):
+        title = m.group(1).strip()
+        desc = m.group(2).strip()
+        if len(title) < 4 or VOLUNTEER_MARKERS.search(title):
+            continue
+        items.append(
+            ProjectItem(
+                title=f"{title}: {desc}"[:250],
+                client_name="",
+                confidence=0.65,
+            )
+        )
     compact = re.sub(r"\s+", " ", search)
     project_patterns = [
         (
@@ -858,16 +1053,7 @@ def _section_slice(
     start_headers: list[str],
     stop_headers: list[str] | None = None,
 ) -> str | None:
-    stop_headers = stop_headers or [
-        "EXPÉRIENCES",
-        "EXPERIENCES",
-        "PROJETS",
-        "LANGUES",
-        "CERTIFICATIONS",
-        "BÉNÉVOLAT",
-        "BENEVOLAT",
-        "CONTACT",
-    ]
+    stop_headers = stop_headers or list(DEFAULT_STOP_HEADERS)
     upper = text.upper()
     start_idx = None
     for h in start_headers:
