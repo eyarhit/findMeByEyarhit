@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, FormArray, ValidationErrors, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
 import { CvService } from '../../services/cv.service';
 import { isPlatformBrowser } from '@angular/common';
 import { jsPDF } from 'jspdf';
@@ -18,10 +18,6 @@ import {
   normalizeLanguageLevel,
   normalizeLanguageName,
 } from '../../shared/constants/form-options';
-import { AppValidators } from '../../shared/validators/app-validators';
-
-
-
 @Component({
   selector: 'app-information-cv', 
   templateUrl: './information-cv.component.html',
@@ -263,8 +259,8 @@ popupTitle: string = '';
     };
   
     this.academicFormations.push(this.fb.group({
-      university: [data?.university || '', [Validators.required, Validators.maxLength(120)]],
-      diplome: [data?.diplome || '', [Validators.required, Validators.maxLength(120)]],
+      university: [data?.university || '', Validators.maxLength(120)],
+      diplome: [data?.diplome || '', Validators.maxLength(120)],
       dateDebut: [formatDate(data?.dateDebut)],
       dateFin: [formatDate(data?.dateFin)],
     }));
@@ -289,10 +285,10 @@ popupTitle: string = '';
   
     const desc = data?.description || data?.travailRealise || '';
     this.professionalExperiences.push(this.fb.group({
-      entreprise: [data?.entreprise || '', Validators.required],
+      entreprise: [data?.entreprise || ''],
       dateDebut: [formatDate(data?.dateDebut)],
       dateFin: [formatDate(data?.dateFin)],
-      poste: [data?.poste || '', Validators.required],
+      poste: [data?.poste || ''],
       nomProjet: [data?.nomProjet || ''],
       client: [data?.client || ''],
       equipe: [data?.equipe || ''],
@@ -321,18 +317,66 @@ popupTitle: string = '';
       raw['niveau'] ?? raw['proficiency'] ?? raw['level'] ?? ''
     );
     this.languages.push(
-      this.fb.group(
-        {
-          name: [name, Validators.required],
-          niveau: [niveau, Validators.required],
-        },
-        { validators: (ctrl) => this.languageEntryValidator(ctrl) }
-      )
+      this.fb.group({
+        name: [name],
+        niveau: [niveau],
+      })
     );
   }
 
   removeLanguage(index: number): void {
     this.languages.removeAt(index);
+  }
+
+  /** Ignore les lignes vides (formulaire partiel autorisé à l’étape 1). */
+  private buildCvPayload(): Cv {
+    const technicalSkillsData = this.form.value.technicalSkills;
+    return {
+      id_cv: this.idCv ?? undefined,
+      userId: this.userId!,
+      competences: [technicalSkillsData],
+      educations: this.filterFilledAcademicFormations(
+        this.form.value.academicFormations || []
+      ),
+      experiences: this.filterFilledProfessionalExperiences(
+        this.form.value.professionalExperiences || []
+      ),
+      langues: this.filterFilledLanguages(this.form.value.languages || []),
+    };
+  }
+
+  private filterFilledAcademicFormations(items: Record<string, unknown>[]): Record<string, unknown>[] {
+    return items.filter((e) => {
+      const u = String(e['university'] ?? '').trim();
+      const d = String(e['diplome'] ?? '').trim();
+      return u || d || e['dateDebut'] || e['dateFin'];
+    });
+  }
+
+  private filterFilledProfessionalExperiences(items: Record<string, unknown>[]): Record<string, unknown>[] {
+    return items.filter((e) => {
+      const ent = String(e['entreprise'] ?? '').trim();
+      const poste = String(e['poste'] ?? '').trim();
+      const desc = String(e['description'] ?? e['travailRealise'] ?? '').trim();
+      return (
+        ent ||
+        poste ||
+        desc ||
+        e['dateDebut'] ||
+        e['dateFin'] ||
+        String(e['nomProjet'] ?? '').trim() ||
+        String(e['client'] ?? '').trim()
+      );
+    });
+  }
+
+  private filterFilledLanguages(items: Record<string, unknown>[]): Record<string, unknown>[] {
+    return items
+      .map((l) => ({
+        name: normalizeLanguageName(l['name'] ?? ''),
+        niveau: normalizeLanguageLevel(l['niveau'] ?? ''),
+      }))
+      .filter((l) => l.name || l.niveau);
   }
 
   // Form Submission
@@ -344,24 +388,7 @@ popupTitle: string = '';
       return;
     }
 
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      if (this.activeStep === 1) {
-        this.showAlert('Attention', 'Veuillez corriger les champs du formulaire avant enregistrement.', 'info');
-      }
-      return;
-    }
-  
-    const technicalSkillsData = this.form.value.technicalSkills;
-  
-    const cvData: Cv = {
-      id_cv: this.idCv ?? undefined,
-      userId: this.userId,
-      competences: [technicalSkillsData],
-      educations: this.form.value.academicFormations || [],
-      experiences: this.form.value.professionalExperiences || [],
-      langues: this.form.value.languages || []
-    };
+    const cvData = this.buildCvPayload();
   
     const currentStep = this.activeStep;
   
@@ -396,6 +423,9 @@ popupTitle: string = '';
 
   goToStep(stepNumber: number): void {
     if (stepNumber >= 1 && stepNumber <= this.steps.length) {
+      if (this.activeStep === 1 && stepNumber > 1) {
+        this.markStep1Complete();
+      }
       this.activeStep = stepNumber;
       this.currentPage = 1;
     }
@@ -404,9 +434,36 @@ popupTitle: string = '';
   goToNextPage(): void {
     if (this.activeStep === 1 && this.currentPage === 1) {
       this.currentPage = 2;
+    } else if (this.activeStep === 1 && this.currentPage === 2) {
+      this.markStep1Complete();
+      this.goToStep(2);
     } else {
-      this.goToStep(this.activeStep + 1)
+      this.goToStep(this.activeStep + 1);
     }
+  }
+
+  /** Étape 1 : navigation libre sans champs obligatoires. */
+  private markStep1Complete(): void {
+    this.completedSteps.add(1);
+    if (this.userId) {
+      this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
+    }
+    this.saveCvSilent();
+  }
+
+  private saveCvSilent(): void {
+    if (!this.userId) return;
+    const cvData = this.buildCvPayload();
+    this.cvService.saveCv(this.userId, cvData).subscribe({
+      next: (response: Cv) => {
+        if (response.id_cv && !this.idCv) {
+          this.idCv = response.id_cv;
+        }
+      },
+      error: () => {
+        /* navigation autorisée même si l’API échoue */
+      },
+    });
   }
 
   goToPreviousPage(): void {
@@ -520,21 +577,6 @@ private async uploadDocument(pdfBlob: Blob, fileName: string): Promise<void> {
   languageList: string[] = LANGUAGE_NAME_OPTIONS.map((o) => o.value);
   levels: string[] = LANGUAGE_LEVEL_OPTIONS.map((o) => o.value);
 
-  private languageEntryValidator = (
-    control: AbstractControl
-  ): ValidationErrors | null => {
-    const group = control as FormGroup;
-    const name = String(group.get('name')?.value ?? '').trim();
-    const niveau = String(group.get('niveau')?.value ?? '').trim();
-    if (!name && !niveau) {
-      return null;
-    }
-    if (!name || !niveau) {
-      return { languageIncomplete: true };
-    }
-    return null;
-  };
-
   AjouterTitreDeProfil(): void {
     if (this.titreDeProfilControl.value) {
       sessionStorage.setItem("TitreProfile", this.titreDeProfilControl.value ?? '');
@@ -632,45 +674,21 @@ private async uploadDocument(pdfBlob: Blob, fileName: string): Promise<void> {
       console.error('User ID is missing');
       return;
     }
-  
-    // Trouver les étapes manquantes
-    const missingSteps = this.steps
-      .filter(step => !this.completedSteps.has(step.number))
-      .map(step => step.number);
-  
-    if (missingSteps.length === 0) {
-      // Toutes les étapes sont complètes
-      this.completedSteps.add(3);
-      this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
-      
-      Swal.fire({
-        title: 'Félicitations !',
-        text: 'Les informations que vous avez entrées se trouvent dans votre profil. Vous pouvez y accéder en cliquant sur OK.',
-        icon: 'success',
-        confirmButtonText: 'OK'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          this.router.navigate(['/profil']);
-        }
-      });
-    } else {
-      // Créer un message dynamique
-      let missingStepsMessage = 'Pour accéder à votre profil, vous devez d\'abord terminer toutes les étapes.<br><br>';
-      missingStepsMessage += '<strong>Étapes restantes :</strong><br><ul style="text-align: left; margin-left: 20px;">';
-      
-      missingSteps.forEach(step => {
-        missingStepsMessage += `<li>Étape ${step}: ${this.steps.find(s => s.number === step)?.description}</li>`;
-      });
-      
-      missingStepsMessage += '</ul><br>Veuillez compléter ces étapes avant de continuer.';
-  
-      Swal.fire({
-        title: 'Étapes incomplètes',
-        html: missingStepsMessage,
-        icon: 'warning',
-        confirmButtonText: 'Compris'
-      });
-    }
+
+    this.completedSteps = new Set(this.steps.map((s) => s.number));
+    this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
+    this.saveCvSilent();
+
+    Swal.fire({
+      title: 'Félicitations !',
+      text: 'Les informations que vous avez entrées se trouvent dans votre profil. Vous pouvez y accéder en cliquant sur OK.',
+      icon: 'success',
+      confirmButtonText: 'OK',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.router.navigate(['/profil']);
+      }
+    });
   }
 
   // Méthode pour le débogage
