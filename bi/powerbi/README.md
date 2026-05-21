@@ -36,6 +36,8 @@ GIT_PULL_BI.cmd
 
 **Premiere ouverture seulement** : identifiants `findme_bi` / `findme_bi_readonly` puis **Actualiser**.
 
+Si erreur `model.bim` manquant : `git pull` puis `ONE_COMMANDE_POWERBI.cmd` (le projet utilise TMDL, `definition.pbism` version **4.0**). Dans Power BI : **Fichier > Options > Fonctionnalites preliminaires** → activer **Stocker le modele semantique au format TMDL**.
+
 Pages (generees automatiquement — rien a configurer) :
 
 | Page | KPI (cartes) | Graphiques | Tableau detail | Filtres (segments) |

@@ -50,7 +50,7 @@ New-Dir $TablesDir
 @'
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/semanticModel/definitionProperties/1.0.0/schema.json",
-  "version": "1.0",
+  "version": "4.0",
   "settings": { "qnaEnabled": false }
 }
 '@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Sm "definition.pbism") $_ }
