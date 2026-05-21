@@ -1,4 +1,4 @@
-# Find-Me — demarrage BI automatique (une commande)
+# Find-Me - demarrage BI automatique (une commande)
 param(
     [switch]$SkipBuild,
     [switch]$SkipEtl,
@@ -61,7 +61,7 @@ function Install-PowerBiDesktop {
     if ($pbi) { return }
     $winget = Get-Command winget -ErrorAction SilentlyContinue
     if (-not $winget) {
-        Write-Host "winget absent — installez Power BI Desktop manuellement si besoin." -ForegroundColor Yellow
+        Write-Host "winget absent - installez Power BI Desktop manuellement si besoin." -ForegroundColor Yellow
         return
     }
     Write-Host "Installation Power BI Desktop (Windows) via winget ..."
@@ -69,10 +69,9 @@ function Install-PowerBiDesktop {
 }
 
 function Try-PowerBiReportServer {
-    # Conteneurs Windows = arrete la stack Linux : on tente seulement si deja en mode Windows
     $os = docker info --format "{{.OSType}}" 2>$null
     if ($os -ne "windows") {
-        Write-Host "Power BI RS (Docker Windows) : non demarre (Docker en mode Linux — normal)." -ForegroundColor Yellow
+        Write-Host "Power BI RS (Docker Windows) : non demarre (Docker en mode Linux, normal)." -ForegroundColor Yellow
         Write-Host "  Utilisez Power BI Desktop (hote) ou Hub BI http://localhost:3032" -ForegroundColor Yellow
         return
     }
@@ -81,31 +80,31 @@ function Try-PowerBiReportServer {
 
 Load-BiEnv
 
-Write-Step "1/7 — Verification Docker"
+Write-Step "1/7 - Verification Docker"
 docker info | Out-Null
 
-Write-Step "2/7 — Installateur Talend (optionnel)"
+Write-Step "2/7 - Installateur Talend (optionnel)"
 Ensure-TalendInstaller
 
-Write-Step "3/7 — Build images"
+Write-Step "3/7 - Build images"
 if (-not $SkipBuild) {
     docker compose build bi-hub talend-studio talend-etl frontend
 }
 
-Write-Step "4/7 — Demarrage stack (app + BI Linux)"
+Write-Step "4/7 - Demarrage stack (app + BI Linux)"
 docker compose up -d
 
-Write-Step "5/7 — Attente MySQL"
+Write-Step "5/7 - Attente MySQL"
 Wait-MySql
 
-Write-Step "6/7 — GRANT findme_bi + ETL Talend"
+Write-Step "6/7 - GRANT findme_bi + ETL Talend"
 Ensure-MySqlGrants
 if (-not $SkipEtl) {
     docker compose run --rm talend-etl
     if ($LASTEXITCODE -ne 0) { throw "talend-etl a echoue" }
 }
 
-Write-Step "7/7 — Power BI"
+Write-Step "7/7 - Power BI"
 Install-PowerBiDesktop
 Try-PowerBiReportServer
 
@@ -119,7 +118,7 @@ Write-Host "MySQL DW      : localhost:3306 / findme_dw / findme_bi / findme_bi_r
 Write-Host ""
 
 if (-not $NoOpenBrowser) {
-    Start-Process "http://localhost:4200"
-    Start-Process "http://localhost:6080"
-    Start-Process "http://localhost:3032"
+    Start-Process 'http://localhost:4200'
+    Start-Process 'http://localhost:6080'
+    Start-Process 'http://localhost:3032'
 }
