@@ -213,10 +213,9 @@ services:
         condition: service_healthy
 
   bi-etl:
+    profiles: ["bi"]
     build:
       context: ./bi/bi_etl
-    # Pas de container_name : un ancien exit 1 de findme-bi-etl bloque compose up
-    # alors que « docker compose run --rm bi-etl » réussit (autre conteneur).
     restart: "no"
     environment:
       MYSQL_HOST: mysql
@@ -233,6 +232,7 @@ services:
     # ETL lit les bases MySQL déjà persistées ; pas besoin d'attendre les microservices Java
 
   metabase-seed:
+    profiles: ["bi"]
     build:
       context: ./bi/metabase
       dockerfile: Dockerfile.seed
@@ -254,12 +254,11 @@ services:
     volumes:
       - ./find-me-front-2.1/src/assets/bi:/output
     depends_on:
-      bi-etl:
-        condition: service_completed_successfully
       metabase:
         condition: service_started
       mysql:
         condition: service_healthy
+    # ETL : lancer avant seed via scripts/docker-compose-up.cmd (compose run bi-etl)
 
   frontend:
     build:
@@ -272,10 +271,6 @@ services:
       # Manifest BI régénéré par metabase-seed — visible sans rebuild frontend
       - ./find-me-front-2.1/src/assets/bi/bi-manifest.json:/usr/share/nginx/html/assets/bi/bi-manifest.json:ro
     depends_on:
-      bi-etl:
-        condition: service_completed_successfully
-      metabase-seed:
-        condition: service_completed_successfully
       gateway-service:
         condition: service_started
       user-service:

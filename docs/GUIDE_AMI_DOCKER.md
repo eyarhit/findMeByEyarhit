@@ -83,36 +83,28 @@ docker compose build frontend python-service user-service metabase-seed bi-etl
 
 ## 4. Démarrer toute la plateforme
 
-**Recommandé** (évite `bi-etl exit 1` après un `compose run` réussi) :
+**Recommandé** (sous Windows, `docker compose up -d` seul peut faire échouer `bi-etl` ; le script utilise `compose run`, qui fonctionne) :
 
 ```cmd
 scripts\docker-compose-up.cmd
 ```
 
-Ou à la main :
+Équivalent manuel :
 
 ```cmd
-docker compose rm -sf bi-etl metabase-seed
-docker compose build bi-etl
-docker compose up -d --force-recreate bi-etl metabase-seed
 docker compose up -d
+docker compose build bi-etl metabase-seed
+docker compose run --rm bi-etl
+docker compose run --rm metabase-seed
 ```
 
-Si `bi-etl` échoue encore, lire les logs :
+> **Note :** `bi-etl` et `metabase-seed` sont dans le profil **`bi`** — ils ne sont **plus** lancés par un simple `docker compose up -d` (évite le blocage `exit 1`). La BI se lance avec le script ci-dessus ou les commandes `run`.
 
-```cmd
-docker compose logs bi-etl
-```
+**Ordre avec le script :**
 
-> **Pourquoi ?** `docker compose run --rm bi-etl` crée un conteneur **temporaire**. Un ancien `findme-bi-etl` en exit 1 fait échouer `docker compose up -d` en 0,7 s sans relancer l’ETL. La commande `rm` supprime ces conteneurs one-shot avant le `up`.
-
-**Ordre automatique (important) :**
-
-1. MySQL, MinIO, microservices Java, Python  
-2. **`findme-bi-etl`** — charge l’entrepôt `findme_dw` (schéma en étoile) → conteneur **s’arrête** (normal)  
-3. Metabase démarre  
-4. **`findme-metabase-seed`** — crée dashboards + `bi-manifest.json` → **s’arrête** (normal)  
-5. **Frontend** démarre en dernier  
+1. MySQL, MinIO, microservices, Metabase, frontend (`docker compose up -d`)  
+2. **`docker compose run --rm bi-etl`** — charge `findme_dw`  
+3. **`docker compose run --rm metabase-seed`** — dashboards + `bi-manifest.json`  
 
 La **première fois** : compter **5 à 15 minutes** (Maven déjà en cache = plus rapide).
 
@@ -333,7 +325,7 @@ docker compose down -v
 | CV | Nom du CV conservé après sauvegarde ; parser Python compétences |
 | E-mail | `.env` local + `env.mail.example` (plus de mot de passe en dur dans Git) |
 | BI | Entrepôt `findme_dw`, ETL `bi-etl`, 3 dashboards Metabase, page admin BI |
-| Docker | Le front attend la fin de `bi-etl` et `metabase-seed` au premier `up` |
+| Docker | BI : `scripts\docker-compose-up.cmd` ou `compose run` bi-etl puis metabase-seed |
 
 ---
 

@@ -725,6 +725,7 @@ def _etl_log_finish(cur, run_id: int, status: str, rows: int | None = None, err:
 
 def main() -> None:
     print("ETL Find-Me → findme_dw (schéma en étoile)", flush=True)
+    print(f"  schema DDL : {SCHEMA_SQL} (exists={Path(SCHEMA_SQL).is_file()})", flush=True)
     wait_for_mysql()
     root = connect()
     ensure_dw_schema(root)

@@ -1,18 +1,24 @@
 @echo off
-REM Demarre toute la stack en recreant bi-etl et metabase-seed (evite exit 1 bloquant).
+REM Stack sans bi-etl au "up" (evite exit 1). BI via "compose run" (fiable sous Windows).
 cd /d "%~dp0.."
-docker compose rm -sf bi-etl metabase-seed 2>nul
-docker compose build bi-etl metabase-seed
-docker compose up -d --force-recreate bi-etl metabase-seed
-if errorlevel 1 (
-  echo Echec bi-etl via compose up — retry avec compose run...
-  docker compose run --rm bi-etl
-  if errorlevel 1 exit /b 1
-  docker compose run --rm metabase-seed
-  if errorlevel 1 exit /b 1
-)
+echo === Demarrage services (sans ETL BI) ===
 docker compose up -d %*
 if errorlevel 1 exit /b 1
 echo.
-echo OK. Verifier : docker compose ps -a
-echo Logs ETL : docker compose logs bi-etl
+echo === ETL findme_dw ===
+docker compose build bi-etl
+docker compose run --rm bi-etl
+if errorlevel 1 (
+  echo ERREUR bi-etl. Logs : docker compose logs bi-etl
+  exit /b 1
+)
+echo.
+echo === Seed Metabase + manifest BI ===
+docker compose build metabase-seed
+docker compose run --rm metabase-seed
+if errorlevel 1 (
+  echo ERREUR metabase-seed. Logs : docker compose logs metabase-seed
+  exit /b 1
+)
+echo.
+echo OK — App http://localhost:4200  Metabase http://localhost:3030
