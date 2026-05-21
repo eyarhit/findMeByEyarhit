@@ -1,5 +1,8 @@
 @echo off
-REM === A la racine du projet : corrige .pbip + ouvre MySQL (sans git pull) ===
+REM === Corrige .pbip + lance ONE_COMMANDE_POWERBI (ETL + dashboard) ===
+cd /d "%~dp0"
+call ONE_COMMANDE_POWERBI.cmd
+exit /b %ERRORLEVEL%
 cd /d "%~dp0"
 
 echo.

@@ -18,13 +18,27 @@
 
 Importer les `.pbix` depuis `bi/powerbi/reports/`. Source MySQL : `host.docker.internal:3306`, base `findme_dw`, user `findme_bi`.
 
-## Une commande (recommandé — format **.pbix**)
+## Une commande (dashboard avec visuels)
 
 ```cmd
-scripts\powerbi-open.cmd
+ONE_COMMANDE_POWERBI.cmd
 ```
 
-Double-clic : **`bi\powerbi\OUVRIR_POWER_BI.cmd`** ou **`CONNEXION_FindMe_MySQL.pbids`**
+(ou `scripts\powerbi-open.cmd` — meme chose)
+
+- ETL Talend → remplit `findme_dw`
+- Ouvre **`reports/FindMe_BI_Auto.pbix`** (cartes KPI, tableaux, graphiques)
+- Si absent : copie depuis **`template/FindMe_BI_Seed.pbix`**
+
+**Publier le modele** (eyarh, une fois apres avoir finalise le rapport) :
+
+```cmd
+scripts\save-powerbi-seed.cmd
+git add bi/powerbi/template/FindMe_BI_Seed.pbix
+git push
+```
+
+Double-clic : **`bi\powerbi\OUVRIR_POWER_BI.cmd`**
 
 **Interdit** : `FindMe-BI\FindMe-BI.pbip` (erreur `dataset`). Correction : `scripts\powerbi-fix.cmd` (supprime l’ancien fichier).
 

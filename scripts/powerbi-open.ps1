@@ -12,6 +12,7 @@ Set-Location $Root
 $LegacyPbipPath = Join-Path $Root "bi\powerbi\FindMe-BI\FindMe-BI.pbip"
 $DevPbipPath = Join-Path $Root "bi\powerbi\_dev-pbip-project\FindMe-BI.pbip"
 $PbixPath = Join-Path $Root "bi\powerbi\reports\FindMe_BI_Auto.pbix"
+$SeedPbixPath = Join-Path $Root "bi\powerbi\template\FindMe_BI_Seed.pbix"
 $PbidsPaths = @(
     (Join-Path $Root "bi\powerbi\CONNEXION_FindMe_MySQL.pbids"),
     (Join-Path $Root "bi\powerbi\starter\findme_dw.pbids")
@@ -37,6 +38,16 @@ function Get-PbidsPath {
 }
 
 if (-not $UsePbip) { Remove-PbipTraps }
+
+function Ensure-DashboardPbix {
+    if (Test-Path $PbixPath) { return }
+    if (Test-Path $SeedPbixPath) {
+        $dir = Split-Path $PbixPath -Parent
+        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+        Copy-Item -LiteralPath $SeedPbixPath -Destination $PbixPath -Force
+        Write-Host "Dashboard copie depuis le modele : $SeedPbixPath" -ForegroundColor Green
+    }
+}
 
 function Wait-MySql {
     $max = 60
@@ -139,11 +150,15 @@ if ($UsePbip) {
     Write-Step "1/4 - Projet Power BI (PBIP, optionnel)"
     & $GenScript
 } else {
-    Write-Step "1/4 - Power BI (.pbix recommande)"
+    Write-Step "1/4 - Dashboard Power BI (.pbix)"
+    Ensure-DashboardPbix
     if (Test-Path $PbixPath) {
-        Write-Host "Rapport .pbix trouve : $PbixPath"
+        Write-Host "Rapport : $PbixPath"
+    } elseif (Test-Path $SeedPbixPath) {
+        Write-Host "Modele present - copie au chargement"
     } else {
-        Write-Host "Pas encore de .pbix - creation guidee via findme_dw.pbids"
+        Write-Host "Pas de modele - premiere config via .pbids"
+        Write-Host "Puis : scripts\save-powerbi-seed.cmd (1 fois)"
         Write-Host "Guide : bi\powerbi\starter\CREER_PBIX.md"
     }
 }
@@ -164,13 +179,15 @@ if (-not $SkipEtl) {
 }
 
 Write-Step "4/4 - Ouverture Power BI Desktop"
+Ensure-DashboardPbix
 if (Test-Path $PbixPath) {
     $openPath = $PbixPath
     Write-Host "Fichier : $openPath" -ForegroundColor Green
     Open-PowerBiReport -ReportPath $openPath
     Write-Host ""
-    Write-Host "========== POWER BI (.pbix) ==========" -ForegroundColor Green
-    Write-Host "Rapport pret - actualisez si besoin (Accueil - Actualiser)."
+    Write-Host "========== DASHBOARD FIND-ME ==========" -ForegroundColor Green
+    Write-Host "Visuels KPI + tableaux prets. Accueil - Actualiser apres ETL."
+    Write-Host "Identifiants si demande : findme_bi / findme_bi_readonly"
 } elseif ($UsePbip -and (Test-Path $DevPbipPath)) {
     $openPath = $DevPbipPath
     Write-Host "Fichier (mode dev) : $openPath" -ForegroundColor Green
