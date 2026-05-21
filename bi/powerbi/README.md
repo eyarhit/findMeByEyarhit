@@ -24,6 +24,10 @@ Importer les `.pbix` depuis `bi/powerbi/reports/`. Source MySQL : `host.docker.i
 scripts\powerbi-open.cmd
 ```
 
+Ou double-clic : `bi\powerbi\OUVRIR_POWER_BI.cmd`
+
+**Ne pas ouvrir** `FindMe-BI\FindMe-BI.pbip` (erreur `dataset` sur anciennes copies). Si l’erreur revient : `scripts\powerbi-fix.cmd`
+
 Fait : MySQL → ETL Talend → ouverture Power BI.
 
 | Situation | Comportement |

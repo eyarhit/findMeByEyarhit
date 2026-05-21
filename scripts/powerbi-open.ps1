@@ -16,6 +16,19 @@ $GenScript = Join-Path $PSScriptRoot "generate-powerbi-pbip.ps1"
 
 function Write-Step($msg) { Write-Host "`n=== $msg ===" -ForegroundColor Cyan }
 
+function Remove-BrokenPbip {
+    if (-not (Test-Path $PbipPath)) { return }
+    $raw = [System.IO.File]::ReadAllText($PbipPath)
+    if ($raw -match '"dataset"\s*:') {
+        Write-Host ""
+        Write-Host "ATTENTION : ancien FindMe-BI.pbip invalide (propriete dataset)." -ForegroundColor Yellow
+        Write-Host "Suppression - utilisez .pbids / .pbix, pas le .pbip." -ForegroundColor Yellow
+        Remove-Item -LiteralPath $PbipPath -Force
+    }
+}
+
+Remove-BrokenPbip
+
 function Wait-MySql {
     $max = 60
     for ($i = 0; $i -lt $max; $i++) {
@@ -109,7 +122,7 @@ function Open-PowerBiReport {
         Start-Process -FilePath $pbi -ArgumentList "`"$ReportPath`""
         return
     }
-    Write-Host "Chemin exe non trouve - ouverture via Windows (fichier .pbip / .pbix)..." -ForegroundColor Yellow
+    Write-Host "Chemin exe non trouve - ouverture via Windows (.pbix / .pbids)..." -ForegroundColor Yellow
     Start-Process -FilePath $ReportPath
 }
 
