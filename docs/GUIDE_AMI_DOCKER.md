@@ -105,21 +105,24 @@ Ou :
 scripts\fix-bi-pfe.cmd
 ```
 
-**Stack BI conteneurisée (formation BIS) :**
+**Une seule commande (app + BI complet) :**
 
 ```cmd
-scripts\docker-bi-full.cmd
-scripts\docker-bi-powerbi-windows.cmd
+scripts\bi-start.cmd
 ```
 
-| Outil | URL | Remarque |
-|-------|-----|----------|
-| **Talend Open Studio** | http://localhost:6080 | VNC : `findme` — installer Talend dans `bi/talend/studio-docker/installer/` (1ère fois) |
-| **Power BI Report Server** | http://localhost:8077/reports | Conteneur **Windows** — mode conteneurs Windows dans Docker Desktop |
-| **Hub BI** | http://localhost:3032 | ETL + liens intégrés |
-| **Admin app** | http://localhost:4200 → BI | Boutons Talend / Power BI |
+Fait automatiquement : build, `docker compose up -d`, attente MySQL, GRANT `findme_bi`, ETL Talend, install Power BI Desktop (winget), ouvre les URLs.
 
-MySQL DW : `localhost:3306` / `findme_dw` / `findme_bi`
+| Outil | URL |
+|-------|-----|
+| Application + BI admin | http://localhost:4200 → **Tableaux de bord BI** |
+| Talend Open Studio | http://localhost:6080 (VNC `findme`) |
+| Hub BI | http://localhost:3032 |
+| Power BI Desktop | installé sur Windows (winget) → connexion `localhost:3306` / `findme_dw` |
+
+Optionnel : copier `scripts\.env.bi.example` → `scripts\.env.bi` et y mettre `TALEND_INSTALLER_URL=` (lien direct archive Talend) pour téléchargement auto.
+
+> Power BI **Report Server** en conteneur Windows (`scripts\docker-bi-powerbi-windows.cmd`) ne peut pas tourner en même temps que MySQL Linux (limitation Docker Desktop).
 
 La **première fois** : compter **5 à 15 minutes** (Maven déjà en cache = plus rapide).
 

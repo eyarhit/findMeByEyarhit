@@ -245,9 +245,8 @@ services:
       talend-studio:
         condition: service_started
 
-  # BI PFE (formation BIS) : Talend ETL → findme_dw → Power BI (OLAP)
+  # BI PFE (formation BIS) : Talend ETL → findme_dw (appele par scripts/bi-start.cmd)
   talend-etl:
-    profiles: ["bi"]
     build:
       context: ./bi/talend/docker
     restart: "no"

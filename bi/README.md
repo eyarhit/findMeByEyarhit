@@ -15,13 +15,12 @@ OLTP (5 bases)  →  Talend ETL (talend-etl)  →  findme_dw (étoile)
 ## Démarrage rapide
 
 ```cmd
-docker compose up -d
+scripts\bi-start.cmd
 ```
 
-- **Talend Open Studio** (Docker) : http://localhost:6080 — [studio-docker/README.md](talend/studio-docker/README.md)
-- **Power BI Report Server** (Docker) : http://localhost:8077/reports — [powerbi/report-server/README.md](powerbi/report-server/README.md)
+- **Talend Open Studio** : http://localhost:6080 — [studio-docker/README.md](talend/studio-docker/README.md)
+- **Power BI Desktop** : install auto (winget) — [powerbi/README.md](powerbi/README.md)
 - **Hub BI** : http://localhost:3032 — [hub/README.md](hub/README.md)
-- Scripts : `scripts/docker-bi-full.cmd` + `scripts/docker-bi-powerbi-windows.cmd`
 
 ## Les 6 blocs méthodologiques
 
