@@ -36,7 +36,14 @@ GIT_PULL_BI.cmd
 
 **Premiere ouverture seulement** : identifiants `findme_bi` / `findme_bi_readonly` puis **Actualiser**.
 
-Si erreur `model.bim` manquant : `git pull` puis `ONE_COMMANDE_POWERBI.cmd` (le projet utilise TMDL, `definition.pbism` version **4.0**). Dans Power BI : **Fichier > Options > Fonctionnalites preliminaires** → activer **Stocker le modele semantique au format TMDL**.
+Si erreur `model.bim` manquant : `git pull` puis `ONE_COMMANDE_POWERBI.cmd` (TMDL, `definition.pbism` version **4.0**).
+
+### Ecran vide / Page 1 seule / pas de donnees
+
+1. Cliquez **Actualiser maintenant** (banniere jaune).
+2. Identifiants : `findme_bi` / `findme_bi_readonly`.
+3. **Recommande** : enregistrez une fois sous `reports/FindMe_BI_Auto.pbix` — les prochains `ONE_COMMANDE_POWERBI.cmd` ouvriront ce fichier (visuels + donnees garantis).
+4. Ou double-clic : `bi\powerbi\OUVRIR_MON_RAPPORT.pbix.cmd` (si le `.pbix` existe).
 
 Pages (generees automatiquement — rien a configurer) :
 

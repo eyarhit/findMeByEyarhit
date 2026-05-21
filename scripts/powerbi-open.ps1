@@ -12,6 +12,7 @@ Set-Location $Root
 $LegacyPbipPath = Join-Path $Root "bi\powerbi\FindMe-BI\FindMe-BI.pbip"
 $DevPbipPath = Join-Path $Root "bi\powerbi\_dev-pbip-project\FindMe-BI.pbip"
 $DashboardPbipPath = Join-Path $Root "bi\powerbi\FindMe-Dashboard\FindMe-Dashboard.pbip"
+$DashboardPbirPath = Join-Path $Root "bi\powerbi\FindMe-Dashboard\FindMe-Dashboard.Report\definition.pbir"
 $PbixPath = Join-Path $Root "bi\powerbi\reports\FindMe_BI_Auto.pbix"
 $SeedPbixPath = Join-Path $Root "bi\powerbi\template\FindMe_BI_Seed.pbix"
 $GenDashboardScript = Join-Path $PSScriptRoot "generate-powerbi-multi-dashboard.ps1"
@@ -172,7 +173,27 @@ if (-not $SkipEtl) {
 
 Write-Step "4/4 - Ouverture Power BI Desktop"
 Ensure-DashboardPbix
-if (Test-Path $DashboardPbipPath) {
+
+# .pbix deja configure = affichage garanti (donnees + visuels)
+if (Test-Path $PbixPath) {
+    $openPath = $PbixPath
+    Write-Host "Rapport .pbix (recommande) : $openPath" -ForegroundColor Green
+    Open-PowerBiReport -ReportPath $openPath
+    Write-Host ""
+    Write-Host "========== DASHBOARD FIND-ME (.pbix) ==========" -ForegroundColor Green
+    Write-Host "Cliquez Accueil - Actualiser si la banniere jaune apparait."
+} elseif (Test-Path $DashboardPbirPath) {
+    $openPath = $DashboardPbirPath
+    Write-Host "Projet PBIR : $openPath" -ForegroundColor Green
+    Open-PowerBiReport -ReportPath $openPath
+    Write-Host ""
+    Write-Host "========== SI ECRAN VIDE ==========" -ForegroundColor Yellow
+    Write-Host "  1. Cliquez 'Actualiser maintenant' (banniere jaune)"
+    Write-Host "  2. Identifiants : findme_bi / findme_bi_readonly"
+    Write-Host "  3. Options - Fonctionnalites preliminaires : activer TMDL + PBIR"
+    Write-Host "  4. Fermer PBI, relancer ONE_COMMANDE_POWERBI.cmd"
+    Write-Host "  5. Ou enregistrez sous bi\powerbi\reports\FindMe_BI_Auto.pbix (1 fois)"
+} elseif (Test-Path $DashboardPbipPath) {
     $openPath = $DashboardPbipPath
     Write-Host "Projet : $openPath" -ForegroundColor Green
     Open-PowerBiReport -ReportPath $openPath
@@ -180,13 +201,6 @@ if (Test-Path $DashboardPbipPath) {
     Write-Host "========== DASHBOARD FIND-ME (3 pages) ==========" -ForegroundColor Green
     Write-Host "  01 Executive | 02 Managerial | 03 Operationnel"
     Write-Host "Premiere fois : findme_bi / findme_bi_readonly puis Actualiser."
-} elseif (Test-Path $PbixPath) {
-    $openPath = $PbixPath
-    Write-Host "Fichier : $openPath" -ForegroundColor Green
-    Open-PowerBiReport -ReportPath $openPath
-    Write-Host ""
-    Write-Host "========== DASHBOARD FIND-ME (.pbix) ==========" -ForegroundColor Green
-    Write-Host "Accueil - Actualiser apres ETL."
 } elseif ($UsePbip -and (Test-Path $DevPbipPath)) {
     $openPath = $DevPbipPath
     Write-Host "Fichier (mode dev) : $openPath" -ForegroundColor Green
