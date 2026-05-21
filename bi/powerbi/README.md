@@ -18,6 +18,10 @@
 
 Importer les `.pbix` depuis `bi/powerbi/reports/`. Source MySQL : `host.docker.internal:3306`, base `findme_dw`, user `findme_bi`.
 
+## Autre PC (ami, jury)
+
+Voir **[GUIDE_AUTRE_PC.md](GUIDE_AUTRE_PC.md)** (clone ou ZIP + `ONE_COMMANDE_POWERBI.cmd`).
+
 ## Une commande (3 pages dashboard, zero config)
 
 ```cmd
