@@ -7,13 +7,24 @@
       <div class="upload-content">
         <i class="fas fa-file-pdf fa-2x text-purple"></i>
         <div class="file-select-area">
-          <ng-container *ngIf="diplomaFilesSelected.length === 0">
+          <div class="saved-files" *ngIf="savedDiplomas.length > 0">
+            <p class="saved-label">Diplômes enregistrés ({{ savedDiplomas.length }})</p>
+            <div class="file-preview saved" *ngFor="let doc of savedDiplomas">
+              <p>✅ {{ doc.fileName }}</p>
+            </div>
+          </div>
+          <ng-container *ngIf="diplomaFilesSelected.length === 0 && savedDiplomas.length === 0">
             <i class="fas fa-plus fa-3x cursor-pointer" (click)="diplomaInput.click()"></i>
             <p>
               Glissez-déposez un fichier ou 
               <a class="browse-link" (click)="diplomaInput.click()">Parcourir</a>
             </p>
           </ng-container>
+          <button
+            *ngIf="diplomaFilesSelected.length === 0 && savedDiplomas.length > 0"
+            type="button"
+            class="add-more-btn"
+            (click)="diplomaInput.click()">+ Ajouter d'autres</button>
           <div *ngIf="diplomaFilesSelected.length > 0">
             <div class="file-preview flex items-center gap-2" *ngFor="let file of diplomaFilesSelected; let i = index">
               <p>📄 {{i + 1}}. {{ file.name }}</p>
@@ -36,7 +47,12 @@
         </div>
         <p class="format-info">Formats acceptés : PDF, JPG, PNG, JPEG, GIF, SVG</p>
       </div>
-      <button class="upload-button" (click)="onUpload()">📤 Enregistrer les diplômes</button>
+      <button
+        class="upload-button"
+        (click)="onUpload()"
+        [disabled]="diplomaFilesSelected.length === 0">
+        📤 Enregistrer les diplômes
+      </button>
     </div>
   </div>
 
@@ -47,13 +63,24 @@
       <div class="upload-content">
         <i class="fas fa-file-pdf fa-2x text-purple"></i>
         <div class="file-select-area">
-          <ng-container *ngIf="certificateFilesSelected.length === 0">
+          <div class="saved-files" *ngIf="savedCertificates.length > 0">
+            <p class="saved-label">Certificats enregistrés ({{ savedCertificates.length }})</p>
+            <div class="file-preview saved" *ngFor="let doc of savedCertificates">
+              <p>✅ {{ doc.fileName }}</p>
+            </div>
+          </div>
+          <ng-container *ngIf="certificateFilesSelected.length === 0 && savedCertificates.length === 0">
             <i class="fas fa-plus fa-3x cursor-pointer" (click)="certificateInput.click()"></i>
             <p>
               Glissez-déposez un fichier ou 
               <a class="browse-link" (click)="certificateInput.click()">Parcourir</a>
             </p>
           </ng-container>
+          <button
+            *ngIf="certificateFilesSelected.length === 0 && savedCertificates.length > 0"
+            type="button"
+            class="add-more-btn"
+            (click)="certificateInput.click()">+ Ajouter d'autres</button>
           <div *ngIf="certificateFilesSelected.length > 0">
             <div class="file-preview flex items-center gap-2" *ngFor="let file of certificateFilesSelected; let i = index">
               <p>📄 {{i + 1}}. {{ file.name }}</p>
@@ -76,7 +103,12 @@
         </div>
         <p class="format-info">Formats acceptés : PDF, JPG, PNG, JPEG, GIF, SVG</p>
       </div>
-      <button class="upload-button" (click)="onUploadCertif()">📤 Enregistrer les certificats</button>
+      <button
+        class="upload-button"
+        (click)="onUploadCertif()"
+        [disabled]="certificateFilesSelected.length === 0">
+        📤 Enregistrer les certificats
+      </button>
     </div>
   </div>
 

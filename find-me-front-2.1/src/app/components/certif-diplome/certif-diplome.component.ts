@@ -1,28 +1,105 @@
-import { Component, Output, EventEmitter  } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { DocumentServiceService } from '../../services/document-service.service';
 import Swal from 'sweetalert2';
 import { StepTrackerService } from '../../services/step-tracker.service';
+import { Subscription } from 'rxjs';
+
+export interface SavedDocument {
+  document: number;
+  fileName: string;
+  presignedUrl?: string;
+}
 
 @Component({
   selector: 'app-certif-diplome',
   templateUrl: './certif-diplome.component.html',
   styleUrls: ['./certif-diplome.component.scss']
 })
-export class CertifDiplomeComponent {
+export class CertifDiplomeComponent implements OnInit, OnDestroy {
   diplomaFilesSelected: File[] = [];
   certificateFilesSelected: File[] = [];
+  savedDiplomas: SavedDocument[] = [];
+  savedCertificates: SavedDocument[] = [];
   fileName: string = '';
-  documentsUploaded = false; 
+  documentsUploaded = false;
   @Output() documentsValidated = new EventEmitter<boolean>();
-  isLoading: boolean = false;
+  isLoading = false;
+  private documentSub?: Subscription;
+  private userId: number | null = null;
 
   constructor(
     private authService: AuthService,
     private documentService: DocumentServiceService,
     private stepTracker: StepTrackerService
-
   ) {}
+
+  ngOnInit(): void {
+    this.userId = this.authService.getUserId();
+    this.loadSavedDocuments();
+    this.documentSub = this.authService.documentUpdate$.subscribe(() => this.loadSavedDocuments());
+  }
+
+  ngOnDestroy(): void {
+    this.documentSub?.unsubscribe();
+  }
+
+  loadSavedDocuments(): void {
+    if (!this.userId) {
+      return;
+    }
+    this.isLoading = true;
+    let certsDone = false;
+    let diplomasDone = false;
+
+    const finish = () => {
+      if (certsDone && diplomasDone) {
+        this.isLoading = false;
+        this.documentsUploaded =
+          this.savedCertificates.length > 0 || this.savedDiplomas.length > 0;
+        if (this.documentsUploaded) {
+          this.documentsValidated.emit(true);
+        }
+      }
+    };
+
+    this.documentService.getDocumentsByUserAndFolder(this.userId, 'Certificat').subscribe({
+      next: (response) => {
+        this.savedCertificates = this.mapSavedDocuments(response);
+        certsDone = true;
+        finish();
+      },
+      error: () => {
+        this.savedCertificates = [];
+        certsDone = true;
+        finish();
+      }
+    });
+
+    this.documentService.getDocumentsByUserAndFolder(this.userId, 'Diplome').subscribe({
+      next: (response) => {
+        this.savedDiplomas = this.mapSavedDocuments(response);
+        diplomasDone = true;
+        finish();
+      },
+      error: () => {
+        this.savedDiplomas = [];
+        diplomasDone = true;
+        finish();
+      }
+    });
+  }
+
+  private mapSavedDocuments(response: unknown): SavedDocument[] {
+    if (!Array.isArray(response)) {
+      return [];
+    }
+    return response.map((doc: { document: number; fileName: string; presignedUrl?: string }) => ({
+      document: doc.document,
+      fileName: doc.fileName,
+      presignedUrl: doc.presignedUrl
+    }));
+  }
 
   onFileSelected(event: any, type: string): void {
     const files: FileList = event.target.files;
@@ -94,9 +171,12 @@ export class CertifDiplomeComponent {
           response => {
             uploadCount++;
             if (uploadCount === allFiles.length) {
+              Swal.close();
+              this.diplomaFilesSelected = [];
               this.documentsUploaded = true;
               this.documentsValidated.emit(true);
               this.authService.notifyDocumentUpdate();
+              this.loadSavedDocuments();
               this.showSuccessAlert('🎓 Diplôme ajouté', 'Votre document a été importé avec succès.');
             }
           },
@@ -128,11 +208,12 @@ export class CertifDiplomeComponent {
             uploadCount++;
             if (uploadCount === allFiles.length && !hasError) {
               Swal.close();
+              this.certificateFilesSelected = [];
               this.documentsUploaded = true;
               this.documentsValidated.emit(true);
               this.authService.notifyDocumentUpdate();
+              this.loadSavedDocuments();
               this.showSuccessAlert('📜 Certificat ajouté', 'Vos certificats ont bien été enregistrés.');
-              this.certificateFilesSelected = [];
             }
           },
           error: (error) => {
