@@ -1,6 +1,6 @@
-﻿
+
 table dim_user_scd2
-    lineageTag: 0e6175cb-455c-4ef8-82cc-f951a45b5064
+    lineageTag: 028bfdef-23a0-4c8f-b9bf-c0cc1ce3851b
 
     partition dim_user_scd2 = m
         mode: import
@@ -9,4 +9,3 @@ table dim_user_scd2
                 Data = fn_MySQLTable("dim_user_scd2")
             in
                 Data
-

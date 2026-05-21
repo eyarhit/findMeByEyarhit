@@ -1,6 +1,6 @@
-﻿
+
 table dim_date
-    lineageTag: 7bd99a9e-7861-4a66-8a51-406ed8ae9553
+    lineageTag: af4c7452-49aa-48b4-88e9-62c8ad06d3c5
 
     partition dim_date = m
         mode: import
@@ -9,4 +9,3 @@ table dim_date
                 Data = fn_MySQLTable("dim_date")
             in
                 Data
-

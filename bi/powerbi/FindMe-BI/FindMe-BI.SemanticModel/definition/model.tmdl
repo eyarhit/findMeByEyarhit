@@ -1,4 +1,4 @@
-﻿
+
 model Model
     culture: fr-FR
     defaultPowerBIDataSourceVersion: powerBI_V3
@@ -37,4 +37,3 @@ ref table etl_run_log
 ref table v_bi_candidature
 ref table v_bi_mission
 ref table v_bi_kpi_recrutement
-

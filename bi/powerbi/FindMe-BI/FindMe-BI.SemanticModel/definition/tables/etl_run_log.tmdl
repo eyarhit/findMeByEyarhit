@@ -1,6 +1,6 @@
-﻿
+
 table etl_run_log
-    lineageTag: 32b2623f-5b80-44a0-933a-1a5a9ff16168
+    lineageTag: d647a89e-2088-4d88-bd08-56ca11990aa9
 
     partition etl_run_log = m
         mode: import
@@ -9,4 +9,3 @@ table etl_run_log
                 Data = fn_MySQLTable("etl_run_log")
             in
                 Data
-

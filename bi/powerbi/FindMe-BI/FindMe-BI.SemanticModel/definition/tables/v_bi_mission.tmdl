@@ -1,6 +1,6 @@
-﻿
+
 table v_bi_mission
-    lineageTag: ae536a34-aadf-463a-8927-81cddec9da8d
+    lineageTag: 3dbc26ae-2b66-4cd2-858e-02baab1e7b9f
 
     partition v_bi_mission = m
         mode: import
@@ -9,4 +9,3 @@ table v_bi_mission
                 Data = fn_MySQLTable("v_bi_mission")
             in
                 Data
-

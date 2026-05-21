@@ -17,6 +17,13 @@ function New-Dir($p) {
     if (-not (Test-Path $p)) { New-Item -ItemType Directory -Path $p -Force | Out-Null }
 }
 
+# Power BI PBIP exige UTF-8 sans BOM (Set-Content -Encoding UTF8 ajoute un BOM sous Windows)
+$script:Utf8NoBom = New-Object System.Text.UTF8Encoding $false
+function Write-Utf8NoBom {
+    param([string]$Path, [string]$Content)
+    [System.IO.File]::WriteAllText($Path, $Content, $script:Utf8NoBom)
+}
+
 New-Dir $Base
 New-Dir $Sm
 New-Dir $Def
@@ -34,7 +41,7 @@ New-Dir (Join-Path $Base "FindMe-BI.Report\definition\pages")
   ],
   "settings": { "enableAutoRecovery": true }
 }
-'@ | Set-Content -Path (Join-Path $Base "FindMe-BI.pbip") -Encoding UTF8
+'@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Base "FindMe-BI.pbip") $_ }
 
 @'
 {
@@ -42,19 +49,19 @@ New-Dir (Join-Path $Base "FindMe-BI.Report\definition\pages")
   "metadata": { "type": "SemanticModel", "displayName": "FindMe-BI" },
   "config": { "version": "2.0", "logicalId": "findme-bi-semantic-001" }
 }
-'@ | Set-Content -Path (Join-Path $Sm ".platform") -Encoding UTF8
+'@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Sm ".platform") $_ }
 
 @'
 {
   "version": "4.0",
   "settings": { "qnaEnabled": false }
 }
-'@ | Set-Content -Path (Join-Path $Sm "definition.pbism") -Encoding UTF8
+'@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Sm "definition.pbism") $_ }
 
 @'
 database
     compatibilityLevel: 1550
-'@ | Set-Content -Path (Join-Path $Def "database.tmdl") -Encoding UTF8
+'@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Def "database.tmdl") $_ }
 
 $refs = ($tables | ForEach-Object { "ref table $_" }) -join "`n"
 @"
@@ -82,7 +89,7 @@ expression PBI_MySqlDatabase = "findme_dw" meta [IsParameterQuery=true, Type="Te
 
 $refs
 
-"@ | Set-Content -Path (Join-Path $Def "model.tmdl") -Encoding UTF8
+"@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Def "model.tmdl") $_ }
 
 foreach ($t in $tables) {
     $tag = [guid]::NewGuid().ToString()
@@ -99,7 +106,7 @@ table $t
             in
                 Data
 
-"@ | Set-Content -Path (Join-Path $TablesDir "$t.tmdl") -Encoding UTF8
+"@ | ForEach-Object { Write-Utf8NoBom (Join-Path $TablesDir "$t.tmdl") $_ }
 }
 
 @'
@@ -108,7 +115,7 @@ table $t
   "metadata": { "type": "Report", "displayName": "FindMe-BI" },
   "config": { "version": "2.0", "logicalId": "findme-bi-report-001" }
 }
-'@ | Set-Content -Path (Join-Path $Base "FindMe-BI.Report\.platform") -Encoding UTF8
+'@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Base "FindMe-BI.Report\.platform") $_ }
 
 @'
 {
@@ -117,7 +124,7 @@ table $t
     "byPath": { "path": "../FindMe-BI.SemanticModel" }
   }
 }
-'@ | Set-Content -Path (Join-Path $Base "FindMe-BI.Report\definition.pbir") -Encoding UTF8
+'@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Base "FindMe-BI.Report\definition.pbir") $_ }
 
 @'
 {
@@ -136,6 +143,6 @@ table $t
     }
   ]
 }
-'@ | Set-Content -Path (Join-Path $Base "FindMe-BI.Report\definition\report.json") -Encoding UTF8
+'@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Base "FindMe-BI.Report\definition\report.json") $_ }
 
 Write-Host "PBIP genere : $Base\FindMe-BI.pbip" -ForegroundColor Green

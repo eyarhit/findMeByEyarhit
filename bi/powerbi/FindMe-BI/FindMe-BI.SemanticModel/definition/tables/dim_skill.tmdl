@@ -1,6 +1,6 @@
-﻿
+
 table dim_skill
-    lineageTag: 204fa241-a1d1-47d1-b398-466401a6bf61
+    lineageTag: 7c3ac14a-525d-4ceb-bca9-4935483b037b
 
     partition dim_skill = m
         mode: import
@@ -9,4 +9,3 @@ table dim_skill
                 Data = fn_MySQLTable("dim_skill")
             in
                 Data
-

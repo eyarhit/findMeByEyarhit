@@ -1,6 +1,6 @@
-﻿
+
 table fact_quiz
-    lineageTag: 223d9dc1-4058-4184-bd7b-bcde4b29c52c
+    lineageTag: 1adf8ede-d537-4a96-b0e5-a458f863afc9
 
     partition fact_quiz = m
         mode: import
@@ -9,4 +9,3 @@ table fact_quiz
                 Data = fn_MySQLTable("fact_quiz")
             in
                 Data
-

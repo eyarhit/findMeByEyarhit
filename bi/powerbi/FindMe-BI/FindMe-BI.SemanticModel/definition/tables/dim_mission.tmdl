@@ -1,6 +1,6 @@
-﻿
+
 table dim_mission
-    lineageTag: e404dd21-5e91-435a-b119-cffe4ae7a5a5
+    lineageTag: 98ec40c8-8db0-4c7c-a608-466222952204
 
     partition dim_mission = m
         mode: import
@@ -9,4 +9,3 @@ table dim_mission
                 Data = fn_MySQLTable("dim_mission")
             in
                 Data
-

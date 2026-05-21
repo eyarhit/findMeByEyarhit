@@ -113,11 +113,8 @@ function Open-PowerBiReport {
 }
 
 Write-Step "1/4 - Projet Power BI (PBIP)"
-if ($RegeneratePbip -or -not (Test-Path $PbipPath)) {
-    & $GenScript
-} else {
-    Write-Host "PBIP deja present : $PbipPath"
-}
+# Regeneration rapide : UTF-8 sans BOM (requis par Power BI Desktop)
+& $GenScript
 
 if (-not $SkipDocker) {
     Write-Step "2/4 - Docker MySQL"

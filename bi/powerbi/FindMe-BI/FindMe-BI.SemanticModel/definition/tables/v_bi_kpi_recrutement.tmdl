@@ -1,6 +1,6 @@
-﻿
+
 table v_bi_kpi_recrutement
-    lineageTag: b7f2b1bd-7a76-406b-a36f-eaa496cca478
+    lineageTag: 02bbcb24-c12a-4dba-b3a5-4c0e54ca1786
 
     partition v_bi_kpi_recrutement = m
         mode: import
@@ -9,4 +9,3 @@ table v_bi_kpi_recrutement
                 Data = fn_MySQLTable("v_bi_kpi_recrutement")
             in
                 Data
-

@@ -1,6 +1,6 @@
-﻿
+
 table fact_notification
-    lineageTag: 086d7fd2-d102-47b0-befe-75526a7b3bd8
+    lineageTag: 6d4e6114-2816-4474-b292-261c7380152a
 
     partition fact_notification = m
         mode: import
@@ -9,4 +9,3 @@ table fact_notification
                 Data = fn_MySQLTable("fact_notification")
             in
                 Data
-

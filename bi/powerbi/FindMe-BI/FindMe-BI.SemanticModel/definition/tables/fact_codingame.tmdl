@@ -1,6 +1,6 @@
-﻿
+
 table fact_codingame
-    lineageTag: 4f0703cf-23cc-4ff5-97f5-0b25e9764ad0
+    lineageTag: fe0a7f4a-9bb7-4dc9-8e9e-bdf40ccf9843
 
     partition fact_codingame = m
         mode: import
@@ -9,4 +9,3 @@ table fact_codingame
                 Data = fn_MySQLTable("fact_codingame")
             in
                 Data
-
