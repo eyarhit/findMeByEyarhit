@@ -24,6 +24,12 @@ Importer les `.pbix` depuis `bi/powerbi/reports/`. Source MySQL : `host.docker.i
 ONE_COMMANDE_POWERBI.cmd
 ```
 
+Si `git pull` refuse (fichiers `.tmdl` modifies) :
+
+```cmd
+GIT_PULL_BI.cmd
+```
+
 - Genere le projet **`FindMe-Dashboard.pbip`** (3 pages : Executive, Managerial, Operationnel)
 - ETL Talend → `findme_dw`
 - Ouvre Power BI avec **cartes KPI, barres, tableaux** deja places
