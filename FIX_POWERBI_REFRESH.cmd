@@ -1,5 +1,6 @@
 @echo off
 REM Regenere le modele + verifie MySQL + rappel Actualiser dans Power BI
+REM Si git pull bloque : GIT_PULL_BI.cmd (pas git pull seul)
 cd /d "%~dp0"
 echo === Verification MySQL findme_dw ===
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\verify-mysql-dw.ps1

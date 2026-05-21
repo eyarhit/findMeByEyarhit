@@ -34,10 +34,18 @@ Verification MySQL avant Power BI : `scripts\verify-mysql-dw.ps1`
 
 Rapport 1 page (ancien) : `ONE_COMMANDE_POWERBI.cmd -UsePbix`
 
-Si `git pull` refuse (fichiers `.tmdl` modifies) :
+Si `git pull` refuse (fichiers `.tmdl` modifies par Power BI — **ne pas committer**) :
 
 ```cmd
 GIT_PULL_BI.cmd
+```
+
+Ou manuellement :
+
+```cmd
+git checkout -- bi/powerbi/FindMe-Dashboard/
+git pull
+FIX_POWERBI_REFRESH.cmd
 ```
 
 - Genere le projet **`FindMe-Dashboard.pbip`** (3 pages : Executive, Managerial, Operationnel)
