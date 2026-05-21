@@ -101,7 +101,13 @@ popupTitle: string = '';
 
     // Charge les étapes AVANT les données du CV
     this.loadSteps();
-    
+
+    // Étape 1 non bloquante : marquer dès l’ouverture du parcours CV
+    this.completedSteps.add(1);
+    if (this.userId) {
+      this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
+    }
+
     // Charge les données du CV
     this.loadCvData();
     this.restoreCvFileName();
@@ -255,9 +261,10 @@ popupTitle: string = '';
     const formatDate = (dateStr: string) => {
       if (!dateStr) return '';
       const date = new Date(dateStr);
-      return date.toISOString().substring(0, 10); // "yyyy-MM-dd"
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toISOString().substring(0, 10);
     };
-  
+
     this.academicFormations.push(this.fb.group({
       university: [data?.university || '', Validators.maxLength(120)],
       diplome: [data?.diplome || '', Validators.maxLength(120)],
@@ -423,8 +430,17 @@ popupTitle: string = '';
 
   goToStep(stepNumber: number): void {
     if (stepNumber >= 1 && stepNumber <= this.steps.length) {
+      if (stepNumber > 1) {
+        this.completedSteps.add(1);
+      }
+      if (stepNumber >= 3) {
+        this.completedSteps.add(2);
+      }
+      if (this.userId) {
+        this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
+      }
       if (this.activeStep === 1 && stepNumber > 1) {
-        this.markStep1Complete();
+        this.saveCvSilent();
       }
       this.activeStep = stepNumber;
       this.currentPage = 1;
@@ -654,14 +670,13 @@ private async uploadDocument(pdfBlob: Blob, fileName: string): Promise<void> {
           }
           
           // Met à jour les étapes si le backend en a
-          if (cv.completedSteps && cv.completedSteps.length > 0) {
-            const steps = new Set(
-              cv.completedSteps.map((n: number) => (n === 4 ? 3 : n))
-            );
-            this.completedSteps = steps;
-            if (this.userId) { // Vérification ajoutée
-              this.stepTracker.updateCompletedSteps(steps, this.userId);
-            }
+          const steps = new Set(
+            (cv.completedSteps ?? []).map((n: number) => (n === 4 ? 3 : n))
+          );
+          steps.add(1);
+          this.completedSteps = steps;
+          if (this.userId) {
+            this.stepTracker.updateCompletedSteps(steps, this.userId);
           }
         }
       },
@@ -679,16 +694,8 @@ private async uploadDocument(pdfBlob: Blob, fileName: string): Promise<void> {
     this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
     this.saveCvSilent();
 
-    Swal.fire({
-      title: 'Félicitations !',
-      text: 'Les informations que vous avez entrées se trouvent dans votre profil. Vous pouvez y accéder en cliquant sur OK.',
-      icon: 'success',
-      confirmButtonText: 'OK',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.router.navigate(['/profil']);
-      }
-    });
+    this.showNotification('Parcours CV terminé.', 'success');
+    this.router.navigate(['/profil']);
   }
 
   // Méthode pour le débogage

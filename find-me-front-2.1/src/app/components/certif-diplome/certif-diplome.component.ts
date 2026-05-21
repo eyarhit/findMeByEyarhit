@@ -227,25 +227,18 @@ export class CertifDiplomeComponent implements OnInit, OnDestroy {
   }
 
   onFinish(): void {
+    const userId = this.authService.getUserId();
+    if (userId) {
+      this.stepTracker.completeStep(userId, 3);
+    }
     if (this.documentsUploaded) {
-      const userId = this.authService.getUserId();
-      if (userId) {
-        this.stepTracker.completeStep(userId, 3); // Étape diplômes / certificats (parcours 3 étapes)
-        Swal.fire({
-          title: '✅ Étape terminée',
-          text: 'Vos documents ont été validés avec succès.',
-          icon: 'success',
-          confirmButtonText: 'Continuer',
-          confirmButtonColor: '#6c63ff'
-        });
-      }
-    } else {
       Swal.fire({
-        title: 'Documents requis',
-        text: 'Veuillez importer au moins un diplôme ou certificat avant de terminer.',
-        icon: 'warning',
-        confirmButtonText: 'Compris',
-        confirmButtonColor: '#6c63ff'
+        title: 'Étape terminée',
+        text: 'Vos documents ont été enregistrés.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#6c63ff',
+        timer: 2500,
       });
     }
   }

@@ -54,7 +54,7 @@
       </div>
 
     <!-- Form Content -->
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="cv-form">
+    <div [formGroup]="form" class="cv-form">
       <!-- Step 1 - Page 1 & 2: Academic Formations, Technical Skills, Professional Experiences & Languages -->
       <div *ngIf="activeStep === 1" class="form-step">
         <!-- Page 1: Academic Formations & Technical Skills -->
@@ -313,7 +313,7 @@
                 <i class="fas fa-arrow-right"></i>
               </button>
               
-              <button type="submit" class="btn-success">
+              <button type="button" class="btn-success" (click)="onSubmit()">
                 <i class="fas fa-save"></i>
                 <span>Enregistrer le CV</span>
               </button>
@@ -428,7 +428,7 @@
           <i class="fas fa-arrow-right"></i>
         </button>
       </div>
-    </form>
+    </div>
   </div>
 
   <!-- Debug Panel (visible seulement en développement) -->

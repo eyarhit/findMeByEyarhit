@@ -88,10 +88,11 @@ popupTitle: string = '';
       return;
     }
 
-    // Charge les étapes AVANT les données du CV
     this.loadSteps();
-    
-    // Charge les données du CV
+    this.completedSteps.add(1);
+    if (this.userId) {
+      this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
+    }
     this.loadCvData();
   }
 
@@ -210,8 +211,8 @@ popupTitle: string = '';
     };
   
     this.academicFormations.push(this.fb.group({
-      university: [data?.university || '', Validators.required],
-      diplome: [data?.diplome || '', Validators.required],
+      university: [data?.university || '', Validators.maxLength(120)],
+      diplome: [data?.diplome || '', Validators.maxLength(120)],
       dateDebut: [formatDate(data?.dateDebut)],
       dateFin: [formatDate(data?.dateFin)]
     }));
@@ -235,10 +236,10 @@ popupTitle: string = '';
     };
   
     this.professionalExperiences.push(this.fb.group({
-      entreprise: [data?.entreprise || '', Validators.required],
+      entreprise: [data?.entreprise || ''],
       dateDebut: [formatDate(data?.dateDebut)],
       dateFin: [formatDate(data?.dateFin)],
-      poste: [data?.poste || '', Validators.required],
+      poste: [data?.poste || ''],
       nomProjet: [data?.nomProjet || ''],
       client: [data?.client || ''],
       equipe: [data?.equipe || ''],
@@ -260,8 +261,8 @@ popupTitle: string = '';
 
   addLanguage(data?: any): void {
     this.languages.push(this.fb.group({
-      name: [data?.name || '', Validators.required],
-      niveau: [data?.niveau || '', Validators.required]
+      name: [data?.name || ''],
+      niveau: [data?.niveau || ''],
     }));
   }
 
@@ -457,14 +458,13 @@ popupTitle: string = '';
           }
           
           // Met à jour les étapes si le backend en a
-          if (cv.completedSteps && cv.completedSteps.length > 0) {
-            const steps = new Set(
-              cv.completedSteps.map((n: number) => (n === 4 ? 3 : n))
-            );
-            this.completedSteps = steps;
-            if (this.userId) { // Vérification ajoutée
-              this.stepTracker.updateCompletedSteps(steps, this.userId);
-            }
+          const steps = new Set(
+            (cv.completedSteps ?? []).map((n: number) => (n === 4 ? 3 : n))
+          );
+          steps.add(1);
+          this.completedSteps = steps;
+          if (this.userId) {
+            this.stepTracker.updateCompletedSteps(steps, this.userId);
           }
         }
       },
@@ -474,48 +474,11 @@ popupTitle: string = '';
 
   onFinish(): void {
     if (!this.userId) {
-      console.error('User ID is missing');
       return;
     }
-  
-    // Trouver les étapes manquantes
-    const missingSteps = this.steps
-      .filter(step => !this.completedSteps.has(step.number))
-      .map(step => step.number);
-  
-    if (missingSteps.length === 0) {
-      // Toutes les étapes sont complètes
-      this.completedSteps.add(3);
-      this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
-      
-      Swal.fire({
-        title: 'Félicitations !',
-        text: 'Les informations que vous avez entrées se trouvent dans votre profil. Vous pouvez y accéder en cliquant sur OK.',
-        icon: 'success',
-        confirmButtonText: 'OK'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          this.router.navigate(['/profil']);
-        }
-      });
-    } else {
-      // Créer un message dynamique
-      let missingStepsMessage = 'Pour accéder à votre profil, vous devez d\'abord terminer toutes les étapes.<br><br>';
-      missingStepsMessage += '<strong>Étapes restantes :</strong><br><ul style="text-align: left; margin-left: 20px;">';
-      
-      missingSteps.forEach(step => {
-        missingStepsMessage += `<li>Étape ${step}: ${this.steps.find(s => s.number === step)?.description}</li>`;
-      });
-      
-      missingStepsMessage += '</ul><br>Veuillez compléter ces étapes avant de continuer.';
-  
-      Swal.fire({
-        title: 'Étapes incomplètes',
-        html: missingStepsMessage,
-        icon: 'warning',
-        confirmButtonText: 'Compris'
-      });
-    }
+    this.completedSteps = new Set(this.steps.map((s) => s.number));
+    this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
+    this.router.navigate(['/profil']);
   }
 
   // Méthode pour le débogage
