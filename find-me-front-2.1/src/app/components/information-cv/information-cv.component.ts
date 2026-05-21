@@ -132,8 +132,9 @@ popupTitle: string = '';
   private loadCompletedSteps(): void {
     if (this.userId) {
       this.stepTracker.loadCompletedSteps(this.userId);
-      this.stepTracker.completedSteps$.subscribe(steps => {
-        this.completedSteps = steps;
+      this.stepTracker.completedSteps$.subscribe((steps) => {
+        this.completedSteps = new Set(steps);
+        this.cdr.detectChanges();
       });
     }
   }
@@ -143,8 +144,8 @@ popupTitle: string = '';
     
     this.stepTracker.completedSteps$.subscribe({
       next: (steps) => {
-        this.completedSteps = steps;
-        //console.log('Steps loaded:', steps); // Debug
+        this.completedSteps = new Set(steps);
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading steps:', err)
     });
@@ -471,19 +472,34 @@ popupTitle: string = '';
   }
   
 
-  /** Vert + coche : uniquement les etapes deja quittees (numero < etape active). */
+  /**
+   * Vert + coche : etapes precedentes, ou etape courante apres « Confirme » (ex. etape 3).
+   */
   isStepVisuallyCompleted(stepNumber: number): boolean {
-    return stepNumber < this.activeStep;
+    if (stepNumber < this.activeStep) {
+      return true;
+    }
+    return (
+      stepNumber === this.activeStep && this.completedSteps.has(stepNumber)
+    );
   }
 
   private markStepCompleted(stepNumber: number): void {
     if (this.completedSteps.has(stepNumber)) {
       return;
     }
-    this.completedSteps.add(stepNumber);
+    const next = new Set(this.completedSteps);
+    next.add(stepNumber);
+    this.completedSteps = next;
     if (this.userId) {
-      this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
+      this.stepTracker.updateCompletedSteps(next, this.userId);
     }
+    this.cdr.detectChanges();
+  }
+
+  /** Etape 3 diplomes/certificats : bouton « Confirme ! » dans certif-diplome. */
+  onStep3Confirmed(): void {
+    this.markStepCompleted(3);
   }
 
   goToStep(stepNumber: number): void {

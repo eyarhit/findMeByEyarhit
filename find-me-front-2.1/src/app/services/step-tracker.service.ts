@@ -27,14 +27,10 @@ export class StepTrackerService {
     this.cvService.getCvByUserId(userId).subscribe({
       next: (cv) => {
         if (cv?.completedSteps) {
-          const backendSteps = new Set(cv.completedSteps);
-          const currentSteps = new Set(this._completedSteps.value);
-          
-          // Fusionne les étapes
-          backendSteps.forEach(step => currentSteps.add(step));
-          
-          this._completedSteps.next(currentSteps);
-          this.persistSteps(userId, currentSteps);
+          const merged = new Set(this._completedSteps.value);
+          cv.completedSteps.forEach((step) => merged.add(step));
+          this._completedSteps.next(merged);
+          this.persistSteps(userId, merged);
         }
       },
       error: (err) => console.error('Error loading steps:', err)
@@ -48,11 +44,10 @@ export class StepTrackerService {
 
   // Marque une étape comme complétée et sauvegarde
   completeStep(userId: number, stepNumber: number, cvData?: any): void {
-    const currentSteps = this._completedSteps.value;
-    currentSteps.add(stepNumber);
-    this._completedSteps.next(currentSteps);
-
-    this.updateCompletedSteps(currentSteps, userId);
+    const next = new Set(this._completedSteps.value);
+    next.add(stepNumber);
+    this._completedSteps.next(next);
+    this.updateCompletedSteps(next, userId);
   }
 
   // Vérifie si une étape est complétée
@@ -62,8 +57,9 @@ export class StepTrackerService {
 
   // Met à jour les étapes complétées
   updateCompletedSteps(steps: Set<number>, userId: number): void {
-    this._completedSteps.next(steps);
-    this.persistSteps(userId, steps);
+    const next = new Set(steps);
+    this._completedSteps.next(next);
+    this.persistSteps(userId, next);
     
     // Met à jour le backend
     this.updateBackendSteps(userId, steps);

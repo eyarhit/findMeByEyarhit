@@ -400,7 +400,7 @@
       <!-- Step 3 - diplômes et certificats -->
       <div *ngIf="activeStep === 3" class="step-container">
         <div class="certif-container">
-          <app-certif-diplome></app-certif-diplome>
+          <app-certif-diplome (stepConfirmed)="onStep3Confirmed()"></app-certif-diplome>
         </div>
         
 

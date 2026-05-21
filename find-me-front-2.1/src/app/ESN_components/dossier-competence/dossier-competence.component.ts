@@ -308,17 +308,25 @@ popupTitle: string = '';
   
 
   isStepVisuallyCompleted(stepNumber: number): boolean {
-    return stepNumber < this.activeStep;
+    if (stepNumber < this.activeStep) {
+      return true;
+    }
+    return (
+      stepNumber === this.activeStep && this.completedSteps.has(stepNumber)
+    );
   }
 
   private markStepCompleted(stepNumber: number): void {
     if (this.completedSteps.has(stepNumber)) {
       return;
     }
-    this.completedSteps.add(stepNumber);
+    const next = new Set(this.completedSteps);
+    next.add(stepNumber);
+    this.completedSteps = next;
     if (this.userId) {
-      this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
+      this.stepTracker.updateCompletedSteps(next, this.userId);
     }
+    this.cdr.detectChanges();
   }
 
   goToStep(stepNumber: number): void {

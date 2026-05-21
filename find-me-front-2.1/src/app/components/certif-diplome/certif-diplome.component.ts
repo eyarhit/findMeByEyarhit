@@ -24,6 +24,8 @@ export class CertifDiplomeComponent implements OnInit, OnDestroy {
   fileName: string = '';
   documentsUploaded = false;
   @Output() documentsValidated = new EventEmitter<boolean>();
+  /** Clic sur « Confirme ! » — le parent affiche l’etape 3 en vert + coche. */
+  @Output() stepConfirmed = new EventEmitter<void>();
   isLoading = false;
   private documentSub?: Subscription;
   private userId: number | null = null;
@@ -231,6 +233,7 @@ export class CertifDiplomeComponent implements OnInit, OnDestroy {
     if (userId) {
       this.stepTracker.completeStep(userId, 3);
     }
+    this.stepConfirmed.emit();
     if (this.documentsUploaded) {
       Swal.fire({
         title: 'Étape terminée',
