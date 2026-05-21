@@ -30,17 +30,86 @@ function Wait-MySql {
 }
 
 function Find-PbiDesktop {
+    if ($env:PBI_DESKTOP_EXE -and (Test-Path $env:PBI_DESKTOP_EXE)) {
+        return $env:PBI_DESKTOP_EXE
+    }
+
+    $exeNames = @("PBIDesktop.exe", "PBIDesktopStore.exe")
     $candidates = @(
         "${env:ProgramFiles}\Microsoft Power BI Desktop\bin\PBIDesktop.exe",
+        "${env:ProgramFiles}\Microsoft Power BI Desktop\bin\PBIDesktopStore.exe",
         "${env:ProgramFiles}\Microsoft Power BI Desktop\PBIDesktop.exe",
-        "${env:LOCALAPPDATA}\Microsoft\WindowsApps\PBIDesktop.exe"
+        "${env:ProgramFiles(x86)}\Microsoft Power BI Desktop\bin\PBIDesktop.exe",
+        "${env:LOCALAPPDATA}\Microsoft\WindowsApps\PBIDesktop.exe",
+        "${env:LOCALAPPDATA}\Microsoft\WindowsApps\PBIDesktopStore.exe"
     )
     foreach ($p in $candidates) {
         if (Test-Path $p) { return $p }
     }
-    $found = Get-ChildItem -Path "${env:ProgramFiles}\Microsoft Power BI Desktop" -Filter "PBIDesktop.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($found) { return $found.FullName }
+
+    $searchRoots = @(
+        "${env:ProgramFiles}\Microsoft Power BI Desktop",
+        "${env:ProgramFiles(x86)}\Microsoft Power BI Desktop",
+        "${env:ProgramFiles}\WindowsApps"
+    )
+    foreach ($root in $searchRoots) {
+        if (-not (Test-Path $root)) { continue }
+        foreach ($name in $exeNames) {
+            $found = Get-ChildItem -Path $root -Filter $name -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($found) { return $found.FullName }
+        }
+    }
+
+    $regPaths = @(
+        "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*",
+        "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*",
+        "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*"
+    )
+    foreach ($regPath in $regPaths) {
+        $prev = $ErrorActionPreference
+        $ErrorActionPreference = "SilentlyContinue"
+        $apps = Get-ItemProperty $regPath -ErrorAction SilentlyContinue |
+            Where-Object { $_.DisplayName -match "Power BI Desktop" }
+        $ErrorActionPreference = $prev
+        foreach ($app in $apps) {
+            if ($app.InstallLocation) {
+                foreach ($name in $exeNames) {
+                    $p = Join-Path $app.InstallLocation "bin\$name"
+                    if (Test-Path $p) { return $p }
+                    $p = Join-Path $app.InstallLocation $name
+                    if (Test-Path $p) { return $p }
+                }
+            }
+            if ($app.DisplayIcon -match '\.exe') {
+                $icon = ($app.DisplayIcon -split ',')[0].Trim('"')
+                if (Test-Path $icon) { return $icon }
+            }
+        }
+    }
+
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = "SilentlyContinue"
+    foreach ($name in $exeNames) {
+        $where = (& where.exe $name 2>$null | Select-Object -First 1)
+        if ($where -and (Test-Path $where)) {
+            $ErrorActionPreference = $prev
+            return $where
+        }
+    }
+    $ErrorActionPreference = $prev
     return $null
+}
+
+function Open-PowerBiReport {
+    param([string]$ReportPath)
+    $pbi = Find-PbiDesktop
+    if ($pbi) {
+        Write-Host "Power BI : $pbi" -ForegroundColor Gray
+        Start-Process -FilePath $pbi -ArgumentList "`"$ReportPath`""
+        return
+    }
+    Write-Host "Chemin exe non trouve - ouverture via Windows (fichier .pbip / .pbix)..." -ForegroundColor Yellow
+    Start-Process -FilePath $ReportPath
 }
 
 Write-Step "1/4 - Projet Power BI (PBIP)"
@@ -66,17 +135,12 @@ if (-not $SkipEtl) {
 }
 
 Write-Step "4/4 - Ouverture Power BI Desktop"
-$pbi = Find-PbiDesktop
-if (-not $pbi) {
-    Write-Host "Power BI Desktop introuvable. Installez-le :" -ForegroundColor Yellow
-    Write-Host "  winget install -e --id Microsoft.PowerBIDesktop"
-    Write-Host "Puis relancez : scripts\powerbi-open.cmd"
-    exit 1
-}
-
 $openPath = if (Test-Path $PbixPath) { $PbixPath } else { $PbipPath }
+if (-not (Test-Path $openPath)) {
+    throw "Fichier introuvable : $openPath"
+}
 Write-Host "Fichier : $openPath" -ForegroundColor Green
-Start-Process -FilePath $pbi -ArgumentList "`"$openPath`""
+Open-PowerBiReport -ReportPath $openPath
 
 Write-Host ""
 Write-Host "========== POWER BI ==========" -ForegroundColor Green
