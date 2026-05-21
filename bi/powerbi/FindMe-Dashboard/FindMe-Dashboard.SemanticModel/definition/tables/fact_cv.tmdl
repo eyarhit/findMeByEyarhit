@@ -1,6 +1,6 @@
 
 table fact_cv
-    lineageTag: 1b7dd168-12c8-414c-bf3f-d4e0babe7b20
+    lineageTag: 253589d5-b50a-48cd-a8d6-2daa7944338a
 
     partition fact_cv = m
         mode: import

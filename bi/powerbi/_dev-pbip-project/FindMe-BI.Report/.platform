@@ -1,5 +1,5 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
   "metadata": { "type": "Report", "displayName": "FindMe-BI" },
-  "config": { "version": "2.0", "logicalId": "findme-bi-report-001" }
+  "config": { "version": "2.0", "logicalId": "b9e3f2d5-4c6e-5a0b-9f3d-7e8c0b1a2f4d" }
 }

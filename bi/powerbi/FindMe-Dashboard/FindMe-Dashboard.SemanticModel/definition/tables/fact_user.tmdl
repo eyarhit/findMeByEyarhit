@@ -1,6 +1,6 @@
 
 table fact_user
-    lineageTag: 098131ea-5f3f-4f1b-abef-09a706f3b7da
+    lineageTag: 8e8ea24b-84a0-418e-a7c3-bfe9e4c0a6c2
 
     partition fact_user = m
         mode: import

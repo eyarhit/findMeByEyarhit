@@ -1,6 +1,6 @@
 
 table dim_user
-    lineageTag: 7e096a21-15fb-4940-b358-98e45a8de3e0
+    lineageTag: a318e1e5-098e-4431-9d66-244fb0f39138
 
     partition dim_user = m
         mode: import

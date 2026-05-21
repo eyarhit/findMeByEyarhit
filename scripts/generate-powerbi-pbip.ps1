@@ -2,6 +2,8 @@
 param(
     [string]$OutputBase = "",
     [string]$ProjectPrefix = "FindMe-BI",
+    [string]$SemanticLogicalId = "a8f2e1c4-3b5d-4f9a-8e2c-6d7b9a0f1e3c",
+    [string]$ReportLogicalId = "b9e3f2d5-4c6e-5a0b-9f3d-7e8c0b1a2f4d",
     [switch]$SemanticModelOnly
 )
 
@@ -41,7 +43,7 @@ New-Dir $TablesDir
 {
   "`$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
   "metadata": { "type": "SemanticModel", "displayName": "$ProjectPrefix" },
-  "config": { "version": "2.0", "logicalId": "findme-semantic-001" }
+  "config": { "version": "2.0", "logicalId": "$SemanticLogicalId" }
 }
 "@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Sm ".platform") $_ }
 
@@ -127,7 +129,7 @@ New-Dir (Join-Path $Rp "definition\pages")
 @{
   '$schema' = 'https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json'
   metadata = @{ type = 'Report'; displayName = $ProjectPrefix }
-  config = @{ version = '2.0'; logicalId = 'findme-report-001' }
+  config = @{ version = '2.0'; logicalId = $ReportLogicalId }
 } | ConvertTo-Json -Depth 5 | ForEach-Object { Write-Utf8NoBom (Join-Path $Rp '.platform') $_ }
 
 @{

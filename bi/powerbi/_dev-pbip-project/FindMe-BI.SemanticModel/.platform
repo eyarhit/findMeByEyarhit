@@ -1,5 +1,5 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
   "metadata": { "type": "SemanticModel", "displayName": "FindMe-BI" },
-  "config": { "version": "2.0", "logicalId": "findme-bi-semantic-001" }
+  "config": { "version": "2.0", "logicalId": "a8f2e1c4-3b5d-4f9a-8e2c-6d7b9a0f1e3c" }
 }

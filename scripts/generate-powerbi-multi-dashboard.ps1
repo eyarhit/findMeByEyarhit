@@ -126,8 +126,12 @@ function New-TitleVisual($id, $x, $y, $w, $title) {
     New-Visual $id $x $y $w 48 1000 0 'textbox' $null $objects
 }
 
+# GUID fixes (Power BI exige un Guid pour logicalId)
+$SemanticLogicalId = '2e8b4f1a-6c3d-4b9e-a1f0-3c7d9e2b4f6a'
+$ReportLogicalId     = '7f3a9c2e-4b1d-4e8a-9f2c-1d5e6a7b8c9d'
+
 # --- Modele semantique (tables findme_dw) ---
-& (Join-Path $PSScriptRoot 'generate-powerbi-pbip.ps1') -OutputBase $Base -ProjectPrefix 'FindMe-Dashboard'
+& (Join-Path $PSScriptRoot 'generate-powerbi-pbip.ps1') -OutputBase $Base -ProjectPrefix 'FindMe-Dashboard' -SemanticModelOnly -SemanticLogicalId $SemanticLogicalId
 
 # --- Pages ---
 $pageExec = 'page_exec_findme01'
@@ -285,7 +289,7 @@ $plat = @"
 {
   "`$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
   "metadata": { "type": "Report", "displayName": "FindMe-Dashboard" },
-  "config": { "version": "2.0", "logicalId": "findme-dashboard-report-001" }
+  "config": { "version": "2.0", "logicalId": "$ReportLogicalId" }
 }
 "@
 Write-Utf8NoBom (Join-Path $Rp '.platform') $plat
