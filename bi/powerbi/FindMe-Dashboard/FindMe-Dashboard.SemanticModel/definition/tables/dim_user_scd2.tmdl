@@ -1,6 +1,6 @@
 
 table dim_user_scd2
-    lineageTag: 24d420ef-1495-4739-8bdd-f9dfe036e197
+    lineageTag: f2c2b932-5f0f-4907-a01f-d9c5d8cb230b
 
     column user_scd_key
         dataType: int64

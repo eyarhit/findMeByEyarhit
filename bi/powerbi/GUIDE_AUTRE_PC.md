@@ -36,6 +36,14 @@ Fait automatiquement :
 - Génération du dashboard **4 pages** (Executive, Managerial, Opérationnel, Technique)
 - Ouverture Power BI `FindMe-Dashboard.pbip`
 
+## Si seule « Page 1 » vide (modèle OK, pas de visuels)
+
+1. **Fermer** Power BI complètement.
+2. `GIT_PULL_BI.cmd` (dernière version du rapport).
+3. Rouvrir **`bi\powerbi\FindMe-Dashboard\FindMe-Dashboard.pbip`** (double-clic sur le `.pbip`, pas seulement le dossier SemanticModel).
+4. **Fichier → Options → Fonctionnalités préliminaires** : activer **Projets Power BI** / **PBIR** / **TMDL** si proposé.
+5. En bas : onglets **01 - Executive**, **02 - Managerial**, etc. (pas seulement Page 1).
+
 ## Première ouverture Power BI (une fois par PC)
 
 1. Bannière jaune → **Actualiser maintenant**

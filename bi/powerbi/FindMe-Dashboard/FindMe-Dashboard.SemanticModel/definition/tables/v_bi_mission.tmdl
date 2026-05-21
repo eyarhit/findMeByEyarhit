@@ -1,6 +1,6 @@
 
 table v_bi_mission
-    lineageTag: ec4a7642-9ae6-4244-a0a4-08ce1aca80ac
+    lineageTag: 0292f7a6-541a-4e4f-b9fc-dd1c5d7f9e6a
 
     column full_date
         dataType: dateTime

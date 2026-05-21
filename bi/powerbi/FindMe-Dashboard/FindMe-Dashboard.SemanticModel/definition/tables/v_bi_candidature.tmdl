@@ -1,6 +1,6 @@
 
 table v_bi_candidature
-    lineageTag: 87a77f63-28e1-45c4-b83c-f34dddc36f06
+    lineageTag: 97e601b4-8bde-42ad-8678-b4bafd52fd7b
 
     column full_date
         dataType: dateTime
