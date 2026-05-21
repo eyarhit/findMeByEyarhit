@@ -36,6 +36,24 @@ Fait automatiquement :
 - Génération du dashboard **4 pages** (Executive, Managerial, Opérationnel, Technique)
 - Ouverture Power BI `FindMe-Dashboard.pbip`
 
+## Où sont les 4 pages et les dashboards ?
+
+Les pages sont **dans le fichier projet** (`definition/pages/`), mais Power BI Desktop ne les affiche **que si l’option PBIR est activée**.
+
+### Activation obligatoire (1 fois)
+
+1. **Fichier → Options → Fonctionnalités préliminaires**
+2. Cocher :
+   - **Stocker les rapports au format de métadonnées amélioré (PBIR)**
+   - **Option d’enregistrement de projet Power BI (.pbip)**
+   - **Modèle sémantique TMDL** (si proposé)
+3. **Redémarrer** Power BI Desktop
+4. Lancer : `ACTIVER_DASHBOARD_4_PAGES.cmd` (à la racine du projet)
+
+Sans PBIR : vous voyez seulement **Page 1** vide alors que le modèle (tables à droite) est correct.
+
+Après activation, en bas du rapport : **01 - Executive**, **02 - Managerial**, **03 - Operationnel**, **04 - Technique** avec KPI et graphiques.
+
 ## Si seule « Page 1 » vide (modèle OK, pas de visuels)
 
 1. **Fermer** Power BI complètement.

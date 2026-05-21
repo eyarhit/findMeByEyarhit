@@ -179,13 +179,17 @@ function Show-PbipRefreshHelp {
     Write-Host "========== DASHBOARD FIND-ME (4 pages PBIP) ==========" -ForegroundColor Green
     Write-Host "  01 Executive | 02 Managerial | 03 Operationnel | 04 Technique"
     Write-Host ""
-    Write-Host "IMPORTANT - remplir les visuels (Vide) :" -ForegroundColor Yellow
-    Write-Host "  1. Banniere jaune : cliquez Actualiser maintenant"
-    Write-Host "  2. Parametres source : serveur localhost:3306  base findme_dw"
-    Write-Host "  3. Identifiants : findme_bi / findme_bi_readonly"
-    Write-Host "  4. Si erreur connexion : docker compose up -d mysql puis relancer ETL"
+    Write-Host "SI VOUS VOYEZ SEULEMENT Page 1 VIDE (pas les 4 onglets) :" -ForegroundColor Red
+    Write-Host "  Fichier > Options > Fonctionnalites preliminaires"
+    Write-Host "  Cocher : format metadonnees ameliore (PBIR) + projet .pbip"
+    Write-Host "  Redemarrer Power BI puis relancer ACTIVER_DASHBOARD_4_PAGES.cmd"
     Write-Host ""
-    Write-Host "Ancien rapport 1 page : ONE_COMMANDE_POWERBI.cmd -UsePbix"
+    Write-Host "IMPORTANT - donnees et visuels :" -ForegroundColor Yellow
+    Write-Host "  1. Banniere : Actualiser maintenant (relations + donnees)"
+    Write-Host "  2. Serveur localhost:3306  base findme_dw"
+    Write-Host "  3. findme_bi / findme_bi_readonly"
+    Write-Host ""
+    Write-Host "Plan B : ONE_COMMANDE_POWERBI.cmd -UsePbix"
 }
 
 # PBIP 3 pages (defaut)
