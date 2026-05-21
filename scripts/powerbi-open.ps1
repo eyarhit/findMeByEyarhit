@@ -181,7 +181,7 @@ function Show-PbipRefreshHelp {
     Write-Host ""
     Write-Host "IMPORTANT - remplir les visuels (Vide) :" -ForegroundColor Yellow
     Write-Host "  1. Banniere jaune : cliquez Actualiser maintenant"
-    Write-Host "  2. Parametres source : serveur 127.0.0.1  base findme_dw"
+    Write-Host "  2. Parametres source : serveur localhost:3306  base findme_dw"
     Write-Host "  3. Identifiants : findme_bi / findme_bi_readonly"
     Write-Host "  4. Si erreur connexion : docker compose up -d mysql puis relancer ETL"
     Write-Host ""

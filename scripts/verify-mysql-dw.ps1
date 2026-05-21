@@ -16,4 +16,4 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 Write-Host ""
-Write-Host "OK - Dans Power BI : Actualiser, serveur 127.0.0.1, base findme_dw, findme_bi / findme_bi_readonly" -ForegroundColor Green
+Write-Host "OK - Dans Power BI : Actualiser, serveur localhost:3306, base findme_dw, findme_bi / findme_bi_readonly" -ForegroundColor Green

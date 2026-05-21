@@ -246,15 +246,18 @@ expression fn_MySQLTable =
 		let
 		    fn = (tableName as text) =>
 		    let
-		        Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase, [CreateNavigationProperties=false]),
-		        Data = Source{[Schema=PBI_MySqlDatabase, Item=tableName]}[Data]
+		        Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase, [ReturnServerDateTime=true, CreateNavigationProperties=false]),
+		        Nav = try Source{[Schema=PBI_MySqlDatabase, Item=tableName]}[Data]
+		            otherwise try Source{[Item=tableName, Kind="Table"]}[Data]
+		            otherwise try Source{[Item=tableName]}[Data]
+		            otherwise Value.NativeQuery(Source, "SELECT * FROM " & tableName, null, [EnableFolding=false])
 		    in
-		        Data
+		        Nav
 		in
 		    fn
 		meta [IsParameterQuery=false]
 
-expression PBI_MySqlServer = "127.0.0.1" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+expression PBI_MySqlServer = "localhost:3306" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 expression PBI_MySqlDatabase = "findme_dw" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 
 $refs

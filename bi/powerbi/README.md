@@ -28,7 +28,7 @@ Voir **[GUIDE_AUTRE_PC.md](GUIDE_AUTRE_PC.md)** (clone ou ZIP + `ONE_COMMANDE_PO
 ONE_COMMANDE_POWERBI.cmd
 ```
 
-Ouvre **`FindMe-Dashboard.pbip`** (3 pages). Si les cartes affichent **(Vide)** : cliquez **Actualiser maintenant**, serveur **`127.0.0.1`**, base **`findme_dw`**, login **`findme_bi`** / **`findme_bi_readonly`**.
+Ouvre **`FindMe-Dashboard.pbip`** (3 pages). Si les cartes affichent **(Vide)** ou triangles rouges : cliquez **Actualiser maintenant**, serveur **`localhost:3306`**, base **`findme_dw`**, login **`findme_bi`** / **`findme_bi_readonly`**.
 
 Verification MySQL avant Power BI : `scripts\verify-mysql-dw.ps1`
 
@@ -161,6 +161,7 @@ Power BI Report Server en Docker nécessite des conteneurs Windows ; non requis 
 
 | Erreur | Cause | Action |
 |--------|-------|--------|
+| **Triangles rouges** sur toutes les tables (vue Modèle) | Requête M ou identifiants MySQL invalides | `git pull` + `ONE_COMMANDE_POWERBI.cmd` ; **Actualiser** ; serveur `localhost:3306` ; si besoin : *Transformer les données* → *Paramètres de la source de données* → modifier identifiants `findme_bi` |
 | **Unable to connect to any of the specified MySQL hosts** | MySQL non joignable depuis Windows (port non publié ou conteneur arrêté) | `git pull`, `docker compose up -d`, vérifier `docker compose ps` → `findme-mysql` **healthy**. Le compose doit exposer `3306:3306`. |
 | Demande d’installer des composants MySQL | Connecteur MySQL manquant | Installer [MySQL Connector/NET](https://dev.mysql.com/downloads/connector/net/), redémarrer Power BI. |
 | Authentification refusée | Mauvais utilisateur | Onglet **Base de données** : `findme_bi` / `findme_bi_readonly` (pas l’auth Windows). |
