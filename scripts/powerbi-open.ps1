@@ -1,8 +1,8 @@
-# Une commande : ETL Talend + ouverture Power BI avec toutes les tables findme_dw
+# Une commande : ETL Talend + ouverture Power BI (.pbix recommande, pas .pbip)
 param(
     [switch]$SkipEtl,
     [switch]$SkipDocker,
-    [switch]$RegeneratePbip
+    [switch]$UsePbip
 )
 
 $ErrorActionPreference = "Stop"
@@ -11,6 +11,7 @@ Set-Location $Root
 
 $PbipPath = Join-Path $Root "bi\powerbi\FindMe-BI\FindMe-BI.pbip"
 $PbixPath = Join-Path $Root "bi\powerbi\reports\FindMe_BI_Auto.pbix"
+$PbidsPath = Join-Path $Root "bi\powerbi\starter\findme_dw.pbids"
 $GenScript = Join-Path $PSScriptRoot "generate-powerbi-pbip.ps1"
 
 function Write-Step($msg) { Write-Host "`n=== $msg ===" -ForegroundColor Cyan }
@@ -112,9 +113,18 @@ function Open-PowerBiReport {
     Start-Process -FilePath $ReportPath
 }
 
-Write-Step "1/4 - Projet Power BI (PBIP)"
-# Regeneration rapide : UTF-8 sans BOM (requis par Power BI Desktop)
-& $GenScript
+if ($UsePbip) {
+    Write-Step "1/4 - Projet Power BI (PBIP, optionnel)"
+    & $GenScript
+} else {
+    Write-Step "1/4 - Power BI (.pbix recommande)"
+    if (Test-Path $PbixPath) {
+        Write-Host "Rapport .pbix trouve : $PbixPath"
+    } else {
+        Write-Host "Pas encore de .pbix - creation guidee via findme_dw.pbids"
+        Write-Host "Guide : bi\powerbi\starter\CREER_PBIX.md"
+    }
+}
 
 if (-not $SkipDocker) {
     Write-Step "2/4 - Docker MySQL"
@@ -132,23 +142,31 @@ if (-not $SkipEtl) {
 }
 
 Write-Step "4/4 - Ouverture Power BI Desktop"
-$openPath = if (Test-Path $PbixPath) { $PbixPath } else { $PbipPath }
-if (-not (Test-Path $openPath)) {
-    throw "Fichier introuvable : $openPath"
-}
-Write-Host "Fichier : $openPath" -ForegroundColor Green
-Open-PowerBiReport -ReportPath $openPath
-
-Write-Host ""
-Write-Host "========== POWER BI ==========" -ForegroundColor Green
 if (Test-Path $PbixPath) {
-    Write-Host "Rapport enregistre detecte - ouverture directe (tables + connexion memorisees)."
+    $openPath = $PbixPath
+    Write-Host "Fichier : $openPath" -ForegroundColor Green
+    Open-PowerBiReport -ReportPath $openPath
+    Write-Host ""
+    Write-Host "========== POWER BI (.pbix) ==========" -ForegroundColor Green
+    Write-Host "Rapport pret - actualisez si besoin (Accueil - Actualiser)."
+} elseif ($UsePbip -and (Test-Path $PbipPath)) {
+    $openPath = $PbipPath
+    Write-Host "Fichier : $openPath" -ForegroundColor Green
+    Open-PowerBiReport -ReportPath $openPath
+} elseif (Test-Path $PbidsPath) {
+    $openPath = $PbidsPath
+    Write-Host "Connexion MySQL : $openPath" -ForegroundColor Green
+    Open-PowerBiReport -ReportPath $openPath
+    Write-Host ""
+    Write-Host "========== CREER VOTRE .pbix (1 fois) ==========" -ForegroundColor Green
+    Write-Host "  1. Onglet Base de donnees : findme_bi / findme_bi_readonly"
+    Write-Host "  2. Navigateur : cochez les tables findme_dw puis Charger"
+    Write-Host "  3. Fichier - Enregistrer sous :"
+    Write-Host "     bi\powerbi\reports\FindMe_BI_Auto.pbix"
+    Write-Host "  4. Relancez : scripts\powerbi-open.cmd"
 } else {
-    Write-Host "Premiere ouverture (projet PBIP) :"
-    Write-Host "  1. Identifiants MySQL : findme_bi / findme_bi_readonly"
-    Write-Host "  2. Actualiser les requetes si demande"
-    Write-Host "  3. Enregistrer sous : bi\powerbi\reports\FindMe_BI_Auto.pbix"
-    Write-Host "     (les prochains scripts\powerbi-open.cmd ouvriront ce fichier)"
+    throw "Aucun fichier Power BI trouve (pbix, pbids ou pbip)."
 }
+
 Write-Host ""
 Write-Host "Relance : scripts\powerbi-open.cmd"

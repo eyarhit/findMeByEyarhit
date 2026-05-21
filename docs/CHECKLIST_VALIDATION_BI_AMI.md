@@ -86,7 +86,7 @@ Utile pour la **démo visuelle** du job Talend, pas obligatoire si l’ETL CLI f
 scripts\powerbi-open.cmd
 ```
 
-Ouvre Power BI avec le projet préconfiguré (17 tables/vues). Première fois : saisir `findme_bi` / `findme_bi_readonly`.
+Ouvre Power BI : `.pbix` si présent, sinon connexion `findme_dw.pbids`. Première fois : créer `reports/FindMe_BI_Auto.pbix` (voir `bi/powerbi/starter/CREER_PBIX.md`).
 
 ### Validation manuelle (si besoin)
 

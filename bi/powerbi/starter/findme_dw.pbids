@@ -1,0 +1,16 @@
+{
+  "version": "0.1",
+  "connections": [
+    {
+      "details": {
+        "protocol": "mysql",
+        "address": {
+          "server": "localhost:3306",
+          "database": "findme_dw"
+        }
+      },
+      "options": {},
+      "mode": "Import"
+    }
+  ]
+}
