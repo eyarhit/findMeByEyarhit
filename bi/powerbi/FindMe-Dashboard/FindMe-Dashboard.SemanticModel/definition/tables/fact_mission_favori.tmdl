@@ -1,6 +1,6 @@
 
 table fact_mission_favori
-    lineageTag: 09b6453a-8a8d-4d89-a7e9-fb1e2d700695
+    lineageTag: 469b05f2-37ca-4c1c-b689-4586f24cb03d
 
     column favori_key
         dataType: int64
@@ -32,6 +32,9 @@ table fact_mission_favori
         source =
             let
                 Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
-                Data = Source{[Schema=PBI_MySqlDatabase, Item="fact_mission_favori"]}[Data]
+                Data = try Source{[Schema=PBI_MySqlDatabase, Item="fact_mission_favori"]}[Data]
+                    otherwise try Source{[Name="fact_mission_favori", Kind="Table"]}[Data]
+                    otherwise try Source{[Item="fact_mission_favori"]}[Data]
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_mission_favori", null)
             in
                 Data

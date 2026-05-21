@@ -1,6 +1,6 @@
 
 table dim_skill
-    lineageTag: bfc3e465-af4d-4d9a-a546-d2aea12614ba
+    lineageTag: 16ea81f6-0fe1-4475-a38a-c661f9076b7a
 
     column skill_key
         dataType: int64
@@ -27,6 +27,9 @@ table dim_skill
         source =
             let
                 Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
-                Data = Source{[Schema=PBI_MySqlDatabase, Item="dim_skill"]}[Data]
+                Data = try Source{[Schema=PBI_MySqlDatabase, Item="dim_skill"]}[Data]
+                    otherwise try Source{[Name="dim_skill", Kind="Table"]}[Data]
+                    otherwise try Source{[Item="dim_skill"]}[Data]
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM dim_skill", null)
             in
                 Data

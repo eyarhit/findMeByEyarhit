@@ -1,6 +1,6 @@
 
 table dim_user_scd2
-    lineageTag: f516d7f5-6b7d-4a8e-9baa-b627d697d7dc
+    lineageTag: 0206b406-a106-4f54-aadb-2a3c6f4d5508
 
     column user_scd_key
         dataType: int64
@@ -47,6 +47,9 @@ table dim_user_scd2
         source =
             let
                 Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
-                Data = Source{[Schema=PBI_MySqlDatabase, Item="dim_user_scd2"]}[Data]
+                Data = try Source{[Schema=PBI_MySqlDatabase, Item="dim_user_scd2"]}[Data]
+                    otherwise try Source{[Name="dim_user_scd2", Kind="Table"]}[Data]
+                    otherwise try Source{[Item="dim_user_scd2"]}[Data]
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM dim_user_scd2", null)
             in
                 Data

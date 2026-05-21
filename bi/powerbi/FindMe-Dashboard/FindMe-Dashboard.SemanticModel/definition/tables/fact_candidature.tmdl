@@ -1,6 +1,6 @@
 
 table fact_candidature
-    lineageTag: 0c9fc51c-4577-4a5a-a087-4f3dae28de49
+    lineageTag: a0885e01-bf58-4e31-90fa-4da516d8b453
 
     column candidature_key
         dataType: int64
@@ -52,6 +52,9 @@ table fact_candidature
         source =
             let
                 Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
-                Data = Source{[Schema=PBI_MySqlDatabase, Item="fact_candidature"]}[Data]
+                Data = try Source{[Schema=PBI_MySqlDatabase, Item="fact_candidature"]}[Data]
+                    otherwise try Source{[Name="fact_candidature", Kind="Table"]}[Data]
+                    otherwise try Source{[Item="fact_candidature"]}[Data]
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_candidature", null)
             in
                 Data

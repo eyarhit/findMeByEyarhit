@@ -1,6 +1,6 @@
 
 table fact_cv
-    lineageTag: 6868c1f9-f528-402e-974e-072267ce661d
+    lineageTag: 99f3a7fe-1faa-48e4-aea0-31792f7bea3f
 
     column cv_key
         dataType: int64
@@ -32,6 +32,9 @@ table fact_cv
         source =
             let
                 Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
-                Data = Source{[Schema=PBI_MySqlDatabase, Item="fact_cv"]}[Data]
+                Data = try Source{[Schema=PBI_MySqlDatabase, Item="fact_cv"]}[Data]
+                    otherwise try Source{[Name="fact_cv", Kind="Table"]}[Data]
+                    otherwise try Source{[Item="fact_cv"]}[Data]
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_cv", null)
             in
                 Data

@@ -1,6 +1,6 @@
 
 table v_bi_mission
-    lineageTag: a891d20b-247e-47f7-9776-b7c0c4b0f651
+    lineageTag: 4c28e7da-5535-4cfa-adb1-0ee689a66fb9
 
     column full_date
         dataType: dateTime
@@ -62,6 +62,9 @@ table v_bi_mission
         source =
             let
                 Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
-                Data = Source{[Schema=PBI_MySqlDatabase, Item="v_bi_mission"]}[Data]
+                Data = try Source{[Schema=PBI_MySqlDatabase, Item="v_bi_mission"]}[Data]
+                    otherwise try Source{[Name="v_bi_mission", Kind="Table"]}[Data]
+                    otherwise try Source{[Item="v_bi_mission"]}[Data]
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM v_bi_mission", null)
             in
                 Data

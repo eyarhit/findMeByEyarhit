@@ -265,7 +265,10 @@ $colBlock
         source =
             let
                 Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
-                Data = Source{[Schema=PBI_MySqlDatabase, Item="$t"]}[Data]
+                Data = try Source{[Schema=PBI_MySqlDatabase, Item="$t"]}[Data]
+                    otherwise try Source{[Name="$t", Kind="Table"]}[Data]
+                    otherwise try Source{[Item="$t"]}[Data]
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM $t", null)
             in
                 Data
 

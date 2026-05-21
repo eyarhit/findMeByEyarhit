@@ -1,6 +1,6 @@
 
 table dim_mission
-    lineageTag: ba08a5f6-4638-47f0-b282-2ba50b0adec6
+    lineageTag: fb27f8c2-673e-4729-b53c-8f8cc327d70b
 
     column mission_key
         dataType: int64
@@ -52,6 +52,9 @@ table dim_mission
         source =
             let
                 Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
-                Data = Source{[Schema=PBI_MySqlDatabase, Item="dim_mission"]}[Data]
+                Data = try Source{[Schema=PBI_MySqlDatabase, Item="dim_mission"]}[Data]
+                    otherwise try Source{[Name="dim_mission", Kind="Table"]}[Data]
+                    otherwise try Source{[Item="dim_mission"]}[Data]
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM dim_mission", null)
             in
                 Data

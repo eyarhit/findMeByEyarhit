@@ -1,6 +1,6 @@
 
 table fact_quiz
-    lineageTag: 9e61d8fb-c568-4c06-9d5f-cf41b8cdd4e2
+    lineageTag: f54e85d7-a7da-48c6-8b98-382e38e97460
 
     column quiz_key
         dataType: int64
@@ -37,6 +37,9 @@ table fact_quiz
         source =
             let
                 Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
-                Data = Source{[Schema=PBI_MySqlDatabase, Item="fact_quiz"]}[Data]
+                Data = try Source{[Schema=PBI_MySqlDatabase, Item="fact_quiz"]}[Data]
+                    otherwise try Source{[Name="fact_quiz", Kind="Table"]}[Data]
+                    otherwise try Source{[Item="fact_quiz"]}[Data]
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_quiz", null)
             in
                 Data

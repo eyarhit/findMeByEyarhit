@@ -1,6 +1,6 @@
 
 table etl_run_log
-    lineageTag: a882add1-fb1e-4f29-af97-f238b765f87b
+    lineageTag: 2da59f85-a907-4cf7-9966-cb3690daee98
 
     column run_id
         dataType: int64
@@ -37,6 +37,9 @@ table etl_run_log
         source =
             let
                 Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
-                Data = Source{[Schema=PBI_MySqlDatabase, Item="etl_run_log"]}[Data]
+                Data = try Source{[Schema=PBI_MySqlDatabase, Item="etl_run_log"]}[Data]
+                    otherwise try Source{[Name="etl_run_log", Kind="Table"]}[Data]
+                    otherwise try Source{[Item="etl_run_log"]}[Data]
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM etl_run_log", null)
             in
                 Data

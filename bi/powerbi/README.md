@@ -40,6 +40,8 @@ Si `git pull` refuse (fichiers `.tmdl` modifies par Power BI — **ne pas commit
 GIT_PULL_BI.cmd
 ```
 
+(Ne supprime plus `reports/FindMe_BI_Auto.pbix` — seulement reset le dossier `FindMe-Dashboard/`.)
+
 Ou manuellement :
 
 ```cmd

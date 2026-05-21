@@ -5,13 +5,13 @@ cd /d "%~dp0"
 echo [1/4] Suppression ancien dossier FindMe-BI (piege .pbip)...
 rmdir /s /q "bi\powerbi\FindMe-BI" 2>nul
 
-echo [2/4] Reset bi/powerbi (fichiers .tmdl modifies par Power BI)...
-git checkout -- bi/powerbi/
+echo [2/4] Reset modele PBIP uniquement (pas reports/*.pbix)...
+git checkout -- bi/powerbi/FindMe-Dashboard/
 if errorlevel 1 (
-  echo git checkout a echoue - essayez : git stash push -u -m "pbi-local"
-  git stash push -u -m "pbi-local" 2>nul
+  echo git checkout a echoue - essayez : git stash push -m "pbi-tmdl"
+  git stash push -m "pbi-tmdl" 2>nul
 )
-git clean -fd bi/powerbi/
+REM NE PAS git clean bi/powerbi/ : supprime FindMe_BI_Auto.pbix non versionne
 
 echo [3/4] git pull...
 git pull
