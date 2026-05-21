@@ -37,13 +37,13 @@
       <div class="steps-container relative mb-8">
         <div class="steps-wrapper">
           <div *ngFor="let step of steps; let i = index" class="step-item"
-              [class.active]="activeStep === step.number" 
-              [class.completed]="completedSteps.has(step.number)"
-              [class.pending]="!completedSteps.has(step.number)"
+              [class.active]="activeStep === step.number"
+              [class.completed]="isStepVisuallyCompleted(step.number)"
+              [class.pending]="step.number > activeStep"
               (click)="goToStep(step.number)">
             <div class="step-circle">
-              <span *ngIf="!completedSteps.has(step.number)">{{ step.number }}</span>
-              <i *ngIf="completedSteps.has(step.number)" class="fas fa-check"></i>
+              <span *ngIf="!isStepVisuallyCompleted(step.number)">{{ step.number }}</span>
+              <i *ngIf="isStepVisuallyCompleted(step.number)" class="fas fa-check"></i>
             </div>
             <div class="step-description">
               <!-- <i class="fas {{step.icon}} step-icon"></i> -->

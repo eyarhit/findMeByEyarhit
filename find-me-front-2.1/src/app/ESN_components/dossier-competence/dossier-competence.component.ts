@@ -307,6 +307,10 @@ popupTitle: string = '';
   }
   
 
+  isStepVisuallyCompleted(stepNumber: number): boolean {
+    return stepNumber < this.activeStep;
+  }
+
   private markStepCompleted(stepNumber: number): void {
     if (this.completedSteps.has(stepNumber)) {
       return;
@@ -323,10 +327,10 @@ popupTitle: string = '';
     }
 
     const previousStep = this.activeStep;
-    if (previousStep === 1 && stepNumber > 1) {
-      this.markStepCompleted(1);
-    } else if (previousStep === 2 && stepNumber > 2) {
-      this.markStepCompleted(2);
+    if (stepNumber > previousStep) {
+      for (let s = previousStep; s < stepNumber; s++) {
+        this.markStepCompleted(s);
+      }
     }
 
     this.activeStep = stepNumber;
@@ -467,6 +471,12 @@ popupTitle: string = '';
             (cv.completedSteps ?? []).map((n: number) => (n === 4 ? 3 : n))
           );
           this.completedSteps = steps;
+          if (steps.size > 0) {
+            const max = Math.max(...Array.from(steps));
+            this.activeStep = Math.min(max + 1, this.steps.length);
+          } else {
+            this.activeStep = 1;
+          }
           if (this.userId) {
             this.stepTracker.updateCompletedSteps(steps, this.userId);
           }
