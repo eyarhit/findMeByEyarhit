@@ -7,8 +7,10 @@ $RpName = "FindMe-Dashboard.Report"
 $Sm = Join-Path $Base $SmName
 $Rp = Join-Path $Base $RpName
 $PagesDir = Join-Path $Rp "definition\pages"
+$script:LayoutOffset = 40
 
 $script:Utf8NoBom = New-Object System.Text.UTF8Encoding $false
+function LY([int]$y) { $y + $script:LayoutOffset }
 function Write-Utf8NoBom([string]$Path, [string]$Content) {
     $dir = Split-Path $Path -Parent
     if ($dir -and -not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
@@ -123,7 +125,17 @@ function New-TitleVisual($id, $x, $y, $w, $title) {
             }
         })
     }
-    New-Visual $id $x $y $w 48 1000 0 'textbox' $null $objects
+    New-Visual $id $x (LY $y) $w 48 1000 0 'textbox' $null $objects
+}
+
+function New-PageNavigatorVisual($id) {
+    New-Visual $id 24 668 1232 48 9500 9500 'pageNavigator' $null
+}
+
+function Add-PageNavBar([string]$pageName) {
+    $navDir = Join-Path $PagesDir "$pageName\visuals\nav_pages"
+    New-Dir $navDir
+    Write-Utf8NoBom (Join-Path $navDir 'visual.json') (New-PageNavigatorVisual 'nav_pages')
 }
 
 # GUID fixes (Power BI exige un Guid pour logicalId)
@@ -163,9 +175,9 @@ Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\title01\visual.json") (N
 $qCard1 = @{ Values = @{ projections = @(New-SumProjection 'v_bi_kpi_recrutement' 'candidatures') } }
 $qCard2 = @{ Values = @{ projections = @(New-SumProjection 'v_bi_kpi_recrutement' 'acceptees') } }
 $qCard3 = @{ Values = @{ projections = @(New-AvgProjection 'v_bi_kpi_recrutement' 'taux_acceptation_pct') } }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\kpi_cand\visual.json") (New-Visual 'kpi_cand' 24 80 280 120 2000 1000 'card' $qCard1)
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\kpi_acc\visual.json") (New-Visual 'kpi_acc' 320 80 280 120 2001 2000 'card' $qCard2)
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\kpi_tx\visual.json") (New-Visual 'kpi_tx' 616 80 280 120 2002 3000 'card' $qCard3)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\kpi_cand\visual.json") (New-Visual 'kpi_cand' 24 (LY 80) 280 120 2000 1000 'card' $qCard1)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\kpi_acc\visual.json") (New-Visual 'kpi_acc' 320 (LY 80) 280 120 2001 2000 'card' $qCard2)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\kpi_tx\visual.json") (New-Visual 'kpi_tx' 616 (LY 80) 280 120 2002 3000 'card' $qCard3)
 
 $qTableKpi = @{
     Values = @{
@@ -179,22 +191,23 @@ $qTableKpi = @{
         )
     }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\tbl_kpi\visual.json") (New-Visual 'tbl_kpi' 590 210 660 480 1000 4000 'tableEx' $qTableKpi)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\tbl_kpi\visual.json") (New-Visual 'tbl_kpi' 590 (LY 210) 660 420 1000 4000 'tableEx' $qTableKpi)
 
 $qSlicerYear = @{ Values = @{ projections = @(New-ColumnProjection 'dim_date' 'year_num' $true) } }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\slicer_year\visual.json") (New-Visual 'slicer_year' 920 72 340 88 3000 5000 'slicer' $qSlicerYear)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\slicer_year\visual.json") (New-Visual 'slicer_year' 920 (LY 72) 340 88 3000 5000 'slicer' $qSlicerYear)
 
 $qLineTrend = @{
     Category = @{ projections = @(New-ColumnProjection 'v_bi_kpi_recrutement' 'month_num' $true) }
     Y        = @{ projections = @(New-SumProjection 'v_bi_kpi_recrutement' 'candidatures') }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\line_trend\visual.json") (New-Visual 'line_trend' 24 210 550 200 1001 3000 'lineChart' $qLineTrend)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\line_trend\visual.json") (New-Visual 'line_trend' 24 (LY 210) 550 200 1001 3000 'lineChart' $qLineTrend)
 
 $qDonutExec = @{
     Category = @{ projections = @(New-ColumnProjection 'v_bi_kpi_recrutement' 'month_num' $true) }
     Y        = @{ projections = @(New-SumProjection 'v_bi_kpi_recrutement' 'acceptees') }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\donut_acc\visual.json") (New-Visual 'donut_acc' 24 430 350 260 1002 3500 'donutChart' $qDonutExec)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\donut_acc\visual.json") (New-Visual 'donut_acc' 24 (LY 430) 350 220 1002 3500 'donutChart' $qDonutExec)
+Add-PageNavBar $pageExec
 
 # Page Managerial
 Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\title02\visual.json") (New-TitleVisual 'title02' 24 16 900 'Find-Me - Missions et Candidatures (Managerial)')
@@ -203,13 +216,13 @@ $qBarMission = @{
     Category = @{ projections = @(New-ColumnProjection 'v_bi_mission' 'mission_name' $true) }
     Y        = @{ projections = @(New-SumProjection 'v_bi_mission' 'mission_count') }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\bar_mission\visual.json") (New-Visual 'bar_mission' 24 80 600 300 1000 1000 'clusteredBarChart' $qBarMission)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\bar_mission\visual.json") (New-Visual 'bar_mission' 24 (LY 80) 600 280 1000 1000 'clusteredBarChart' $qBarMission)
 
 $qBarCand = @{
     Category = @{ projections = @(New-ColumnProjection 'v_bi_candidature' 'statut_candidature' $true) }
     Y        = @{ projections = @(New-SumProjection 'v_bi_candidature' 'candidature_count') }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\bar_statut\visual.json") (New-Visual 'bar_statut' 640 80 600 300 1001 2000 'clusteredBarChart' $qBarCand)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\bar_statut\visual.json") (New-Visual 'bar_statut' 640 (LY 80) 600 280 1001 2000 'clusteredBarChart' $qBarCand)
 
 $qTblCand = @{
     Values = @{
@@ -222,19 +235,20 @@ $qTblCand = @{
         )
     }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\tbl_cand\visual.json") (New-Visual 'tbl_cand' 24 400 1230 290 1000 3000 'tableEx' $qTblCand)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\tbl_cand\visual.json") (New-Visual 'tbl_cand' 640 (LY 380) 600 270 1000 3000 'tableEx' $qTblCand)
 
 $qSlicerStatut = @{ Values = @{ projections = @(New-ColumnProjection 'v_bi_candidature' 'statut_candidature' $true) } }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\slicer_statut\visual.json") (New-Visual 'slicer_statut' 920 72 340 88 3000 5000 'slicer' $qSlicerStatut)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\slicer_statut\visual.json") (New-Visual 'slicer_statut' 920 (LY 72) 340 88 3000 5000 'slicer' $qSlicerStatut)
 
-$qSlicerMgrYear = @{ Values = @{ projections = @(New-ColumnProjection 'v_bi_candidature' 'year_num' $true) } }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\slicer_year\visual.json") (New-Visual 'slicer_year' 920 172 340 88 3001 5100 'slicer' $qSlicerMgrYear)
+$qSlicerMgrYear = @{ Values = @{ projections = @(New-ColumnProjection 'dim_date' 'year_num' $true) } }
+Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\slicer_year\visual.json") (New-Visual 'slicer_year' 920 (LY 172) 340 88 3001 5100 'slicer' $qSlicerMgrYear)
 
 $qColMission = @{
-    Category = @{ projections = @(New-ColumnProjection 'dim_mission' 'status_mission' $true) }
+    Category = @{ projections = @(New-ColumnProjection 'v_bi_mission' 'status_mission' $true) }
     Y        = @{ projections = @(New-SumProjection 'v_bi_mission' 'mission_count') }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\col_status\visual.json") (New-Visual 'col_status' 24 400 580 290 1002 4000 'columnChart' $qColMission)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\col_status\visual.json") (New-Visual 'col_status' 24 (LY 380) 600 270 1002 4000 'columnChart' $qColMission)
+Add-PageNavBar $pageMgr
 
 # Page Operationnel
 Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\title03\visual.json") (New-TitleVisual 'title03' 24 16 900 'Find-Me - CV, Utilisateurs, Notifications (Operationnel)')
@@ -242,9 +256,9 @@ Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\title03\visual.json") (Ne
 $qCardUsers = @{ Values = @{ projections = @(New-SumProjection 'fact_user' 'user_count') } }
 $qCardCv    = @{ Values = @{ projections = @(New-SumProjection 'fact_cv' 'cv_count') } }
 $qCardNotif = @{ Values = @{ projections = @(New-SumProjection 'fact_notification' 'notification_count') } }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\kpi_users\visual.json") (New-Visual 'kpi_users' 24 80 280 120 2000 1000 'card' $qCardUsers)
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\kpi_cv\visual.json") (New-Visual 'kpi_cv' 320 80 280 120 2001 2000 'card' $qCardCv)
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\kpi_notif\visual.json") (New-Visual 'kpi_notif' 616 80 280 120 2002 3000 'card' $qCardNotif)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\kpi_users\visual.json") (New-Visual 'kpi_users' 24 (LY 80) 280 120 2000 1000 'card' $qCardUsers)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\kpi_cv\visual.json") (New-Visual 'kpi_cv' 320 (LY 80) 280 120 2001 2000 'card' $qCardCv)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\kpi_notif\visual.json") (New-Visual 'kpi_notif' 616 (LY 80) 280 120 2002 3000 'card' $qCardNotif)
 
 $qTblNotif = @{
     Values = @{
@@ -256,7 +270,7 @@ $qTblNotif = @{
         )
     }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\tbl_notif\visual.json") (New-Visual 'tbl_notif' 24 220 600 470 1000 4000 'tableEx' $qTblNotif)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\tbl_notif\visual.json") (New-Visual 'tbl_notif' 24 (LY 220) 600 420 1000 4000 'tableEx' $qTblNotif)
 
 $qTblCv = @{
     Values = @{
@@ -268,19 +282,20 @@ $qTblCv = @{
         )
     }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\tbl_cv\visual.json") (New-Visual 'tbl_cv' 640 220 610 470 1001 5000 'tableEx' $qTblCv)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\tbl_cv\visual.json") (New-Visual 'tbl_cv' 640 (LY 220) 610 420 1001 5000 'tableEx' $qTblCv)
 
 $qCardMission = @{ Values = @{ projections = @(New-SumProjection 'fact_mission' 'mission_count') } }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\kpi_mission\visual.json") (New-Visual 'kpi_mission' 920 72 280 120 2003 1000 'card' $qCardMission)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\kpi_mission\visual.json") (New-Visual 'kpi_mission' 920 (LY 72) 280 120 2003 1000 'card' $qCardMission)
 
 $qSlicerRead = @{ Values = @{ projections = @(New-ColumnProjection 'fact_notification' 'is_read' $true) } }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\slicer_read\visual.json") (New-Visual 'slicer_read' 920 210 340 88 3000 6000 'slicer' $qSlicerRead)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\slicer_read\visual.json") (New-Visual 'slicer_read' 920 (LY 210) 340 88 3000 6000 'slicer' $qSlicerRead)
 
 $qBarSkill = @{
     Category = @{ projections = @(New-ColumnProjection 'dim_skill' 'skill_label' $true) }
     Y        = @{ projections = @(New-SumProjection 'dim_skill' 'usage_count') }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\bar_skills\visual.json") (New-Visual 'bar_skills' 24 430 1230 260 1002 5500 'clusteredBarChart' $qBarSkill)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\bar_skills\visual.json") (New-Visual 'bar_skills' 24 (LY 430) 1230 220 1002 5500 'clusteredBarChart' $qBarSkill)
+Add-PageNavBar $pageOps
 
 # report.json (PBIR)
 $reportJson = @'
@@ -304,7 +319,8 @@ $reportJson = @'
     "useStylableVisualContainerHeader": true,
     "defaultDrillFilterOtherVisuals": true,
     "allowChangeFilterTypes": true,
-    "useEnhancedTooltips": true
+    "useEnhancedTooltips": true,
+    "pagesPosition": "Bottom"
   }
 }
 '@

@@ -1,11 +1,11 @@
 {
     "position":  {
                      "width":  350,
-                     "y":  430,
+                     "y":  470,
                      "z":  1002,
                      "x":  24,
                      "tabOrder":  3500,
-                     "height":  260
+                     "height":  220
                  },
     "name":  "donut_acc",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",

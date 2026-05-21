@@ -1,0 +1,84 @@
+relationship rel_fact_notification_date_key
+    fromColumn: fact_notification.date_key
+    toColumn: dim_date.date_key
+    crossFilteringBehavior: bothDirections
+
+relationship rel_fact_mission_mission_key
+    fromColumn: fact_mission.mission_key
+    toColumn: dim_mission.mission_key
+    crossFilteringBehavior: bothDirections
+
+relationship rel_fact_mission_date_key
+    fromColumn: fact_mission.date_key
+    toColumn: dim_date.date_key
+    crossFilteringBehavior: bothDirections
+
+relationship rel_fact_candidature_date_key
+    fromColumn: fact_candidature.date_key
+    toColumn: dim_date.date_key
+    crossFilteringBehavior: bothDirections
+
+relationship rel_fact_candidature_mission_key
+    fromColumn: fact_candidature.mission_key
+    toColumn: dim_mission.mission_key
+    crossFilteringBehavior: bothDirections
+
+relationship rel_fact_mission_favori_date_key
+    fromColumn: fact_mission_favori.date_key
+    toColumn: dim_date.date_key
+    crossFilteringBehavior: bothDirections
+
+relationship rel_fact_mission_favori_mission_key
+    fromColumn: fact_mission_favori.mission_key
+    toColumn: dim_mission.mission_key
+    crossFilteringBehavior: bothDirections
+
+relationship rel_fact_cv_date_key
+    fromColumn: fact_cv.date_key
+    toColumn: dim_date.date_key
+    crossFilteringBehavior: bothDirections
+
+relationship rel_fact_cv_user_key
+    fromColumn: fact_cv.user_key
+    toColumn: dim_user.user_key
+    crossFilteringBehavior: bothDirections
+
+relationship rel_fact_quiz_date_key
+    fromColumn: fact_quiz.date_key
+    toColumn: dim_date.date_key
+    crossFilteringBehavior: bothDirections
+
+relationship rel_fact_quiz_user_key
+    fromColumn: fact_quiz.user_key
+    toColumn: dim_user.user_key
+    crossFilteringBehavior: bothDirections
+
+relationship rel_fact_codingame_date_key
+    fromColumn: fact_codingame.date_key
+    toColumn: dim_date.date_key
+    crossFilteringBehavior: bothDirections
+
+relationship rel_fact_codingame_user_key
+    fromColumn: fact_codingame.user_key
+    toColumn: dim_user.user_key
+    crossFilteringBehavior: bothDirections
+
+relationship rel_fact_user_user_key
+    fromColumn: fact_user.user_key
+    toColumn: dim_user.user_key
+    crossFilteringBehavior: bothDirections
+
+relationship rel_v_bi_kpi_recrutement_year_num
+    fromColumn: v_bi_kpi_recrutement.year_num
+    toColumn: dim_date.year_num
+    crossFilteringBehavior: bothDirections
+
+relationship rel_v_bi_candidature_year_num
+    fromColumn: v_bi_candidature.year_num
+    toColumn: dim_date.year_num
+    crossFilteringBehavior: bothDirections
+
+relationship rel_v_bi_mission_year_num
+    fromColumn: v_bi_mission.year_num
+    toColumn: dim_date.year_num
+    crossFilteringBehavior: bothDirections

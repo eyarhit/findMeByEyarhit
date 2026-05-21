@@ -18,6 +18,7 @@
     "useStylableVisualContainerHeader": true,
     "defaultDrillFilterOtherVisuals": true,
     "allowChangeFilterTypes": true,
-    "useEnhancedTooltips": true
+    "useEnhancedTooltips": true,
+    "pagesPosition": "Bottom"
   }
 }

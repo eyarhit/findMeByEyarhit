@@ -1,11 +1,11 @@
 {
     "position":  {
                      "width":  600,
-                     "y":  80,
+                     "y":  120,
                      "z":  1000,
                      "x":  24,
                      "tabOrder":  1000,
-                     "height":  300
+                     "height":  280
                  },
     "name":  "bar_mission",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",

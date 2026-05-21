@@ -1,11 +1,11 @@
 {
     "position":  {
-                     "width":  1230,
-                     "y":  400,
+                     "width":  600,
+                     "y":  420,
                      "z":  1000,
-                     "x":  24,
+                     "x":  640,
                      "tabOrder":  3000,
-                     "height":  290
+                     "height":  270
                  },
     "name":  "tbl_cand",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",

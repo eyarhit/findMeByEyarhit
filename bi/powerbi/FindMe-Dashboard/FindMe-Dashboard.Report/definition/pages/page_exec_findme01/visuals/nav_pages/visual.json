@@ -1,41 +1,15 @@
 {
     "position":  {
-                     "width":  280,
-                     "y":  120,
-                     "z":  2000,
+                     "width":  1232,
+                     "y":  668,
+                     "z":  9500,
                      "x":  24,
-                     "tabOrder":  1000,
-                     "height":  120
+                     "tabOrder":  9500,
+                     "height":  48
                  },
-    "name":  "kpi_users",
+    "name":  "nav_pages",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
     "visual":  {
-                   "query":  {
-                                 "queryState":  {
-                                                    "Values":  {
-                                                                   "projections":  [
-                                                                                       {
-                                                                                           "queryRef":  "Sum(fact_user.user_count)",
-                                                                                           "field":  {
-                                                                                                         "Aggregation":  {
-                                                                                                                             "Function":  0,
-                                                                                                                             "Expression":  {
-                                                                                                                                                "Column":  {
-                                                                                                                                                               "Expression":  {
-                                                                                                                                                                                  "SourceRef":  {
-                                                                                                                                                                                                    "Entity":  "fact_user"
-                                                                                                                                                                                                }
-                                                                                                                                                                              },
-                                                                                                                                                               "Property":  "user_count"
-                                                                                                                                                           }
-                                                                                                                                            }
-                                                                                                                         }
-                                                                                                     }
-                                                                                       }
-                                                                                   ]
-                                                               }
-                                                }
-                             },
                    "objects":  {
 
                                },
@@ -93,6 +67,6 @@
                                                                  }
                                                              ]
                                               },
-                   "visualType":  "card"
+                   "visualType":  "pageNavigator"
                }
 }

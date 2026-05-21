@@ -1,11 +1,11 @@
 {
     "position":  {
                      "width":  660,
-                     "y":  210,
+                     "y":  250,
                      "z":  1000,
                      "x":  590,
                      "tabOrder":  4000,
-                     "height":  480
+                     "height":  420
                  },
     "name":  "tbl_kpi",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",

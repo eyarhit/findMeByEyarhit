@@ -1,7 +1,7 @@
 {
     "position":  {
                      "width":  340,
-                     "y":  172,
+                     "y":  212,
                      "z":  3001,
                      "x":  920,
                      "tabOrder":  5100,
@@ -19,14 +19,14 @@
                                                                                                          "Column":  {
                                                                                                                         "Expression":  {
                                                                                                                                            "SourceRef":  {
-                                                                                                                                                             "Entity":  "v_bi_candidature"
+                                                                                                                                                             "Entity":  "dim_date"
                                                                                                                                                          }
                                                                                                                                        },
                                                                                                                         "Property":  "year_num"
                                                                                                                     }
                                                                                                      },
                                                                                            "active":  true,
-                                                                                           "queryRef":  "v_bi_candidature.year_num"
+                                                                                           "queryRef":  "dim_date.year_num"
                                                                                        }
                                                                                    ]
                                                                }

@@ -1,6 +1,6 @@
 
 table fact_user
-    lineageTag: f052ae28-e9bf-497d-b69d-3dafb2ae1e9a
+    lineageTag: cdc5244c-bc1c-4cfd-b7e8-d9f35ada49a5
 
     column user_key
         dataType: int64
