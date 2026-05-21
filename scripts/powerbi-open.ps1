@@ -175,25 +175,26 @@ Write-Step "4/4 - Ouverture Power BI Desktop"
 if ($UsePbix) { Ensure-DashboardPbix }
 
 function Show-PbipRefreshHelp {
-    Write-Host ""
-    Write-Host "========== DASHBOARD FIND-ME (4 pages PBIP) ==========" -ForegroundColor Green
-    Write-Host "  01 Executive | 02 Managerial | 03 Operationnel | 04 Technique"
-    Write-Host ""
-    Write-Host "SI Page 1 vide OU erreur visualContainers :" -ForegroundColor Red
-    Write-Host "  1. Fermer Power BI"
-    Write-Host "  2. FIX_POWERBI_REFRESH.cmd  (version.json 2.0.0 + supprime cache .pbi)"
-    Write-Host "  3. Rouvrir FindMe-Dashboard.pbip — onglets 01 a 04 en bas"
-    Write-Host "  Plan B : bi\powerbi\CREER_4_PAGES_DANS_PBI.md"
-    Write-Host ""
-    Write-Host "SI SEULEMENT Page 1 (preview PBIR desactive) :" -ForegroundColor Red
-    Write-Host "  Options > Fonctionnalites : PBIR + projet .pbip > redemarrer PBI"
-    Write-Host ""
-    Write-Host "IMPORTANT - donnees et visuels :" -ForegroundColor Yellow
-    Write-Host "  1. Banniere : Actualiser maintenant (relations + donnees)"
-    Write-Host "  2. Serveur localhost:3306  base findme_dw"
-    Write-Host "  3. findme_bi / findme_bi_readonly"
-    Write-Host ""
-    Write-Host "Plan B : ONE_COMMANDE_POWERBI.cmd -UsePbix"
+    Write-Host ''
+    Write-Host '========== DASHBOARD FIND-ME - 4 pages PBIP ==========' -ForegroundColor Green
+    Write-Host '  01 Executive | 02 Managerial | 03 Operationnel | 04 Technique'
+    Write-Host ''
+    Write-Host 'SI Page 1 vide OU erreur visualContainers :' -ForegroundColor Red
+    Write-Host '  1. Fermer Power BI'
+    Write-Host '  2. FIX_POWERBI_REFRESH.cmd - version.json 2.0.0 et cache .pbi'
+    Write-Host '  3. Rouvrir FindMe-Dashboard.pbip - onglets 01 a 04 en bas'
+    Write-Host '  Plan B : bi\powerbi\CREER_4_PAGES_DANS_PBI.md'
+    Write-Host ''
+    Write-Host 'SI SEULEMENT Page 1 - preview PBIR desactive :' -ForegroundColor Red
+    Write-Host '  Options - Fonctionnalites : activer PBIR et projet .pbip puis redemarrer PBI'
+    Write-Host ''
+    Write-Host 'IMPORTANT - donnees et visuels :' -ForegroundColor Yellow
+    Write-Host '  1. Banniere : Actualiser maintenant'
+    Write-Host '  2. Serveur localhost:3306  base findme_dw'
+    Write-Host '  3. findme_bi / findme_bi_readonly'
+    Write-Host '  4. Page 04 : segment year_num = 2026 puis Actualiser'
+    Write-Host ''
+    Write-Host 'Plan B : ONE_COMMANDE_POWERBI.cmd -UsePbix'
 }
 
 # PBIP 3 pages (defaut)
@@ -209,7 +210,7 @@ if (-not $UsePbix -and (Test-Path $DashboardPbipPath)) {
     Show-PbipRefreshHelp
 } elseif ($UsePbix -and (Test-Path $PbixPath)) {
     $openPath = $PbixPath
-    Write-Host "Rapport .pbix (1 page) : $openPath" -ForegroundColor Green
+    Write-Host ('Rapport .pbix 1 page : ' + $openPath) -ForegroundColor Green
     Open-PowerBiReport -ReportPath $openPath
     Write-Host ""
     Write-Host "========== DASHBOARD FIND-ME (.pbix) ==========" -ForegroundColor Green
@@ -223,14 +224,14 @@ if (-not $UsePbix -and (Test-Path $DashboardPbipPath)) {
     Write-Host "Connexion MySQL : $openPath" -ForegroundColor Green
     Open-PowerBiReport -ReportPath $openPath
     Write-Host ""
-    Write-Host "========== CREER VOTRE .pbix (1 fois) ==========" -ForegroundColor Green
+    Write-Host '========== CREER VOTRE .pbix - une fois ==========' -ForegroundColor Green
     Write-Host "  1. Onglet Base de donnees : findme_bi / findme_bi_readonly"
     Write-Host "  2. Navigateur : cochez les tables findme_dw puis Charger"
     Write-Host "  3. Fichier - Enregistrer sous :"
     Write-Host "     bi\powerbi\reports\FindMe_BI_Auto.pbix"
     Write-Host "  4. Relancez : scripts\powerbi-open.cmd"
 } else {
-    throw "Aucun fichier Power BI trouve (pbix, pbids ou pbip)."
+    throw 'Aucun fichier Power BI trouve : pbix, pbids ou pbip.'
 }
 
 Write-Host ""
