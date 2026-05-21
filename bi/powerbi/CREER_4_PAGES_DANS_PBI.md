@@ -65,7 +65,7 @@ Dans Power BI : **Actualiser** → `findme_bi` / `findme_bi_readonly`.
 
 ## 7. Page 04 - Technique
 
-**Cartes** : Tentatives quiz, Score moyen quiz, Sessions codingame, Dernier refresh OK
+**Cartes** : Tentatives quiz, Score moyen quiz, Sessions codingame, **Runs ETL OK** (pas la date — statut Talend = SUCCESS)
 
 **Visuels** :
 

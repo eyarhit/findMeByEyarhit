@@ -478,10 +478,49 @@ def load_fact_cv(cur, src, user_map: dict[int, int]) -> None:
     print(f"fact_cv : {n} lignes")
 
 
+def _default_bi_date_key() -> int:
+    """Date réaliste pour quiz/CodinGame sans horodatage source (évite filtre 1900 en Power BI)."""
+    return date_key_from_date(date(2026, 5, 15))
+
+
+def seed_technical_facts_if_empty(cur, user_map: dict[int, int]) -> None:
+    """Données démo page 04 si quiz_bd / codingame_bd sont vides (PFE, autre PC)."""
+    if not user_map:
+        return
+    uk = next((v for v in user_map.values() if v), 0)
+    if uk == 0:
+        return
+    dk = _default_bi_date_key()
+    cur.execute("SELECT COUNT(*) AS c FROM fact_quiz")
+    if cur.fetchone()["c"] == 0:
+        for score, passed in ((85, 1), (60, 0), (92, 1)):
+            cur.execute(
+                """
+                INSERT INTO fact_quiz (date_key, user_key, score, passed, attempt_count)
+                VALUES (%s,%s,%s,%s,1)
+                """,
+                (dk, uk, score, passed),
+            )
+        print("fact_quiz : donnees demo PFE (3 lignes)")
+    cur.execute("SELECT COUNT(*) AS c FROM fact_codingame")
+    if cur.fetchone()["c"] == 0:
+        for fw, score in (("React", 78.0), ("Spring", 65.0), ("Angular", 88.0)):
+            cur.execute(
+                """
+                INSERT INTO fact_codingame
+                  (date_key, user_key, framework_name, score, total_score, session_count)
+                VALUES (%s,%s,%s,%s,100,1)
+                """,
+                (dk, uk, fw, score),
+            )
+        print("fact_codingame : donnees demo PFE (3 lignes)")
+
+
 def load_fact_quiz(cur, src, user_map: dict[int, int]) -> None:
     cur.execute("DELETE FROM fact_quiz")
     src.execute("SELECT user_id, score, passed FROM quiz_bd.user_quiz_results")
     n = 0
+    dk_default = _default_bi_date_key()
     for row in src.fetchall():
         uk = user_map.get(int(row["user_id"]), 0)
         if uk == 0:
@@ -491,7 +530,7 @@ def load_fact_quiz(cur, src, user_map: dict[int, int]) -> None:
             INSERT INTO fact_quiz (date_key, user_key, score, passed, attempt_count)
             VALUES (%s,%s,%s,%s,1)
             """,
-            (UNKNOWN_DATE_KEY, uk, row["score"] or 0, 1 if row["passed"] else 0),
+            (dk_default, uk, row["score"] or 0, 1 if row["passed"] else 0),
         )
         n += 1
     print(f"fact_quiz : {n} lignes")
@@ -524,7 +563,7 @@ def load_fact_codingame(cur, src, user_map: dict[int, int]) -> None:
         if uk == 0:
             continue
         st = row["start_time"]
-        dk = UNKNOWN_DATE_KEY
+        dk = _default_bi_date_key()
         if st:
             dk = date_key_from_date(st.date() if hasattr(st, "date") else st)
         cur.execute(
@@ -767,6 +806,7 @@ def main() -> None:
             load_fact_cv(cur, s, user_map)
             load_fact_quiz(cur, s, user_map)
             load_fact_codingame(cur, s, user_map)
+            seed_technical_facts_if_empty(cur, user_map)
             cur.execute(
                 """
                 SELECT

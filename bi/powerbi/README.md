@@ -64,6 +64,13 @@ FIX_POWERBI_REFRESH.cmd
 
 Si erreur `model.bim` manquant : `git pull` puis `ONE_COMMANDE_POWERBI.cmd` (TMDL, `definition.pbism` version **4.0**).
 
+### Page 04 Technique : cartes « (Vide) »
+
+1. Relancer l’ETL : `docker compose run --rm talend-etl` (remplit quiz/CodinGame + démo si bases vides).
+2. **Actualiser** dans Power BI.
+3. Segment **year_num** : choisir **2026** (plus `01/01/1900`).
+4. Carte ETL : mesure **Runs ETL OK** (Talend écrit `SUCCESS`, pas `OK`).
+
 ### Erreur « Échec du rendu » / `visualContainers`
 
 Cause fréquente : `definition\version.json` incorrect (doit être **`2.0.0`**, pas `3.2.0`).

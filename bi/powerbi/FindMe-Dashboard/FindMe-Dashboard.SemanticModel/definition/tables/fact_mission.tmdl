@@ -1,6 +1,6 @@
 
 table fact_mission
-    lineageTag: b9485488-a289-4104-b58d-1e96892570ee
+    lineageTag: ea415ed6-bf2b-41f3-ac55-dc7882a0f531
 
     column mission_key
         dataType: int64

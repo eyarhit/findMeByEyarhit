@@ -1,6 +1,6 @@
 
 table fact_cv
-    lineageTag: e62a5bcc-013e-4e64-b088-f4fb622ead97
+    lineageTag: a3561b85-090a-49db-a09a-4174d2e7c3ae
 
     column cv_key
         dataType: int64

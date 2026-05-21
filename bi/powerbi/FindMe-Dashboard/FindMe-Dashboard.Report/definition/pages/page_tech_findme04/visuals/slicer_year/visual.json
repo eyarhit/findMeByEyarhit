@@ -7,7 +7,7 @@
                      "tabOrder":  5000,
                      "height":  44
                  },
-    "name":  "slicer_date",
+    "name":  "slicer_year",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
     "visual":  {
                    "query":  {
@@ -22,11 +22,11 @@
                                                                                                                                                              "Entity":  "dim_date"
                                                                                                                                                          }
                                                                                                                                        },
-                                                                                                                        "Property":  "full_date"
+                                                                                                                        "Property":  "year_num"
                                                                                                                     }
                                                                                                      },
                                                                                            "active":  true,
-                                                                                           "queryRef":  "dim_date.full_date"
+                                                                                           "queryRef":  "dim_date.year_num"
                                                                                        }
                                                                                    ]
                                                                }

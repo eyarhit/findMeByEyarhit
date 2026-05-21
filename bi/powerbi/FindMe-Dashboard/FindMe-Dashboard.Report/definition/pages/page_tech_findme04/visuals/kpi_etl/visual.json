@@ -15,7 +15,7 @@
                                                     "Values":  {
                                                                    "projections":  [
                                                                                        {
-                                                                                           "queryRef":  "MesuresBI.Dernier refresh OK",
+                                                                                           "queryRef":  "MesuresBI.Runs ETL OK",
                                                                                            "field":  {
                                                                                                          "Measure":  {
                                                                                                                          "Expression":  {
@@ -23,7 +23,7 @@
                                                                                                                                                               "Entity":  "MesuresBI"
                                                                                                                                                           }
                                                                                                                                         },
-                                                                                                                         "Property":  "Dernier refresh OK"
+                                                                                                                         "Property":  "Runs ETL OK"
                                                                                                                      }
                                                                                                      }
                                                                                        }

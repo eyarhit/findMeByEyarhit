@@ -1,6 +1,6 @@
 
 table fact_mission_favori
-    lineageTag: c2d776bb-8cba-41e1-808f-196bf10e629f
+    lineageTag: 48a4b62d-aec6-43ec-a14e-a938d4f432ef
 
     column favori_key
         dataType: int64

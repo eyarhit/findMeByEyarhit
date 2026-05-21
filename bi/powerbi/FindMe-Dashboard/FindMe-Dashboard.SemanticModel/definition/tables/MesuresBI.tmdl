@@ -37,8 +37,10 @@ table MesuresBI
     measure 'Score moyen CDG' = AVERAGE(fact_codingame[score])
     measure 'Score CDG %' =
         DIVIDE(AVERAGE(fact_codingame[score]), AVERAGE(fact_codingame[total_score]), 0) * 100
+    measure 'Runs ETL OK' =
+        CALCULATE(COUNTROWS(etl_run_log), etl_run_log[status] IN { "OK", "SUCCESS" })
     measure 'Dernier refresh OK' =
-        CALCULATE(MAX(etl_run_log[finished_at]), etl_run_log[status] = "OK")
+        CALCULATE(MAX(etl_run_log[finished_at]), etl_run_log[status] IN { "OK", "SUCCESS" })
 
     partition MesuresBI = m
         mode: import

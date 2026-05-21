@@ -161,10 +161,10 @@ Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\page.json")  (New-PageJson $pageM
 Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\page.json")  (New-PageJson $pageOps  '03 - Operationnel')
 Write-Utf8NoBom (Join-Path $PagesDir "$pageTech\page.json") (New-PageJson $pageTech '04 - Technique')
 
-$sub = 'Find-Me · findme_dw · Talend ETL · Guide 4 dashboards'
+$sub = 'Find-Me - findme_dw - Talend ETL - Guide 4 dashboards'
 
 # ========== 01 Executive ==========
-Add-PageChrome $pageExec '01 — Executive dashboard' $sub
+Add-PageChrome $pageExec '01 - Executive dashboard' $sub
 Write-KpiRow $pageExec @(
     @{ Id = 'kpi_cand'; Measure = 'KPI Candidatures' },
     @{ Id = 'kpi_acc'; Measure = 'KPI Acceptees' },
@@ -199,7 +199,7 @@ Write-Vis $pageExec 'bar_top_mission' 24 $script:BotY 1232 $script:BotH 1004 400
 }
 
 # ========== 02 Managerial ==========
-Add-PageChrome $pageMgr '02 — Managerial dashboard' $sub
+Add-PageChrome $pageMgr '02 - Managerial dashboard' $sub
 Write-KpiRow $pageMgr @(
     @{ Id = 'kpi_cv'; Measure = 'Candidatures (vue)' },
     @{ Id = 'kpi_acc'; Measure = 'Acceptees (vue)' },
@@ -252,7 +252,7 @@ Write-Vis $pageMgr 'bar_ville_stack' 656 $script:BotY 600 $script:BotH 1006 4100
 }
 
 # ========== 03 Operationnel ==========
-Add-PageChrome $pageOps '03 — Dashboard operationnel' $sub
+Add-PageChrome $pageOps '03 - Dashboard operationnel' $sub
 Write-KpiRow $pageOps @(
     @{ Id = 'kpi_u'; Measure = 'Total utilisateurs' },
     @{ Id = 'kpi_n'; Measure = 'Total notifications' },
@@ -301,17 +301,17 @@ Write-Vis $pageOps 'line_notif' 848 $script:BotY 408 $script:BotH 1006 4200 'lin
 }
 
 # ========== 04 Technique ==========
-Add-PageChrome $pageTech '04 — Dashboard technique' $sub
+Add-PageChrome $pageTech '04 - Dashboard technique' $sub
 Write-KpiRow $pageTech @(
     @{ Id = 'kpi_qz'; Measure = 'Tentatives quiz' },
     @{ Id = 'kpi_qs'; Measure = 'Score moyen quiz' },
     @{ Id = 'kpi_qt'; Measure = 'Taux reussite quiz %' },
     @{ Id = 'kpi_cg'; Measure = 'Sessions codingame' },
     @{ Id = 'kpi_cs'; Measure = 'Score moyen CDG' },
-    @{ Id = 'kpi_etl'; Measure = 'Dernier refresh OK' }
+    @{ Id = 'kpi_etl'; Measure = 'Runs ETL OK' }
 ) $script:KpiY $script:KpiH
 
-Write-Slicer $pageTech 'slicer_date' 24 'dim_date' 'full_date' 3000 5000
+Write-Slicer $pageTech 'slicer_year' 24 'dim_date' 'year_num' 3000 5000
 Write-Slicer $pageTech 'slicer_fw' 232 'fact_codingame' 'framework_name' 3001 5100
 Write-Slicer $pageTech 'slicer_passed' 440 'fact_quiz' 'passed' 3002 5200
 Write-Slicer $pageTech 'slicer_etl' 648 'etl_run_log' 'status' 3003 5300
