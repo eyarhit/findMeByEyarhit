@@ -5,8 +5,9 @@ cd /d "%~dp0"
 echo [1/4] Suppression ancien dossier FindMe-BI (piege .pbip)...
 rmdir /s /q "bi\powerbi\FindMe-BI" 2>nul
 
-echo [2/4] Reset modele PBIP uniquement (pas reports/*.pbix)...
+echo [2/4] Reset modele PBIP + cache rapport local...
 git checkout -- bi/powerbi/FindMe-Dashboard/
+rmdir /s /q "bi\powerbi\FindMe-Dashboard\FindMe-Dashboard.Report\.pbi" 2>nul
 if errorlevel 1 (
   echo git checkout a echoue - essayez : git stash push -m "pbi-tmdl"
   git stash push -m "pbi-tmdl" 2>nul

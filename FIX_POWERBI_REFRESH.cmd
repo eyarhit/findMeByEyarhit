@@ -6,10 +6,12 @@ echo === Verification MySQL findme_dw ===
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\verify-mysql-dw.ps1
 if errorlevel 1 exit /b 1
 echo.
-echo === Regeneration modele TMDL ===
+echo === Regeneration modele TMDL + rapport 4 pages ===
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\generate-powerbi-multi-dashboard.ps1
+rmdir /s /q "bi\powerbi\FindMe-Dashboard\FindMe-Dashboard.Report\.pbi" 2>nul
 echo.
 echo === Dans Power BI (deja ouvert ou apres ONE_COMMANDE_POWERBI.cmd) ===
+echo   0. Si erreur visualContainers : fermer PBI, supprimer .pbi (fait ci-dessus), rouvrir
 echo   1. Fermer et rouvrir FindMe-Dashboard.pbip
 echo   2. Accueil - Actualiser
 echo   3. Parametres : localhost:3306 / findme_dw / findme_bi / findme_bi_readonly

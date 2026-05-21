@@ -1,6 +1,6 @@
 
 table dim_mission
-    lineageTag: 5c95ec1b-6956-4891-8146-cf6fce7b436c
+    lineageTag: 37cc593c-7ce6-4a7c-8eca-1fb05e539a0e
 
     column mission_key
         dataType: int64

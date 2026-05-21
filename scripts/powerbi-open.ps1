@@ -179,10 +179,14 @@ function Show-PbipRefreshHelp {
     Write-Host "========== DASHBOARD FIND-ME (4 pages PBIP) ==========" -ForegroundColor Green
     Write-Host "  01 Executive | 02 Managerial | 03 Operationnel | 04 Technique"
     Write-Host ""
-    Write-Host "SI VOUS VOYEZ SEULEMENT Page 1 VIDE (pas les 4 onglets) :" -ForegroundColor Red
-    Write-Host "  Fichier > Options > Fonctionnalites preliminaires"
-    Write-Host "  Cocher : format metadonnees ameliore (PBIR) + projet .pbip"
-    Write-Host "  Redemarrer Power BI puis relancer ACTIVER_DASHBOARD_4_PAGES.cmd"
+    Write-Host "SI Page 1 vide OU erreur visualContainers :" -ForegroundColor Red
+    Write-Host "  1. Fermer Power BI"
+    Write-Host "  2. FIX_POWERBI_REFRESH.cmd  (version.json 2.0.0 + supprime cache .pbi)"
+    Write-Host "  3. Rouvrir FindMe-Dashboard.pbip — onglets 01 a 04 en bas"
+    Write-Host "  Plan B : bi\powerbi\CREER_4_PAGES_DANS_PBI.md"
+    Write-Host ""
+    Write-Host "SI SEULEMENT Page 1 (preview PBIR desactive) :" -ForegroundColor Red
+    Write-Host "  Options > Fonctionnalites : PBIR + projet .pbip > redemarrer PBI"
     Write-Host ""
     Write-Host "IMPORTANT - donnees et visuels :" -ForegroundColor Yellow
     Write-Host "  1. Banniere : Actualiser maintenant (relations + donnees)"

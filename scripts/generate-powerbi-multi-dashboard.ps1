@@ -24,7 +24,7 @@ function Write-Utf8NoBom([string]$Path, [string]$Content) {
 function New-Dir($p) { if (-not (Test-Path $p)) { New-Item -ItemType Directory -Path $p -Force | Out-Null } }
 
 function Get-VisualContainerObjects {
-    $off = @{ show = @{ expr = @{ Literal = @{ Value = "'false'" } } } }
+    $off = @{ show = @{ expr = @{ Literal = @{ Value = 'false' } } } }
     @{
         background = @(@{ properties = $off })
         border     = @(@{ properties = $off })
@@ -353,6 +353,20 @@ Write-Vis $pageTech 'line_cdg_month' 848 $script:BotY 408 $script:BotH 1006 4200
 $reportJson = @'
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/report/3.2.0/schema.json",
+  "themeCollection": {
+    "baseTheme": {
+      "name": "CY24SU10",
+      "reportVersionAtImport": { "visual": "2.6.0", "report": "3.1.0", "page": "2.3.0" },
+      "type": "SharedResources"
+    }
+  },
+  "resourcePackages": [
+    {
+      "name": "SharedResources",
+      "type": "SharedResources",
+      "items": [{ "name": "CY24SU10", "path": "BaseThemes/CY24SU10.json", "type": "BaseTheme" }]
+    }
+  ],
   "settings": {
     "useStylableVisualContainerHeader": true,
     "defaultDrillFilterOtherVisuals": true,
@@ -368,7 +382,7 @@ Write-Utf8NoBom (Join-Path $Rp 'definition\report.json') $reportJson
 Write-Utf8NoBom (Join-Path $Rp 'definition\version.json') @'
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/versionMetadata/1.0.0/schema.json",
-  "version": "3.2.0"
+  "version": "2.0.0"
 }
 '@
 

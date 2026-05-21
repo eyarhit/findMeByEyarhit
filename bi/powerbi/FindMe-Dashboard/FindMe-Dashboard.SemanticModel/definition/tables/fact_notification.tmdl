@@ -1,6 +1,6 @@
 
 table fact_notification
-    lineageTag: c2422248-0848-44be-a209-5475937f39f7
+    lineageTag: 4f374344-3b11-4720-8a7e-2c7b602bca6d
 
     column notification_key
         dataType: int64

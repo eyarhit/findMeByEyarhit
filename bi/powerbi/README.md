@@ -56,7 +56,7 @@ git pull
 FIX_POWERBI_REFRESH.cmd
 ```
 
-- Genere le projet **`FindMe-Dashboard.pbip`** (4 pages : **01 Executive**, **02 Managerial**, **03 Operationnel**, **04 Technique** + table **`_Mesures BI`** avec mesures DAX du guide)
+- Genere le projet **`FindMe-Dashboard.pbip`** (4 pages : **01 Executive**, **02 Managerial**, **03 Operationnel**, **04 Technique** + table **`MesuresBI`** avec mesures DAX du guide)
 - ETL Talend → `findme_dw`
 - Ouvre Power BI avec **cartes KPI, barres, tableaux** deja places
 
@@ -64,12 +64,22 @@ FIX_POWERBI_REFRESH.cmd
 
 Si erreur `model.bim` manquant : `git pull` puis `ONE_COMMANDE_POWERBI.cmd` (TMDL, `definition.pbism` version **4.0**).
 
+### Erreur « Échec du rendu » / `visualContainers`
+
+Cause fréquente : `definition\version.json` incorrect (doit être **`2.0.0`**, pas `3.2.0`).
+
+```cmd
+FIX_POWERBI_REFRESH.cmd
+```
+
+Puis fermer Power BI, rouvrir `FindMe-Dashboard.pbip`. Si besoin : guide **[CREER_4_PAGES_DANS_PBI.md](CREER_4_PAGES_DANS_PBI.md)**.
+
 ### Ecran vide / Page 1 seule / pas de donnees
 
 1. **Volet Donnees vide + erreur sur chaque visuel** : le modele TMDL doit inclure les colonnes (`git pull` + `ONE_COMMANDE_POWERBI.cmd`).
 2. Cliquez **Actualiser maintenant** (banniere jaune).
 3. Identifiants : `findme_bi` / `findme_bi_readonly`.
-4. **Recommande** : enregistrez une fois sous `reports/FindMe_BI_Auto.pbix` — les prochains `ONE_COMMANDE_POWERBI.cmd` ouvriront ce fichier (visuels + donnees garantis).
+4. **Recommande** : enregistrez une fois sous `reports/FindMe_BI_Auto.pbix` — les prochains `ONE_COMMANDE_POWERBI.cmd -UsePbix` ouvriront ce fichier (visuels + donnees garantis).
 5. Ou double-clic : `bi\powerbi\OUVRIR_MON_RAPPORT.pbix.cmd` (si le `.pbix` existe).
 
 Pages (generees automatiquement — rien a configurer) :

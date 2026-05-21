@@ -112,7 +112,7 @@
                                                                                        "show":  {
                                                                                                     "expr":  {
                                                                                                                  "Literal":  {
-                                                                                                                                 "Value":  "\u0027false\u0027"
+                                                                                                                                 "Value":  "false"
                                                                                                                              }
                                                                                                              }
                                                                                                 }
@@ -125,7 +125,7 @@
                                                                                             "show":  {
                                                                                                          "expr":  {
                                                                                                                       "Literal":  {
-                                                                                                                                      "Value":  "\u0027false\u0027"
+                                                                                                                                      "Value":  "false"
                                                                                                                                   }
                                                                                                                   }
                                                                                                      }
@@ -138,7 +138,7 @@
                                                                                             "show":  {
                                                                                                          "expr":  {
                                                                                                                       "Literal":  {
-                                                                                                                                      "Value":  "\u0027false\u0027"
+                                                                                                                                      "Value":  "false"
                                                                                                                                   }
                                                                                                                   }
                                                                                                      }
@@ -151,7 +151,7 @@
                                                                                         "show":  {
                                                                                                      "expr":  {
                                                                                                                   "Literal":  {
-                                                                                                                                  "Value":  "\u0027false\u0027"
+                                                                                                                                  "Value":  "false"
                                                                                                                               }
                                                                                                               }
                                                                                                  }

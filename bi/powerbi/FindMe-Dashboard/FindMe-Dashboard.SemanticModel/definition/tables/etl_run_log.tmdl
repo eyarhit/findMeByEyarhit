@@ -1,6 +1,6 @@
 
 table etl_run_log
-    lineageTag: e5afeef6-2dee-4848-89d7-e8b2c3293754
+    lineageTag: 0a8b00e2-2c70-4a0c-8a40-1d251a0885d4
 
     column run_id
         dataType: int64
