@@ -1,4 +1,4 @@
-# Genere le projet Power BI Desktop (PBIP) — toutes les tables findme_dw
+# Genere le projet Power BI Desktop (PBIP) - toutes les tables findme_dw
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 $Base = Join-Path $Root "bi\powerbi\FindMe-BI"

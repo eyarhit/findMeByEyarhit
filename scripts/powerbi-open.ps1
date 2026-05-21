@@ -26,7 +26,7 @@ function Wait-MySql {
         if ($ok) { return }
         Start-Sleep -Seconds 2
     }
-    throw "MySQL non pret apres ${max}s — demarrez Docker Desktop."
+    throw "MySQL non pret apres ${max}s - demarrez Docker Desktop."
 }
 
 function Find-PbiDesktop {
@@ -61,7 +61,7 @@ if (-not $SkipEtl) {
     Write-Step "3/4 - ETL Talend (remplit findme_dw)"
     docker compose run --rm talend-etl
     if ($LASTEXITCODE -ne 0) {
-        throw "talend-etl a echoue — corrigez avant Power BI."
+        throw "talend-etl a echoue - corrigez avant Power BI."
     }
 }
 
@@ -81,7 +81,7 @@ Start-Process -FilePath $pbi -ArgumentList "`"$openPath`""
 Write-Host ""
 Write-Host "========== POWER BI ==========" -ForegroundColor Green
 if (Test-Path $PbixPath) {
-    Write-Host "Rapport enregistre detecte — ouverture directe (tables + connexion memorisees)."
+    Write-Host "Rapport enregistre detecte - ouverture directe (tables + connexion memorisees)."
 } else {
     Write-Host "Premiere ouverture (projet PBIP) :"
     Write-Host "  1. Identifiants MySQL : findme_bi / findme_bi_readonly"
