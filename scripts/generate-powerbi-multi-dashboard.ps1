@@ -392,7 +392,7 @@ Write-Utf8NoBom (Join-Path $Rp 'definition\version.json') @'
 Write-Utf8NoBom (Join-Path $Rp 'definition.pbir') @"
 {
   "`$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definitionProperties/2.0.0/schema.json",
-  "version": "4.0",
+  "version": "2.0",
   "datasetReference": { "byPath": { "path": "../$SmName" } }
 }
 "@

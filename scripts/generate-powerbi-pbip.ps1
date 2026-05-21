@@ -273,7 +273,8 @@ database
     compatibilityLevel: 1550
 '@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Def "database.tmdl") $_ }
 
-$queryOrder = (@('PBI_MySqlServer', 'PBI_MySqlDatabase') + $tables) | ForEach-Object { "`"$_`"" }
+$dataTables = $tables | Where-Object { $_ -ne '_Mesures BI' }
+$queryOrder = (@('PBI_MySqlServer', 'PBI_MySqlDatabase') + $dataTables) | ForEach-Object { "`"$_`"" }
 $queryOrderJson = $queryOrder -join ','
 $relRefs = Write-ModelRelationships $Def
 function Format-TmdlTableRef([string]$tableName) {
@@ -298,6 +299,13 @@ $refs
 
 $measuresTmdl = @'
 table '_Mesures BI'
+    lineageTag: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+
+    column Dummy
+        dataType: int64
+        sourceColumn: Dummy
+        summarizeBy: none
+
     measure 'KPI Candidatures' = SUM(v_bi_kpi_recrutement[candidatures])
     measure 'KPI Acceptees' = SUM(v_bi_kpi_recrutement[acceptees])
     measure 'KPI Refusees' = SUM(v_bi_kpi_recrutement[refusees])
@@ -331,6 +339,14 @@ table '_Mesures BI'
         DIVIDE(AVERAGE(fact_codingame[score]), AVERAGE(fact_codingame[total_score]), 0) * 100
     measure 'Dernier refresh OK' =
         CALCULATE(MAX(etl_run_log[finished_at]), etl_run_log[status] = "OK")
+
+    partition '_Mesures BI' = m
+        mode: import
+        source =
+            let
+                Source = #table(type table [Dummy = Int64.Type], {{1}})
+            in
+                Source
 
 '@
 

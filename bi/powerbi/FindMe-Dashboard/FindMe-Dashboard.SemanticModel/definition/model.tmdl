@@ -3,7 +3,7 @@ model Model
     culture: fr-FR
     defaultPowerBIDataSourceVersion: powerBI_V3
 
-    annotation PBI_QueryOrder = ["PBI_MySqlServer","PBI_MySqlDatabase","_Mesures BI","dim_date","dim_user","dim_user_scd2","dim_mission","dim_skill","fact_user","fact_notification","fact_mission","fact_candidature","fact_mission_favori","fact_cv","fact_quiz","fact_codingame","etl_run_log","v_bi_candidature","v_bi_mission","v_bi_kpi_recrutement"]
+    annotation PBI_QueryOrder = ["PBI_MySqlServer","PBI_MySqlDatabase","dim_date","dim_user","dim_user_scd2","dim_mission","dim_skill","fact_user","fact_notification","fact_mission","fact_candidature","fact_mission_favori","fact_cv","fact_quiz","fact_codingame","etl_run_log","v_bi_candidature","v_bi_mission","v_bi_kpi_recrutement"]
 
 expression PBI_MySqlServer = "localhost:3306" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 expression PBI_MySqlDatabase = "findme_dw" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]

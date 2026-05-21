@@ -1,6 +1,6 @@
 
 table dim_skill
-    lineageTag: 2ad30b58-e07b-4130-9a86-b210639707d6
+    lineageTag: cad444c5-94e9-4a8c-806c-1bcba6aa195e
 
     column skill_key
         dataType: int64
