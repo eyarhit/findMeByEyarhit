@@ -110,6 +110,8 @@ scripts\fix-bi-pfe.cmd
 1. `docker compose up -d` — application  
 2. **`docker compose run --rm talend-etl`** — ETL → `findme_dw`  
 3. **Power BI Desktop** — ouvrir `bi/powerbi/README.md` et les rapports `.pbix`  
+   - Connexion : `localhost:3306`, base `findme_dw`, utilisateur `findme_bi` / `findme_bi_readonly`  
+   - Si **« Unable to connect to any MySQL hosts »** : `git pull` puis `docker compose up -d` (MySQL doit publier le port **3306** sur l’hôte).
 
 La **première fois** : compter **5 à 15 minutes** (Maven déjà en cache = plus rapide).
 

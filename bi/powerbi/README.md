@@ -78,3 +78,17 @@ Power BI Report Server en Docker nécessite des conteneurs Windows ; non requis 
 1. Montrer job Talend (`bi/talend/studio`) + log `ETL terminé avec succès`.
 2. Ouvrir Power BI → rapport Executive → drill sur mois / statut.
 3. Admin Angular → page BI (liens vers rapports + paramètres connexion).
+
+## Dépannage connexion
+
+| Erreur | Cause | Action |
+|--------|-------|--------|
+| **Unable to connect to any of the specified MySQL hosts** | MySQL non joignable depuis Windows (port non publié ou conteneur arrêté) | `git pull`, `docker compose up -d`, vérifier `docker compose ps` → `findme-mysql` **healthy**. Le compose doit exposer `3306:3306`. |
+| Demande d’installer des composants MySQL | Connecteur MySQL manquant | Installer [MySQL Connector/NET](https://dev.mysql.com/downloads/connector/net/), redémarrer Power BI. |
+| Authentification refusée | Mauvais utilisateur | Onglet **Base de données** : `findme_bi` / `findme_bi_readonly` (pas l’auth Windows). |
+
+Test rapide hors Power BI :
+
+```cmd
+docker compose exec mysql mysql -ufindme_bi -pfindme_bi_readonly -e "SELECT COUNT(*) FROM findme_dw.dim_date;"
+```
