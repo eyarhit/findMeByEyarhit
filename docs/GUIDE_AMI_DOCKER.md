@@ -130,6 +130,8 @@ scripts\bi-start.cmd
 
 Fait automatiquement : build, `docker compose up -d`, attente MySQL, GRANT `findme_bi`, ETL Talend, install Power BI Desktop (winget), ouvre les URLs.
 
+**Checklist validation Talend + Power BI (testeur non expert) :** [CHECKLIST_VALIDATION_BI_AMI.md](CHECKLIST_VALIDATION_BI_AMI.md)
+
 | Outil | URL |
 |-------|-----|
 | Application + BI admin | http://localhost:4200 → **Tableaux de bord BI** |
