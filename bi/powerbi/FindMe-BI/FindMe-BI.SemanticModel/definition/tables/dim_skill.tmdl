@@ -1,6 +1,6 @@
 
 table dim_skill
-    lineageTag: 7c3ac14a-525d-4ceb-bca9-4935483b037b
+    lineageTag: 5ac1ab76-773c-4efd-8a90-94c0d4c97002
 
     partition dim_skill = m
         mode: import

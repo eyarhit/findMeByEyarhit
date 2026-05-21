@@ -1,6 +1,6 @@
 
 table v_bi_kpi_recrutement
-    lineageTag: 02bbcb24-c12a-4dba-b3a5-4c0e54ca1786
+    lineageTag: 779423ff-d255-46fe-96db-e2f52c2fdd0f
 
     partition v_bi_kpi_recrutement = m
         mode: import

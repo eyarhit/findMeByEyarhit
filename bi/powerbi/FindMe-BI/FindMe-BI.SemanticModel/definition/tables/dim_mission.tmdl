@@ -1,6 +1,6 @@
 
 table dim_mission
-    lineageTag: 98ec40c8-8db0-4c7c-a608-466222952204
+    lineageTag: 5a5f35a8-69d3-405e-b2d2-f62f3ac5e268
 
     partition dim_mission = m
         mode: import

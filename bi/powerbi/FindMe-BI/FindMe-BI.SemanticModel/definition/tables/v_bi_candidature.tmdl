@@ -1,6 +1,6 @@
 
 table v_bi_candidature
-    lineageTag: 4978a42c-4764-4659-a16f-113785d7ae91
+    lineageTag: 5e30a63b-4ff9-48fe-89ac-2bc3a2db1185
 
     partition v_bi_candidature = m
         mode: import

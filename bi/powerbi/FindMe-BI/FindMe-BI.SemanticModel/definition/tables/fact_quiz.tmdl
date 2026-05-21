@@ -1,6 +1,6 @@
 
 table fact_quiz
-    lineageTag: 1adf8ede-d537-4a96-b0e5-a458f863afc9
+    lineageTag: cc251328-b169-4cf1-9c68-aa3c246aea95
 
     partition fact_quiz = m
         mode: import

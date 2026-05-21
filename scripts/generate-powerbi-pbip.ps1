@@ -34,10 +34,10 @@ New-Dir (Join-Path $Base "FindMe-BI.Report\definition\pages")
 
 @'
 {
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/pbip/pbipProperties/1.0.0/schema.json",
   "version": "1.0",
   "artifacts": [
-    { "report": { "path": "FindMe-BI.Report" } },
-    { "dataset": { "path": "FindMe-BI.SemanticModel" } }
+    { "report": { "path": "FindMe-BI.Report" } }
   ],
   "settings": { "enableAutoRecovery": true }
 }
@@ -53,7 +53,8 @@ New-Dir (Join-Path $Base "FindMe-BI.Report\definition\pages")
 
 @'
 {
-  "version": "4.0",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/semanticModel/definitionProperties/1.0.0/schema.json",
+  "version": "1.0",
   "settings": { "qnaEnabled": false }
 }
 '@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Sm "definition.pbism") $_ }
@@ -119,7 +120,8 @@ table $t
 
 @'
 {
-  "version": "4.0",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definitionProperties/2.0.0/schema.json",
+  "version": "2.0",
   "datasetReference": {
     "byPath": { "path": "../FindMe-BI.SemanticModel" }
   }

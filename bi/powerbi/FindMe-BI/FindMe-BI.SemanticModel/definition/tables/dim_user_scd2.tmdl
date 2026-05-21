@@ -1,6 +1,6 @@
 
 table dim_user_scd2
-    lineageTag: 028bfdef-23a0-4c8f-b9bf-c0cc1ce3851b
+    lineageTag: f8086cee-c140-4980-bbb6-e55be85af704
 
     partition dim_user_scd2 = m
         mode: import

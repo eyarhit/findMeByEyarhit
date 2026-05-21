@@ -1,8 +1,8 @@
 {
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/pbip/pbipProperties/1.0.0/schema.json",
   "version": "1.0",
   "artifacts": [
-    { "report": { "path": "FindMe-BI.Report" } },
-    { "dataset": { "path": "FindMe-BI.SemanticModel" } }
+    { "report": { "path": "FindMe-BI.Report" } }
   ],
   "settings": { "enableAutoRecovery": true }
 }

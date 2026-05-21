@@ -1,6 +1,6 @@
 
 table fact_codingame
-    lineageTag: fe0a7f4a-9bb7-4dc9-8e9e-bdf40ccf9843
+    lineageTag: a7e7a596-5781-4da3-b70e-c3ee9dbf7e90
 
     partition fact_codingame = m
         mode: import
