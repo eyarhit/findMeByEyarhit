@@ -215,7 +215,8 @@ services:
   bi-etl:
     build:
       context: ./bi/bi_etl
-    container_name: findme-bi-etl
+    # Pas de container_name : un ancien exit 1 de findme-bi-etl bloque compose up
+    # alors que « docker compose run --rm bi-etl » réussit (autre conteneur).
     restart: "no"
     environment:
       MYSQL_HOST: mysql
@@ -244,7 +245,6 @@ services:
     build:
       context: ./bi/metabase
       dockerfile: Dockerfile.seed
-    container_name: findme-metabase-seed
     restart: "no"
     environment:
       METABASE_URL: http://metabase:3000

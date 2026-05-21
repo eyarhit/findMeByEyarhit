@@ -8,7 +8,7 @@ from __future__ import annotations
 import os
 import re
 import sys
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import pymysql
@@ -632,7 +632,7 @@ def ensure_dw_schema(conn) -> None:
 def _etl_log_start(cur) -> int:
     cur.execute(
         "INSERT INTO etl_run_log (started_at, status) VALUES (%s, 'RUNNING')",
-        (datetime.utcnow(),),
+        (datetime.now(timezone.utc),),
     )
     return cur.lastrowid
 
@@ -679,7 +679,7 @@ def _etl_log_finish(cur, run_id: int, status: str, rows: int | None = None, err:
         SET finished_at = %s, status = %s, rows_loaded = %s, error_message = %s
         WHERE run_id = %s
         """,
-        (datetime.utcnow(), status, rows, err, run_id),
+        (datetime.now(timezone.utc), status, rows, err, run_id),
     )
 
 

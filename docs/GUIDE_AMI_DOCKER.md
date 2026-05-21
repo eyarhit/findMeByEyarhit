@@ -83,9 +83,20 @@ docker compose build frontend python-service user-service metabase-seed bi-etl
 
 ## 4. Démarrer toute la plateforme
 
+**Recommandé** (évite `bi-etl exit 1` après un `compose run` réussi) :
+
 ```cmd
+scripts\docker-compose-up.cmd
+```
+
+Ou à la main :
+
+```cmd
+docker compose rm -sf bi-etl metabase-seed
 docker compose up -d
 ```
+
+> **Pourquoi ?** `docker compose run --rm bi-etl` crée un conteneur **temporaire**. Un ancien `findme-bi-etl` en exit 1 fait échouer `docker compose up -d` en 0,7 s sans relancer l’ETL. La commande `rm` supprime ces conteneurs one-shot avant le `up`.
 
 **Ordre automatique (important) :**
 
@@ -101,8 +112,8 @@ La **première fois** : compter **5 à 15 minutes** (Maven déjà en cache = plu
 
 ```cmd
 docker compose ps -a
-docker logs findme-bi-etl
-docker logs findme-metabase-seed
+docker compose logs bi-etl
+docker compose logs metabase-seed
 ```
 
 Messages attendus :
@@ -196,7 +207,7 @@ Ne pas faire `docker compose down -v` sauf si vous voulez **effacer toutes les d
 **Cause fréquente :** volume MySQL **déjà existant** sans les tables `etl_run_log` / `dim_user_scd2`.
 
 ```cmd
-docker logs findme-bi-etl
+docker compose logs bi-etl
 ```
 
 Puis **après un `git pull` récent** :
@@ -226,8 +237,8 @@ docker compose up -d --no-deps frontend gateway-service user-service cv-service 
 ### Le frontend ne démarre pas (bloqué sur bi-etl ou metabase-seed)
 
 ```cmd
-docker logs findme-bi-etl
-docker logs findme-metabase-seed
+docker compose logs bi-etl
+docker compose logs metabase-seed
 ```
 
 Relancer seulement ces services :
