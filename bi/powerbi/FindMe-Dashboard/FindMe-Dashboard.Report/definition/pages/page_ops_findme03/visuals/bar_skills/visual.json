@@ -1,11 +1,11 @@
 {
     "position":  {
-                     "width":  1230,
-                     "y":  470,
-                     "z":  1002,
+                     "width":  400,
+                     "y":  192,
+                     "z":  1001,
                      "x":  24,
-                     "tabOrder":  5500,
-                     "height":  220
+                     "tabOrder":  3000,
+                     "height":  200
                  },
     "name":  "bar_skills",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
@@ -33,21 +33,16 @@
                                                     "Y":  {
                                                               "projections":  [
                                                                                   {
-                                                                                      "queryRef":  "Sum(dim_skill.usage_count)",
+                                                                                      "queryRef":  "_Mesures BI.Total usages",
                                                                                       "field":  {
-                                                                                                    "Aggregation":  {
-                                                                                                                        "Function":  0,
-                                                                                                                        "Expression":  {
-                                                                                                                                           "Column":  {
-                                                                                                                                                          "Expression":  {
-                                                                                                                                                                             "SourceRef":  {
-                                                                                                                                                                                               "Entity":  "dim_skill"
-                                                                                                                                                                                           }
-                                                                                                                                                                         },
-                                                                                                                                                          "Property":  "usage_count"
-                                                                                                                                                      }
-                                                                                                                                       }
-                                                                                                                    }
+                                                                                                    "Measure":  {
+                                                                                                                    "Expression":  {
+                                                                                                                                       "SourceRef":  {
+                                                                                                                                                         "Entity":  "_Mesures BI"
+                                                                                                                                                     }
+                                                                                                                                   },
+                                                                                                                    "Property":  "Total usages"
+                                                                                                                }
                                                                                                 }
                                                                                   }
                                                                               ]

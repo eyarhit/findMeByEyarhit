@@ -1,0 +1,240 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+.nav-btn { padding: 8px 16px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-secondary); cursor: pointer; font-size: 13px; transition: all .15s; }
+.nav-btn:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
+.nav-btn.active { background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); font-weight: 500; }
+.page { display: none; }
+.page.active { display: block; }
+.section-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.section-sub { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 20px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.kpi-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 14px 16px; }
+.kpi-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.kpi-value { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.kpi-source { font-size: 11px; color: var(--color-text-tertiary); margin-top: 4px; }
+.dax-block { background: var(--color-background-secondary); border-left: 3px solid var(--color-border-info); border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; padding: 12px 16px; margin-bottom: 12px; }
+.dax-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px; }
+.dax-code { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-info); line-height: 1.6; white-space: pre-wrap; }
+.visual-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.visual-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 14px 16px; }
+.visual-card-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.visual-card-sub { font-size: 12px; color: var(--color-text-secondary); }
+.badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: var(--border-radius-md); }
+.badge-blue { background: var(--color-background-info); color: var(--color-text-info); }
+.badge-green { background: var(--color-background-success); color: var(--color-text-success); }
+.badge-amber { background: var(--color-background-warning); color: var(--color-text-warning); }
+.badge-red { background: var(--color-background-danger); color: var(--color-text-danger); }
+.tip { background: var(--color-background-warning); border-radius: var(--border-radius-md); padding: 10px 14px; font-size: 12px; color: var(--color-text-warning); margin-bottom: 16px; }
+.nav-guide { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 16px; margin-bottom: 20px; }
+.nav-guide-title { font-size: 13px; font-weight: 500; margin-bottom: 10px; color: var(--color-text-primary); }
+.nav-step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; font-size: 12px; color: var(--color-text-secondary); }
+.step-num { width: 20px; height: 20px; border-radius: 50%; background: var(--color-background-info); color: var(--color-text-info); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+h3 { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin: 16px 0 8px; }
+</style>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="show('p1',this)">01 — Executive</button>
+  <button class="nav-btn" onclick="show('p2',this)">02 — Managerial</button>
+  <button class="nav-btn" onclick="show('p3',this)">03 — Opérationnel</button>
+  <button class="nav-btn" onclick="show('p4',this)">04 — Technique</button>
+  <button class="nav-btn" onclick="show('p5',this)">Navigation PBI</button>
+</div>
+
+<!-- PAGE 1: Executive -->
+<div id="p1" class="page active">
+  <p class="section-title">01 — Executive dashboard</p>
+  <p class="section-sub">Vue stratégique · Source principale : <code>v_bi_kpi_recrutement</code> · Segment : <code>year_num</code></p>
+
+  <div class="cards">
+    <div class="kpi-card"><div class="kpi-label">Total candidatures</div><div class="kpi-value">KPI</div><div class="kpi-source">v_bi_kpi_recrutement[candidatures]</div></div>
+    <div class="kpi-card"><div class="kpi-label">Taux d'acceptation</div><div class="kpi-value">%</div><div class="kpi-source">acceptees / candidatures</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total missions</div><div class="kpi-value">KPI</div><div class="kpi-source">v_bi_mission[mission_count]</div></div>
+    <div class="kpi-card"><div class="kpi-label">Missions ouvertes</div><div class="kpi-value">KPI</div><div class="kpi-source">status_mission = "OPEN"</div></div>
+  </div>
+
+  <h3>Mesures DAX à créer</h3>
+  <div class="dax-block"><div class="dax-title">KPI Candidatures <span class="badge badge-blue">v_bi_kpi_recrutement</span></div><div class="dax-code">KPI Candidatures = SUM(v_bi_kpi_recrutement[candidatures])</div></div>
+  <div class="dax-block"><div class="dax-title">KPI Acceptées</div><div class="dax-code">KPI Acceptées = SUM(v_bi_kpi_recrutement[acceptees])</div></div>
+  <div class="dax-block"><div class="dax-title">Taux acceptation %</div><div class="dax-code">KPI Taux % = DIVIDE([KPI Acceptées], [KPI Candidatures], 0) * 100</div></div>
+  <div class="dax-block"><div class="dax-title">Missions ouvertes</div><div class="dax-code">Missions ouvertes = 
+CALCULATE(
+  SUM(v_bi_mission[mission_count]),
+  v_bi_mission[status_mission] = "OPEN"
+)</div></div>
+  <div class="dax-block"><div class="dax-title">Missions remote</div><div class="dax-code">Missions remote = 
+CALCULATE([Missions (vue)], v_bi_mission[is_remote] = 1)</div></div>
+
+  <h3>Visuels recommandés</h3>
+  <div class="visual-row">
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-hash" aria-hidden="true"></i> Cartes KPI (×4)</div><div class="visual-card-sub">Candidatures · Taux % · Missions · CV</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-chart-line" aria-hidden="true"></i> Graphique en courbes</div><div class="visual-card-sub">Candidatures par mois (month_num)</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Histogramme</div><div class="visual-card-sub">Acceptées vs refusées par mois</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-filter" aria-hidden="true"></i> Segment année</div><div class="visual-card-sub">v_bi_kpi_recrutement[year_num]</div></div>
+  </div>
+</div>
+
+<!-- PAGE 2: Managerial -->
+<div id="p2" class="page">
+  <p class="section-title">02 — Managerial dashboard</p>
+  <p class="section-sub">Vue managériale · Sources : <code>v_bi_candidature</code> + <code>v_bi_mission</code> · Segment : <code>year_num</code></p>
+
+  <div class="cards">
+    <div class="kpi-card"><div class="kpi-label">Candidatures (vue)</div><div class="kpi-value">KPI</div><div class="kpi-source">v_bi_candidature[candidature_count]</div></div>
+    <div class="kpi-card"><div class="kpi-label">Candidatures acceptées</div><div class="kpi-value">KPI</div><div class="kpi-source">SUM(is_accepted)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Candidatures refusées</div><div class="kpi-value">KPI</div><div class="kpi-source">SUM(is_refused)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Missions (vue)</div><div class="kpi-value">KPI</div><div class="kpi-source">v_bi_mission[mission_count]</div></div>
+  </div>
+
+  <h3>Mesures DAX à créer</h3>
+  <div class="dax-block"><div class="dax-title">Candidatures (vue) <span class="badge badge-blue">v_bi_candidature</span></div><div class="dax-code">Candidatures (vue) = SUM(v_bi_candidature[candidature_count])</div></div>
+  <div class="dax-block"><div class="dax-title">Acceptées (vue)</div><div class="dax-code">Acceptées (vue) = SUM(v_bi_candidature[is_accepted])
+Refusées (vue)   = SUM(v_bi_candidature[is_refused])
+En cours (vue)   = SUM(v_bi_candidature[is_en_cours])</div></div>
+  <div class="dax-block"><div class="dax-title">Taux acceptation (vue) %</div><div class="dax-code">Taux acceptation (vue) % = 
+DIVIDE([Acceptées (vue)], [Candidatures (vue)], 0) * 100</div></div>
+  <div class="dax-block"><div class="dax-title">Par statut candidature</div><div class="dax-code">Par statut = 
+CALCULATE(
+  [Candidatures (vue)],
+  ALLEXCEPT(v_bi_candidature, v_bi_candidature[statut_candidature])
+)</div></div>
+  <div class="dax-block"><div class="dax-title">Missions (vue) <span class="badge badge-blue">v_bi_mission</span></div><div class="dax-code">Missions (vue) = SUM(v_bi_mission[mission_count])</div></div>
+  <div class="dax-block"><div class="dax-title">Par type contrat</div><div class="dax-code">Missions CDI = 
+CALCULATE([Missions (vue)], v_bi_mission[type_contrat] = "CDI")
+Missions CDD = 
+CALCULATE([Missions (vue)], v_bi_mission[type_contrat] = "CDD")</div></div>
+
+  <h3>Visuels recommandés</h3>
+  <div class="visual-row">
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-chart-donut" aria-hidden="true"></i> Graphique en anneau</div><div class="visual-card-sub">Répartition par statut_candidature</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Barres groupées</div><div class="visual-card-sub">Missions par type_contrat</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-map-pin" aria-hidden="true"></i> Carte géographique</div><div class="visual-card-sub">Missions par ville / pays</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-table" aria-hidden="true"></i> Tableau détail</div><div class="visual-card-sub">mission_name, statut, type_contrat</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-filter" aria-hidden="true"></i> Segment année</div><div class="visual-card-sub">v_bi_candidature[year_num]</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-filter" aria-hidden="true"></i> Segment ville/pays</div><div class="visual-card-sub">v_bi_mission[ville]</div></div>
+  </div>
+</div>
+
+<!-- PAGE 3: Operationnel -->
+<div id="p3" class="page">
+  <p class="section-title">03 — Dashboard opérationnel</p>
+  <p class="section-sub">Vue activité temps réel · Sources : <code>fact_user</code> · <code>fact_notification</code> · <code>fact_cv</code> · <code>dim_skill</code></p>
+
+  <div class="cards">
+    <div class="kpi-card"><div class="kpi-label">Total utilisateurs</div><div class="kpi-value">KPI</div><div class="kpi-source">fact_user[user_count]</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total notifications</div><div class="kpi-value">KPI</div><div class="kpi-source">fact_notification[notification_count]</div></div>
+    <div class="kpi-card"><div class="kpi-label">Taux lecture notif.</div><div class="kpi-value">%</div><div class="kpi-source">is_read = 1 / total</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total CV</div><div class="kpi-value">KPI</div><div class="kpi-source">fact_cv[cv_count]</div></div>
+    <div class="kpi-card"><div class="kpi-label">Étapes moyennes CV</div><div class="kpi-value">AVG</div><div class="kpi-source">fact_cv[steps_completed]</div></div>
+    <div class="kpi-card"><div class="kpi-label">Top compétence</div><div class="kpi-value">—</div><div class="kpi-source">dim_skill[usage_count]</div></div>
+  </div>
+
+  <h3>Mesures DAX à créer</h3>
+  <div class="dax-block"><div class="dax-title">Utilisateurs <span class="badge badge-green">fact_user</span></div><div class="dax-code">Total utilisateurs = SUM(fact_user[user_count])</div></div>
+  <div class="dax-block"><div class="dax-title">Notifications <span class="badge badge-green">fact_notification</span></div><div class="dax-code">Total notifications  = SUM(fact_notification[notification_count])
+Notifications lues   = CALCULATE([Total notifications], fact_notification[is_read] = 1)
+Taux lecture %       = DIVIDE([Notifications lues], [Total notifications], 0) * 100</div></div>
+  <div class="dax-block"><div class="dax-title">CV <span class="badge badge-green">fact_cv</span></div><div class="dax-code">Total CV        = SUM(fact_cv[cv_count])
+Étapes moyennes = AVERAGE(fact_cv[steps_completed])</div></div>
+  <div class="dax-block"><div class="dax-title">Compétences <span class="badge badge-green">dim_skill</span></div><div class="dax-code">Total usages compétences = SUM(dim_skill[usage_count])
+Top compétence = 
+CALCULATE(
+  SELECTEDVALUE(dim_skill[skill_label]),
+  TOPN(1, ALL(dim_skill), [Total usages compétences])
+)</div></div>
+  <div class="dax-block"><div class="dax-title">Favoris <span class="badge badge-green">fact_mission_favori</span></div><div class="dax-code">Total favoris = SUM(fact_mission_favori[favori_count])</div></div>
+
+  <h3>Visuels recommandés</h3>
+  <div class="visual-row">
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-hash" aria-hidden="true"></i> Cartes KPI (×5)</div><div class="visual-card-sub">Utilisateurs · Notif. · Taux lecture · CV · Favoris</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Top compétences</div><div class="visual-card-sub">dim_skill[usage_count] — top 10</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-chart-donut" aria-hidden="true"></i> Répartition rôles</div><div class="visual-card-sub">dim_user[role_name]</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-chart-line" aria-hidden="true"></i> Activité par jour</div><div class="visual-card-sub">dim_date[full_date] via faits</div></div>
+  </div>
+</div>
+
+<!-- PAGE 4: Technique -->
+<div id="p4" class="page">
+  <p class="section-title">04 — Dashboard technique</p>
+  <p class="section-sub">Quiz, CodinGame, ETL · Sources : <code>fact_quiz</code> · <code>fact_codingame</code> · <code>etl_run_log</code></p>
+
+  <div class="cards">
+    <div class="kpi-card"><div class="kpi-label">Tentatives quiz</div><div class="kpi-value">KPI</div><div class="kpi-source">fact_quiz[attempt_count]</div></div>
+    <div class="kpi-card"><div class="kpi-label">Taux réussite quiz</div><div class="kpi-value">%</div><div class="kpi-source">passed = 1 / total</div></div>
+    <div class="kpi-card"><div class="kpi-label">Score moyen quiz</div><div class="kpi-value">AVG</div><div class="kpi-source">fact_quiz[score]</div></div>
+    <div class="kpi-card"><div class="kpi-label">Sessions CodinGame</div><div class="kpi-value">KPI</div><div class="kpi-source">fact_codingame[session_count]</div></div>
+    <div class="kpi-card"><div class="kpi-label">Score moyen CDG</div><div class="kpi-value">AVG</div><div class="kpi-source">fact_codingame[score]</div></div>
+    <div class="kpi-card"><div class="kpi-label">Dernier refresh ETL</div><div class="kpi-value">Date</div><div class="kpi-source">etl_run_log[finished_at]</div></div>
+  </div>
+
+  <h3>Mesures DAX à créer</h3>
+  <div class="dax-block"><div class="dax-title">Quiz <span class="badge badge-amber">fact_quiz</span></div><div class="dax-code">Tentatives quiz     = SUM(fact_quiz[attempt_count])
+Score moyen quiz    = AVERAGE(fact_quiz[score])
+Taux réussite quiz % = 
+DIVIDE(
+  CALCULATE([Tentatives quiz], fact_quiz[passed] = 1),
+  [Tentatives quiz], 0
+) * 100</div></div>
+  <div class="dax-block"><div class="dax-title">CodinGame <span class="badge badge-amber">fact_codingame</span></div><div class="dax-code">Sessions codingame = SUM(fact_codingame[session_count])
+Score moyen CDG    = AVERAGE(fact_codingame[score])
+Score moyen CDG %  = DIVIDE(AVERAGE(fact_codingame[score]), AVERAGE(fact_codingame[total_score]), 0) * 100</div></div>
+  <div class="dax-block"><div class="dax-title">ETL Fraîcheur <span class="badge badge-red">etl_run_log</span></div><div class="dax-code">Dernier refresh OK = 
+CALCULATE(
+  MAX(etl_run_log[finished_at]),
+  etl_run_log[status] = "OK"
+)</div></div>
+
+  <h3>Visuels recommandés</h3>
+  <div class="visual-row">
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-hash" aria-hidden="true"></i> Cartes KPI (×4)</div><div class="visual-card-sub">Tentatives · Taux % · Sessions CDG · Refresh</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Scores par framework</div><div class="visual-card-sub">fact_codingame[framework_name]</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-chart-line" aria-hidden="true"></i> Évolution scores quiz</div><div class="visual-card-sub">Score moyen dans le temps</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-table" aria-hidden="true"></i> Log ETL</div><div class="visual-card-sub">started_at · status · rows_loaded</div></div>
+  </div>
+</div>
+
+<!-- PAGE 5: Navigation -->
+<div id="p5" class="page">
+  <p class="section-title">Comment créer la navigation dans Power BI</p>
+  <p class="section-sub">Barre de navigation avec boutons sur chaque page</p>
+
+  <div class="nav-guide">
+    <div class="nav-guide-title">Méthode recommandée : boutons de navigation natifs</div>
+    <div class="nav-step"><span class="step-num">1</span><span>Créer <strong>4 pages</strong> dans votre rapport PBIP : nommez-les exactement <code>01 - Executive</code>, <code>02 - Managerial</code>, <code>03 - Operationnel</code>, <code>04 - Technique</code></span></div>
+    <div class="nav-step"><span class="step-num">2</span><span>Sur chaque page, insérer un <strong>rectangle</strong> en haut (hauteur ≈ 50px, fond sombre). C'est votre barre de nav.</span></div>
+    <div class="nav-step"><span class="step-num">3</span><span>Insérer → <strong>Bouton</strong> → choisir <em>Navigation dans la page</em>. Répéter pour chaque page cible.</span></div>
+    <div class="nav-step"><span class="step-num">4</span><span>Dans le panneau Format bouton → <em>Action</em> → Type = <strong>Navigation dans la page</strong> → Destination = page souhaitée.</span></div>
+    <div class="nav-step"><span class="step-num">5</span><span>Styliser les 4 boutons : fond neutre pour les inactifs, fond coloré pour <em>la page courante</em>. Copier-coller la barre sur toutes les pages.</span></div>
+    <div class="nav-step"><span class="step-num">6</span><span>Pour indiquer la page active : créer un <strong>signet</strong> par page avec le bouton correspondant en état <em>sélectionné</em>. Assigner le signet à l'action du bouton.</span></div>
+  </div>
+
+  <h3>Astuce : signets pour état actif</h3>
+  <div class="tip">Dans Affichage → Signets, créez un signet par page. Nommez-les Nav_Executive, Nav_Managerial, etc. Assignez chaque signet au bouton correspondant dans l'onglet Action. Ainsi, le bouton de la page courante peut avoir un état visuel différent (surligné, gras, souligné).</div>
+
+  <h3>Filtres transversaux recommandés</h3>
+  <div class="visual-row">
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-calendar" aria-hidden="true"></i> Filtre date</div><div class="visual-card-sub"><code>dim_date[full_date]</code> — plage glissante</div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-filter" aria-hidden="true"></i> Segment année</div><div class="visual-card-sub">Page 01 : <code>v_bi_kpi_recrutement[year_num]</code></div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-filter" aria-hidden="true"></i> Segment année</div><div class="visual-card-sub">Page 02 : <code>v_bi_candidature[year_num]</code></div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-map-pin" aria-hidden="true"></i> Filtre lieu</div><div class="visual-card-sub">Page 02 : <code>v_bi_mission[ville]</code></div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-user" aria-hidden="true"></i> Filtre rôle</div><div class="visual-card-sub">Page 03 : <code>dim_user[role_name]</code></div></div>
+    <div class="visual-card"><div class="visual-card-title"><i class="ti ti-code" aria-hidden="true"></i> Filtre framework</div><div class="visual-card-sub">Page 04 : <code>fact_codingame[framework_name]</code></div></div>
+  </div>
+
+  <div class="dax-block" style="margin-top:8px"><div class="dax-title">Bon à savoir — règle year_num</div><div class="dax-code">// NE PAS utiliser dim_date[year_num] comme segment
+// (pas unique — plusieurs jours par an = relation impossible)
+// TOUJOURS utiliser le year_num des vues :
+// → v_bi_kpi_recrutement[year_num]  pour page 01
+// → v_bi_candidature[year_num]      pour page 02</div></div>
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>

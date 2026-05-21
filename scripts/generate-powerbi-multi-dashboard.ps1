@@ -1,16 +1,21 @@
-# Genere PBIP multi-pages (3 dashboards) + modele findme_dw — sans config manuelle
+# Genere PBIP 4 pages — spec findme_powerbi_dashboard_guide + findme_4dashboards_full_layout
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 $Base = Join-Path $Root "bi\powerbi\FindMe-Dashboard"
 $SmName = "FindMe-Dashboard.SemanticModel"
 $RpName = "FindMe-Dashboard.Report"
-$Sm = Join-Path $Base $SmName
 $Rp = Join-Path $Base $RpName
 $PagesDir = Join-Path $Rp "definition\pages"
-$script:LayoutOffset = 40
+$M = '_Mesures BI'
+
+$script:HdrY = 8;    $script:HdrH = 48
+$script:NavX = 520;  $script:NavW = 736; $script:NavH = 44
+$script:KpiY = 60;   $script:KpiH = 72
+$script:FiltY = 140; $script:FiltH = 44
+$script:MidY = 192;  $script:MidH = 200
+$script:BotY = 400;  $script:BotH = 308
 
 $script:Utf8NoBom = New-Object System.Text.UTF8Encoding $false
-function LY([int]$y) { $y + $script:LayoutOffset }
 function Write-Utf8NoBom([string]$Path, [string]$Content) {
     $dir = Split-Path $Path -Parent
     if ($dir -and -not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
@@ -19,62 +24,42 @@ function Write-Utf8NoBom([string]$Path, [string]$Content) {
 function New-Dir($p) { if (-not (Test-Path $p)) { New-Item -ItemType Directory -Path $p -Force | Out-Null } }
 
 function Get-VisualContainerObjects {
+    $off = @{ show = @{ expr = @{ Literal = @{ Value = "'false'" } } } }
     @{
-        background = @(@{ properties = @{ show = @{ expr = @{ Literal = @{ Value = "'false'" } } } } })
-        border     = @(@{ properties = @{ show = @{ expr = @{ Literal = @{ Value = "'false'" } } } } })
-        dropShadow = @(@{ properties = @{ show = @{ expr = @{ Literal = @{ Value = "'false'" } } } } })
-        title      = @(@{ properties = @{ show = @{ expr = @{ Literal = @{ Value = "'false'" } } } } })
+        background = @(@{ properties = $off })
+        border     = @(@{ properties = $off })
+        dropShadow = @(@{ properties = $off })
+        title      = @(@{ properties = $off })
     }
 }
 
 function New-ColumnProjection($entity, $property, [bool]$active = $false) {
     @{
-        field = @{
-            Column = @{
-                Expression = @{ SourceRef = @{ Entity = $entity } }
-                Property = $property
-            }
-        }
+        field = @{ Column = @{ Expression = @{ SourceRef = @{ Entity = $entity } }; Property = $property } }
         queryRef = "$entity.$property"
         active = $active
     }
 }
-
+function New-MeasureProjection($entity, $property) {
+    @{
+        field = @{ Measure = @{ Expression = @{ SourceRef = @{ Entity = $entity } }; Property = $property } }
+        queryRef = "$entity.$property"
+    }
+}
 function New-SumProjection($entity, $property) {
     @{
-        field = @{
-            Aggregation = @{
-                Expression = @{
-                    Column = @{
-                        Expression = @{ SourceRef = @{ Entity = $entity } }
-                        Property = $property
-                    }
-                }
-                Function = 0
-            }
-        }
+        field = @{ Aggregation = @{ Expression = @{ Column = @{ Expression = @{ SourceRef = @{ Entity = $entity } }; Property = $property } }; Function = 0 } }
         queryRef = "Sum($entity.$property)"
     }
 }
-
 function New-AvgProjection($entity, $property) {
     @{
-        field = @{
-            Aggregation = @{
-                Expression = @{
-                    Column = @{
-                        Expression = @{ SourceRef = @{ Entity = $entity } }
-                        Property = $property
-                    }
-                }
-                Function = 1
-            }
-        }
+        field = @{ Aggregation = @{ Expression = @{ Column = @{ Expression = @{ SourceRef = @{ Entity = $entity } }; Property = $property } }; Function = 1 } }
         queryRef = "Avg($entity.$property)"
     }
 }
 
-function New-Visual($id, $x, $y, $w, $h, $z, $tabOrder, $visualType, $queryState, $objects = @{}) {
+function New-VisualPro($id, $x, $y, $w, $h, $z, $tabOrder, $visualType, $queryState, $objects) {
     $v = @{
         '$schema' = 'https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json'
         name = $id
@@ -89,6 +74,12 @@ function New-Visual($id, $x, $y, $w, $h, $z, $tabOrder, $visualType, $queryState
     $v | ConvertTo-Json -Depth 40 -Compress:$false
 }
 
+function Write-Vis($page, $id, $x, $y, $w, $h, $z, $to, $type, $query, $objects = @{}) {
+    $dir = Join-Path $PagesDir "$page\visuals\$id"
+    New-Dir $dir
+    Write-Utf8NoBom (Join-Path $dir 'visual.json') (New-VisualPro $id $x $y $w $h $z $to $type $query $objects)
+}
+
 function New-PageJson($id, $displayName) {
     @{
         '$schema' = 'https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json'
@@ -100,11 +91,7 @@ function New-PageJson($id, $displayName) {
         objects = @{
             background = @(@{
                 properties = @{
-                    color = @{
-                        solid = @{
-                            color = @{ expr = @{ Literal = @{ Value = "'#F5F7FA'" } } }
-                        }
-                    }
+                    color = @{ solid = @{ color = @{ expr = @{ Literal = @{ Value = "'#F0F4F8'" } } } } }
                     transparency = @{ expr = @{ Literal = @{ Value = '0D' } } }
                 }
             })
@@ -112,192 +99,260 @@ function New-PageJson($id, $displayName) {
     } | ConvertTo-Json -Depth 20 -Compress:$false
 }
 
-function New-TitleVisual($id, $x, $y, $w, $title) {
-    $objects = @{
+function Get-KpiLayout([int]$count) {
+    $margin = 24; $gap = 8
+    $w = [int][math]::Floor((1280 - 2 * $margin - ($count - 1) * $gap) / $count)
+    $xs = 0..($count - 1) | ForEach-Object { $margin + $_ * ($w + $gap) }
+    @{ Width = $w; X = $xs }
+}
+
+function Write-KpiRow($page, $items, $y, $h) {
+    $layout = Get-KpiLayout $items.Count
+    for ($i = 0; $i -lt $items.Count; $i++) {
+        $it = $items[$i]
+        $proj = if ($it.Measure) { New-MeasureProjection $M $it.Measure } else { New-SumProjection $it.Entity $it.Column }
+        Write-Vis $page $it.Id $layout.X[$i] $y $layout.Width $h (2000 + $i) (1000 + $i) 'card' @{
+            Values = @{ projections = @($proj) }
+        }
+    }
+}
+
+function Add-PageChrome($page, $dashTitle, $pageSubtitle) {
+    Write-Vis $page 'header_main' 24 $script:HdrY 480 $script:HdrH 10000 0 'textbox' $null @{
         general = @(@{
             properties = @{
-                paragraphs = @(@{
-                    textRuns = @(@{
-                        value = $title
-                        textStyle = @{ fontSize = '22pt'; fontWeight = 'bold'; color = '#1B3A57' }
-                    })
-                })
+                paragraphs = @(
+                    @{ textRuns = @(@{ value = $dashTitle; textStyle = @{ fontSize = '18pt'; fontWeight = 'bold'; color = '#1B3A57' } }) },
+                    @{ textRuns = @(@{ value = $pageSubtitle; textStyle = @{ fontSize = '10pt'; color = '#5A6B7D' } }) }
+                )
             }
         })
     }
-    New-Visual $id $x (LY $y) $w 48 1000 0 'textbox' $null $objects
+    Write-Vis $page 'nav_pages' $script:NavX $script:HdrY $script:NavW $script:NavH 9500 9000 'pageNavigator' $null
 }
 
-function New-PageNavigatorVisual($id) {
-    New-Visual $id 24 668 1232 48 9500 9500 'pageNavigator' $null
+function Write-Slicer($page, $id, $x, $entity, $col, $z, $to) {
+    Write-Vis $page $id $x $script:FiltY 200 $script:FiltH $z $to 'slicer' @{
+        Values = @{ projections = @(New-ColumnProjection $entity $col $true) }
+    }
 }
 
-function Add-PageNavBar([string]$pageName) {
-    $navDir = Join-Path $PagesDir "$pageName\visuals\nav_pages"
-    New-Dir $navDir
-    Write-Utf8NoBom (Join-Path $navDir 'visual.json') (New-PageNavigatorVisual 'nav_pages')
-}
-
-# GUID fixes (Power BI exige un Guid pour logicalId)
+# --- Modele semantique (tables + mesures DAX + relations) ---
 $SemanticLogicalId = '2e8b4f1a-6c3d-4b9e-a1f0-3c7d9e2b4f6a'
 $ReportLogicalId     = '7f3a9c2e-4b1d-4e8a-9f2c-1d5e6a7b8c9d'
-
-# --- Modele semantique (tables findme_dw) ---
 & (Join-Path $PSScriptRoot 'generate-powerbi-pbip.ps1') -OutputBase $Base -ProjectPrefix 'FindMe-Dashboard' -SemanticModelOnly -SemanticLogicalId $SemanticLogicalId
 
-# --- Pages ---
 $pageExec = 'page_exec_findme01'
 $pageMgr  = 'page_mgr_findme02'
 $pageOps  = 'page_ops_findme03'
+$pageTech = 'page_tech_findme04'
 
-New-Dir $PagesDir
-New-Dir (Join-Path $PagesDir $pageExec)
-New-Dir (Join-Path $PagesDir "$pageExec\visuals")
-New-Dir (Join-Path $PagesDir $pageMgr)
-New-Dir (Join-Path $PagesDir "$pageMgr\visuals")
-New-Dir (Join-Path $PagesDir $pageOps)
-New-Dir (Join-Path $PagesDir "$pageOps\visuals")
+foreach ($p in @($pageExec, $pageMgr, $pageOps, $pageTech)) {
+    New-Dir (Join-Path $PagesDir $p)
+    New-Dir (Join-Path $PagesDir "$p\visuals")
+}
 
 $pagesMeta = @{
     '$schema' = 'https://developer.microsoft.com/json-schemas/fabric/item/report/definition/pagesMetadata/1.0.0/schema.json'
-    pageOrder = @($pageExec, $pageMgr, $pageOps)
+    pageOrder = @($pageExec, $pageMgr, $pageOps, $pageTech)
     activePageName = $pageExec
 } | ConvertTo-Json -Depth 10 -Compress:$false
 Write-Utf8NoBom (Join-Path $PagesDir 'pages.json') $pagesMeta
 
 Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\page.json") (New-PageJson $pageExec '01 - Executive')
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\page.json") (New-PageJson $pageMgr '02 - Managerial')
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\page.json") (New-PageJson $pageOps '03 - Operationnel')
+Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\page.json")  (New-PageJson $pageMgr  '02 - Managerial')
+Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\page.json")  (New-PageJson $pageOps  '03 - Operationnel')
+Write-Utf8NoBom (Join-Path $PagesDir "$pageTech\page.json") (New-PageJson $pageTech '04 - Technique')
 
-# Page Executive
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\title01\visual.json") (New-TitleVisual 'title01' 24 16 900 'Find-Me - KPI Recrutement (Executive)')
+$sub = 'Find-Me · findme_dw · Talend ETL · Guide 4 dashboards'
 
-$qCard1 = @{ Values = @{ projections = @(New-SumProjection 'v_bi_kpi_recrutement' 'candidatures') } }
-$qCard2 = @{ Values = @{ projections = @(New-SumProjection 'v_bi_kpi_recrutement' 'acceptees') } }
-$qCard3 = @{ Values = @{ projections = @(New-AvgProjection 'v_bi_kpi_recrutement' 'taux_acceptation_pct') } }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\kpi_cand\visual.json") (New-Visual 'kpi_cand' 24 (LY 80) 280 120 2000 1000 'card' $qCard1)
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\kpi_acc\visual.json") (New-Visual 'kpi_acc' 320 (LY 80) 280 120 2001 2000 'card' $qCard2)
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\kpi_tx\visual.json") (New-Visual 'kpi_tx' 616 (LY 80) 280 120 2002 3000 'card' $qCard3)
+# ========== 01 Executive ==========
+Add-PageChrome $pageExec '01 — Executive dashboard' $sub
+Write-KpiRow $pageExec @(
+    @{ Id = 'kpi_cand'; Measure = 'KPI Candidatures' },
+    @{ Id = 'kpi_acc'; Measure = 'KPI Acceptees' },
+    @{ Id = 'kpi_tx'; Measure = 'KPI Taux %' },
+    @{ Id = 'kpi_mis'; Measure = 'Missions (vue)' },
+    @{ Id = 'kpi_open'; Measure = 'Missions ouvertes' }
+) $script:KpiY $script:KpiH
 
-$qTableKpi = @{
-    Values = @{
-        projections = @(
-            (New-ColumnProjection 'v_bi_kpi_recrutement' 'year_num' $true),
-            (New-ColumnProjection 'v_bi_kpi_recrutement' 'month_num'),
-            (New-ColumnProjection 'v_bi_kpi_recrutement' 'candidatures'),
-            (New-ColumnProjection 'v_bi_kpi_recrutement' 'acceptees'),
-            (New-ColumnProjection 'v_bi_kpi_recrutement' 'refusees'),
-            (New-ColumnProjection 'v_bi_kpi_recrutement' 'taux_acceptation_pct')
-        )
-    }
-}
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\tbl_kpi\visual.json") (New-Visual 'tbl_kpi' 590 (LY 210) 660 420 1000 4000 'tableEx' $qTableKpi)
+Write-Slicer $pageExec 'slicer_year' 24 'v_bi_kpi_recrutement' 'year_num' 3000 5000
+Write-Slicer $pageExec 'slicer_contrat' 232 'v_bi_mission' 'type_contrat' 3001 5100
+Write-Slicer $pageExec 'slicer_date' 440 'dim_date' 'full_date' 3002 5200
 
-$qSlicerYear = @{ Values = @{ projections = @(New-ColumnProjection 'v_bi_kpi_recrutement' 'year_num' $true) } }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\slicer_year\visual.json") (New-Visual 'slicer_year' 920 (LY 72) 340 88 3000 5000 'slicer' $qSlicerYear)
-
-$qLineTrend = @{
+Write-Vis $pageExec 'line_cand' 24 $script:MidY 400 $script:MidH 1001 3000 'lineChart' @{
     Category = @{ projections = @(New-ColumnProjection 'v_bi_kpi_recrutement' 'month_num' $true) }
-    Y        = @{ projections = @(New-SumProjection 'v_bi_kpi_recrutement' 'candidatures') }
+    Y        = @{ projections = @(New-MeasureProjection $M 'KPI Candidatures') }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\line_trend\visual.json") (New-Visual 'line_trend' 24 (LY 210) 550 200 1001 3000 'lineChart' $qLineTrend)
-
-$qDonutExec = @{
+Write-Vis $pageExec 'col_acc_ref' 436 $script:MidY 400 $script:MidH 1002 3100 'clusteredColumnChart' @{
     Category = @{ projections = @(New-ColumnProjection 'v_bi_kpi_recrutement' 'month_num' $true) }
-    Y        = @{ projections = @(New-SumProjection 'v_bi_kpi_recrutement' 'acceptees') }
+    Y        = @{ projections = @(
+        (New-SumProjection 'v_bi_kpi_recrutement' 'acceptees'),
+        (New-SumProjection 'v_bi_kpi_recrutement' 'refusees')
+    ) }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\donut_acc\visual.json") (New-Visual 'donut_acc' 24 (LY 430) 350 220 1002 3500 'donutChart' $qDonutExec)
-Add-PageNavBar $pageExec
-
-# Page Managerial
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\title02\visual.json") (New-TitleVisual 'title02' 24 16 900 'Find-Me - Missions et Candidatures (Managerial)')
-
-$qBarMission = @{
-    Category = @{ projections = @(New-ColumnProjection 'v_bi_mission' 'mission_name' $true) }
-    Y        = @{ projections = @(New-SumProjection 'v_bi_mission' 'mission_count') }
+Write-Vis $pageExec 'line_taux' 848 $script:MidY 408 $script:MidH 1003 3200 'lineChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'v_bi_kpi_recrutement' 'month_num' $true) }
+    Y        = @{ projections = @(New-AvgProjection 'v_bi_kpi_recrutement' 'taux_acceptation_pct') }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\bar_mission\visual.json") (New-Visual 'bar_mission' 24 (LY 80) 600 280 1000 1000 'clusteredBarChart' $qBarMission)
 
-$qBarCand = @{
-    Category = @{ projections = @(New-ColumnProjection 'v_bi_candidature' 'statut_candidature' $true) }
+Write-Vis $pageExec 'bar_top_mission' 24 $script:BotY 1232 $script:BotH 1004 4000 'clusteredBarChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'v_bi_candidature' 'mission_name' $true) }
     Y        = @{ projections = @(New-SumProjection 'v_bi_candidature' 'candidature_count') }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\bar_statut\visual.json") (New-Visual 'bar_statut' 640 (LY 80) 600 280 1001 2000 'clusteredBarChart' $qBarCand)
 
-$qTblCand = @{
+# ========== 02 Managerial ==========
+Add-PageChrome $pageMgr '02 — Managerial dashboard' $sub
+Write-KpiRow $pageMgr @(
+    @{ Id = 'kpi_cv'; Measure = 'Candidatures (vue)' },
+    @{ Id = 'kpi_acc'; Measure = 'Acceptees (vue)' },
+    @{ Id = 'kpi_ref'; Measure = 'Refusees (vue)' },
+    @{ Id = 'kpi_enc'; Measure = 'En cours (vue)' },
+    @{ Id = 'kpi_mis'; Measure = 'Missions (vue)' }
+) $script:KpiY $script:KpiH
+
+Write-Slicer $pageMgr 'slicer_year' 24 'v_bi_candidature' 'year_num' 3000 5000
+Write-Slicer $pageMgr 'slicer_ville' 232 'v_bi_mission' 'ville' 3001 5100
+Write-Slicer $pageMgr 'slicer_contrat' 440 'v_bi_mission' 'type_contrat' 3002 5200
+Write-Slicer $pageMgr 'slicer_statut' 648 'v_bi_candidature' 'statut_candidature' 3003 5300
+Write-Slicer $pageMgr 'slicer_remote' 856 'v_bi_mission' 'is_remote' 3004 5400
+
+Write-Vis $pageMgr 'donut_statut' 24 $script:MidY 300 $script:MidH 1001 3000 'donutChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'v_bi_candidature' 'statut_candidature' $true) }
+    Y        = @{ projections = @(New-MeasureProjection $M 'Candidatures (vue)') }
+}
+Write-Vis $pageMgr 'bar_contrat' 336 $script:MidY 300 $script:MidH 1002 3100 'clusteredColumnChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'v_bi_mission' 'type_contrat' $true) }
+    Y        = @{ projections = @(New-MeasureProjection $M 'Missions (vue)') }
+}
+Write-Vis $pageMgr 'line_month' 648 $script:MidY 300 $script:MidH 1003 3200 'lineChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'v_bi_candidature' 'month_name' $true) }
+    Y        = @{ projections = @(New-MeasureProjection $M 'Candidatures (vue)') }
+}
+Write-Vis $pageMgr 'bar_ville' 960 $script:MidY 304 $script:MidH 1004 3300 'clusteredBarChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'v_bi_mission' 'ville' $true) }
+    Y        = @{ projections = @(New-MeasureProjection $M 'Missions (vue)') }
+}
+
+Write-Vis $pageMgr 'tbl_detail' 24 $script:BotY 620 $script:BotH 1005 4000 'tableEx' @{
     Values = @{
         projections = @(
             (New-ColumnProjection 'v_bi_candidature' 'mission_name' $true),
-            (New-ColumnProjection 'v_bi_candidature' 'statut_candidature'),
-            (New-ColumnProjection 'v_bi_candidature' 'candidature_count'),
+            (New-ColumnProjection 'v_bi_candidature' 'reference_code'),
+            (New-ColumnProjection 'v_bi_candidature' 'type_contrat'),
+            (New-ColumnProjection 'v_bi_candidature' 'status_mission'),
             (New-ColumnProjection 'v_bi_candidature' 'ville'),
-            (New-ColumnProjection 'v_bi_candidature' 'year_num')
+            (New-ColumnProjection 'v_bi_candidature' 'candidature_count')
         )
     }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\tbl_cand\visual.json") (New-Visual 'tbl_cand' 640 (LY 380) 600 270 1000 3000 'tableEx' $qTblCand)
-
-$qSlicerStatut = @{ Values = @{ projections = @(New-ColumnProjection 'v_bi_candidature' 'statut_candidature' $true) } }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\slicer_statut\visual.json") (New-Visual 'slicer_statut' 920 (LY 72) 340 88 3000 5000 'slicer' $qSlicerStatut)
-
-$qSlicerMgrYear = @{ Values = @{ projections = @(New-ColumnProjection 'v_bi_candidature' 'year_num' $true) } }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\slicer_year\visual.json") (New-Visual 'slicer_year' 920 (LY 172) 340 88 3001 5100 'slicer' $qSlicerMgrYear)
-
-$qColMission = @{
-    Category = @{ projections = @(New-ColumnProjection 'v_bi_mission' 'status_mission' $true) }
-    Y        = @{ projections = @(New-SumProjection 'v_bi_mission' 'mission_count') }
+Write-Vis $pageMgr 'bar_ville_stack' 656 $script:BotY 600 $script:BotH 1006 4100 'clusteredColumnChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'v_bi_candidature' 'ville' $true) }
+    Y        = @{ projections = @(
+        (New-SumProjection 'v_bi_candidature' 'is_accepted'),
+        (New-SumProjection 'v_bi_candidature' 'is_refused')
+    ) }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\col_status\visual.json") (New-Visual 'col_status' 24 (LY 380) 600 270 1002 4000 'columnChart' $qColMission)
-Add-PageNavBar $pageMgr
 
-# Page Operationnel
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\title03\visual.json") (New-TitleVisual 'title03' 24 16 900 'Find-Me - CV, Utilisateurs, Notifications (Operationnel)')
+# ========== 03 Operationnel ==========
+Add-PageChrome $pageOps '03 — Dashboard operationnel' $sub
+Write-KpiRow $pageOps @(
+    @{ Id = 'kpi_u'; Measure = 'Total utilisateurs' },
+    @{ Id = 'kpi_n'; Measure = 'Total notifications' },
+    @{ Id = 'kpi_nl'; Measure = 'Notifications lues' },
+    @{ Id = 'kpi_nt'; Measure = 'Taux lecture %' },
+    @{ Id = 'kpi_cv'; Measure = 'Total CV' },
+    @{ Id = 'kpi_st'; Measure = 'Etapes moyennes' },
+    @{ Id = 'kpi_fav'; Measure = 'Total favoris' }
+) $script:KpiY $script:KpiH
 
-$qCardUsers = @{ Values = @{ projections = @(New-SumProjection 'fact_user' 'user_count') } }
-$qCardCv    = @{ Values = @{ projections = @(New-SumProjection 'fact_cv' 'cv_count') } }
-$qCardNotif = @{ Values = @{ projections = @(New-SumProjection 'fact_notification' 'notification_count') } }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\kpi_users\visual.json") (New-Visual 'kpi_users' 24 (LY 80) 280 120 2000 1000 'card' $qCardUsers)
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\kpi_cv\visual.json") (New-Visual 'kpi_cv' 320 (LY 80) 280 120 2001 2000 'card' $qCardCv)
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\kpi_notif\visual.json") (New-Visual 'kpi_notif' 616 (LY 80) 280 120 2002 3000 'card' $qCardNotif)
+Write-Slicer $pageOps 'slicer_date' 24 'dim_date' 'full_date' 3000 5000
+Write-Slicer $pageOps 'slicer_role' 232 'dim_user' 'role_name' 3001 5100
+Write-Slicer $pageOps 'slicer_pays' 440 'dim_user' 'country' 3002 5200
+Write-Slicer $pageOps 'slicer_skillcat' 648 'dim_skill' 'skill_category' 3003 5300
 
-$qTblNotif = @{
-    Values = @{
-        projections = @(
-            (New-ColumnProjection 'fact_notification' 'user_id_degen' $true),
-            (New-ColumnProjection 'fact_notification' 'notification_count'),
-            (New-ColumnProjection 'fact_notification' 'is_read'),
-            (New-ColumnProjection 'fact_notification' 'date_key')
-        )
-    }
-}
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\tbl_notif\visual.json") (New-Visual 'tbl_notif' 24 (LY 220) 600 420 1000 4000 'tableEx' $qTblNotif)
-
-$qTblCv = @{
-    Values = @{
-        projections = @(
-            (New-ColumnProjection 'fact_cv' 'user_key' $true),
-            (New-ColumnProjection 'fact_cv' 'cv_count'),
-            (New-ColumnProjection 'fact_cv' 'steps_completed'),
-            (New-ColumnProjection 'fact_cv' 'date_key')
-        )
-    }
-}
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\tbl_cv\visual.json") (New-Visual 'tbl_cv' 640 (LY 220) 610 420 1001 5000 'tableEx' $qTblCv)
-
-$qCardMission = @{ Values = @{ projections = @(New-SumProjection 'fact_mission' 'mission_count') } }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\kpi_mission\visual.json") (New-Visual 'kpi_mission' 920 (LY 72) 280 120 2003 1000 'card' $qCardMission)
-
-$qSlicerRead = @{ Values = @{ projections = @(New-ColumnProjection 'fact_notification' 'is_read' $true) } }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\slicer_read\visual.json") (New-Visual 'slicer_read' 920 (LY 210) 340 88 3000 6000 'slicer' $qSlicerRead)
-
-$qBarSkill = @{
+Write-Vis $pageOps 'bar_skills' 24 $script:MidY 400 $script:MidH 1001 3000 'clusteredBarChart' @{
     Category = @{ projections = @(New-ColumnProjection 'dim_skill' 'skill_label' $true) }
-    Y        = @{ projections = @(New-SumProjection 'dim_skill' 'usage_count') }
+    Y        = @{ projections = @(New-MeasureProjection $M 'Total usages') }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\bar_skills\visual.json") (New-Visual 'bar_skills' 24 (LY 430) 1230 220 1002 5500 'clusteredBarChart' $qBarSkill)
-Add-PageNavBar $pageOps
+Write-Vis $pageOps 'donut_role' 436 $script:MidY 400 $script:MidH 1002 3100 'donutChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'dim_user' 'role_name' $true) }
+    Y        = @{ projections = @(New-MeasureProjection $M 'Total utilisateurs') }
+}
+Write-Vis $pageOps 'line_activity' 848 $script:MidY 408 $script:MidH 1003 3200 'lineChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'dim_date' 'full_date' $true) }
+    Y        = @{ projections = @(
+        (New-SumProjection 'fact_cv' 'cv_count'),
+        (New-SumProjection 'fact_notification' 'notification_count')
+    ) }
+}
 
-# report.json (PBIR)
+Write-Vis $pageOps 'bar_steps' 24 $script:BotY 400 $script:BotH 1004 4000 'clusteredColumnChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'fact_cv' 'steps_completed' $true) }
+    Y        = @{ projections = @(New-SumProjection 'fact_cv' 'cv_count') }
+}
+Write-Vis $pageOps 'donut_skillcat' 436 $script:BotY 400 $script:BotH 1005 4100 'donutChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'dim_skill' 'skill_category' $true) }
+    Y        = @{ projections = @(New-MeasureProjection $M 'Total usages') }
+}
+Write-Vis $pageOps 'line_notif' 848 $script:BotY 408 $script:BotH 1006 4200 'lineChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'dim_date' 'full_date' $true) }
+    Y        = @{ projections = @(
+        (New-MeasureProjection $M 'Total notifications'),
+        (New-MeasureProjection $M 'Notifications lues')
+    ) }
+}
+
+# ========== 04 Technique ==========
+Add-PageChrome $pageTech '04 — Dashboard technique' $sub
+Write-KpiRow $pageTech @(
+    @{ Id = 'kpi_qz'; Measure = 'Tentatives quiz' },
+    @{ Id = 'kpi_qs'; Measure = 'Score moyen quiz' },
+    @{ Id = 'kpi_qt'; Measure = 'Taux reussite quiz %' },
+    @{ Id = 'kpi_cg'; Measure = 'Sessions codingame' },
+    @{ Id = 'kpi_cs'; Measure = 'Score moyen CDG' },
+    @{ Id = 'kpi_etl'; Measure = 'Dernier refresh OK' }
+) $script:KpiY $script:KpiH
+
+Write-Slicer $pageTech 'slicer_date' 24 'dim_date' 'full_date' 3000 5000
+Write-Slicer $pageTech 'slicer_fw' 232 'fact_codingame' 'framework_name' 3001 5100
+Write-Slicer $pageTech 'slicer_passed' 440 'fact_quiz' 'passed' 3002 5200
+Write-Slicer $pageTech 'slicer_etl' 648 'etl_run_log' 'status' 3003 5300
+
+Write-Vis $pageTech 'bar_fw' 24 $script:MidY 400 $script:MidH 1001 3000 'clusteredBarChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'fact_codingame' 'framework_name' $true) }
+    Y        = @{ projections = @(New-MeasureProjection $M 'Score moyen CDG') }
+}
+Write-Vis $pageTech 'line_quiz' 436 $script:MidY 400 $script:MidH 1002 3100 'lineChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'dim_date' 'full_date' $true) }
+    Y        = @{ projections = @(New-MeasureProjection $M 'Score moyen quiz') }
+}
+Write-Vis $pageTech 'donut_passed' 848 $script:MidY 408 $script:MidH 1003 3200 'donutChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'fact_quiz' 'passed' $true) }
+    Y        = @{ projections = @(New-MeasureProjection $M 'Tentatives quiz') }
+}
+
+Write-Vis $pageTech 'bar_user_quiz' 24 $script:BotY 400 $script:BotH 1004 4000 'clusteredColumnChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'fact_quiz' 'user_key' $true) }
+    Y        = @{ projections = @(New-SumProjection 'fact_quiz' 'attempt_count') }
+}
+Write-Vis $pageTech 'tbl_etl' 436 $script:BotY 400 $script:BotH 1005 4100 'tableEx' @{
+    Values = @{
+        projections = @(
+            (New-ColumnProjection 'etl_run_log' 'started_at' $true),
+            (New-ColumnProjection 'etl_run_log' 'finished_at'),
+            (New-ColumnProjection 'etl_run_log' 'status'),
+            (New-ColumnProjection 'etl_run_log' 'rows_loaded'),
+            (New-ColumnProjection 'etl_run_log' 'error_message')
+        )
+    }
+}
+Write-Vis $pageTech 'line_cdg_month' 848 $script:BotY 408 $script:BotH 1006 4200 'lineChart' @{
+    Category = @{ projections = @(New-ColumnProjection 'dim_date' 'month_name' $true) }
+    Y        = @{ projections = @(New-MeasureProjection $M 'Sessions codingame') }
+}
+
+# report.json
 $reportJson = @'
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/report/3.2.0/schema.json",
@@ -320,53 +375,43 @@ $reportJson = @'
     "defaultDrillFilterOtherVisuals": true,
     "allowChangeFilterTypes": true,
     "useEnhancedTooltips": true,
-    "pagesPosition": "Bottom"
+    "pagesPosition": "Bottom",
+    "filterPaneHiddenInEditMode": true
   }
 }
 '@
 Write-Utf8NoBom (Join-Path $Rp 'definition\report.json') $reportJson
 
-$versionJson = @'
+Write-Utf8NoBom (Join-Path $Rp 'definition\version.json') @'
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/versionMetadata/1.0.0/schema.json",
   "version": "2.0.0"
 }
 '@
-Write-Utf8NoBom (Join-Path $Rp 'definition\version.json') $versionJson
 
-# definition.pbir
-$pbir = @"
+Write-Utf8NoBom (Join-Path $Rp 'definition.pbir') @"
 {
   "`$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definitionProperties/2.0.0/schema.json",
   "version": "4.0",
-  "datasetReference": {
-    "byPath": { "path": "../$SmName" }
-  }
+  "datasetReference": { "byPath": { "path": "../$SmName" } }
 }
 "@
-Write-Utf8NoBom (Join-Path $Rp 'definition.pbir') $pbir
 
-# .platform report
-$plat = @"
+Write-Utf8NoBom (Join-Path $Rp '.platform') @"
 {
   "`$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
   "metadata": { "type": "Report", "displayName": "FindMe-Dashboard" },
   "config": { "version": "2.0", "logicalId": "$ReportLogicalId" }
 }
 "@
-Write-Utf8NoBom (Join-Path $Rp '.platform') $plat
 
-# .pbip
-$pbip = @"
+Write-Utf8NoBom (Join-Path $Base 'FindMe-Dashboard.pbip') @"
 {
   "`$schema": "https://developer.microsoft.com/json-schemas/fabric/pbip/pbipProperties/1.0.0/schema.json",
   "version": "1.0",
-  "artifacts": [
-    { "report": { "path": "$RpName" } }
-  ],
+  "artifacts": [{ "report": { "path": "$RpName" } }],
   "settings": { "enableAutoRecovery": true }
 }
 "@
-Write-Utf8NoBom (Join-Path $Base 'FindMe-Dashboard.pbip') $pbip
 
-Write-Host "Dashboard PBIP (3 pages) : $Base\FindMe-Dashboard.pbip" -ForegroundColor Green
+Write-Host "Dashboard PBIP (4 pages + mesures DAX) : $Base\FindMe-Dashboard.pbip" -ForegroundColor Green

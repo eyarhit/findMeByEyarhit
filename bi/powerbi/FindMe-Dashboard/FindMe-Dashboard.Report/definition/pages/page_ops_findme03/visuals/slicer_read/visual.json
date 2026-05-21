@@ -1,11 +1,11 @@
 {
     "position":  {
-                     "width":  340,
-                     "y":  250,
+                     "width":  260,
+                     "y":  192,
                      "z":  3000,
-                     "x":  920,
+                     "x":  1000,
                      "tabOrder":  6000,
-                     "height":  88
+                     "height":  248
                  },
     "name":  "slicer_read",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",

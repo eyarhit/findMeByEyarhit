@@ -3,7 +3,8 @@
     "pageOrder":  [
                       "page_exec_findme01",
                       "page_mgr_findme02",
-                      "page_ops_findme03"
+                      "page_ops_findme03",
+                      "page_tech_findme04"
                   ],
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/pagesMetadata/1.0.0/schema.json"
 }

@@ -1,11 +1,11 @@
 {
     "position":  {
-                     "width":  1232,
-                     "y":  668,
+                     "width":  736,
+                     "y":  8,
                      "z":  9500,
-                     "x":  24,
-                     "tabOrder":  9500,
-                     "height":  48
+                     "x":  520,
+                     "tabOrder":  9000,
+                     "height":  44
                  },
     "name":  "nav_pages",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",

@@ -1,0 +1,378 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.nb{padding:7px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer;font-size:12px;transition:all .15s}
+.nb:hover{background:var(--color-background-secondary)}
+.nb.on{background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info);font-weight:500}
+.pg{display:none}.pg.on{display:block}
+.db{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.db-bar{background:var(--color-background-secondary);padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.db-dot{width:8px;height:8px;border-radius:50%}
+.db-title{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.db-sub{font-size:11px;color:var(--color-text-tertiary);margin-left:auto}
+.db-body{padding:14px;background:var(--color-background-primary)}
+.krow{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:14px}
+.kc{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.kl{font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px}
+.kv{font-size:16px;font-weight:500;color:var(--color-text-primary)}
+.ks{font-size:10px;color:var(--color-text-tertiary);margin-top:2px;font-family:var(--font-mono)}
+.vrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:14px}
+.vc{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;background:var(--color-background-primary)}
+.vh{font-size:11px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px;display:flex;align-items:center;gap:5px}
+.vd{font-size:10px;color:var(--color-text-secondary);line-height:1.5}
+.vm{font-size:10px;color:var(--color-text-tertiary);font-family:var(--font-mono);margin-top:4px;padding:3px 6px;background:var(--color-background-secondary);border-radius:4px}
+.sec{font-size:11px;font-weight:500;color:var(--color-text-secondary);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.05em}
+.frow{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;margin-bottom:12px}
+.fc{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px 10px;display:flex;align-items:center;gap:6px}
+.fi{font-size:15px;color:var(--color-text-secondary)}
+.ft{font-size:10px;color:var(--color-text-secondary)}
+.fm{font-size:10px;color:var(--color-text-tertiary);font-family:var(--font-mono)}
+.dax{background:var(--color-background-secondary);border-left:2px solid var(--color-border-info);border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;padding:8px 12px;margin-bottom:8px}
+.dx{font-size:11px;color:var(--color-text-primary);font-weight:500;margin-bottom:3px}
+.dc{font-family:var(--font-mono);font-size:11px;color:var(--color-text-info);white-space:pre-wrap;line-height:1.5}
+.warn{background:var(--color-background-warning);border-radius:var(--border-radius-md);padding:8px 12px;font-size:11px;color:var(--color-text-warning);margin-bottom:10px;display:flex;align-items:flex-start;gap:6px}
+.badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px}
+.bi{background:var(--color-background-info);color:var(--color-text-info)}
+.bg{background:var(--color-background-success);color:var(--color-text-success)}
+.ba{background:var(--color-background-warning);color:var(--color-text-warning)}
+.br{background:var(--color-background-danger);color:var(--color-text-danger)}
+</style>
+
+<h2 class="sr-only">Guide complet des 4 dashboards Power BI Find-Me avec visuels, mesures DAX et filtres</h2>
+
+<div class="nav">
+  <button class="nb on" onclick="show('p1',this)"><i class="ti ti-presentation-analytics" style="font-size:13px" aria-hidden="true"></i> 01 — Executive</button>
+  <button class="nb" onclick="show('p2',this)"><i class="ti ti-briefcase" style="font-size:13px" aria-hidden="true"></i> 02 — Managerial</button>
+  <button class="nb" onclick="show('p3',this)"><i class="ti ti-activity" style="font-size:13px" aria-hidden="true"></i> 03 — Opérationnel</button>
+  <button class="nb" onclick="show('p4',this)"><i class="ti ti-code" style="font-size:13px" aria-hidden="true"></i> 04 — Technique</button>
+</div>
+
+<!-- ========== PAGE 1 ========== -->
+<div id="p1" class="pg on">
+<div class="db">
+  <div class="db-bar">
+    <div class="db-dot" style="background:#378ADD"></div>
+    <span class="db-title">01 — Executive dashboard</span>
+    <span class="db-sub">Vue stratégique · recrutement mensuel</span>
+  </div>
+  <div class="db-body">
+
+    <div class="sec">Cartes KPI (ligne du haut)</div>
+    <div class="krow">
+      <div class="kc"><div class="kl">Total candidatures</div><div class="kv">—</div><div class="ks">SUM(candidatures)</div></div>
+      <div class="kc"><div class="kl">Candidatures acceptées</div><div class="kv">—</div><div class="ks">SUM(acceptees)</div></div>
+      <div class="kc"><div class="kl">Taux acceptation</div><div class="kv">— %</div><div class="ks">DIVIDE(accept,total)*100</div></div>
+      <div class="kc"><div class="kl">Total missions</div><div class="kv">—</div><div class="ks">SUM(mission_count)</div></div>
+      <div class="kc"><div class="kl">Missions ouvertes</div><div class="kv">—</div><div class="ks">status = "OPEN"</div></div>
+    </div>
+
+    <div class="sec">Visuels principaux</div>
+    <div class="vrow">
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-line" aria-hidden="true"></i> Graphique en courbes</div>
+        <div class="vd">Évolution mensuelle des candidatures</div>
+        <div class="vm">Axe X : month_num · Axe Y : KPI Candidatures</div>
+        <div class="vm">Source : v_bi_kpi_recrutement</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-bar" aria-hidden="true"></i> Histogramme groupé</div>
+        <div class="vd">Acceptées vs refusées par mois</div>
+        <div class="vm">Axe X : month_num · Valeurs : acceptees / refusees</div>
+        <div class="vm">Source : v_bi_kpi_recrutement</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-area" aria-hidden="true"></i> Graphique aire</div>
+        <div class="vd">Taux acceptation % sur le temps</div>
+        <div class="vm">Axe X : month_num · Axe Y : KPI Taux %</div>
+        <div class="vm">Source : v_bi_kpi_recrutement</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-bar" aria-hidden="true"></i> Barres horizontales</div>
+        <div class="vd">Top missions par nb de candidatures</div>
+        <div class="vm">Axe Y : mission_name · Axe X : candidatures</div>
+        <div class="vm">Source : v_bi_candidature</div>
+      </div>
+    </div>
+
+    <div class="sec">Filtres / segments</div>
+    <div class="frow">
+      <div class="fc"><i class="ti ti-filter fi" aria-hidden="true"></i><div><div class="ft">Segment année <span class="badge bi">obligatoire</span></div><div class="fm">v_bi_kpi_recrutement[year_num]</div></div></div>
+      <div class="fc"><i class="ti ti-calendar fi" aria-hidden="true"></i><div><div class="ft">Plage de dates</div><div class="fm">dim_date[full_date]</div></div></div>
+      <div class="fc"><i class="ti ti-file-description fi" aria-hidden="true"></i><div><div class="ft">Type contrat</div><div class="fm">v_bi_mission[type_contrat]</div></div></div>
+    </div>
+
+    <div class="warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Ne pas utiliser <code>dim_date[year_num]</code> comme segment — colonne non unique. Utiliser uniquement <code>v_bi_kpi_recrutement[year_num]</code>.</div>
+
+    <div class="sec">Mesures DAX à créer (table : v_bi_kpi_recrutement)</div>
+    <div class="dax"><div class="dx">KPI Candidatures</div><div class="dc">KPI Candidatures = SUM(v_bi_kpi_recrutement[candidatures])</div></div>
+    <div class="dax"><div class="dx">KPI Acceptées</div><div class="dc">KPI Acceptées = SUM(v_bi_kpi_recrutement[acceptees])</div></div>
+    <div class="dax"><div class="dx">KPI Refusées</div><div class="dc">KPI Refusées = SUM(v_bi_kpi_recrutement[refusees])</div></div>
+    <div class="dax"><div class="dx">Taux acceptation %</div><div class="dc">KPI Taux % = DIVIDE([KPI Acceptées],[KPI Candidatures],0)*100</div></div>
+    <div class="dax"><div class="dx">Missions ouvertes (table : v_bi_mission)</div><div class="dc">Missions ouvertes = CALCULATE(SUM(v_bi_mission[mission_count]),v_bi_mission[status_mission]="OPEN")</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ========== PAGE 2 ========== -->
+<div id="p2" class="pg">
+<div class="db">
+  <div class="db-bar">
+    <div class="db-dot" style="background:#1D9E75"></div>
+    <span class="db-title">02 — Managerial dashboard</span>
+    <span class="db-sub">Candidatures & missions enrichies</span>
+  </div>
+  <div class="db-body">
+
+    <div class="sec">Cartes KPI (ligne du haut)</div>
+    <div class="krow">
+      <div class="kc"><div class="kl">Candidatures (vue)</div><div class="kv">—</div><div class="ks">SUM(candidature_count)</div></div>
+      <div class="kc"><div class="kl">Acceptées</div><div class="kv">—</div><div class="ks">SUM(is_accepted)</div></div>
+      <div class="kc"><div class="kl">Refusées</div><div class="kv">—</div><div class="ks">SUM(is_refused)</div></div>
+      <div class="kc"><div class="kl">En cours</div><div class="kv">—</div><div class="ks">SUM(is_en_cours)</div></div>
+      <div class="kc"><div class="kl">Missions publiées</div><div class="kv">—</div><div class="ks">SUM(mission_count)</div></div>
+    </div>
+
+    <div class="sec">Visuels principaux</div>
+    <div class="vrow">
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-donut" aria-hidden="true"></i> Graphique en anneau</div>
+        <div class="vd">Répartition par statut candidature</div>
+        <div class="vm">Légende : statut_candidature</div>
+        <div class="vm">Valeur : Candidatures (vue)</div>
+        <div class="vm">Source : v_bi_candidature</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-bar" aria-hidden="true"></i> Barres groupées</div>
+        <div class="vd">Missions par type de contrat</div>
+        <div class="vm">Axe X : type_contrat (CDI,CDD…)</div>
+        <div class="vm">Valeur : Missions (vue)</div>
+        <div class="vm">Source : v_bi_mission</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-line" aria-hidden="true"></i> Courbes multiséries</div>
+        <div class="vd">Candidatures & missions par mois</div>
+        <div class="vm">Axe X : month_name · 2 séries</div>
+        <div class="vm">Source : v_bi_candidature + v_bi_mission</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-map-pin" aria-hidden="true"></i> Carte géographique</div>
+        <div class="vd">Missions par ville / pays</div>
+        <div class="vm">Emplacement : ville ou pays</div>
+        <div class="vm">Taille bulles : mission_count</div>
+        <div class="vm">Source : v_bi_mission</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-table" aria-hidden="true"></i> Tableau détail</div>
+        <div class="vd">Détail par mission</div>
+        <div class="vm">Colonnes : mission_name, reference_code,</div>
+        <div class="vm">type_contrat, statut, ville, candidatures</div>
+        <div class="vm">Source : v_bi_candidature</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-bar" aria-hidden="true"></i> Barres empilées</div>
+        <div class="vd">Acceptées + refusées par ville</div>
+        <div class="vm">Axe X : ville · Empilé : is_accepted / is_refused</div>
+        <div class="vm">Source : v_bi_candidature</div>
+      </div>
+    </div>
+
+    <div class="sec">Filtres / segments</div>
+    <div class="frow">
+      <div class="fc"><i class="ti ti-filter fi" aria-hidden="true"></i><div><div class="ft">Segment année</div><div class="fm">v_bi_candidature[year_num]</div></div></div>
+      <div class="fc"><i class="ti ti-map-pin fi" aria-hidden="true"></i><div><div class="ft">Ville / Pays</div><div class="fm">v_bi_mission[ville]</div></div></div>
+      <div class="fc"><i class="ti ti-file-description fi" aria-hidden="true"></i><div><div class="ft">Type contrat</div><div class="fm">v_bi_mission[type_contrat]</div></div></div>
+      <div class="fc"><i class="ti ti-check fi" aria-hidden="true"></i><div><div class="ft">Statut candidature</div><div class="fm">v_bi_candidature[statut_candidature]</div></div></div>
+      <div class="fc"><i class="ti ti-home fi" aria-hidden="true"></i><div><div class="ft">Télétravail</div><div class="fm">v_bi_mission[is_remote]</div></div></div>
+    </div>
+
+    <div class="sec">Mesures DAX à créer</div>
+    <div class="dax"><div class="dx">Candidatures (vue) <span class="badge bg">v_bi_candidature</span></div><div class="dc">Candidatures (vue) = SUM(v_bi_candidature[candidature_count])</div></div>
+    <div class="dax"><div class="dx">Acceptées / Refusées / En cours</div><div class="dc">Acceptées (vue) = SUM(v_bi_candidature[is_accepted])
+Refusées (vue)  = SUM(v_bi_candidature[is_refused])
+En cours (vue)  = SUM(v_bi_candidature[is_en_cours])</div></div>
+    <div class="dax"><div class="dx">Taux acceptation (vue) %</div><div class="dc">Taux % (vue) = DIVIDE([Acceptées (vue)],[Candidatures (vue)],0)*100</div></div>
+    <div class="dax"><div class="dx">Missions (vue) <span class="badge bg">v_bi_mission</span></div><div class="dc">Missions (vue) = SUM(v_bi_mission[mission_count])
+Missions remote = CALCULATE([Missions (vue)],v_bi_mission[is_remote]=1)</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ========== PAGE 3 ========== -->
+<div id="p3" class="pg">
+<div class="db">
+  <div class="db-bar">
+    <div class="db-dot" style="background:#BA7517"></div>
+    <span class="db-title">03 — Dashboard opérationnel</span>
+    <span class="db-sub">Utilisateurs · notifications · CV · compétences</span>
+  </div>
+  <div class="db-body">
+
+    <div class="sec">Cartes KPI (ligne du haut)</div>
+    <div class="krow">
+      <div class="kc"><div class="kl">Total utilisateurs</div><div class="kv">—</div><div class="ks">SUM(user_count)</div></div>
+      <div class="kc"><div class="kl">Total notifications</div><div class="kv">—</div><div class="ks">SUM(notification_count)</div></div>
+      <div class="kc"><div class="kl">Notif. lues</div><div class="kv">—</div><div class="ks">is_read = 1</div></div>
+      <div class="kc"><div class="kl">Taux lecture</div><div class="kv">— %</div><div class="ks">lues / total * 100</div></div>
+      <div class="kc"><div class="kl">Total CV</div><div class="kv">—</div><div class="ks">SUM(cv_count)</div></div>
+      <div class="kc"><div class="kl">Étapes moy. CV</div><div class="kv">—</div><div class="ks">AVERAGE(steps_completed)</div></div>
+      <div class="kc"><div class="kl">Total favoris</div><div class="kv">—</div><div class="ks">SUM(favori_count)</div></div>
+    </div>
+
+    <div class="sec">Visuels principaux</div>
+    <div class="vrow">
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-bar" aria-hidden="true"></i> Top 10 compétences</div>
+        <div class="vd">Compétences les plus utilisées dans les CV</div>
+        <div class="vm">Axe Y : skill_label · Axe X : usage_count</div>
+        <div class="vm">Tri décroissant · Source : dim_skill</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-donut" aria-hidden="true"></i> Répartition par rôle</div>
+        <div class="vd">Candidats vs recruteurs vs autres</div>
+        <div class="vm">Légende : role_name</div>
+        <div class="vm">Valeur : Total utilisateurs</div>
+        <div class="vm">Source : dim_user</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-line" aria-hidden="true"></i> Activité par jour/semaine</div>
+        <div class="vd">Inscriptions et CV dans le temps</div>
+        <div class="vm">Axe X : dim_date[full_date]</div>
+        <div class="vm">Séries : CV + notifications</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-bar" aria-hidden="true"></i> CV par étapes complétées</div>
+        <div class="vd">Distribution du nb d'étapes</div>
+        <div class="vm">Axe X : steps_completed · Axe Y : count</div>
+        <div class="vm">Source : fact_cv</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-donut" aria-hidden="true"></i> Catégories compétences</div>
+        <div class="vd">Langages vs Frameworks vs Outils</div>
+        <div class="vm">Légende : skill_category</div>
+        <div class="vm">Valeur : Total usages compétences</div>
+        <div class="vm">Source : dim_skill</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-bar" aria-hidden="true"></i> Notifications par jour</div>
+        <div class="vd">Volume envoyé vs lu dans le temps</div>
+        <div class="vm">Axe X : dim_date[full_date]</div>
+        <div class="vm">Séries : total notif. + lues</div>
+        <div class="vm">Source : fact_notification</div>
+      </div>
+    </div>
+
+    <div class="sec">Filtres / segments</div>
+    <div class="frow">
+      <div class="fc"><i class="ti ti-calendar fi" aria-hidden="true"></i><div><div class="ft">Plage de dates</div><div class="fm">dim_date[full_date]</div></div></div>
+      <div class="fc"><i class="ti ti-user fi" aria-hidden="true"></i><div><div class="ft">Rôle utilisateur</div><div class="fm">dim_user[role_name]</div></div></div>
+      <div class="fc"><i class="ti ti-map-pin fi" aria-hidden="true"></i><div><div class="ft">Pays utilisateur</div><div class="fm">dim_user[country]</div></div></div>
+      <div class="fc"><i class="ti ti-code fi" aria-hidden="true"></i><div><div class="ft">Catégorie skill</div><div class="fm">dim_skill[skill_category]</div></div></div>
+    </div>
+
+    <div class="sec">Mesures DAX à créer</div>
+    <div class="dax"><div class="dx">Utilisateurs <span class="badge ba">fact_user</span></div><div class="dc">Total utilisateurs = SUM(fact_user[user_count])</div></div>
+    <div class="dax"><div class="dx">Notifications <span class="badge ba">fact_notification</span></div><div class="dc">Total notifications = SUM(fact_notification[notification_count])
+Notifications lues = CALCULATE([Total notifications],fact_notification[is_read]=1)
+Taux lecture %     = DIVIDE([Notifications lues],[Total notifications],0)*100</div></div>
+    <div class="dax"><div class="dx">CV <span class="badge ba">fact_cv</span></div><div class="dc">Total CV        = SUM(fact_cv[cv_count])
+Étapes moyennes = AVERAGE(fact_cv[steps_completed])</div></div>
+    <div class="dax"><div class="dx">Compétences <span class="badge ba">dim_skill</span></div><div class="dc">Total usages = SUM(dim_skill[usage_count])
+Top compétence = CALCULATE(SELECTEDVALUE(dim_skill[skill_label]),TOPN(1,ALL(dim_skill),[Total usages]))</div></div>
+    <div class="dax"><div class="dx">Favoris <span class="badge ba">fact_mission_favori</span></div><div class="dc">Total favoris = SUM(fact_mission_favori[favori_count])</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ========== PAGE 4 ========== -->
+<div id="p4" class="pg">
+<div class="db">
+  <div class="db-bar">
+    <div class="db-dot" style="background:#E24B4A"></div>
+    <span class="db-title">04 — Dashboard technique</span>
+    <span class="db-sub">Quiz · CodinGame · ETL</span>
+  </div>
+  <div class="db-body">
+
+    <div class="sec">Cartes KPI (ligne du haut)</div>
+    <div class="krow">
+      <div class="kc"><div class="kl">Tentatives quiz</div><div class="kv">—</div><div class="ks">SUM(attempt_count)</div></div>
+      <div class="kc"><div class="kl">Score moyen quiz</div><div class="kv">—</div><div class="ks">AVERAGE(score)</div></div>
+      <div class="kc"><div class="kl">Taux réussite quiz</div><div class="kv">— %</div><div class="ks">passed=1 / total</div></div>
+      <div class="kc"><div class="kl">Sessions CodinGame</div><div class="kv">—</div><div class="ks">SUM(session_count)</div></div>
+      <div class="kc"><div class="kl">Score moyen CDG</div><div class="kv">—</div><div class="ks">AVERAGE(score)</div></div>
+      <div class="kc"><div class="kl">Dernier refresh ETL</div><div class="kv">—</div><div class="ks">MAX(finished_at) OK</div></div>
+    </div>
+
+    <div class="sec">Visuels principaux</div>
+    <div class="vrow">
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-bar" aria-hidden="true"></i> Scores par framework</div>
+        <div class="vd">Performance CodinGame par techno</div>
+        <div class="vm">Axe Y : framework_name</div>
+        <div class="vm">Axe X : Score moyen CDG %</div>
+        <div class="vm">Source : fact_codingame</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-line" aria-hidden="true"></i> Évolution scores quiz</div>
+        <div class="vd">Score moyen dans le temps</div>
+        <div class="vm">Axe X : dim_date[full_date]</div>
+        <div class="vm">Axe Y : Score moyen quiz</div>
+        <div class="vm">Source : fact_quiz</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-donut" aria-hidden="true"></i> Taux réussite quiz</div>
+        <div class="vd">Réussis vs échoués</div>
+        <div class="vm">Valeur : passed = 1 vs 0</div>
+        <div class="vm">Source : fact_quiz</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-bar" aria-hidden="true"></i> Tentatives par utilisateur</div>
+        <div class="vd">Distribution du nb de tentatives</div>
+        <div class="vm">Axe X : user_key · Axe Y : attempt_count</div>
+        <div class="vm">Source : fact_quiz</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-table" aria-hidden="true"></i> Log ETL</div>
+        <div class="vd">Historique des exécutions ETL</div>
+        <div class="vm">Colonnes : started_at, finished_at,</div>
+        <div class="vm">status, rows_loaded, error_message</div>
+        <div class="vm">Source : etl_run_log</div>
+      </div>
+      <div class="vc">
+        <div class="vh"><i class="ti ti-chart-area" aria-hidden="true"></i> Sessions CDG par mois</div>
+        <div class="vd">Volume évaluations techniques</div>
+        <div class="vm">Axe X : dim_date[month_name]</div>
+        <div class="vm">Axe Y : Sessions codingame</div>
+        <div class="vm">Source : fact_codingame</div>
+      </div>
+    </div>
+
+    <div class="sec">Filtres / segments</div>
+    <div class="frow">
+      <div class="fc"><i class="ti ti-calendar fi" aria-hidden="true"></i><div><div class="ft">Plage de dates</div><div class="fm">dim_date[full_date]</div></div></div>
+      <div class="fc"><i class="ti ti-code fi" aria-hidden="true"></i><div><div class="ft">Framework CDG</div><div class="fm">fact_codingame[framework_name]</div></div></div>
+      <div class="fc"><i class="ti ti-check fi" aria-hidden="true"></i><div><div class="ft">Quiz réussi</div><div class="fm">fact_quiz[passed]</div></div></div>
+      <div class="fc"><i class="ti ti-alert-triangle fi" aria-hidden="true"></i><div><div class="ft">Statut ETL</div><div class="fm">etl_run_log[status]</div></div></div>
+    </div>
+
+    <div class="sec">Mesures DAX à créer</div>
+    <div class="dax"><div class="dx">Quiz <span class="badge br">fact_quiz</span></div><div class="dc">Tentatives quiz      = SUM(fact_quiz[attempt_count])
+Score moyen quiz     = AVERAGE(fact_quiz[score])
+Taux réussite quiz % = DIVIDE(CALCULATE([Tentatives quiz],fact_quiz[passed]=1),[Tentatives quiz],0)*100</div></div>
+    <div class="dax"><div class="dx">CodinGame <span class="badge br">fact_codingame</span></div><div class="dc">Sessions codingame = SUM(fact_codingame[session_count])
+Score moyen CDG    = AVERAGE(fact_codingame[score])
+Score CDG %        = DIVIDE(AVERAGE(fact_codingame[score]),AVERAGE(fact_codingame[total_score]),0)*100</div></div>
+    <div class="dax"><div class="dx">ETL fraîcheur <span class="badge br">etl_run_log</span></div><div class="dc">Dernier refresh OK = CALCULATE(MAX(etl_run_log[finished_at]),etl_run_log[status]="OK")</div></div>
+  </div>
+</div>
+</div>
+
+<script>
+function show(id,btn){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  btn.classList.add('on');
+}
+</script>

@@ -149,7 +149,7 @@ function Open-PowerBiReport {
     Start-Process -FilePath $ReportPath
 }
 
-Write-Step "1/4 - Generation dashboard (3 pages, visuels)"
+Write-Step "1/4 - Generation dashboard (4 pages, mesures DAX, visuels)"
 & $GenDashboardScript
 
 if ($UsePbix) {
@@ -176,8 +176,8 @@ if ($UsePbix) { Ensure-DashboardPbix }
 
 function Show-PbipRefreshHelp {
     Write-Host ""
-    Write-Host "========== DASHBOARD FIND-ME (3 pages PBIP) ==========" -ForegroundColor Green
-    Write-Host "  01 Executive | 02 Managerial | 03 Operationnel"
+    Write-Host "========== DASHBOARD FIND-ME (4 pages PBIP) ==========" -ForegroundColor Green
+    Write-Host "  01 Executive | 02 Managerial | 03 Operationnel | 04 Technique"
     Write-Host ""
     Write-Host "IMPORTANT - remplir les visuels (Vide) :" -ForegroundColor Yellow
     Write-Host "  1. Banniere jaune : cliquez Actualiser maintenant"
@@ -191,7 +191,7 @@ function Show-PbipRefreshHelp {
 # PBIP 3 pages (defaut)
 if (-not $UsePbix -and (Test-Path $DashboardPbipPath)) {
     $openPath = $DashboardPbipPath
-    Write-Host "Projet 3 pages : $openPath" -ForegroundColor Green
+    Write-Host "Projet 4 pages : $openPath" -ForegroundColor Green
     Open-PowerBiReport -ReportPath $openPath
     Show-PbipRefreshHelp
 } elseif (-not $UsePbix -and (Test-Path $DashboardPbirPath)) {

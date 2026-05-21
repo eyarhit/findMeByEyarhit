@@ -1,6 +1,6 @@
 
 table fact_codingame
-    lineageTag: 1bd387b5-1da9-4d98-b4a6-5d7b5a62fc1e
+    lineageTag: cdf83ff8-25f6-4ae3-bb59-8932390c9ce1
 
     column codingame_key
         dataType: int64

@@ -1,11 +1,11 @@
 {
     "position":  {
-                     "width":  280,
-                     "y":  120,
+                     "width":  240,
+                     "y":  60,
                      "z":  2001,
-                     "x":  320,
-                     "tabOrder":  2000,
-                     "height":  120
+                     "x":  272,
+                     "tabOrder":  1001,
+                     "height":  72
                  },
     "name":  "kpi_acc",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
@@ -15,21 +15,16 @@
                                                     "Values":  {
                                                                    "projections":  [
                                                                                        {
-                                                                                           "queryRef":  "Sum(v_bi_kpi_recrutement.acceptees)",
+                                                                                           "queryRef":  "_Mesures BI.KPI Acceptees",
                                                                                            "field":  {
-                                                                                                         "Aggregation":  {
-                                                                                                                             "Function":  0,
-                                                                                                                             "Expression":  {
-                                                                                                                                                "Column":  {
-                                                                                                                                                               "Expression":  {
-                                                                                                                                                                                  "SourceRef":  {
-                                                                                                                                                                                                    "Entity":  "v_bi_kpi_recrutement"
-                                                                                                                                                                                                }
-                                                                                                                                                                              },
-                                                                                                                                                               "Property":  "acceptees"
-                                                                                                                                                           }
-                                                                                                                                            }
-                                                                                                                         }
+                                                                                                         "Measure":  {
+                                                                                                                         "Expression":  {
+                                                                                                                                            "SourceRef":  {
+                                                                                                                                                              "Entity":  "_Mesures BI"
+                                                                                                                                                          }
+                                                                                                                                        },
+                                                                                                                         "Property":  "KPI Acceptees"
+                                                                                                                     }
                                                                                                      }
                                                                                        }
                                                                                    ]

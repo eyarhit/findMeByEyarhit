@@ -19,6 +19,7 @@
     "defaultDrillFilterOtherVisuals": true,
     "allowChangeFilterTypes": true,
     "useEnhancedTooltips": true,
-    "pagesPosition": "Bottom"
+    "pagesPosition": "Bottom",
+    "filterPaneHiddenInEditMode": true
   }
 }

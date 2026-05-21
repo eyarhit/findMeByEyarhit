@@ -33,15 +33,21 @@ Fait automatiquement :
 
 - Démarrage MySQL (Docker)
 - ETL Talend → base `findme_dw`
-- Ouverture Power BI (3 pages si `.pbip` OK, sinon `.pbix` si présent)
+- Génération du dashboard **4 pages** (Executive, Managerial, Opérationnel, Technique)
+- Ouverture Power BI `FindMe-Dashboard.pbip`
 
 ## Première ouverture Power BI (une fois par PC)
 
 1. Bannière jaune → **Actualiser maintenant**
-2. Onglet **Base de données** (pas Windows)
-3. Utilisateur : `findme_bi`
-4. Mot de passe : `findme_bi_readonly`
-5. Attendre la fin du chargement
+2. Paramètres source : serveur **`localhost:3306`**, base **`findme_dw`**
+3. Onglet **Base de données** (pas Windows)
+4. Utilisateur : `findme_bi`
+5. Mot de passe : `findme_bi_readonly`
+6. Attendre la fin (**18 tables** + mesures `_Mesures BI`)
+7. Pages du rapport : **01 Executive** · **02 Managerial** · **03 Operationnel** · **04 Technique** (navigation en haut à droite)
+
+Spécification (mesures, visuels, filtres) : ouvrir dans le navigateur  
+`bi\powerbi\guides\findme_4dashboards_full_layout.html`
 
 Si l’écran reste vide :
 
@@ -80,7 +86,8 @@ puis lancer `ONE_COMMANDE_POWERBI.cmd` → ouverture directe avec visuels.
 | Erreur `ReturnServerDateTime` | `git pull` + `FIX_POWERBI_REFRESH.cmd` (option retiree du modele M) |
 | Chemins ambigus dim_date / dim_user | `git pull` + regen : relations user_key sur fact_cv/quiz supprimees |
 | Duplicate year_num dans dim_date | Retirer relation year_num ; segment annee sur v_bi_* (pas dim_date) |
-| `git pull` bloqué | `git checkout -- bi/powerbi/` puis `git pull` |
+| `git pull` bloqué | `GIT_PULL_BI.cmd` (reset dashboard + pull + une commande) |
+| Ancienne version (3 pages) | `git pull` puis `ONE_COMMANDE_POWERBI.cmd` |
 | Écran vide | Actualiser + identifiants MySQL ; ou utiliser `.pbix` |
 | Docker | Lancer **Docker Desktop** avant la commande |
 

@@ -32,7 +32,9 @@ Voir **[GUIDE_AUTRE_PC.md](GUIDE_AUTRE_PC.md)** (clone ou ZIP + `ONE_COMMANDE_PO
 ONE_COMMANDE_POWERBI.cmd
 ```
 
-Ouvre **`FindMe-Dashboard.pbip`** (3 pages). Si les cartes affichent **(Vide)** ou triangles rouges : cliquez **Actualiser maintenant**, serveur **`localhost:3306`**, base **`findme_dw`**, login **`findme_bi`** / **`findme_bi_readonly`**.
+Ouvre **`FindMe-Dashboard.pbip`** (**4 pages** alignées sur les guides HTML). Si les cartes affichent **(Vide)** ou triangles rouges : cliquez **Actualiser maintenant**, serveur **`localhost:3306`**, base **`findme_dw`**, login **`findme_bi`** / **`findme_bi_readonly`**.
+
+Spécification visuelle + DAX : [guides/findme_4dashboards_full_layout.html](guides/findme_4dashboards_full_layout.html) et [guides/findme_powerbi_dashboard_guide.html](guides/findme_powerbi_dashboard_guide.html).
 
 Verification MySQL avant Power BI : `scripts\verify-mysql-dw.ps1`
 
@@ -54,7 +56,7 @@ git pull
 FIX_POWERBI_REFRESH.cmd
 ```
 
-- Genere le projet **`FindMe-Dashboard.pbip`** (3 pages : Executive, Managerial, Operationnel)
+- Genere le projet **`FindMe-Dashboard.pbip`** (4 pages : **01 Executive**, **02 Managerial**, **03 Operationnel**, **04 Technique** + table **`_Mesures BI`** avec mesures DAX du guide)
 - ETL Talend → `findme_dw`
 - Ouvre Power BI avec **cartes KPI, barres, tableaux** deja places
 
@@ -74,9 +76,10 @@ Pages (generees automatiquement — rien a configurer) :
 
 | Page | KPI (cartes) | Graphiques | Tableau detail | Filtres (segments) |
 |------|--------------|------------|----------------|-------------------|
-| **01 Executive** | Candidatures, acceptees, taux % | Courbe mensuelle, donut | KPI par mois | Annee (`dim_date`) |
-| **02 Managerial** | — | Barres missions/statuts, colonnes statut mission | Candidatures par mission | Statut, annee |
-| **03 Operationnel** | Users, CV, notifications, missions | Barres competences | Notifications + CV | Lu / non lu |
+| **01 Executive** | Candidatures, acceptees, taux %, missions, ouvertes | Courbe, colonnes acc/ref, taux %, top missions | — | year_num (vue), type_contrat, dim_date |
+| **02 Managerial** | Candidatures vue, acc/ref/en cours, missions | Donut statut, barres contrat/ville, courbe, tableau, empile ville | Detail missions | year_num, ville, contrat, statut, remote |
+| **03 Operationnel** | Users, notif, lues, taux lecture, CV, etapes, favoris | Top skills, roles, activite, etapes CV, categories, notif/jour | — | dim_date, role, pays, skill_category |
+| **04 Technique** | Quiz, scores, taux, CDG, refresh ETL | Framework, evolution quiz, donut reussite, log ETL, CDG/mois | Log ETL | dim_date, framework, passed, status ETL |
 
 **Modele** : relations fait → dimension (`relationships.tmdl`). Pas de lien sur `year_num` (non unique dans `dim_date`). Segments **annee** : champs `year_num` des vues `v_bi_*`.
 

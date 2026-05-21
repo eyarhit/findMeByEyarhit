@@ -1,0 +1,150 @@
+{
+    "position":  {
+                     "width":  400,
+                     "y":  400,
+                     "z":  1005,
+                     "x":  436,
+                     "tabOrder":  4100,
+                     "height":  308
+                 },
+    "name":  "tbl_etl",
+    "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+    "visual":  {
+                   "query":  {
+                                 "queryState":  {
+                                                    "Values":  {
+                                                                   "projections":  [
+                                                                                       {
+                                                                                           "field":  {
+                                                                                                         "Column":  {
+                                                                                                                        "Expression":  {
+                                                                                                                                           "SourceRef":  {
+                                                                                                                                                             "Entity":  "etl_run_log"
+                                                                                                                                                         }
+                                                                                                                                       },
+                                                                                                                        "Property":  "started_at"
+                                                                                                                    }
+                                                                                                     },
+                                                                                           "active":  true,
+                                                                                           "queryRef":  "etl_run_log.started_at"
+                                                                                       },
+                                                                                       {
+                                                                                           "field":  {
+                                                                                                         "Column":  {
+                                                                                                                        "Expression":  {
+                                                                                                                                           "SourceRef":  {
+                                                                                                                                                             "Entity":  "etl_run_log"
+                                                                                                                                                         }
+                                                                                                                                       },
+                                                                                                                        "Property":  "finished_at"
+                                                                                                                    }
+                                                                                                     },
+                                                                                           "active":  false,
+                                                                                           "queryRef":  "etl_run_log.finished_at"
+                                                                                       },
+                                                                                       {
+                                                                                           "field":  {
+                                                                                                         "Column":  {
+                                                                                                                        "Expression":  {
+                                                                                                                                           "SourceRef":  {
+                                                                                                                                                             "Entity":  "etl_run_log"
+                                                                                                                                                         }
+                                                                                                                                       },
+                                                                                                                        "Property":  "status"
+                                                                                                                    }
+                                                                                                     },
+                                                                                           "active":  false,
+                                                                                           "queryRef":  "etl_run_log.status"
+                                                                                       },
+                                                                                       {
+                                                                                           "field":  {
+                                                                                                         "Column":  {
+                                                                                                                        "Expression":  {
+                                                                                                                                           "SourceRef":  {
+                                                                                                                                                             "Entity":  "etl_run_log"
+                                                                                                                                                         }
+                                                                                                                                       },
+                                                                                                                        "Property":  "rows_loaded"
+                                                                                                                    }
+                                                                                                     },
+                                                                                           "active":  false,
+                                                                                           "queryRef":  "etl_run_log.rows_loaded"
+                                                                                       },
+                                                                                       {
+                                                                                           "field":  {
+                                                                                                         "Column":  {
+                                                                                                                        "Expression":  {
+                                                                                                                                           "SourceRef":  {
+                                                                                                                                                             "Entity":  "etl_run_log"
+                                                                                                                                                         }
+                                                                                                                                       },
+                                                                                                                        "Property":  "error_message"
+                                                                                                                    }
+                                                                                                     },
+                                                                                           "active":  false,
+                                                                                           "queryRef":  "etl_run_log.error_message"
+                                                                                       }
+                                                                                   ]
+                                                               }
+                                                }
+                             },
+                   "objects":  {
+
+                               },
+                   "visualContainerObjects":  {
+                                                  "title":  [
+                                                                {
+                                                                    "properties":  {
+                                                                                       "show":  {
+                                                                                                    "expr":  {
+                                                                                                                 "Literal":  {
+                                                                                                                                 "Value":  "\u0027false\u0027"
+                                                                                                                             }
+                                                                                                             }
+                                                                                                }
+                                                                                   }
+                                                                }
+                                                            ],
+                                                  "dropShadow":  [
+                                                                     {
+                                                                         "properties":  {
+                                                                                            "show":  {
+                                                                                                         "expr":  {
+                                                                                                                      "Literal":  {
+                                                                                                                                      "Value":  "\u0027false\u0027"
+                                                                                                                                  }
+                                                                                                                  }
+                                                                                                     }
+                                                                                        }
+                                                                     }
+                                                                 ],
+                                                  "background":  [
+                                                                     {
+                                                                         "properties":  {
+                                                                                            "show":  {
+                                                                                                         "expr":  {
+                                                                                                                      "Literal":  {
+                                                                                                                                      "Value":  "\u0027false\u0027"
+                                                                                                                                  }
+                                                                                                                  }
+                                                                                                     }
+                                                                                        }
+                                                                     }
+                                                                 ],
+                                                  "border":  [
+                                                                 {
+                                                                     "properties":  {
+                                                                                        "show":  {
+                                                                                                     "expr":  {
+                                                                                                                  "Literal":  {
+                                                                                                                                  "Value":  "\u0027false\u0027"
+                                                                                                                              }
+                                                                                                              }
+                                                                                                 }
+                                                                                    }
+                                                                 }
+                                                             ]
+                                              },
+                   "visualType":  "tableEx"
+               }
+}

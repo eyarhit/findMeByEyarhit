@@ -1,0 +1,164 @@
+{
+    "position":  {
+                     "width":  620,
+                     "y":  400,
+                     "z":  1005,
+                     "x":  24,
+                     "tabOrder":  4000,
+                     "height":  308
+                 },
+    "name":  "tbl_detail",
+    "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
+    "visual":  {
+                   "query":  {
+                                 "queryState":  {
+                                                    "Values":  {
+                                                                   "projections":  [
+                                                                                       {
+                                                                                           "field":  {
+                                                                                                         "Column":  {
+                                                                                                                        "Expression":  {
+                                                                                                                                           "SourceRef":  {
+                                                                                                                                                             "Entity":  "v_bi_candidature"
+                                                                                                                                                         }
+                                                                                                                                       },
+                                                                                                                        "Property":  "mission_name"
+                                                                                                                    }
+                                                                                                     },
+                                                                                           "active":  true,
+                                                                                           "queryRef":  "v_bi_candidature.mission_name"
+                                                                                       },
+                                                                                       {
+                                                                                           "field":  {
+                                                                                                         "Column":  {
+                                                                                                                        "Expression":  {
+                                                                                                                                           "SourceRef":  {
+                                                                                                                                                             "Entity":  "v_bi_candidature"
+                                                                                                                                                         }
+                                                                                                                                       },
+                                                                                                                        "Property":  "reference_code"
+                                                                                                                    }
+                                                                                                     },
+                                                                                           "active":  false,
+                                                                                           "queryRef":  "v_bi_candidature.reference_code"
+                                                                                       },
+                                                                                       {
+                                                                                           "field":  {
+                                                                                                         "Column":  {
+                                                                                                                        "Expression":  {
+                                                                                                                                           "SourceRef":  {
+                                                                                                                                                             "Entity":  "v_bi_candidature"
+                                                                                                                                                         }
+                                                                                                                                       },
+                                                                                                                        "Property":  "type_contrat"
+                                                                                                                    }
+                                                                                                     },
+                                                                                           "active":  false,
+                                                                                           "queryRef":  "v_bi_candidature.type_contrat"
+                                                                                       },
+                                                                                       {
+                                                                                           "field":  {
+                                                                                                         "Column":  {
+                                                                                                                        "Expression":  {
+                                                                                                                                           "SourceRef":  {
+                                                                                                                                                             "Entity":  "v_bi_candidature"
+                                                                                                                                                         }
+                                                                                                                                       },
+                                                                                                                        "Property":  "status_mission"
+                                                                                                                    }
+                                                                                                     },
+                                                                                           "active":  false,
+                                                                                           "queryRef":  "v_bi_candidature.status_mission"
+                                                                                       },
+                                                                                       {
+                                                                                           "field":  {
+                                                                                                         "Column":  {
+                                                                                                                        "Expression":  {
+                                                                                                                                           "SourceRef":  {
+                                                                                                                                                             "Entity":  "v_bi_candidature"
+                                                                                                                                                         }
+                                                                                                                                       },
+                                                                                                                        "Property":  "ville"
+                                                                                                                    }
+                                                                                                     },
+                                                                                           "active":  false,
+                                                                                           "queryRef":  "v_bi_candidature.ville"
+                                                                                       },
+                                                                                       {
+                                                                                           "field":  {
+                                                                                                         "Column":  {
+                                                                                                                        "Expression":  {
+                                                                                                                                           "SourceRef":  {
+                                                                                                                                                             "Entity":  "v_bi_candidature"
+                                                                                                                                                         }
+                                                                                                                                       },
+                                                                                                                        "Property":  "candidature_count"
+                                                                                                                    }
+                                                                                                     },
+                                                                                           "active":  false,
+                                                                                           "queryRef":  "v_bi_candidature.candidature_count"
+                                                                                       }
+                                                                                   ]
+                                                               }
+                                                }
+                             },
+                   "objects":  {
+
+                               },
+                   "visualContainerObjects":  {
+                                                  "title":  [
+                                                                {
+                                                                    "properties":  {
+                                                                                       "show":  {
+                                                                                                    "expr":  {
+                                                                                                                 "Literal":  {
+                                                                                                                                 "Value":  "\u0027false\u0027"
+                                                                                                                             }
+                                                                                                             }
+                                                                                                }
+                                                                                   }
+                                                                }
+                                                            ],
+                                                  "dropShadow":  [
+                                                                     {
+                                                                         "properties":  {
+                                                                                            "show":  {
+                                                                                                         "expr":  {
+                                                                                                                      "Literal":  {
+                                                                                                                                      "Value":  "\u0027false\u0027"
+                                                                                                                                  }
+                                                                                                                  }
+                                                                                                     }
+                                                                                        }
+                                                                     }
+                                                                 ],
+                                                  "background":  [
+                                                                     {
+                                                                         "properties":  {
+                                                                                            "show":  {
+                                                                                                         "expr":  {
+                                                                                                                      "Literal":  {
+                                                                                                                                      "Value":  "\u0027false\u0027"
+                                                                                                                                  }
+                                                                                                                  }
+                                                                                                     }
+                                                                                        }
+                                                                     }
+                                                                 ],
+                                                  "border":  [
+                                                                 {
+                                                                     "properties":  {
+                                                                                        "show":  {
+                                                                                                     "expr":  {
+                                                                                                                  "Literal":  {
+                                                                                                                                  "Value":  "\u0027false\u0027"
+                                                                                                                              }
+                                                                                                              }
+                                                                                                 }
+                                                                                    }
+                                                                 }
+                                                             ]
+                                              },
+                   "visualType":  "tableEx"
+               }
+}

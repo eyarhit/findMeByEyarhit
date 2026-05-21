@@ -1,11 +1,11 @@
 {
     "position":  {
-                     "width":  280,
-                     "y":  120,
+                     "width":  296,
+                     "y":  72,
                      "z":  2002,
-                     "x":  616,
+                     "x":  640,
                      "tabOrder":  3000,
-                     "height":  120
+                     "height":  108
                  },
     "name":  "kpi_notif",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",

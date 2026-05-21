@@ -54,3 +54,20 @@ relationship rel_fact_user_user_key
     fromColumn: fact_user.user_key
     toColumn: dim_user.user_key
     crossFilteringBehavior: oneDirection
+
+relationship rel_fact_cv_user_key
+    fromColumn: fact_cv.user_key
+    toColumn: dim_user.user_key
+    crossFilteringBehavior: oneDirection
+
+relationship rel_fact_quiz_user_key
+    fromColumn: fact_quiz.user_key
+    toColumn: dim_user.user_key
+    isActive: false
+    crossFilteringBehavior: oneDirection
+
+relationship rel_fact_codingame_user_key
+    fromColumn: fact_codingame.user_key
+    toColumn: dim_user.user_key
+    isActive: false
+    crossFilteringBehavior: oneDirection

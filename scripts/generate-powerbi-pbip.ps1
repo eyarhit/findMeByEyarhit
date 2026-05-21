@@ -18,6 +18,7 @@ $RpName = "$ProjectPrefix.Report"
 $Rp = Join-Path $OutputBase $RpName
 
 $tables = @(
+    "_Mesures BI",
     "dim_date", "dim_user", "dim_user_scd2", "dim_mission", "dim_skill",
     "fact_user", "fact_notification", "fact_mission", "fact_candidature",
     "fact_mission_favori", "fact_cv", "fact_quiz", "fact_codingame", "etl_run_log",
@@ -30,6 +31,7 @@ function C([string]$Name, [string]$Type = 'string', [string]$Sum = 'none') {
 }
 
 $tableColumns = @{
+    "_Mesures BI" = @()
     dim_date = @(
         C 'date_key' 'int64' 'none'
         C 'full_date' 'dateTime' 'none'
@@ -209,7 +211,10 @@ $modelRelationships = @(
     @{ from = 'fact_cv'; fc = 'date_key'; to = 'dim_date'; tc = 'date_key' },
     @{ from = 'fact_quiz'; fc = 'date_key'; to = 'dim_date'; tc = 'date_key' },
     @{ from = 'fact_codingame'; fc = 'date_key'; to = 'dim_date'; tc = 'date_key' },
-    @{ from = 'fact_user'; fc = 'user_key'; to = 'dim_user'; tc = 'user_key' }
+    @{ from = 'fact_user'; fc = 'user_key'; to = 'dim_user'; tc = 'user_key' },
+    @{ from = 'fact_cv'; fc = 'user_key'; to = 'dim_user'; tc = 'user_key' },
+    @{ from = 'fact_quiz'; fc = 'user_key'; to = 'dim_user'; tc = 'user_key'; active = $false },
+    @{ from = 'fact_codingame'; fc = 'user_key'; to = 'dim_user'; tc = 'user_key'; active = $false }
     # Pas de lien year_num -> dim_date : year_num n'est pas unique dans dim_date (1 ligne/jour)
 )
 
@@ -288,7 +293,49 @@ $refs
 
 "@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Def "model.tmdl") $_ }
 
+$measuresTmdl = @'
+table '_Mesures BI'
+    measure 'KPI Candidatures' = SUM(v_bi_kpi_recrutement[candidatures])
+    measure 'KPI Acceptees' = SUM(v_bi_kpi_recrutement[acceptees])
+    measure 'KPI Refusees' = SUM(v_bi_kpi_recrutement[refusees])
+    measure 'KPI Taux %' = DIVIDE([KPI Acceptees], [KPI Candidatures], 0) * 100
+    measure 'Missions (vue)' = SUM(v_bi_mission[mission_count])
+    measure 'Missions ouvertes' =
+        CALCULATE([Missions (vue)], v_bi_mission[status_mission] = "OPEN")
+    measure 'Missions remote' =
+        CALCULATE([Missions (vue)], v_bi_mission[is_remote] = 1)
+    measure 'Candidatures (vue)' = SUM(v_bi_candidature[candidature_count])
+    measure 'Acceptees (vue)' = SUM(v_bi_candidature[is_accepted])
+    measure 'Refusees (vue)' = SUM(v_bi_candidature[is_refused])
+    measure 'En cours (vue)' = SUM(v_bi_candidature[is_en_cours])
+    measure 'Taux % (vue)' = DIVIDE([Acceptees (vue)], [Candidatures (vue)], 0) * 100
+    measure 'Total utilisateurs' = SUM(fact_user[user_count])
+    measure 'Total notifications' = SUM(fact_notification[notification_count])
+    measure 'Notifications lues' =
+        CALCULATE([Total notifications], fact_notification[is_read] = 1)
+    measure 'Taux lecture %' = DIVIDE([Notifications lues], [Total notifications], 0) * 100
+    measure 'Total CV' = SUM(fact_cv[cv_count])
+    measure 'Etapes moyennes' = AVERAGE(fact_cv[steps_completed])
+    measure 'Total usages' = SUM(dim_skill[usage_count])
+    measure 'Total favoris' = SUM(fact_mission_favori[favori_count])
+    measure 'Tentatives quiz' = SUM(fact_quiz[attempt_count])
+    measure 'Score moyen quiz' = AVERAGE(fact_quiz[score])
+    measure 'Taux reussite quiz %' =
+        DIVIDE(CALCULATE([Tentatives quiz], fact_quiz[passed] = 1), [Tentatives quiz], 0) * 100
+    measure 'Sessions codingame' = SUM(fact_codingame[session_count])
+    measure 'Score moyen CDG' = AVERAGE(fact_codingame[score])
+    measure 'Score CDG %' =
+        DIVIDE(AVERAGE(fact_codingame[score]), AVERAGE(fact_codingame[total_score]), 0) * 100
+    measure 'Dernier refresh OK' =
+        CALCULATE(MAX(etl_run_log[finished_at]), etl_run_log[status] = "OK")
+
+'@
+
 foreach ($t in $tables) {
+    if ($t -eq '_Mesures BI') {
+        Write-Utf8NoBom (Join-Path $TablesDir '_Mesures BI.tmdl') $measuresTmdl
+        continue
+    }
     $tag = [guid]::NewGuid().ToString()
     $colBlock = Format-TmdlColumns $tableColumns[$t]
     @"

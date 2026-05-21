@@ -1,11 +1,11 @@
 {
     "position":  {
-                     "width":  280,
-                     "y":  120,
-                     "z":  2001,
-                     "x":  320,
-                     "tabOrder":  2000,
-                     "height":  120
+                     "width":  169,
+                     "y":  60,
+                     "z":  2004,
+                     "x":  732,
+                     "tabOrder":  1004,
+                     "height":  72
                  },
     "name":  "kpi_cv",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
@@ -15,21 +15,16 @@
                                                     "Values":  {
                                                                    "projections":  [
                                                                                        {
-                                                                                           "queryRef":  "Sum(fact_cv.cv_count)",
+                                                                                           "queryRef":  "_Mesures BI.Total CV",
                                                                                            "field":  {
-                                                                                                         "Aggregation":  {
-                                                                                                                             "Function":  0,
-                                                                                                                             "Expression":  {
-                                                                                                                                                "Column":  {
-                                                                                                                                                               "Expression":  {
-                                                                                                                                                                                  "SourceRef":  {
-                                                                                                                                                                                                    "Entity":  "fact_cv"
-                                                                                                                                                                                                }
-                                                                                                                                                                              },
-                                                                                                                                                               "Property":  "cv_count"
-                                                                                                                                                           }
-                                                                                                                                            }
-                                                                                                                         }
+                                                                                                         "Measure":  {
+                                                                                                                         "Expression":  {
+                                                                                                                                            "SourceRef":  {
+                                                                                                                                                              "Entity":  "_Mesures BI"
+                                                                                                                                                          }
+                                                                                                                                        },
+                                                                                                                         "Property":  "Total CV"
+                                                                                                                     }
                                                                                                      }
                                                                                        }
                                                                                    ]

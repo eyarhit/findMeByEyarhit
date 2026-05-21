@@ -1,11 +1,11 @@
 {
     "position":  {
-                     "width":  280,
-                     "y":  120,
+                     "width":  240,
+                     "y":  60,
                      "z":  2000,
                      "x":  24,
                      "tabOrder":  1000,
-                     "height":  120
+                     "height":  72
                  },
     "name":  "kpi_cand",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
@@ -15,21 +15,16 @@
                                                     "Values":  {
                                                                    "projections":  [
                                                                                        {
-                                                                                           "queryRef":  "Sum(v_bi_kpi_recrutement.candidatures)",
+                                                                                           "queryRef":  "_Mesures BI.KPI Candidatures",
                                                                                            "field":  {
-                                                                                                         "Aggregation":  {
-                                                                                                                             "Function":  0,
-                                                                                                                             "Expression":  {
-                                                                                                                                                "Column":  {
-                                                                                                                                                               "Expression":  {
-                                                                                                                                                                                  "SourceRef":  {
-                                                                                                                                                                                                    "Entity":  "v_bi_kpi_recrutement"
-                                                                                                                                                                                                }
-                                                                                                                                                                              },
-                                                                                                                                                               "Property":  "candidatures"
-                                                                                                                                                           }
-                                                                                                                                            }
-                                                                                                                         }
+                                                                                                         "Measure":  {
+                                                                                                                         "Expression":  {
+                                                                                                                                            "SourceRef":  {
+                                                                                                                                                              "Entity":  "_Mesures BI"
+                                                                                                                                                          }
+                                                                                                                                        },
+                                                                                                                         "Property":  "KPI Candidatures"
+                                                                                                                     }
                                                                                                      }
                                                                                        }
                                                                                    ]

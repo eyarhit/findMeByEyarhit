@@ -1,11 +1,11 @@
 {
     "position":  {
-                     "width":  600,
-                     "y":  120,
+                     "width":  606,
+                     "y":  456,
                      "z":  1001,
-                     "x":  640,
-                     "tabOrder":  2000,
-                     "height":  280
+                     "x":  650,
+                     "tabOrder":  3500,
+                     "height":  248
                  },
     "name":  "bar_statut",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",

@@ -1,11 +1,11 @@
 {
     "position":  {
-                     "width":  550,
-                     "y":  250,
-                     "z":  1001,
+                     "width":  1232,
+                     "y":  456,
+                     "z":  1003,
                      "x":  24,
-                     "tabOrder":  3000,
-                     "height":  200
+                     "tabOrder":  4000,
+                     "height":  248
                  },
     "name":  "line_trend",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",

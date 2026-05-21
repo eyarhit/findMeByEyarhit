@@ -1,11 +1,11 @@
 {
     "position":  {
-                     "width":  610,
-                     "y":  260,
+                     "width":  604,
+                     "y":  192,
                      "z":  1001,
-                     "x":  640,
+                     "x":  652,
                      "tabOrder":  5000,
-                     "height":  420
+                     "height":  248
                  },
     "name":  "tbl_cv",
     "$schema":  "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.7.0/schema.json",
