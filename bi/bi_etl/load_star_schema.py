@@ -6,6 +6,7 @@ Exécution : docker compose run --rm bi-etl  (ou service bi-etl au démarrage)
 from __future__ import annotations
 
 import os
+import re
 import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -501,7 +502,8 @@ def _existing_dw_tables(conn) -> set[str]:
     with conn.cursor() as cur:
         cur.execute(
             """
-            SELECT table_name FROM information_schema.tables
+            SELECT LOWER(table_name) AS table_name
+            FROM information_schema.tables
             WHERE table_schema = %s
             """,
             (DW,),
@@ -509,24 +511,55 @@ def _existing_dw_tables(conn) -> set[str]:
         return {row["table_name"] for row in cur.fetchall()}
 
 
-def _apply_sql_file(conn, path: Path, label: str) -> None:
+def _strip_sql_comments(sql: str) -> str:
+    """Retire les lignes -- (sinon un bloc « -- … CREATE TABLE » est ignoré en entier)."""
+    return "\n".join(
+        line for line in sql.splitlines() if not line.strip().startswith("--")
+    )
+
+
+def _prepare_schema_sql(raw: str) -> str:
+    """Retire CREATE DATABASE / USE (connexion déjà sur findme_dw)."""
+    sql = _strip_sql_comments(raw)
+    sql = re.sub(
+        r"CREATE\s+DATABASE\s+IF\s+NOT\s+EXISTS\s+`?findme_dw`?\s*;?",
+        "",
+        sql,
+        flags=re.IGNORECASE,
+    )
+    sql = re.sub(r"USE\s+`?findme_dw`?\s*;?", "", sql, flags=re.IGNORECASE)
+    return sql
+
+
+def _sql_statements(path: Path) -> list[str]:
+    if not path.is_file():
+        return []
+    prepared = _prepare_schema_sql(path.read_text(encoding="utf-8"))
+    return [s.strip() for s in prepared.split(";") if s.strip()]
+
+
+def _apply_sql_file(path: Path, label: str) -> None:
     if not path.is_file():
         print(f"ATTENTION: fichier SQL introuvable: {path}", file=sys.stderr)
         return
-    sql = path.read_text(encoding="utf-8")
-    with conn.cursor() as cur:
-        for chunk in sql.split(";"):
-            stmt = chunk.strip()
-            if not stmt or stmt.startswith("--"):
-                continue
-            try:
-                cur.execute(stmt)
-            except pymysql.err.ProgrammingError as exc:
-                # CREATE TABLE IF NOT EXISTS / VIEW déjà là
-                if exc.args[0] not in (1050, 1061):
-                    raise
-    conn.commit()
-    print(f"Schéma findme_dw : {label} ({path.name})")
+    statements = _sql_statements(path)
+    if not statements:
+        return
+    dw_conn = connect(DW)
+    try:
+        with dw_conn.cursor() as cur:
+            cur.execute("SET FOREIGN_KEY_CHECKS = 0")
+            for stmt in statements:
+                try:
+                    cur.execute(stmt)
+                except pymysql.err.ProgrammingError as exc:
+                    if exc.args[0] not in (1050, 1061):
+                        raise
+            cur.execute("SET FOREIGN_KEY_CHECKS = 1")
+        dw_conn.commit()
+        print(f"Schéma findme_dw : {label} ({path.name}, {len(statements)} requêtes)")
+    finally:
+        dw_conn.close()
 
 
 def ensure_dw_schema(conn) -> None:
@@ -541,14 +574,19 @@ def ensure_dw_schema(conn) -> None:
         return
     print(f"findme_dw : tables manquantes → {', '.join(missing)}")
     if "dim_date" not in present:
-        _apply_sql_file(conn, Path(SCHEMA_SQL), "DDL complet")
+        _apply_sql_file(Path(SCHEMA_SQL), "DDL complet")
     else:
-        _apply_sql_file(conn, Path(PATCH_SQL), "patch")
-        # Si encore des manques, retenter DDL complet (IF NOT EXISTS)
+        _apply_sql_file(Path(PATCH_SQL), "patch")
         still = [t for t in REQUIRED_DW_TABLES if t not in _existing_dw_tables(conn)]
         if still:
             print(f"findme_dw : complément DDL complet pour {still}")
-            _apply_sql_file(conn, Path(SCHEMA_SQL), "complément")
+            _apply_sql_file(Path(SCHEMA_SQL), "complément")
+    present_after = _existing_dw_tables(conn)
+    still_missing = [t for t in REQUIRED_DW_TABLES if t not in present_after]
+    if still_missing:
+        raise RuntimeError(
+            f"Schéma findme_dw incomplet après DDL : {', '.join(still_missing)}"
+        )
 
 
 def _etl_log_start(cur) -> int:
