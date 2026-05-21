@@ -72,6 +72,10 @@ Si erreur `model.bim` manquant : `git pull` puis `ONE_COMMANDE_POWERBI.cmd` (TMD
 4. Relancer `docker compose run --rm talend-etl` si les cartes restent vides.
 5. Carte ETL : mesure **Runs ETL OK** (compte les runs `SUCCESS`).
 
+### Erreur tableau `queryName` (tableEx)
+
+Regenerer le rapport (`GIT_PULL_BI.cmd`) : les tableaux n’incluent plus la propriete `active` invalide.
+
 ### Erreur « Échec du rendu » / `visualContainers`
 
 Cause fréquente : `definition\version.json` incorrect (doit être **`2.0.0`**, pas `3.2.0`).

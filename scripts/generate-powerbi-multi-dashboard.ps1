@@ -34,10 +34,17 @@ function Get-VisualContainerObjects {
 }
 
 function New-ColumnProjection($entity, $property, [bool]$active = $false) {
+    $p = @{
+        field = @{ Column = @{ Expression = @{ SourceRef = @{ Entity = $entity } }; Property = $property } }
+        queryRef = "$entity.$property"
+    }
+    if ($active) { $p.active = $true }
+    $p
+}
+function New-TableColumnProjection($entity, $property) {
     @{
         field = @{ Column = @{ Expression = @{ SourceRef = @{ Entity = $entity } }; Property = $property } }
         queryRef = "$entity.$property"
-        active = $active
     }
 }
 function New-MeasureProjection($entity, $property) {
@@ -234,12 +241,12 @@ Write-Vis $pageMgr 'bar_ville' 960 $script:MidY 304 $script:MidH 1004 3300 'clus
 Write-Vis $pageMgr 'tbl_detail' 24 $script:BotY 620 $script:BotH 1005 4000 'tableEx' @{
     Values = @{
         projections = @(
-            (New-ColumnProjection 'v_bi_candidature' 'mission_name' $true),
-            (New-ColumnProjection 'v_bi_candidature' 'reference_code'),
-            (New-ColumnProjection 'v_bi_candidature' 'type_contrat'),
-            (New-ColumnProjection 'v_bi_candidature' 'status_mission'),
-            (New-ColumnProjection 'v_bi_candidature' 'ville'),
-            (New-ColumnProjection 'v_bi_candidature' 'candidature_count')
+            (New-TableColumnProjection 'v_bi_candidature' 'mission_name'),
+            (New-TableColumnProjection 'v_bi_candidature' 'reference_code'),
+            (New-TableColumnProjection 'v_bi_candidature' 'type_contrat'),
+            (New-TableColumnProjection 'v_bi_candidature' 'status_mission'),
+            (New-TableColumnProjection 'v_bi_candidature' 'ville'),
+            (New-TableColumnProjection 'v_bi_candidature' 'candidature_count')
         )
     }
 }
@@ -336,11 +343,11 @@ Write-Vis $pageTech 'bar_user_quiz' 24 $script:BotY 400 $script:BotH 1004 4000 '
 Write-Vis $pageTech 'tbl_etl' 436 $script:BotY 400 $script:BotH 1005 4100 'tableEx' @{
     Values = @{
         projections = @(
-            (New-ColumnProjection 'etl_run_log' 'started_at' $true),
-            (New-ColumnProjection 'etl_run_log' 'finished_at'),
-            (New-ColumnProjection 'etl_run_log' 'status'),
-            (New-ColumnProjection 'etl_run_log' 'rows_loaded'),
-            (New-ColumnProjection 'etl_run_log' 'error_message')
+            (New-TableColumnProjection 'etl_run_log' 'started_at'),
+            (New-TableColumnProjection 'etl_run_log' 'finished_at'),
+            (New-TableColumnProjection 'etl_run_log' 'status'),
+            (New-TableColumnProjection 'etl_run_log' 'rows_loaded'),
+            (New-TableColumnProjection 'etl_run_log' 'error_message')
         )
     }
 }
