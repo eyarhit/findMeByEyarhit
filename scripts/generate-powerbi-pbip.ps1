@@ -197,21 +197,18 @@ function Format-TmdlColumns([array]$columns) {
     return ($lines -join "`n")
 }
 
-# Relations schema en etoile (fait -> dimension) + vues BI -> dim_date (annee)
+# Relations schema en etoile — une seule route active entre dimensions (evite chemins ambigus)
 $modelRelationships = @(
     @{ from = 'fact_notification'; fc = 'date_key'; to = 'dim_date'; tc = 'date_key' },
-    @{ from = 'fact_mission'; fc = 'mission_key'; to = 'dim_mission'; tc = 'mission_key' },
+    @{ from = 'fact_mission'; fc = 'mission_key'; to = 'dim_mission'; tc = 'mission_key'; active = $false },
     @{ from = 'fact_mission'; fc = 'date_key'; to = 'dim_date'; tc = 'date_key' },
     @{ from = 'fact_candidature'; fc = 'date_key'; to = 'dim_date'; tc = 'date_key' },
     @{ from = 'fact_candidature'; fc = 'mission_key'; to = 'dim_mission'; tc = 'mission_key' },
     @{ from = 'fact_mission_favori'; fc = 'date_key'; to = 'dim_date'; tc = 'date_key' },
-    @{ from = 'fact_mission_favori'; fc = 'mission_key'; to = 'dim_mission'; tc = 'mission_key' },
+    @{ from = 'fact_mission_favori'; fc = 'mission_key'; to = 'dim_mission'; tc = 'mission_key'; active = $false },
     @{ from = 'fact_cv'; fc = 'date_key'; to = 'dim_date'; tc = 'date_key' },
-    @{ from = 'fact_cv'; fc = 'user_key'; to = 'dim_user'; tc = 'user_key' },
     @{ from = 'fact_quiz'; fc = 'date_key'; to = 'dim_date'; tc = 'date_key' },
-    @{ from = 'fact_quiz'; fc = 'user_key'; to = 'dim_user'; tc = 'user_key' },
     @{ from = 'fact_codingame'; fc = 'date_key'; to = 'dim_date'; tc = 'date_key' },
-    @{ from = 'fact_codingame'; fc = 'user_key'; to = 'dim_user'; tc = 'user_key' },
     @{ from = 'fact_user'; fc = 'user_key'; to = 'dim_user'; tc = 'user_key' },
     @{ from = 'v_bi_kpi_recrutement'; fc = 'year_num'; to = 'dim_date'; tc = 'year_num' },
     @{ from = 'v_bi_candidature'; fc = 'year_num'; to = 'dim_date'; tc = 'year_num' },
@@ -227,7 +224,10 @@ function Write-ModelRelationships([string]$DefPath) {
         [void]$relLines.Add("relationship $name")
         [void]$relLines.Add("    fromColumn: $($r.from).$($r.fc)")
         [void]$relLines.Add("    toColumn: $($r.to).$($r.tc)")
-        [void]$relLines.Add("    crossFilteringBehavior: bothDirections")
+        if ($r.active -eq $false) {
+            [void]$relLines.Add('    isActive: false')
+        }
+        [void]$relLines.Add('    crossFilteringBehavior: oneDirection')
         [void]$relLines.Add('')
     }
     Write-Utf8NoBom (Join-Path $DefPath 'relationships.tmdl') ($relLines -join "`n")
