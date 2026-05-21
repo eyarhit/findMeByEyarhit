@@ -25,6 +25,6 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [4/4] OK - lancement dashboard...
+echo [4/4] OK - ETL + dashboard (page 04 sans filtre annee 1900)...
 call ONE_COMMANDE_POWERBI.cmd
 exit /b %ERRORLEVEL%

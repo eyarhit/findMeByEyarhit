@@ -2,9 +2,9 @@
     "position":  {
                      "width":  200,
                      "y":  140,
-                     "z":  3002,
-                     "x":  440,
-                     "tabOrder":  5200,
+                     "z":  3001,
+                     "x":  232,
+                     "tabOrder":  5100,
                      "height":  44
                  },
     "name":  "slicer_passed",

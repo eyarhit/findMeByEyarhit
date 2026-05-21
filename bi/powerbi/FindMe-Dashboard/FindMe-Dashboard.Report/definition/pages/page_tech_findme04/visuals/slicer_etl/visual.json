@@ -2,9 +2,9 @@
     "position":  {
                      "width":  200,
                      "y":  140,
-                     "z":  3003,
-                     "x":  648,
-                     "tabOrder":  5300,
+                     "z":  3002,
+                     "x":  440,
+                     "tabOrder":  5200,
                      "height":  44
                  },
     "name":  "slicer_etl",

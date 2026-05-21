@@ -2,9 +2,9 @@
     "position":  {
                      "width":  200,
                      "y":  140,
-                     "z":  3001,
-                     "x":  232,
-                     "tabOrder":  5100,
+                     "z":  3000,
+                     "x":  24,
+                     "tabOrder":  5000,
                      "height":  44
                  },
     "name":  "slicer_fw",

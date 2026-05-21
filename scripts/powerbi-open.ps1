@@ -192,7 +192,7 @@ function Show-PbipRefreshHelp {
     Write-Host '  1. Banniere : Actualiser maintenant'
     Write-Host '  2. Serveur localhost:3306  base findme_dw'
     Write-Host '  3. findme_bi / findme_bi_readonly'
-    Write-Host '  4. Page 04 : segment year_num = 2026 puis Actualiser'
+    Write-Host '  4. Page 04 : ne pas filtrer annee 1900 - relancer ETL si cartes vides'
     Write-Host ''
     Write-Host 'Plan B : ONE_COMMANDE_POWERBI.cmd -UsePbix'
 }
