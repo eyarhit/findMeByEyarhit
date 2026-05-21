@@ -225,6 +225,7 @@ services:
       DW_SCHEMA_SQL: /ddl/schema.sql
     volumes:
       - ./bi/dw/schema.sql:/ddl/schema.sql:ro
+      - ./bi/dw/migrations/001_patch_etl_log_scd2.sql:/ddl/migrations/001_patch_etl_log_scd2.sql:ro
     depends_on:
       mysql:
         condition: service_healthy

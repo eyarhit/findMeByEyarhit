@@ -20,6 +20,17 @@ MYSQL_PASSWORD = os.environ.get("MYSQL_ETL_PASSWORD", "root")
 DW = "findme_dw"
 UNKNOWN_DATE_KEY = 19000101
 SCHEMA_SQL = os.environ.get("DW_SCHEMA_SQL", "/ddl/schema.sql")
+PATCH_SQL = os.environ.get("DW_PATCH_SQL", "/ddl/migrations/001_patch_etl_log_scd2.sql")
+
+REQUIRED_DW_TABLES = (
+    "dim_date",
+    "dim_user",
+    "dim_user_scd2",
+    "dim_mission",
+    "dim_skill",
+    "fact_candidature",
+    "etl_run_log",
+)
 
 
 def connect(db: str | None = None):
@@ -440,16 +451,25 @@ def load_fact_quiz(cur, src, user_map: dict[int, int]) -> None:
 
 def load_fact_codingame(cur, src, user_map: dict[int, int]) -> None:
     cur.execute("DELETE FROM fact_codingame")
-    src.execute(
-        """
+    sql_with_results = """
         SELECT es.user_id, es.start_time, es.total_score,
                COALESCE(f.name, 'Sans framework') AS framework_name,
-               er.score
+               COALESCE(er.score, es.total_score) AS score
         FROM codingame_bd.evaluation_session es
         LEFT JOIN codingame_bd.evaluation_result er ON er.session_id = es.id
         LEFT JOIN codingame_bd.framework f ON f.id = er.framework_id
-        """
-    )
+    """
+    sql_sessions_only = """
+        SELECT es.user_id, es.start_time, es.total_score,
+               'Sans framework' AS framework_name,
+               es.total_score AS score
+        FROM codingame_bd.evaluation_session es
+    """
+    try:
+        src.execute(sql_with_results)
+    except pymysql.err.ProgrammingError:
+        print("fact_codingame : repli sessions seules (schéma evaluation_result différent)")
+        src.execute(sql_sessions_only)
     n = 0
     for row in src.fetchall():
         uk = user_map.get(int(row["user_id"]), 0)
@@ -477,30 +497,58 @@ def load_fact_codingame(cur, src, user_map: dict[int, int]) -> None:
     print(f"fact_codingame : {n} lignes")
 
 
-def ensure_dw_schema(conn) -> None:
-    """Crée findme_dw si le volume MySQL existait avant l'ajout du script init."""
+def _existing_dw_tables(conn) -> set[str]:
     with conn.cursor() as cur:
         cur.execute(
             """
-            SELECT COUNT(*) AS c FROM information_schema.tables
-            WHERE table_schema = %s AND table_name = 'dim_date'
+            SELECT table_name FROM information_schema.tables
+            WHERE table_schema = %s
             """,
             (DW,),
         )
-        if cur.fetchone()["c"] > 0:
-            return
-    path = Path(SCHEMA_SQL)
+        return {row["table_name"] for row in cur.fetchall()}
+
+
+def _apply_sql_file(conn, path: Path, label: str) -> None:
     if not path.is_file():
-        print(f"ATTENTION: schéma DW absent et {path} introuvable", file=sys.stderr)
+        print(f"ATTENTION: fichier SQL introuvable: {path}", file=sys.stderr)
         return
     sql = path.read_text(encoding="utf-8")
     with conn.cursor() as cur:
         for chunk in sql.split(";"):
             stmt = chunk.strip()
-            if stmt and not stmt.startswith("--"):
+            if not stmt or stmt.startswith("--"):
+                continue
+            try:
                 cur.execute(stmt)
+            except pymysql.err.ProgrammingError as exc:
+                # CREATE TABLE IF NOT EXISTS / VIEW déjà là
+                if exc.args[0] not in (1050, 1061):
+                    raise
     conn.commit()
-    print(f"Schéma findme_dw appliqué depuis {path}")
+    print(f"Schéma findme_dw : {label} ({path.name})")
+
+
+def ensure_dw_schema(conn) -> None:
+    """Crée ou complète findme_dw (volumes MySQL anciens sans etl_run_log / SCD2)."""
+    with conn.cursor() as cur:
+        cur.execute(f"CREATE DATABASE IF NOT EXISTS `{DW}`")
+    conn.commit()
+    present = _existing_dw_tables(conn)
+    missing = [t for t in REQUIRED_DW_TABLES if t not in present]
+    if not missing:
+        print("findme_dw : schéma complet")
+        return
+    print(f"findme_dw : tables manquantes → {', '.join(missing)}")
+    if "dim_date" not in present:
+        _apply_sql_file(conn, Path(SCHEMA_SQL), "DDL complet")
+    else:
+        _apply_sql_file(conn, Path(PATCH_SQL), "patch")
+        # Si encore des manques, retenter DDL complet (IF NOT EXISTS)
+        still = [t for t in REQUIRED_DW_TABLES if t not in _existing_dw_tables(conn)]
+        if still:
+            print(f"findme_dw : complément DDL complet pour {still}")
+            _apply_sql_file(conn, Path(SCHEMA_SQL), "complément")
 
 
 def _etl_log_start(cur) -> int:
@@ -601,8 +649,11 @@ def main() -> None:
             dw.commit()
         except Exception:
             pass
+        import traceback
+
         print(f"ERREUR ETL: {e}", file=sys.stderr)
-        raise
+        traceback.print_exc()
+        sys.exit(1)
     finally:
         root.close()
         src.close()

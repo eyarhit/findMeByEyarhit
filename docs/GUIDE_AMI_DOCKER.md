@@ -191,6 +191,31 @@ Ne pas faire `docker compose down -v` sauf si vous voulez **effacer toutes les d
 
 ## 9. Dépannage fréquent
 
+### `bi-etl` exit 1 (service didn't complete successfully)
+
+**Cause fréquente :** volume MySQL **déjà existant** sans les tables `etl_run_log` / `dim_user_scd2`.
+
+```cmd
+docker logs findme-bi-etl
+```
+
+Puis **après un `git pull` récent** :
+
+```cmd
+docker compose build bi-etl
+docker compose run --rm bi-etl
+```
+
+Si ça échoue encore, voir la dernière ligne `ERREUR ETL:` dans les logs.
+
+**Contournement pour démarrer l’app sans attendre l’ETL** (BI vide temporairement) :
+
+```cmd
+docker compose up -d --no-deps frontend gateway-service user-service cv-service mission-service python-service
+```
+
+*(La BI nécessite quand même un ETL réussi pour les graphiques.)*
+
 ### Le frontend ne démarre pas (bloqué sur bi-etl ou metabase-seed)
 
 ```cmd
