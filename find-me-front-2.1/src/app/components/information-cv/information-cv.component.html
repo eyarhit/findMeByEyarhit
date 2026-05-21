@@ -39,6 +39,7 @@
           <div *ngFor="let step of steps; let i = index" class="step-item"
               [class.active]="activeStep === step.number" 
               [class.completed]="completedSteps.has(step.number)"
+              [class.pending]="!completedSteps.has(step.number)"
               (click)="goToStep(step.number)">
             <div class="step-circle">
               <span *ngIf="!completedSteps.has(step.number)">{{ step.number }}</span>

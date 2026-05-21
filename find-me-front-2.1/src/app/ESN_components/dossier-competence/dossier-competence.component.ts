@@ -89,10 +89,6 @@ popupTitle: string = '';
     }
 
     this.loadSteps();
-    this.completedSteps.add(1);
-    if (this.userId) {
-      this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
-    }
     this.loadCvData();
   }
 
@@ -295,7 +291,7 @@ popupTitle: string = '';
     this.cvService.saveCv(this.userId, cvData).subscribe(
       (response: Cv) => {
         if (currentStep === 1) {
-          this.completedSteps.add(1); // Mark step 1 as completed
+          this.markStepCompleted(1);
           this.showAlert('Succès', 'Votre CV a été enregistré avec succès !', 'success');
         }
         if (response.id_cv && !this.idCv) {
@@ -311,21 +307,30 @@ popupTitle: string = '';
   }
   
 
-  private markAllAsTouched(): void {
-    Object.values(this.form.controls).forEach(control => {
-      if (control instanceof FormGroup || control instanceof FormArray) {
-        control.markAllAsTouched();
-      } else {
-        control.markAsTouched();
-      }
-    });
+  private markStepCompleted(stepNumber: number): void {
+    if (this.completedSteps.has(stepNumber)) {
+      return;
+    }
+    this.completedSteps.add(stepNumber);
+    if (this.userId) {
+      this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
+    }
   }
 
   goToStep(stepNumber: number): void {
-    if (stepNumber >= 1 && stepNumber <= this.steps.length) {
-      this.activeStep = stepNumber;
-      this.currentPage = 1;
+    if (stepNumber < 1 || stepNumber > this.steps.length) {
+      return;
     }
+
+    const previousStep = this.activeStep;
+    if (previousStep === 1 && stepNumber > 1) {
+      this.markStepCompleted(1);
+    } else if (previousStep === 2 && stepNumber > 2) {
+      this.markStepCompleted(2);
+    }
+
+    this.activeStep = stepNumber;
+    this.currentPage = 1;
   }
 
   goToNextPage(): void {
@@ -398,7 +403,7 @@ popupTitle: string = '';
   
     this.cvService.saveCv(this.userId!, cvData as Cv).subscribe({
       next: (res) => {
-        this.completedSteps.add(2); // Mark step 2 as completed
+        this.markStepCompleted(2);
         this.showAlert(
           'Succes !', 
           'Titre ajouté avec succès', 
@@ -461,7 +466,6 @@ popupTitle: string = '';
           const steps = new Set(
             (cv.completedSteps ?? []).map((n: number) => (n === 4 ? 3 : n))
           );
-          steps.add(1);
           this.completedSteps = steps;
           if (this.userId) {
             this.stepTracker.updateCompletedSteps(steps, this.userId);
@@ -476,8 +480,7 @@ popupTitle: string = '';
     if (!this.userId) {
       return;
     }
-    this.completedSteps = new Set(this.steps.map((s) => s.number));
-    this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
+    this.markStepCompleted(3);
     this.router.navigate(['/profil']);
   }
 

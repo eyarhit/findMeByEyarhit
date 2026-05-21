@@ -102,12 +102,6 @@ popupTitle: string = '';
     // Charge les étapes AVANT les données du CV
     this.loadSteps();
 
-    // Étape 1 non bloquante : marquer dès l’ouverture du parcours CV
-    this.completedSteps.add(1);
-    if (this.userId) {
-      this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
-    }
-
     // Charge les données du CV
     this.loadCvData();
     this.restoreCvFileName();
@@ -402,7 +396,7 @@ popupTitle: string = '';
     this.cvService.saveCv(this.userId, cvData).subscribe(
       (response: Cv) => {
         if (currentStep === 1) {
-          this.completedSteps.add(1); // Mark step 1 as completed
+          this.markStepCompleted(1);
           this.showAlert('Succès', 'Votre CV a été enregistré avec succès !', 'success');
         }
         if (response.id_cv && !this.idCv) {
@@ -418,33 +412,31 @@ popupTitle: string = '';
   }
   
 
-  private markAllAsTouched(): void {
-    Object.values(this.form.controls).forEach(control => {
-      if (control instanceof FormGroup || control instanceof FormArray) {
-        control.markAllAsTouched();
-      } else {
-        control.markAsTouched();
-      }
-    });
+  private markStepCompleted(stepNumber: number): void {
+    if (this.completedSteps.has(stepNumber)) {
+      return;
+    }
+    this.completedSteps.add(stepNumber);
+    if (this.userId) {
+      this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
+    }
   }
 
   goToStep(stepNumber: number): void {
-    if (stepNumber >= 1 && stepNumber <= this.steps.length) {
-      if (stepNumber > 1) {
-        this.completedSteps.add(1);
-      }
-      if (stepNumber >= 3) {
-        this.completedSteps.add(2);
-      }
-      if (this.userId) {
-        this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
-      }
-      if (this.activeStep === 1 && stepNumber > 1) {
-        this.saveCvSilent();
-      }
-      this.activeStep = stepNumber;
-      this.currentPage = 1;
+    if (stepNumber < 1 || stepNumber > this.steps.length) {
+      return;
     }
+
+    const previousStep = this.activeStep;
+    if (previousStep === 1 && stepNumber > 1) {
+      this.markStepCompleted(1);
+      this.saveCvSilent();
+    } else if (previousStep === 2 && stepNumber > 2) {
+      this.markStepCompleted(2);
+    }
+
+    this.activeStep = stepNumber;
+    this.currentPage = 1;
   }
 
   goToNextPage(): void {
@@ -460,10 +452,7 @@ popupTitle: string = '';
 
   /** Étape 1 : navigation libre sans champs obligatoires. */
   private markStep1Complete(): void {
-    this.completedSteps.add(1);
-    if (this.userId) {
-      this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
-    }
+    this.markStepCompleted(1);
     this.saveCvSilent();
   }
 
@@ -610,7 +599,7 @@ private async uploadDocument(pdfBlob: Blob, fileName: string): Promise<void> {
   
     this.cvService.saveCv(this.userId!, cvData as Cv).subscribe({
       next: (res) => {
-        this.completedSteps.add(2); // Mark step 2 as completed
+        this.markStepCompleted(2);
         this.showAlert(
           'Succes !', 
           'Titre ajouté avec succès', 
@@ -668,12 +657,11 @@ private async uploadDocument(pdfBlob: Blob, fileName: string): Promise<void> {
           if (cv.titreDeProfil) {
             this.titreDeProfilControl.setValue(cv.titreDeProfil);
           }
-          
+
           // Met à jour les étapes si le backend en a
           const steps = new Set(
             (cv.completedSteps ?? []).map((n: number) => (n === 4 ? 3 : n))
           );
-          steps.add(1);
           this.completedSteps = steps;
           if (this.userId) {
             this.stepTracker.updateCompletedSteps(steps, this.userId);
@@ -690,8 +678,7 @@ private async uploadDocument(pdfBlob: Blob, fileName: string): Promise<void> {
       return;
     }
 
-    this.completedSteps = new Set(this.steps.map((s) => s.number));
-    this.stepTracker.updateCompletedSteps(this.completedSteps, this.userId);
+    this.markStepCompleted(3);
     this.saveCvSilent();
 
     this.showNotification('Parcours CV terminé.', 'success');
