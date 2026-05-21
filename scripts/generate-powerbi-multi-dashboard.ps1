@@ -81,22 +81,17 @@ function Write-Vis($page, $id, $x, $y, $w, $h, $z, $to, $type, $query, $objects 
 }
 
 function New-PageJson($id, $displayName) {
-    @{
-        '$schema' = 'https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json'
-        name = $id
-        displayName = $displayName
-        displayOption = 'FitToPage'
-        height = 720
-        width = 1280
-        objects = @{
-            background = @(@{
-                properties = @{
-                    color = @{ solid = @{ color = @{ expr = @{ Literal = @{ Value = "'#F0F4F8'" } } } } }
-                    transparency = @{ expr = @{ Literal = @{ Value = '0D' } } }
-                }
-            })
-        }
-    } | ConvertTo-Json -Depth 20 -Compress:$false
+    $dn = $displayName.Replace('\', '\\').Replace('"', '\"')
+    @"
+{
+  "`$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "$id",
+  "displayName": "$dn",
+  "displayOption": "FitToPage",
+  "height": 720,
+  "width": 1280
+}
+"@
 }
 
 function Get-KpiLayout([int]$count) {
@@ -373,14 +368,14 @@ Write-Utf8NoBom (Join-Path $Rp 'definition\report.json') $reportJson
 Write-Utf8NoBom (Join-Path $Rp 'definition\version.json') @'
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/versionMetadata/1.0.0/schema.json",
-  "version": "2.0.0"
+  "version": "3.2.0"
 }
 '@
 
 Write-Utf8NoBom (Join-Path $Rp 'definition.pbir') @"
 {
   "`$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definitionProperties/2.0.0/schema.json",
-  "version": "2.0",
+  "version": "4.0",
   "datasetReference": { "byPath": { "path": "../$SmName" } }
 }
 "@

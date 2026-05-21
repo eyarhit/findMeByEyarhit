@@ -19,8 +19,13 @@ echo     [x] Modèle sémantique TMDL (si propose)
 echo.
 echo   Redemarrer Power BI Desktop.
 echo.
+echo IMPORTANT : definition.pbir doit etre version 4.0 (sinon Page 1 vide).
+echo.
 echo Ensuite dans ce dossier :
 echo   GIT_PULL_BI.cmd
+echo.
+echo Ou ouvrir directement :
+echo   bi\powerbi\FindMe-Dashboard\FindMe-Dashboard.Report\definition.pbir
 echo.
 echo Vous devez voir en bas : 01 - Executive, 02 - Managerial,
 echo   03 - Operationnel, 04 - Technique
