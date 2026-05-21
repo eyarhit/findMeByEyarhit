@@ -1,6 +1,6 @@
 
 table dim_user
-    lineageTag: 510ca1ab-2e1e-4e9c-8087-047ef8da3dce
+    lineageTag: 2d8e8b72-c9d3-403c-9f2f-7d21a88d046f
 
     column user_key
         dataType: int64

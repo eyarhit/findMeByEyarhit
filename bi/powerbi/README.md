@@ -74,7 +74,7 @@ Pages (generees automatiquement — rien a configurer) :
 | **02 Managerial** | — | Barres missions/statuts, colonnes statut mission | Candidatures par mission | Statut, annee |
 | **03 Operationnel** | Users, CV, notifications, missions | Barres competences | Notifications + CV | Lu / non lu |
 
-**Modele** : relations automatiques fait → dimension (`relationships.tmdl`). Vue **Modele** dans Power BI : lignes entre `dim_date`, `dim_mission`, `dim_user` et les tables de faits / vues `v_bi_*`.
+**Modele** : relations fait → dimension (`relationships.tmdl`). Pas de lien sur `year_num` (non unique dans `dim_date`). Segments **annee** : champs `year_num` des vues `v_bi_*`.
 
 **Navigation** : barre **pageNavigator** en bas de chaque page (01 Executive / 02 Managerial / 03 Operationnel).
 

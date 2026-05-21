@@ -193,7 +193,7 @@ $qTableKpi = @{
 }
 Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\tbl_kpi\visual.json") (New-Visual 'tbl_kpi' 590 (LY 210) 660 420 1000 4000 'tableEx' $qTableKpi)
 
-$qSlicerYear = @{ Values = @{ projections = @(New-ColumnProjection 'dim_date' 'year_num' $true) } }
+$qSlicerYear = @{ Values = @{ projections = @(New-ColumnProjection 'v_bi_kpi_recrutement' 'year_num' $true) } }
 Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\slicer_year\visual.json") (New-Visual 'slicer_year' 920 (LY 72) 340 88 3000 5000 'slicer' $qSlicerYear)
 
 $qLineTrend = @{
@@ -240,7 +240,7 @@ Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\tbl_cand\visual.json") (N
 $qSlicerStatut = @{ Values = @{ projections = @(New-ColumnProjection 'v_bi_candidature' 'statut_candidature' $true) } }
 Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\slicer_statut\visual.json") (New-Visual 'slicer_statut' 920 (LY 72) 340 88 3000 5000 'slicer' $qSlicerStatut)
 
-$qSlicerMgrYear = @{ Values = @{ projections = @(New-ColumnProjection 'dim_date' 'year_num' $true) } }
+$qSlicerMgrYear = @{ Values = @{ projections = @(New-ColumnProjection 'v_bi_candidature' 'year_num' $true) } }
 Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\slicer_year\visual.json") (New-Visual 'slicer_year' 920 (LY 172) 340 88 3001 5100 'slicer' $qSlicerMgrYear)
 
 $qColMission = @{

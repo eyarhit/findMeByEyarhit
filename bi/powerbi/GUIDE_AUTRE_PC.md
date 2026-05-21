@@ -79,6 +79,7 @@ puis lancer `ONE_COMMANDE_POWERBI.cmd` → ouverture directe avec visuels.
 | Triangles rouges (vue Modele) | Serveur `localhost:3306`, base `findme_dw` ; *Parametres de la source de donnees* → ressaisir `findme_bi` |
 | Erreur `ReturnServerDateTime` | `git pull` + `FIX_POWERBI_REFRESH.cmd` (option retiree du modele M) |
 | Chemins ambigus dim_date / dim_user | `git pull` + regen : relations user_key sur fact_cv/quiz supprimees |
+| Duplicate year_num dans dim_date | Retirer relation year_num ; segment annee sur v_bi_* (pas dim_date) |
 | `git pull` bloqué | `git checkout -- bi/powerbi/` puis `git pull` |
 | Écran vide | Actualiser + identifiants MySQL ; ou utiliser `.pbix` |
 | Docker | Lancer **Docker Desktop** avant la commande |

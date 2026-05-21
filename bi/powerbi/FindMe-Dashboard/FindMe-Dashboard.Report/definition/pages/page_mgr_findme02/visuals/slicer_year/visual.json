@@ -19,14 +19,14 @@
                                                                                                          "Column":  {
                                                                                                                         "Expression":  {
                                                                                                                                            "SourceRef":  {
-                                                                                                                                                             "Entity":  "dim_date"
+                                                                                                                                                             "Entity":  "v_bi_candidature"
                                                                                                                                                          }
                                                                                                                                        },
                                                                                                                         "Property":  "year_num"
                                                                                                                     }
                                                                                                      },
                                                                                            "active":  true,
-                                                                                           "queryRef":  "dim_date.year_num"
+                                                                                           "queryRef":  "v_bi_candidature.year_num"
                                                                                        }
                                                                                    ]
                                                                }

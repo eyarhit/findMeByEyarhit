@@ -1,6 +1,6 @@
 
 table v_bi_kpi_recrutement
-    lineageTag: 3c9d6460-7796-4ff0-b34c-40373a84d27b
+    lineageTag: 1288b6f0-8268-4240-b060-27b424acf360
 
     column year_num
         dataType: int64

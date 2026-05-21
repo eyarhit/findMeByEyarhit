@@ -1,6 +1,6 @@
 
 table dim_date
-    lineageTag: fadbaa6c-c2ae-44b9-868d-74ae1706f6d2
+    lineageTag: de45da7b-2d44-4f0b-8b18-a7722141fc07
 
     column date_key
         dataType: int64

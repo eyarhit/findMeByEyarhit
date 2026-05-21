@@ -54,18 +54,3 @@ relationship rel_fact_user_user_key
     fromColumn: fact_user.user_key
     toColumn: dim_user.user_key
     crossFilteringBehavior: oneDirection
-
-relationship rel_v_bi_kpi_recrutement_year_num
-    fromColumn: v_bi_kpi_recrutement.year_num
-    toColumn: dim_date.year_num
-    crossFilteringBehavior: oneDirection
-
-relationship rel_v_bi_candidature_year_num
-    fromColumn: v_bi_candidature.year_num
-    toColumn: dim_date.year_num
-    crossFilteringBehavior: oneDirection
-
-relationship rel_v_bi_mission_year_num
-    fromColumn: v_bi_mission.year_num
-    toColumn: dim_date.year_num
-    crossFilteringBehavior: oneDirection

@@ -209,10 +209,8 @@ $modelRelationships = @(
     @{ from = 'fact_cv'; fc = 'date_key'; to = 'dim_date'; tc = 'date_key' },
     @{ from = 'fact_quiz'; fc = 'date_key'; to = 'dim_date'; tc = 'date_key' },
     @{ from = 'fact_codingame'; fc = 'date_key'; to = 'dim_date'; tc = 'date_key' },
-    @{ from = 'fact_user'; fc = 'user_key'; to = 'dim_user'; tc = 'user_key' },
-    @{ from = 'v_bi_kpi_recrutement'; fc = 'year_num'; to = 'dim_date'; tc = 'year_num' },
-    @{ from = 'v_bi_candidature'; fc = 'year_num'; to = 'dim_date'; tc = 'year_num' },
-    @{ from = 'v_bi_mission'; fc = 'year_num'; to = 'dim_date'; tc = 'year_num' }
+    @{ from = 'fact_user'; fc = 'user_key'; to = 'dim_user'; tc = 'user_key' }
+    # Pas de lien year_num -> dim_date : year_num n'est pas unique dans dim_date (1 ligne/jour)
 )
 
 function Write-ModelRelationships([string]$DefPath) {
