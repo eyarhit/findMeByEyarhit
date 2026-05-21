@@ -150,6 +150,7 @@ export class UploadCvComponent {
       educations: transformed.education ?? [],
       experiences: transformed.workExperiences ?? [],
       langues: transformed.langues ?? [],
+      completedSteps: [],
     };
 
     this.cvService.saveCv(this.userId, cvData).subscribe({

@@ -55,8 +55,15 @@ MONTHS_FR = {
 }
 
 DEGREE_KEYWORDS = re.compile(
-    r"\b(licence|master|baccalauréat|baccalaureat|ingénieur|ingenieur|doctorat|"
-    r"mba|dut|bts|diplôme|diplome|ingénierie|ingenierie)\b",
+    r"\b(licence|master|baccalauréat|baccalaureat|ingénieur|ingenieur|ingénierie|ingenierie|"
+    r"doctorat|mba|dut|bts|diplôme|diplome|aérospatial|aerospatial|aéronautique|aeronautique)\b",
+    re.I,
+)
+
+SKILL_LINE_PREFIX = re.compile(
+    r"^(langages de programmation|langages de balisage|bases de données|base de données|"
+    r"systèmes d'exploitation|systemes d'exploitation|modélisation|modelisation|"
+    r"simulation|outils|frameworks|méthodologie|methodologie|compétences|competences)\s*:",
     re.I,
 )
 
@@ -98,6 +105,16 @@ SKILL_CATEGORIES: dict[str, str] = {
     "compétences personnelles": "methodologies",
     "competences personnelles": "methodologies",
     "compétences techniques": "methodologies",
+    "modélisation numérique": "design",
+    "modelisation numerique": "design",
+    "simulation numérique": "design",
+    "simulation numerique": "design",
+    "aérodynamique": "design",
+    "aerodynamique": "design",
+    "mécanique": "design",
+    "mecanique": "design",
+    "cao": "tools",
+    "cfd": "tools",
 }
 
 # Limite alignée sur la colonne MySQL `competence.db` (varchar ~255)
@@ -115,7 +132,7 @@ def _normalize_cv_text(text: str) -> str:
     return "\n".join(lines)
 
 
-def parse_cv_pdf(file_bytes: bytes):
+def parse_cv_pdf(file_bytes: bytes, filename: str = ""):
     text, layout_text, page_count = extract_pdf_text(file_bytes)
     raw = text if len(text) >= 100 else layout_text
     source = _normalize_cv_text(raw)
@@ -130,8 +147,13 @@ def parse_cv_pdf(file_bytes: bytes):
 
     layout = _normalize_cv_text(layout_text) if len(layout_text) > len(raw) * 0.5 else source
     skills = _normalize_skill_categories(_parse_technical_skills(source))
+    personal = _parse_personal(source)
+    if filename and (not personal.job_title or len(personal.job_title or "") < 12):
+        title_from_name = _job_title_from_filename(filename)
+        if title_from_name:
+            personal.job_title = title_from_name
     data = ParseData(
-        personal_info=_parse_personal(source),
+        personal_info=personal,
         education=_parse_education(source),
         technical_skills=skills,
         languages=_parse_languages(source),
@@ -139,6 +161,21 @@ def parse_cv_pdf(file_bytes: bytes):
         projects=_parse_projects(source),
     )
     return validate_and_score(data, source)
+
+
+def _job_title_from_filename(filename: str) -> str | None:
+    base = re.sub(r"\.pdf$", "", filename, flags=re.I).strip()
+    m = re.search(
+        r"(ingénieur[^,.\(]{0,120}|ingenieur[^,.\(]{0,120}|"
+        r"[^,.\(]{0,80}(?:aérospatial|aerospatial|aéronautique|aeronautique)[^,.\(]{0,80})",
+        base,
+        re.I,
+    )
+    if m:
+        return re.sub(r"\s+", " ", m.group(0).strip())[:220]
+    if len(base) > 8 and len(base) < 180:
+        return base[:220]
+    return None
 
 
 def _parse_personal(text: str) -> PersonalInfo:
@@ -184,17 +221,52 @@ def _parse_personal(text: str) -> PersonalInfo:
     )
 
 
+def _education_search_window(text: str) -> str:
+    """PDF 2 colonnes : évite de couper sur EXPÉRIENCES au milieu des compétences."""
+    upper = text.upper()
+    start = -1
+    for header in (
+        "FORMATIONS ACADÉMIQUES",
+        "FORMATIONS ACADEMIQUES",
+        "ÉDUCATION",
+        "EDUCATION",
+        "FORMATION",
+    ):
+        i = upper.find(header)
+        if i >= 0:
+            start = i + len(header)
+            break
+    if start < 0:
+        return text
+
+    end = len(text)
+    for h in (
+        "EXPÉRIENCES PROFESSIONNELLES",
+        "EXPERIENCES PROFESSIONNELLES",
+        "PROJETS ACADEMIQUES",
+        "PROJETS ACADÉMIQUES",
+        "BÉNÉVOLAT",
+        "BENEVOLAT",
+        "LANGUES",
+        "CERTIFICATIONS",
+    ):
+        m = re.search(rf"(?:^|\n)\s*{re.escape(h)}\b", text[start:], re.I)
+        if m:
+            end = min(end, start + m.start())
+
+    window = text[start:end].strip()
+    return window if len(window) > 30 else text
+
+
 def _parse_education(text: str) -> list[EducationItem]:
-    edu_section = _section_slice(
-        text, ["ÉDUCATION", "EDUCATION", "FORMATION", "FORMATIONS ACADÉMIQUES"]
-    )
+    edu_section = _education_search_window(text)
     search_text = edu_section or text
     items: list[EducationItem] = []
     seen: set[str] = set()
 
-    # Institution + year range on same line
+    # Institution + year range on same line (2023 – 2025 or [2023 -2025])
     inst_pattern = re.compile(
-        r"^[\s]*(.{4,80}?)\s+(\d{4})\s*[-–—]\s*(\d{4}|présent|present|aujourd['']hui)\s*$",
+        r"^[\s]*(.{4,80}?)\s*[\[\(]?\s*(\d{4})\s*[-–—]\s*(\d{4}|présent|present|aujourd['']hui)\s*[\]\)]?\s*$",
         re.I | re.M,
     )
     for m in inst_pattern.finditer(search_text):
@@ -297,12 +369,15 @@ def _looks_like_institution(name: str) -> bool:
 
 
 def _find_degree_near(text: str, start: int, end: int) -> str | None:
-    window = text[max(0, start - 80) : min(len(text), end + 200)]
+    window = text[max(0, start - 80) : min(len(text), end + 400)]
     for line in window.split("\n"):
         line = line.strip()
+        if SKILL_LINE_PREFIX.match(line):
+            continue
         if DEGREE_KEYWORDS.search(line) and len(line) < 120:
-            line = re.sub(r"^langages de programmation\s*:\s*", "", line, flags=re.I)
-            return line.strip(" :")
+            cleaned = SKILL_LINE_PREFIX.sub("", line).strip(" :|-")
+            if DEGREE_KEYWORDS.search(cleaned):
+                return cleaned[:120]
     return None
 
 

@@ -56,4 +56,4 @@ async def parse_cv(file: UploadFile = File(...)):
                 ],
             },
         )
-    return parse_cv_pdf(content)
+    return parse_cv_pdf(content, filename=file.filename or "")

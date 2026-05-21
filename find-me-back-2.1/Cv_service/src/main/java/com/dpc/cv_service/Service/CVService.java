@@ -194,7 +194,8 @@ public class CVService implements ICVService {
 
     private void updateEntities(Cv existingCv, Cv cv) {
 
-        if (cv.getEducations() != null && !cv.getEducations().isEmpty()) {
+        // null = partial save (steps only); [] = import cleared that section
+        if (cv.getEducations() != null) {
             existingCv.getEducations().clear();
             for (Education incoming : cv.getEducations()) {
                 Education managed = resolveEducation(incoming);
@@ -205,7 +206,7 @@ public class CVService implements ICVService {
         }
 
 
-        if (cv.getExperiences() != null && !cv.getExperiences().isEmpty()) {
+        if (cv.getExperiences() != null) {
             existingCv.getExperiences().clear();
             for (Experience incoming : cv.getExperiences()) {
                 Experience managed = resolveExperience(incoming);
@@ -216,7 +217,7 @@ public class CVService implements ICVService {
         }
 
 
-        if (cv.getLangues() != null && !cv.getLangues().isEmpty()) {
+        if (cv.getLangues() != null) {
             existingCv.getLangues().clear();
             for (Langue lang : cv.getLangues()) {
                 List<Langue> existingLangues = langueRepo.findByNameAndNiveau(lang.getName(), lang.getNiveau());
@@ -230,7 +231,7 @@ public class CVService implements ICVService {
         }
 
 
-        if (cv.getCompetences() != null && !cv.getCompetences().isEmpty()) {
+        if (cv.getCompetences() != null) {
             existingCv.getCompetences().clear();
             for (Competence newComp : cv.getCompetences()) {
                 if (newComp.getId_competence() != null) {
