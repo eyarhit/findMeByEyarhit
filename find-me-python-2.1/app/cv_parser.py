@@ -28,6 +28,7 @@ from .cv_sections import (
     SKILL_CATEGORIES,
 )
 from .field_mapper import apply_field_mapping
+from .skill_classifier import reclassify_technical_skills
 from .ocr_cleanup import ocr_quality_score
 from .pdf_extract import extract_pdf_full
 from .validation import validate_and_score
@@ -186,24 +187,34 @@ def parse_cv_pdf(file_bytes: bytes, filename: str = ""):
         educations.append(_parse_education_fallback(src))
         experiences.append(_parse_experiences(src))
         experiences.append(_parse_experiences_fallback(src))
-        skills_list.append(_normalize_skill_categories(_parse_technical_skills(src)))
-        skills_list.append(_normalize_skill_categories(_parse_skills_fallback(src)))
+        skills_list.append(_parse_technical_skills(src))
+        skills_list.append(_parse_skills_fallback(src))
         languages_all.extend(_parse_languages(src))
         projects_all.extend(_parse_projects(src))
 
     personal = _parse_personal(source)
-    if filename and (not personal.job_title or len(personal.job_title or "") < 12):
-        title_from_name = _job_title_from_filename(filename)
-        if title_from_name:
-            personal.job_title = title_from_name
+    if filename:
+        if not personal.full_name:
+            name_from_file = _name_from_filename(filename)
+            if name_from_file:
+                personal.full_name = name_from_file
+        if not personal.job_title or len(personal.job_title or "") < 12:
+            title_from_name = _job_title_from_filename(filename)
+            if title_from_name:
+                personal.job_title = title_from_name
+
+    work_experiences = _merge_experiences(experiences)
+    if not work_experiences:
+        for src in sources:
+            work_experiences = _merge_experiences([work_experiences, _parse_stages_global(src)])
 
     data = apply_field_mapping(
         ParseData(
             personal_info=personal,
             education=_merge_education(educations),
-            technical_skills=_merge_skills(skills_list),
+            technical_skills=reclassify_technical_skills(_merge_skills(skills_list)),
             languages=_dedupe_languages(languages_all),
-            work_experiences=_merge_experiences(experiences),
+            work_experiences=work_experiences,
             projects=_dedupe_projects(projects_all),
         )
     )
@@ -298,6 +309,51 @@ def _parse_experiences_fallback(text: str) -> list[WorkExperienceItem]:
     return items[:10]
 
 
+def _parse_stages_global(text: str) -> list[WorkExperienceItem]:
+    """Stages « Stage d'été – Société | dates » même si la section EXPÉRIENCES est illisible (PDF 2 col.)."""
+    items: list[WorkExperienceItem] = []
+    seen: set[str] = set()
+    pattern = re.compile(
+        r"Stage\s+d['\u2019]?été\s*[-–—]\s*([^|\n]{2,90}?)(?:\s*\|\s*|\s+)([^\n]{4,60})",
+        re.I,
+    )
+    matches = list(pattern.finditer(text))
+    for idx, m in enumerate(matches):
+        company = m.group(1).strip()
+        dates_raw = m.group(2).strip()
+        next_pos = matches[idx + 1].start() if idx + 1 < len(matches) else min(len(text), m.end() + 600)
+        _append_experience(
+            items,
+            seen,
+            text,
+            "Stage d'été",
+            company,
+            dates_raw,
+            m.end(),
+            next_pos,
+            0.8,
+        )
+    return items[:10]
+
+
+def _name_from_filename(filename: str) -> str | None:
+    """Ex. « CV professionnel de Eya Rhit.pdf » → « Eya Rhit »."""
+    base = re.sub(r"\.pdf$", "", filename, flags=re.I).strip()
+    m = re.search(
+        r"(?:CV|curriculum|resume|résumé|resumé)[^A-Za-zÀ-ÿ]*(?:de\s+)?(.+)$",
+        base,
+        re.I,
+    )
+    if m:
+        name = m.group(1).strip(" -_")
+        if 3 <= len(name) <= 60 and re.search(r"[A-Za-zÀ-ÿ]", name):
+            return name if name.isupper() else name.title()
+    m = re.search(r"\bde\s+([A-Za-zÀ-ÿ]+(?:\s+[A-Za-zÀ-ÿ]+)+)\s*$", base, re.I)
+    if m:
+        return m.group(1).strip().title()
+    return None
+
+
 def _parse_skills_fallback(text: str) -> dict[str, Any]:
     """Liste de technologies séparées par virgules (CV internationaux compacts)."""
     known = re.compile(
@@ -314,7 +370,7 @@ def _parse_skills_fallback(text: str) -> dict[str, Any]:
             found.append(token)
     if len(found) < 3:
         return {}
-    return {"programming_languages": found[:40]}
+    return reclassify_technical_skills({"programming_languages": found[:40]})
 
 
 def _job_title_from_filename(filename: str) -> str | None:
@@ -341,15 +397,20 @@ def _parse_personal(text: str) -> PersonalInfo:
     if not phone:
         phone = _first_match(r"(?<!\d)(?:\+216\s?)?[259]\d{7}(?!\d)", text.replace(" ", ""))
 
-    linkedin = _first_match(r"(?:https?://)?(?:www\.)?linkedin\.com/in/[\w\-]+", text)
-    full_name = _parse_name_from_header(text)
+    flat = re.sub(r"\s+", "", text)
+    linkedin = _first_match(
+        r"(?:https?://)?(?:www\.)?linkedin\.com/in/[\w\-]+",
+        flat,
+    ) or _first_match(r"(?:https?://)?(?:www\.)?linkedin\.com/in/[\w\-]+", text)
+    full_name = _parse_name_from_header(text) or _parse_name_loose(text)
 
+    contact_zone = text[:1200]
     location = None
     loc_m = re.search(
-        r"(Gouvernorat\s+[\wÀ-ÿ\-]+|"
+        r"(Gouvernorat\s+[\wÀ-ÿ\-]+(?:,\s*[\wÀ-ÿ\-]+)?|"
         r"Tunis(?:ie)?|Paris|Lyon|London|Berlin|New York|Dubai|Casablanca|"
-        r"[\wÀ-ÿ\-]{2,40}\s*,\s*[\wÀ-ÿ\-]{2,40})",
-        text,
+        r"[\wÀ-ÿ\-]{2,40}\s*,\s*Tunisie)",
+        contact_zone,
         re.I,
     )
     if loc_m:
@@ -370,6 +431,7 @@ def _parse_personal(text: str) -> PersonalInfo:
                 and len(re.sub(r"[^A-Za-zÀ-ÿ]", "", ln)) >= 12
             ):
                 job_title = re.sub(r"\s+", " ", ln)[:220]
+                job_title = _normalize_profile_title(job_title)
                 break
         if job_title:
             break
@@ -383,6 +445,27 @@ def _parse_personal(text: str) -> PersonalInfo:
         job_title=job_title,
         confidence=0.8 if job_title or email else 0.4,
     )
+
+
+def _normalize_profile_title(title: str) -> str:
+    """Corrige artefacts PDF (ex. 3ᵉ → 3n)."""
+    title = re.sub(r"\b3\s*[nN]\b", "3ᵉ", title)
+    title = re.sub(r"\s+à\s+ESPRIT,?\s+passionnée.*$", "", title, flags=re.I).strip()
+    return title[:220]
+
+
+def _parse_name_loose(text: str) -> str | None:
+    """Nom en tête de CV même si le PDF ne met pas la ligne en premier."""
+    head = text[:1500]
+    m = re.search(
+        r"(?:^|\n)\s*([A-ZÀ-Ÿ]{2,20}\s+[A-ZÀ-Ÿ]{2,20}(?:\s+[A-ZÀ-Ÿ]{2,20})?)\s*(?:\n|$)",
+        head,
+    )
+    if m:
+        candidate = m.group(1).strip()
+        if not re.match(r"^(CONTACT|COMPÉTENCES|COMPETENCES|PROFIL|CV)\b", candidate, re.I):
+            return candidate
+    return None
 
 
 def _parse_name_from_header(text: str) -> str | None:
@@ -748,28 +831,8 @@ def _sanitize_skills_dict(skills: dict[str, Any]) -> dict[str, Any]:
 
 
 def _normalize_skill_categories(skills: dict[str, Any]) -> dict[str, Any]:
-    markup_tokens = {"html", "css", "xml", "html5", "css3", "sass", "scss"}
-    prog = skills.get("programming_languages", [])
-    db_tokens = {"sql", "mysql", "postgresql", "mongodb", "oracle"}
-    if isinstance(prog, list):
-        markup = skills.setdefault("markup_languages", [])
-        kept = []
-        for item in prog:
-            low = item.lower()
-            if low in markup_tokens:
-                if item not in markup:
-                    markup.append(item)
-            elif low in db_tokens:
-                db = skills.setdefault("databases", [])
-                if item not in db:
-                    db.append(item)
-            else:
-                kept.append(item)
-        if kept:
-            skills["programming_languages"] = kept
-        elif "programming_languages" in skills:
-            del skills["programming_languages"]
-    return skills
+    """Délègue au classificateur strict (évite doublons markup/BDD dans « langages »)."""
+    return reclassify_technical_skills(skills)
 
 
 def _split_skill_list(raw: str) -> list[str]:
@@ -1016,18 +1079,48 @@ def _collect_experience_description(text: str, pos: int, end_pos: int) -> str:
     return joined[:MAX_EXPERIENCE_DESC_CHARS]
 
 
+def _is_false_project_line(title: str) -> bool:
+    """Évite de traiter compétences / langues comme des projets (PDF sans section PROJETS)."""
+    low = title.lower().strip()
+    if SKILL_LINE_PREFIX.match(title):
+        return True
+    false_prefixes = (
+        "langages de",
+        "langage de",
+        "bases de données",
+        "base de données",
+        "systèmes d",
+        "systemes d",
+        "modélisation",
+        "modelisation",
+        "outils",
+        "soft skills",
+        "compétences",
+        "competences",
+        "français",
+        "francais",
+        "anglais",
+        "arabe",
+        "allemand",
+        "espagnol",
+    )
+    return any(low.startswith(p) for p in false_prefixes)
+
+
 def _parse_projects(text: str) -> list[ProjectItem]:
     section = _section_slice(
         text,
         HEADERS_PROJECTS,
         stop_headers=list(HEADERS_LANGUAGES + HEADERS_CERTIFICATIONS) + ["BÉNÉVOLAT", "BENEVOLAT"],
     )
-    search = section or text
+    if not section or len(section.strip()) < 25:
+        return []
+    search = section
     items: list[ProjectItem] = []
     for m in GENERIC_PROJECT_LINE.finditer(search):
         title = m.group(1).strip()
         desc = m.group(2).strip()
-        if len(title) < 4 or VOLUNTEER_MARKERS.search(title):
+        if len(title) < 4 or VOLUNTEER_MARKERS.search(title) or _is_false_project_line(title):
             continue
         items.append(
             ProjectItem(
