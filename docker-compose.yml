@@ -214,7 +214,7 @@ services:
 
   bi-etl:
     build:
-      context: ./bi/etl
+      context: ./bi/bi_etl
     container_name: findme-bi-etl
     restart: "no"
     environment:
@@ -224,7 +224,7 @@ services:
       MYSQL_ETL_PASSWORD: root
       DW_SCHEMA_SQL: /ddl/schema.sql
     volumes:
-      - ./docker/mysql-init/05-findme-dw-star-schema.sql:/ddl/schema.sql:ro
+      - ./bi/dw/schema.sql:/ddl/schema.sql:ro
     depends_on:
       mysql:
         condition: service_healthy

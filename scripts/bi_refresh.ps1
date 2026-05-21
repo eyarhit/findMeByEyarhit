@@ -7,4 +7,10 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host "=== Seed Metabase + manifest ===" -ForegroundColor Cyan
 docker compose run --rm metabase-seed
-exit $LASTEXITCODE
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+Write-Host ""
+Write-Host "=== Export PDF (optionnel) ===" -ForegroundColor Cyan
+Write-Host "Lancez: .\scripts\export_metabase_pdfs.ps1" -ForegroundColor Gray
+Write-Host "Slides PFE: docs\BI_PRESENTATION_PFE.md" -ForegroundColor Gray
+exit 0

@@ -27,6 +27,10 @@
       <span class="kpi-label">indicateurs</span>
     </div>
     <div class="kpi">
+      <span class="kpi-value">{{ tierDashboards.length }}</span>
+      <span class="kpi-label">dashboards Metabase</span>
+    </div>
+    <div class="kpi">
       <span class="kpi-value">{{ tabs.length }}</span>
       <span class="kpi-label">domaines métier</span>
     </div>
@@ -53,20 +57,30 @@
   </div>
 
   <article class="dashboard-wrapper">
-    <h2>{{ manifest?.dashboard?.name || 'Tableau de bord complet' }}</h2>
+    <h2>Tableaux de bord Metabase (3 niveaux)</h2>
+    <div class="tier-buttons" *ngIf="tierDashboards.length">
+      <button
+        *ngFor="let d of tierDashboards"
+        type="button"
+        class="tier-btn"
+        [class.active]="selectedDashboardLevel === d.level"
+        (click)="selectDashboardLevel(d.level)">
+        {{ tierLabel(d.level) }}
+      </button>
+    </div>
     <div class="metabase-link-panel">
       <p class="panel-lead">
         Metabase n’autorise pas l’iframe par défaut (<code>frame-ancestors</code>). Ouvrez le dashboard
-        dans un nouvel onglet pour la démo PFE ou l’export PDF.
+        adapté à votre profil (Executive / Managérial / Opérationnel) pour la démo PFE ou l’export PDF.
       </p>
       <button
         type="button"
         class="open-btn primary"
         [disabled]="!isProvisioned"
         (click)="openDashboard()">
-        Ouvrir le dashboard{{ dashboardId != null ? ' #' + dashboardId : '' }}
+        Ouvrir — {{ selectedTierDashboard?.name || 'dashboard' }}
       </button>
-      <p class="muted-url">{{ dashboardAbsoluteUrl }}</p>
+      <p class="muted-url">{{ selectedTierDashboard?.url }}</p>
     </div>
   </article>
 

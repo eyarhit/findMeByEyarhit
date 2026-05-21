@@ -225,6 +225,30 @@
   }
 }
 
+.tier-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.tier-btn {
+  border: 1px solid #c7d2fe;
+  background: #f8fafc;
+  color: #3730a3;
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tier-btn.active {
+  background: #4f46e5;
+  color: #fff;
+  border-color: #4f46e5;
+}
+
 .metabase-link-panel {
   border: 1px solid #e2e8f0;
   border-radius: 12px;

@@ -32,6 +32,8 @@ Puis **Ctrl+Shift+R** ou fenêtre privée. Vérifier : `powershell -File scripts
 
 Voir [DOCKER_DEPLOYMENT.md](./DOCKER_DEPLOYMENT.md) pour les ports et le dépannage.
 
+**Guide pas à pas pour un collègue :** [docs/GUIDE_AMI_DOCKER.md](./docs/GUIDE_AMI_DOCKER.md)
+
 ## Important — clone complet
 
 Les dossiers `find-me-back-2.1` et `find-me-python-2.1` doivent contenir le **code source** (sous-dossiers `DiscoveryService`, `Cv_service`, `app`, etc.).

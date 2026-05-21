@@ -31,6 +31,10 @@ find-me-python-2.1/tests/output_*.txt
 **/hs_err_pid*.log
 **/.pytest_cache/
 
+# BI presentation exports (regenerable)
+bi/presentation/exports/*.pdf
+bi/presentation/exports/export-manifest.json
+
 # Env secrets (never commit)
 .env
 .env.*

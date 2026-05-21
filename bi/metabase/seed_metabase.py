@@ -40,35 +40,82 @@ DASHBOARD_NAME = (
     if USE_STAR_SCHEMA
     else "Find-Me — BI complet"
 )
+# Bloc 5 — trois niveaux décisionnels (RH & Opérations)
+DASHBOARD_TIERS: list[dict] = [
+    {
+        "level": "executive",
+        "name": "Find-Me — BI Executive",
+        "description": "Synthèse direction : KPIs globaux et tendances.",
+        "slugs": [
+            "executive_kpis",
+            "users_by_role",
+            "applications_by_month",
+            "application_conversion_rate",
+            "missions_by_month",
+            "cvs_by_month",
+        ],
+    },
+    {
+        "level": "managerial",
+        "name": "Find-Me — BI Managérial",
+        "description": "Pilotage RH / ESN : missions, candidatures, profils.",
+        "slugs": [
+            "users_by_status",
+            "users_by_country",
+            "missions_by_status",
+            "applications_by_status",
+            "missions_by_contract",
+            "missions_top_cities",
+            "top_missions_applications",
+            "missions_remote_split",
+            "favorites_by_user_type",
+            "cv_top_skills",
+            "quiz_pass_fail",
+        ],
+    },
+    {
+        "level": "operational",
+        "name": "Find-Me — BI Opérationnel",
+        "description": "Détail opérationnel : notifications, CV, évaluations.",
+        "slugs": [
+            "notifications_by_month",
+            "cv_completion_steps",
+            "quiz_avg_score",
+            "codingame_sessions_month",
+            "codingame_avg_score",
+            "codingame_score_by_framework",
+        ],
+    },
+]
 MANIFEST_PATH = Path(os.environ.get("BI_MANIFEST_PATH", "/output/bi-manifest.json"))
 
 SQL_ROOT = Path(__file__).resolve().parent / "sql"
 
-# (fichier dw/, titre, display, slug, domain)
-_DW_SPECS: list[tuple[str, str, str, str, str]] = [
-    ("01_utilisateurs_par_role.sql", "Utilisateurs par rôle", "bar", "users_by_role", "users"),
-    ("02_utilisateurs_par_statut.sql", "Utilisateurs par statut", "pie", "users_by_status", "users"),
-    ("03_utilisateurs_par_pays.sql", "Utilisateurs par pays", "bar", "users_by_country", "users"),
-    ("04_notifications_par_mois.sql", "Notifications par mois", "line", "notifications_by_month", "users"),
-    ("05_kpi_executif.sql", "KPI — vue exécutive", "table", "executive_kpis", "overview"),
-    ("06_missions_par_statut.sql", "Missions par statut", "pie", "missions_by_status", "missions"),
-    ("07_missions_par_mois.sql", "Missions créées par mois", "line", "missions_by_month", "missions"),
-    ("08_candidatures_par_statut.sql", "Candidatures par statut", "bar", "applications_by_status", "missions"),
-    ("09_type_contrat.sql", "Missions par type de contrat", "bar", "missions_by_contract", "missions"),
-    ("10_top_villes.sql", "Top villes (missions)", "bar", "missions_top_cities", "missions"),
-    ("11_favoris_par_user_type.sql", "Favoris par type utilisateur", "bar", "favorites_by_user_type", "missions"),
-    ("12_candidatures_par_mois.sql", "Candidatures par mois", "line", "applications_by_month", "missions"),
-    ("13_taux_conversion_candidatures.sql", "Taux de conversion candidatures", "pie", "application_conversion_rate", "missions"),
-    ("14_top_missions_candidatures.sql", "Top missions (candidatures)", "bar", "top_missions_applications", "missions"),
-    ("15_missions_teletravail.sql", "Missions télétravail vs sur site", "pie", "missions_remote_split", "missions"),
-    ("16_cv_par_mois.sql", "CV créés par mois", "line", "cvs_by_month", "cv"),
-    ("17_top_competences.sql", "Top compétences CV", "bar", "cv_top_skills", "cv"),
-    ("18_cv_etapes_completees.sql", "CV — étapes complétées", "bar", "cv_completion_steps", "cv"),
-    ("19_quiz_reussite.sql", "Quiz — réussite / échec", "pie", "quiz_pass_fail", "evaluations"),
-    ("20_score_moyen_quiz.sql", "Quiz — score moyen", "table", "quiz_avg_score", "evaluations"),
-    ("21_codingame_sessions_mois.sql", "Codingame — sessions par mois", "line", "codingame_sessions_month", "evaluations"),
-    ("22_codingame_score_moyen.sql", "Codingame — score moyen global", "table", "codingame_avg_score", "evaluations"),
-    ("23_codingame_par_framework.sql", "Codingame — score par framework", "bar", "codingame_score_by_framework", "evaluations"),
+# (fichier dw/, titre, display, slug, domain, niveau dashboard)
+_DW_SPECS: list[tuple[str, str, str, str, str, str]] = [
+    ("01_utilisateurs_par_role.sql", "Utilisateurs par rôle", "bar", "users_by_role", "users", "executive"),
+    ("02_utilisateurs_par_statut.sql", "Utilisateurs par statut", "pie", "users_by_status", "users", "managerial"),
+    ("03_utilisateurs_par_pays.sql", "Utilisateurs par pays", "bar", "users_by_country", "users", "managerial"),
+    ("04_notifications_par_mois.sql", "Notifications par mois", "line", "notifications_by_month", "users", "operational"),
+    ("05_kpi_executif.sql", "KPI — vue exécutive", "table", "executive_kpis", "overview", "executive"),
+    ("06_missions_par_statut.sql", "Missions par statut", "pie", "missions_by_status", "missions", "managerial"),
+    ("07_missions_par_mois.sql", "Missions créées par mois", "line", "missions_by_month", "missions", "executive"),
+    ("08_candidatures_par_statut.sql", "Candidatures par statut", "bar", "applications_by_status", "missions", "managerial"),
+    ("09_type_contrat.sql", "Missions par type de contrat", "bar", "missions_by_contract", "missions", "managerial"),
+    ("10_top_villes.sql", "Top villes (missions)", "bar", "missions_top_cities", "missions", "managerial"),
+    ("11_favoris_par_user_type.sql", "Favoris par type utilisateur", "bar", "favorites_by_user_type", "missions", "managerial"),
+    ("12_candidatures_par_mois.sql", "Candidatures par mois", "line", "applications_by_month", "missions", "executive"),
+    ("13_taux_conversion_candidatures.sql", "Taux de conversion candidatures", "pie", "application_conversion_rate", "missions", "executive"),
+    ("14_top_missions_candidatures.sql", "Top missions (candidatures)", "bar", "top_missions_applications", "missions", "managerial"),
+    ("15_missions_teletravail.sql", "Missions télétravail vs sur site", "pie", "missions_remote_split", "missions", "managerial"),
+    ("16_cv_par_mois.sql", "CV créés par mois", "line", "cvs_by_month", "cv", "executive"),
+    ("17_top_competences.sql", "Top compétences CV", "bar", "cv_top_skills", "cv", "managerial"),
+    ("18_cv_etapes_completees.sql", "CV — étapes complétées", "bar", "cv_completion_steps", "cv", "operational"),
+    ("19_quiz_reussite.sql", "Quiz — réussite / échec", "pie", "quiz_pass_fail", "evaluations", "managerial"),
+    ("20_score_moyen_quiz.sql", "Quiz — score moyen", "table", "quiz_avg_score", "evaluations", "operational"),
+    ("21_codingame_sessions_mois.sql", "Codingame — sessions par mois", "line", "codingame_sessions_month", "evaluations", "operational"),
+    ("22_codingame_score_moyen.sql", "Codingame — score moyen global", "table", "codingame_avg_score", "evaluations", "operational"),
+    ("23_codingame_par_framework.sql", "Codingame — score par framework", "bar", "codingame_score_by_framework", "evaluations", "operational"),
 ]
 
 
@@ -81,8 +128,9 @@ def _dw_cards() -> list[dict]:
             "display": display,
             "slug": slug,
             "domain": domain,
+            "tier": tier,
         }
-        for fname, title, display, slug, domain in _DW_SPECS
+        for fname, title, display, slug, domain, tier in _DW_SPECS
     ]
 
 
@@ -580,16 +628,28 @@ def build_tabs(card_entries: list[dict]) -> list[dict]:
     return tabs
 
 
-def write_manifest(dash_id: int, card_entries: list[dict]) -> None:
+def write_manifest(
+    dash_id: int,
+    card_entries: list[dict],
+    dashboards: list[dict] | None = None,
+) -> None:
+    tier_dashboards = dashboards or []
+    primary = tier_dashboards[0] if tier_dashboards else {
+        "id": dash_id,
+        "level": "executive",
+        "name": DASHBOARD_NAME,
+        "url": f"{MB_EXTERNAL}/dashboard/{dash_id}",
+    }
     manifest = {
-        "version": 2,
+        "version": 3,
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "metabaseUrl": MB_EXTERNAL,
         "dashboard": {
-            "id": dash_id,
-            "name": DASHBOARD_NAME,
-            "url": f"{MB_EXTERNAL}/dashboard/{dash_id}",
+            "id": primary.get("id", dash_id),
+            "name": primary.get("name", DASHBOARD_NAME),
+            "url": primary.get("url", f"{MB_EXTERNAL}/dashboard/{dash_id}"),
         },
+        "dashboards": tier_dashboards,
         "cards": card_entries,
         "tabs": build_tabs(card_entries),
         "credentials": {
@@ -653,7 +713,11 @@ def manifest_from_existing_dashboard(
     return entries
 
 
-def provision_fresh(sess: requests.Session, session_id: str) -> tuple[int, list[dict]]:
+def _slug_to_entry(card_entries: list[dict]) -> dict[str, dict]:
+    return {e["slug"]: e for e in card_entries}
+
+
+def provision_fresh(sess: requests.Session, session_id: str) -> tuple[int, list[dict], list[dict]]:
     db_ids = {dbn: ensure_database(sess, session_id, dbn) for dbn in DB_NAMES}
     collection_id = ensure_collection(sess, session_id)
 
@@ -677,20 +741,75 @@ def provision_fresh(sess: requests.Session, session_id: str) -> tuple[int, list[
                 "domain": spec["domain"],
                 "display": spec["display"],
                 "db": spec["db"],
+                "tier": spec.get("tier", "managerial"),
                 "url": f"{MB_EXTERNAL}/question/{cid}",
             }
         )
         time.sleep(0.25)
 
-    dash_id = create_dashboard(sess, session_id, collection_id)
-    cols, sx, sy = 3, 6, 4
-    for i, entry in enumerate(card_entries):
-        row = (i // cols) * sy
-        col = (i % cols) * sx
-        add_card_to_dashboard(sess, session_id, dash_id, entry["id"], row, col, sx, sy)
-        time.sleep(0.15)
+    by_slug = _slug_to_entry(card_entries)
+    tier_dashboards: list[dict] = []
+    cols, sx, sy = 2, 6, 4
 
-    return dash_id, card_entries
+    tiers = DASHBOARD_TIERS if USE_STAR_SCHEMA else [
+        {"level": "complete", "name": DASHBOARD_NAME, "description": DASHBOARD_NAME, "slugs": [e["slug"] for e in card_entries]},
+    ]
+
+    for tier_cfg in tiers:
+        payload = {
+            "name": tier_cfg["name"],
+            "description": tier_cfg.get("description", ""),
+            "collection_id": collection_id,
+            "parameters": [],
+        }
+        r = sess.post(
+            f"{MB_URL}/api/dashboard",
+            headers=mb_headers(session_id),
+            data=json.dumps(payload),
+            timeout=60,
+        )
+        if not r.ok:
+            print(f"Dashboard {tier_cfg['name']}: {r.status_code}", file=sys.stderr)
+            sys.exit(1)
+        dash_id = r.json()["id"]
+        subset = [by_slug[s] for s in tier_cfg["slugs"] if s in by_slug]
+        for i, entry in enumerate(subset):
+            row = (i // cols) * sy
+            col = (i % cols) * sx
+            add_card_to_dashboard(sess, session_id, dash_id, entry["id"], row, col, sx, sy)
+            time.sleep(0.15)
+        tier_dashboards.append(
+            {
+                "id": dash_id,
+                "level": tier_cfg["level"],
+                "name": tier_cfg["name"],
+                "url": f"{MB_EXTERNAL}/dashboard/{dash_id}",
+                "cardSlugs": [e["slug"] for e in subset],
+            }
+        )
+        print(f"Dashboard « {tier_cfg['name']} » id={dash_id} ({len(subset)} cartes)")
+
+    primary_id = tier_dashboards[0]["id"] if tier_dashboards else 0
+    return primary_id, card_entries, tier_dashboards
+
+
+def find_existing_tier_dashboards(sess: requests.Session, session_id: str) -> list[dict]:
+    names = {t["name"] for t in DASHBOARD_TIERS} if USE_STAR_SCHEMA else {DASHBOARD_NAME}
+    found = []
+    for d in list_dashboards(sess, session_id):
+        if d.get("name") in names:
+            found.append(
+                {
+                    "id": d["id"],
+                    "level": next(
+                        (t["level"] for t in DASHBOARD_TIERS if t["name"] == d.get("name")),
+                        "complete",
+                    ),
+                    "name": d.get("name"),
+                    "url": f"{MB_EXTERNAL}/dashboard/{d['id']}",
+                }
+            )
+    return found
 
 
 def main() -> None:
@@ -701,21 +820,22 @@ def main() -> None:
     props = get_session_properties(sess)
     session_id = ensure_setup(sess, props)
 
-    existing = find_dashboard(sess, session_id, DASHBOARD_NAME)
-    if existing:
-        print(f"Dashboard « {DASHBOARD_NAME} » déjà présent (id={existing}).")
-        entries = manifest_from_existing_dashboard(sess, session_id, existing)
-        write_manifest(existing, entries)
+    existing_tiers = find_existing_tier_dashboards(sess, session_id)
+    if existing_tiers:
+        print(f"Dashboards BI déjà présents ({len(existing_tiers)}).")
+        primary = existing_tiers[0]["id"]
+        entries = manifest_from_existing_dashboard(sess, session_id, primary)
+        write_manifest(primary, entries, existing_tiers)
         print(f"Metabase : {MB_EXTERNAL} — {SETUP_EMAIL}")
         return
 
-    dash_id, entries = provision_fresh(sess, session_id)
-    write_manifest(dash_id, entries)
+    dash_id, entries, tier_dashboards = provision_fresh(sess, session_id)
+    write_manifest(dash_id, entries, tier_dashboards)
 
     print("—" * 50)
     print("BI Metabase : provisionnement terminé.")
     print(f"  URL : {MB_EXTERNAL}")
-    print(f"  Dashboard : {DASHBOARD_NAME} (id={dash_id})")
+    print(f"  Dashboards : {len(tier_dashboards)}")
     print(f"  Cartes : {len(entries)}")
     print("—" * 50)
 

@@ -21,11 +21,20 @@ export interface BiManifestTab {
   cardSlugs: string[];
 }
 
+export interface BiManifestDashboard {
+  id: number;
+  level: string;
+  name: string;
+  url: string;
+  cardSlugs?: string[];
+}
+
 export interface BiManifest {
   version: number;
   generatedAt: string | null;
   metabaseUrl: string;
   dashboard: { id: number | null; name: string; url: string };
+  dashboards?: BiManifestDashboard[];
   cards: BiManifestCard[];
   tabs: BiManifestTab[];
   credentials?: { metabaseAdminEmail?: string; mysqlReadOnlyUser?: string };
@@ -42,6 +51,7 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
   manifest: BiManifest | null = null;
   manifestError = '';
   selectedTabKey = '';
+  selectedDashboardLevel = 'executive';
   showConnectionInfo = false;
   healthState: HealthState = 'checking';
   healthMessage = 'Vérification Metabase…';
@@ -89,8 +99,33 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
     return this.manifest?.cards?.length ?? 0;
   }
 
+  get tierDashboards(): BiManifestDashboard[] {
+    if (this.manifest?.dashboards?.length) {
+      return this.manifest.dashboards;
+    }
+    if (this.dashboardId != null && this.manifest?.dashboard) {
+      return [
+        {
+          id: this.dashboardId,
+          level: 'executive',
+          name: this.manifest.dashboard.name,
+          url: this.dashboardAbsoluteUrl,
+        },
+      ];
+    }
+    return [];
+  }
+
+  get selectedTierDashboard(): BiManifestDashboard | null {
+    return (
+      this.tierDashboards.find((d) => d.level === this.selectedDashboardLevel) ||
+      this.tierDashboards[0] ||
+      null
+    );
+  }
+
   get isProvisioned(): boolean {
-    return !!this.manifest?.cards?.length && this.dashboardId != null;
+    return !!this.manifest?.cards?.length && this.tierDashboards.length > 0;
   }
 
   ngOnInit(): void {
@@ -114,8 +149,23 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
     window.open(this.metabaseBaseUrl, '_blank', 'noopener,noreferrer');
   }
 
+  selectDashboardLevel(level: string): void {
+    this.selectedDashboardLevel = level;
+  }
+
   openDashboard(): void {
-    window.open(this.dashboardAbsoluteUrl, '_blank', 'noopener,noreferrer');
+    const url = this.selectedTierDashboard?.url || this.dashboardAbsoluteUrl;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  tierLabel(level: string): string {
+    const labels: Record<string, string> = {
+      executive: 'Executive (Direction)',
+      managerial: 'Managérial (RH / ESN)',
+      operational: 'Opérationnel (Détail)',
+      complete: 'Complet',
+    };
+    return labels[level] || level;
   }
 
   openCard(card: BiManifestCard): void {
@@ -145,6 +195,8 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
               'Manifest vide : exécutez « docker compose up » jusqu’à la fin de metabase-seed, ou reset du volume metabase_data.';
           }
           this.selectedTabKey = data.tabs?.[0]?.key || data.cards?.[0]?.domain || '';
+          this.selectedDashboardLevel =
+            data.dashboards?.[0]?.level || 'executive';
         })
     );
   }
