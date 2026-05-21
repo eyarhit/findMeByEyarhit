@@ -33,12 +33,12 @@
                                                     "Y":  {
                                                               "projections":  [
                                                                                   {
-                                                                                      "queryRef":  "_Mesures BI.Candidatures (vue)",
+                                                                                      "queryRef":  "MesuresBI.Candidatures (vue)",
                                                                                       "field":  {
                                                                                                     "Measure":  {
                                                                                                                     "Expression":  {
                                                                                                                                        "SourceRef":  {
-                                                                                                                                                         "Entity":  "_Mesures BI"
+                                                                                                                                                         "Entity":  "MesuresBI"
                                                                                                                                                      }
                                                                                                                                    },
                                                                                                                     "Property":  "Candidatures (vue)"

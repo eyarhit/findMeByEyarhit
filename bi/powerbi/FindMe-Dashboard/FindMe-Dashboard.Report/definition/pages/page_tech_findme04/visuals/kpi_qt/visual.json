@@ -15,12 +15,12 @@
                                                     "Values":  {
                                                                    "projections":  [
                                                                                        {
-                                                                                           "queryRef":  "_Mesures BI.Taux reussite quiz %",
+                                                                                           "queryRef":  "MesuresBI.Taux reussite quiz %",
                                                                                            "field":  {
                                                                                                          "Measure":  {
                                                                                                                          "Expression":  {
                                                                                                                                             "SourceRef":  {
-                                                                                                                                                              "Entity":  "_Mesures BI"
+                                                                                                                                                              "Entity":  "MesuresBI"
                                                                                                                                                           }
                                                                                                                                         },
                                                                                                                          "Property":  "Taux reussite quiz %"

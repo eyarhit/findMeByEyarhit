@@ -18,7 +18,7 @@ $RpName = "$ProjectPrefix.Report"
 $Rp = Join-Path $OutputBase $RpName
 
 $tables = @(
-    "_Mesures BI",
+    "MesuresBI",
     "dim_date", "dim_user", "dim_user_scd2", "dim_mission", "dim_skill",
     "fact_user", "fact_notification", "fact_mission", "fact_candidature",
     "fact_mission_favori", "fact_cv", "fact_quiz", "fact_codingame", "etl_run_log",
@@ -31,7 +31,7 @@ function C([string]$Name, [string]$Type = 'string', [string]$Sum = 'none') {
 }
 
 $tableColumns = @{
-    "_Mesures BI" = @()
+    MesuresBI = @()
     dim_date = @(
         C 'date_key' 'int64' 'none'
         C 'full_date' 'dateTime' 'none'
@@ -273,7 +273,7 @@ database
     compatibilityLevel: 1550
 '@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Def "database.tmdl") $_ }
 
-$dataTables = $tables | Where-Object { $_ -ne '_Mesures BI' }
+$dataTables = $tables | Where-Object { $_ -ne 'MesuresBI' }
 $queryOrder = (@('PBI_MySqlServer', 'PBI_MySqlDatabase') + $dataTables) | ForEach-Object { "`"$_`"" }
 $queryOrderJson = $queryOrder -join ','
 $relRefs = Write-ModelRelationships $Def
@@ -298,7 +298,7 @@ $refs
 "@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Def "model.tmdl") $_ }
 
 $measuresTmdl = @'
-table '_Mesures BI'
+table MesuresBI
     lineageTag: a1b2c3d4-e5f6-7890-abcd-ef1234567890
 
     column Dummy
@@ -340,7 +340,7 @@ table '_Mesures BI'
     measure 'Dernier refresh OK' =
         CALCULATE(MAX(etl_run_log[finished_at]), etl_run_log[status] = "OK")
 
-    partition '_Mesures BI' = m
+    partition MesuresBI = m
         mode: import
         source =
             let
@@ -350,9 +350,11 @@ table '_Mesures BI'
 
 '@
 
+Remove-Item (Join-Path $TablesDir '_Mesures BI.tmdl') -Force -ErrorAction SilentlyContinue
+
 foreach ($t in $tables) {
-    if ($t -eq '_Mesures BI') {
-        Write-Utf8NoBom (Join-Path $TablesDir '_Mesures BI.tmdl') $measuresTmdl
+    if ($t -eq 'MesuresBI') {
+        Write-Utf8NoBom (Join-Path $TablesDir 'MesuresBI.tmdl') $measuresTmdl
         continue
     }
     $tag = [guid]::NewGuid().ToString()

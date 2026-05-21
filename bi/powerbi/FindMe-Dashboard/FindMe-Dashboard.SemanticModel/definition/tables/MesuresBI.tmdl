@@ -1,4 +1,4 @@
-table '_Mesures BI'
+table MesuresBI
     lineageTag: a1b2c3d4-e5f6-7890-abcd-ef1234567890
 
     column Dummy
@@ -40,7 +40,7 @@ table '_Mesures BI'
     measure 'Dernier refresh OK' =
         CALCULATE(MAX(etl_run_log[finished_at]), etl_run_log[status] = "OK")
 
-    partition '_Mesures BI' = m
+    partition MesuresBI = m
         mode: import
         source =
             let

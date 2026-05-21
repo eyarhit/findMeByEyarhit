@@ -15,12 +15,12 @@
                                                     "Values":  {
                                                                    "projections":  [
                                                                                        {
-                                                                                           "queryRef":  "_Mesures BI.Acceptees (vue)",
+                                                                                           "queryRef":  "MesuresBI.Acceptees (vue)",
                                                                                            "field":  {
                                                                                                          "Measure":  {
                                                                                                                          "Expression":  {
                                                                                                                                             "SourceRef":  {
-                                                                                                                                                              "Entity":  "_Mesures BI"
+                                                                                                                                                              "Entity":  "MesuresBI"
                                                                                                                                                           }
                                                                                                                                         },
                                                                                                                          "Property":  "Acceptees (vue)"

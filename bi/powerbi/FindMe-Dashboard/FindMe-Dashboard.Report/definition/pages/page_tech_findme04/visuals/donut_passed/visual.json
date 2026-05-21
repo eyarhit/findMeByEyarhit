@@ -33,12 +33,12 @@
                                                     "Y":  {
                                                               "projections":  [
                                                                                   {
-                                                                                      "queryRef":  "_Mesures BI.Tentatives quiz",
+                                                                                      "queryRef":  "MesuresBI.Tentatives quiz",
                                                                                       "field":  {
                                                                                                     "Measure":  {
                                                                                                                     "Expression":  {
                                                                                                                                        "SourceRef":  {
-                                                                                                                                                         "Entity":  "_Mesures BI"
+                                                                                                                                                         "Entity":  "MesuresBI"
                                                                                                                                                      }
                                                                                                                                    },
                                                                                                                     "Property":  "Tentatives quiz"

@@ -6,7 +6,7 @@ $SmName = "FindMe-Dashboard.SemanticModel"
 $RpName = "FindMe-Dashboard.Report"
 $Rp = Join-Path $Base $RpName
 $PagesDir = Join-Path $Rp "definition\pages"
-$M = '_Mesures BI'
+$M = 'MesuresBI'
 
 $script:HdrY = 8;    $script:HdrH = 48
 $script:NavX = 520;  $script:NavW = 736; $script:NavH = 44
@@ -128,7 +128,6 @@ function Add-PageChrome($page, $dashTitle, $pageSubtitle) {
             }
         })
     }
-    Write-Vis $page 'nav_pages' $script:NavX $script:HdrY $script:NavW $script:NavH 9500 9000 'pageNavigator' $null
 }
 
 function Write-Slicer($page, $id, $x, $entity, $col, $z, $to) {
@@ -146,6 +145,9 @@ $pageExec = 'page_exec_findme01'
 $pageMgr  = 'page_mgr_findme02'
 $pageOps  = 'page_ops_findme03'
 $pageTech = 'page_tech_findme04'
+
+if (Test-Path $PagesDir) { Remove-Item $PagesDir -Recurse -Force }
+New-Dir $PagesDir
 
 foreach ($p in @($pageExec, $pageMgr, $pageOps, $pageTech)) {
     New-Dir (Join-Path $PagesDir $p)
@@ -378,7 +380,7 @@ Write-Utf8NoBom (Join-Path $Rp 'definition\version.json') @'
 Write-Utf8NoBom (Join-Path $Rp 'definition.pbir') @"
 {
   "`$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definitionProperties/2.0.0/schema.json",
-  "version": "4.0",
+  "version": "2.0",
   "datasetReference": { "byPath": { "path": "../$SmName" } }
 }
 "@

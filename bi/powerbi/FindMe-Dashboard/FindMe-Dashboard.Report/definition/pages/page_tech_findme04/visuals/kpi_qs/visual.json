@@ -15,12 +15,12 @@
                                                     "Values":  {
                                                                    "projections":  [
                                                                                        {
-                                                                                           "queryRef":  "_Mesures BI.Score moyen quiz",
+                                                                                           "queryRef":  "MesuresBI.Score moyen quiz",
                                                                                            "field":  {
                                                                                                          "Measure":  {
                                                                                                                          "Expression":  {
                                                                                                                                             "SourceRef":  {
-                                                                                                                                                              "Entity":  "_Mesures BI"
+                                                                                                                                                              "Entity":  "MesuresBI"
                                                                                                                                                           }
                                                                                                                                         },
                                                                                                                          "Property":  "Score moyen quiz"

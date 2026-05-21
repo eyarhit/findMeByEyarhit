@@ -15,12 +15,12 @@
                                                     "Values":  {
                                                                    "projections":  [
                                                                                        {
-                                                                                           "queryRef":  "_Mesures BI.Total CV",
+                                                                                           "queryRef":  "MesuresBI.Total CV",
                                                                                            "field":  {
                                                                                                          "Measure":  {
                                                                                                                          "Expression":  {
                                                                                                                                             "SourceRef":  {
-                                                                                                                                                              "Entity":  "_Mesures BI"
+                                                                                                                                                              "Entity":  "MesuresBI"
                                                                                                                                                           }
                                                                                                                                         },
                                                                                                                          "Property":  "Total CV"

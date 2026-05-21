@@ -15,12 +15,12 @@
                                                     "Values":  {
                                                                    "projections":  [
                                                                                        {
-                                                                                           "queryRef":  "_Mesures BI.Sessions codingame",
+                                                                                           "queryRef":  "MesuresBI.Sessions codingame",
                                                                                            "field":  {
                                                                                                          "Measure":  {
                                                                                                                          "Expression":  {
                                                                                                                                             "SourceRef":  {
-                                                                                                                                                              "Entity":  "_Mesures BI"
+                                                                                                                                                              "Entity":  "MesuresBI"
                                                                                                                                                           }
                                                                                                                                         },
                                                                                                                          "Property":  "Sessions codingame"

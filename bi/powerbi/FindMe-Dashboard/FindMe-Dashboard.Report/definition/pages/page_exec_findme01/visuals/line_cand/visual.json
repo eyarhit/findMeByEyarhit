@@ -33,12 +33,12 @@
                                                     "Y":  {
                                                               "projections":  [
                                                                                   {
-                                                                                      "queryRef":  "_Mesures BI.KPI Candidatures",
+                                                                                      "queryRef":  "MesuresBI.KPI Candidatures",
                                                                                       "field":  {
                                                                                                     "Measure":  {
                                                                                                                     "Expression":  {
                                                                                                                                        "SourceRef":  {
-                                                                                                                                                         "Entity":  "_Mesures BI"
+                                                                                                                                                         "Entity":  "MesuresBI"
                                                                                                                                                      }
                                                                                                                                    },
                                                                                                                     "Property":  "KPI Candidatures"

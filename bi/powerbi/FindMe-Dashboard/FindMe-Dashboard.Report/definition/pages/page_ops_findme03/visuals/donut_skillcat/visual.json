@@ -33,12 +33,12 @@
                                                     "Y":  {
                                                               "projections":  [
                                                                                   {
-                                                                                      "queryRef":  "_Mesures BI.Total usages",
+                                                                                      "queryRef":  "MesuresBI.Total usages",
                                                                                       "field":  {
                                                                                                     "Measure":  {
                                                                                                                     "Expression":  {
                                                                                                                                        "SourceRef":  {
-                                                                                                                                                         "Entity":  "_Mesures BI"
+                                                                                                                                                         "Entity":  "MesuresBI"
                                                                                                                                                      }
                                                                                                                                    },
                                                                                                                     "Property":  "Total usages"
