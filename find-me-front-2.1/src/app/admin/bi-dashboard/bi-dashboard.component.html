@@ -3,115 +3,70 @@
     <div>
       <h1>Business Intelligence Find-Me</h1>
       <p>
-        Entrepôt décisionnel <strong>findme_dw</strong> (schéma en étoile : dimensions + tables de faits).
-        L’ETL recharge les données depuis l’application ; Metabase interroge l’entrepôt, pas les bases OLTP directement.
+        Projet BI ESB : entrepôt <strong>findme_dw</strong> (étoile), alimentation <strong>Talend</strong>,
+        visualisation <strong>Power BI</strong>. Dimensions <strong>Temps</strong> et <strong>Localisation</strong>.
       </p>
     </div>
     <div class="bi-actions">
-      <span
-        class="status-badge"
-        [class.connected]="healthState === 'connected'"
-        [class.unavailable]="healthState === 'unavailable'">
-        <span class="dot"></span>
-        {{ healthMessage }}
-      </span>
-      <button type="button" class="open-btn" (click)="openMetabaseHome()">Console Metabase</button>
+      <button type="button" class="open-btn" (click)="openGuide()">Guide Power BI</button>
     </div>
   </header>
 
   <div class="alert warn" *ngIf="manifestError">{{ manifestError }}</div>
 
-  <div class="kpi-strip" *ngIf="isProvisioned">
+  <div class="kpi-strip" *ngIf="manifest">
     <div class="kpi">
-      <span class="kpi-value">{{ cardCount }}</span>
-      <span class="kpi-label">indicateurs</span>
+      <span class="kpi-value">Talend</span>
+      <span class="kpi-label">ETL {{ manifest.etl?.jobName }}</span>
     </div>
     <div class="kpi">
-      <span class="kpi-value">{{ tierDashboards.length }}</span>
-      <span class="kpi-label">dashboards Metabase</span>
+      <span class="kpi-value">Power BI</span>
+      <span class="kpi-label">{{ reports.length }} rapports</span>
     </div>
     <div class="kpi">
-      <span class="kpi-value">{{ tabs.length }}</span>
-      <span class="kpi-label">domaines métier</span>
+      <span class="kpi-value">{{ manifest.dimensions?.temps }}</span>
+      <span class="kpi-label">dimension Temps</span>
     </div>
-    <div class="kpi" *ngIf="manifest?.generatedAt as generatedAt">
-      <span class="kpi-value kpi-small">{{ generatedAt | date : 'short' }}</span>
-      <span class="kpi-label">dernier seed BI</span>
+    <div class="kpi">
+      <span class="kpi-value">{{ manifest.dimensions?.localisation }}</span>
+      <span class="kpi-label">dimension Localisation</span>
     </div>
   </div>
 
   <div class="connection-box">
     <button type="button" class="collapse-btn" (click)="toggleConnectionInfo()">
-      Paramètres & accès
+      Connexion Power BI Desktop & ETL
       <span>{{ showConnectionInfo ? '▲' : '▼' }}</span>
     </button>
-    <div *ngIf="showConnectionInfo" class="connection-content">
-      <p><strong>URL Metabase :</strong> {{ metabaseBaseUrl }}</p>
-      <p><strong>Admin Metabase :</strong> {{ manifest?.credentials?.metabaseAdminEmail || 'bi-admin@findme.local' }}</p>
-      <p><strong>MySQL lecture seule :</strong> {{ manifest?.credentials?.mysqlReadOnlyUser || 'findme_bi' }}</p>
-      <p class="hint">
-        Mot de passe admin : variable <code>METABASE_SETUP_PASSWORD</code> dans docker-compose.
-        Export PDF : dans Metabase → dashboard → menu → Exporter.
-      </p>
+    <div *ngIf="showConnectionInfo && manifest" class="connection-content">
+      <p><strong>MySQL :</strong> {{ manifest.mysql.host }}:{{ manifest.mysql.port }} / {{ manifest.mysql.database }}</p>
+      <p><strong>Utilisateur :</strong> {{ manifest.mysql.user }} ({{ manifest.mysql.passwordHint }})</p>
+      <p><strong>ETL :</strong> <code>{{ manifest.etl.command }}</code></p>
+      <p><strong>Guide :</strong> <a [href]="guideUrl" target="_blank" rel="noopener">{{ guideUrl }}</a></p>
+      <p class="hint">Créer les fichiers .pbix selon <code>bi/powerbi/reports/README.md</code></p>
     </div>
   </div>
 
-  <article class="dashboard-wrapper">
-    <h2>Tableaux de bord Metabase (3 niveaux)</h2>
-    <div class="tier-buttons" *ngIf="tierDashboards.length">
+  <article class="dashboard-wrapper" *ngIf="reports.length">
+    <h2>Rapports Power BI (3 niveaux)</h2>
+    <div class="tier-buttons">
       <button
-        *ngFor="let d of tierDashboards"
+        *ngFor="let r of reports"
         type="button"
         class="tier-btn"
-        [class.active]="selectedDashboardLevel === d.level"
-        (click)="selectDashboardLevel(d.level)">
-        {{ tierLabel(d.level) }}
+        [class.active]="selectedReportLevel === r.level"
+        (click)="selectReport(r.level)">
+        {{ tierLabel(r.level) }}
       </button>
     </div>
-    <div class="metabase-link-panel">
-      <p class="panel-lead">
-        Metabase n’autorise pas l’iframe par défaut (<code>frame-ancestors</code>). Ouvrez le dashboard
-        adapté à votre profil (Executive / Managérial / Opérationnel) pour la démo PFE ou l’export PDF.
-      </p>
-      <button
-        type="button"
-        class="open-btn primary"
-        [disabled]="!isProvisioned"
-        (click)="openDashboard()">
-        Ouvrir — {{ selectedTierDashboard?.name || 'dashboard' }}
-      </button>
-      <p class="muted-url">{{ selectedTierDashboard?.url }}</p>
+    <div class="metabase-link-panel" *ngIf="selectedReport as sr">
+      <h3>{{ sr.name }}</h3>
+      <p class="panel-lead">Fichier : <code>{{ sr.file }}</code></p>
+      <ul>
+        <li *ngFor="let p of sr.pages">{{ p }}</li>
+      </ul>
+      <p class="hint">Ouvrir Power BI Desktop → Se connecter à findme_dw → Importer les tables de faits et dimensions.</p>
+      <button type="button" class="open-btn primary" (click)="openGuide()">Voir le guide pas à pas</button>
     </div>
   </article>
-
-  <div class="bi-layout" *ngIf="tabs.length">
-    <aside class="tabs">
-      <button
-        *ngFor="let tab of tabs"
-        type="button"
-        class="tab-btn"
-        [class.active]="selectedTabKey === tab.key"
-        (click)="selectTab(tab.key)">
-        {{ tab.label }}
-        <span class="tab-count" *ngIf="tab.cardSlugs?.length">{{ tab.cardSlugs.length }}</span>
-      </button>
-    </aside>
-
-    <section class="reports">
-      <h2>{{ selectedTab.label }}</h2>
-      <p class="reports-lead" *ngIf="!selectedCards.length">Aucune carte pour cet onglet — relancez le seed BI.</p>
-      <div class="cards-grid">
-        <article class="report-card" *ngFor="let card of selectedCards">
-          <div class="card-head">
-            <h3>{{ card.title }}</h3>
-            <span class="chip">{{ card.db }}</span>
-          </div>
-          <p class="card-meta">Visualisation : {{ card.display }}</p>
-          <div class="card-actions">
-            <button type="button" class="card-open-btn" (click)="openCard(card)">Ouvrir dans Metabase</button>
-          </div>
-        </article>
-      </div>
-    </section>
-  </div>
 </section>

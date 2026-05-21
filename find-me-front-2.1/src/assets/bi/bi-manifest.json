@@ -1,17 +1,50 @@
 {
   "version": 2,
+  "stack": "talend-powerbi",
   "generatedAt": null,
-  "metabaseUrl": "http://localhost:3030",
-  "dashboard": {
-    "id": null,
-    "name": "Find-Me — BI complet",
-    "url": "http://localhost:3030"
+  "problematic": "Pilotage recrutement et missions ESN — plateforme Find-Me",
+  "powerBiGuideUrl": "http://localhost:8088",
+  "mysql": {
+    "host": "localhost",
+    "port": 3306,
+    "database": "findme_dw",
+    "user": "findme_bi",
+    "passwordHint": "findme_bi_readonly"
   },
-  "cards": [],
-  "tabs": [],
+  "etl": {
+    "tool": "Talend Open Studio",
+    "jobName": "FindMe_Load_DW",
+    "dockerService": "talend-etl",
+    "command": "docker compose run --rm talend-etl"
+  },
+  "reports": [
+    {
+      "level": "executive",
+      "name": "Find-Me — Vue direction",
+      "file": "bi/powerbi/reports/01_Executive.pbix",
+      "pages": ["KPI globaux", "Candidatures par mois", "Taux de conversion"]
+    },
+    {
+      "level": "managerial",
+      "name": "Find-Me — Pilotage RH",
+      "file": "bi/powerbi/reports/02_Managerial.pbix",
+      "pages": ["Missions par statut", "Top villes", "Compétences CV"]
+    },
+    {
+      "level": "operational",
+      "name": "Find-Me — Opérationnel",
+      "file": "bi/powerbi/reports/03_Operational.pbix",
+      "pages": ["Notifications", "Quiz", "Codingame"]
+    }
+  ],
+  "dimensions": {
+    "temps": "dim_date",
+    "localisation": "dim_localisation",
+    "utilisateur": "dim_user",
+    "mission": "dim_mission"
+  },
   "credentials": {
-    "metabaseAdminEmail": "bi-admin@findme.local",
-    "mysqlReadOnlyUser": "findme_bi"
-  },
-  "_note": "Fichier régénéré par metabase-seed (docker compose). Ne pas éditer les IDs à la main."
+    "mysqlReadOnlyUser": "findme_bi",
+    "powerBiNote": "Power BI Desktop → MySQL findme_dw (guide http://localhost:8088)"
+  }
 }

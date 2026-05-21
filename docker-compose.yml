@@ -191,31 +191,11 @@ services:
     ports:
       - "8000:8000"
 
-  # Sur http://localhost:3030 la console peut afficher : 503 sur /api/health (Metabase en "initializing")
-  # et 404 sur /app/instance-loading-page/img/*.png — comportement côté image Metabase, souvent cosmétique ; attendre la fin des migrations.
-  metabase:
-    image: metabase/metabase:latest
-    container_name: findme-metabase
-    restart: unless-stopped
-    environment:
-      MB_SITE_URL: http://localhost:3030
-      # JDBC explicite : MySQL 8.4 + driver MariaDB → allowPublicKeyRetrieval (sinon "RSA public key is not available").
-      MB_DB_TYPE: mysql
-      MB_DB_CONNECTION_URI: >-
-        jdbc:mysql://mysql:3306/metabase_app?user=metabase_app&password=FindMe_MetabaseApp_2026_xQ9&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
-      JAVA_OPTS: -Xmx1536m
-    ports:
-      - "3030:3000"
-    volumes:
-      - metabase_data:/metabase-data
-    depends_on:
-      mysql:
-        condition: service_healthy
-
-  bi-etl:
+  # --- BI PFE ESB : Talend (ETL) + Power BI (dashboards) — profil « bi » ---
+  talend-etl:
     profiles: ["bi"]
     build:
-      context: ./bi/bi_etl
+      context: ./bi/talend/docker
     restart: "no"
     environment:
       MYSQL_HOST: mysql
@@ -229,38 +209,32 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    # ETL lit les bases MySQL déjà persistées ; pas besoin d'attendre les microservices Java
 
-  metabase-seed:
+  powerbi-guide:
+    profiles: ["bi"]
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "8088:80"
+    volumes:
+      - ./bi/powerbi/www:/usr/share/nginx/html:ro
+
+  powerbi-seed:
     profiles: ["bi"]
     build:
-      context: ./bi/metabase
+      context: ./bi/powerbi
       dockerfile: Dockerfile.seed
     restart: "no"
     environment:
-      METABASE_URL: http://metabase:3000
-      METABASE_EXTERNAL_URL: http://localhost:3030
-      METABASE_SETUP_EMAIL: bi-admin@findme.local
-      METABASE_SETUP_PASSWORD: FindMe_BI_Auto_2026!xQ7vM2
-      METABASE_ADMIN_FIRST_NAME: FindMe
-      METABASE_ADMIN_LAST_NAME: BI
-      METABASE_SITE_NAME: Find-Me BI
-      BI_USE_STAR_SCHEMA: "true"
+      BI_MANIFEST_PATH: /output/bi-manifest.json
+      POWERBI_GUIDE_URL: http://localhost:8088
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
-      MYSQL_USER: findme_bi
-      MYSQL_PASSWORD: findme_bi_readonly
-      MYSQL_ROOT_USER: root
-      MYSQL_ROOT_PASSWORD: root
-      BI_MANIFEST_PATH: /output/bi-manifest.json
     volumes:
       - ./find-me-front-2.1/src/assets/bi:/output
     depends_on:
-      metabase:
-        condition: service_started
       mysql:
         condition: service_healthy
-    # ETL : lancer avant seed via scripts/docker-compose-up.cmd (compose run bi-etl)
 
   frontend:
     build:
@@ -270,7 +244,6 @@ services:
     ports:
       - "4200:80"
     volumes:
-      # Manifest BI régénéré par metabase-seed — visible sans rebuild frontend
       - ./find-me-front-2.1/src/assets/bi/bi-manifest.json:/usr/share/nginx/html/assets/bi/bi-manifest.json:ro
     depends_on:
       gateway-service:
@@ -291,4 +264,3 @@ services:
 volumes:
   mysql_data:
   minio_data:
-  metabase_data:
