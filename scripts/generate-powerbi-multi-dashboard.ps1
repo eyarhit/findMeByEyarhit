@@ -395,10 +395,7 @@ Write-Utf8NoBom (Join-Path $Base 'FindMe-Dashboard.pbip') @"
 {
   "`$schema": "https://developer.microsoft.com/json-schemas/fabric/pbip/pbipProperties/1.0.0/schema.json",
   "version": "1.0",
-  "artifacts": [
-    { "dataset": { "path": "$SmName" } },
-    { "report": { "path": "$RpName" } }
-  ],
+  "artifacts": [{ "report": { "path": "$RpName" } }],
   "settings": { "enableAutoRecovery": true }
 }
 "@
