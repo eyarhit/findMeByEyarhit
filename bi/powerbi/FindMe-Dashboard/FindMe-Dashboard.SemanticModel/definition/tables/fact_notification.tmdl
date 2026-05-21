@@ -1,6 +1,31 @@
 
 table fact_notification
-    lineageTag: a9abcdc8-2805-4d73-82f6-8b3cc65e4ca9
+    lineageTag: 14cfdbe0-5e37-4e40-94f1-c2bc79d9c2ae
+
+    column notification_key
+        dataType: int64
+        sourceColumn: notification_key
+        summarizeBy: none
+
+    column date_key
+        dataType: int64
+        sourceColumn: date_key
+        summarizeBy: none
+
+    column user_id_degen
+        dataType: string
+        sourceColumn: user_id_degen
+        summarizeBy: none
+
+    column is_read
+        dataType: int64
+        sourceColumn: is_read
+        summarizeBy: none
+
+    column notification_count
+        dataType: int64
+        sourceColumn: notification_count
+        summarizeBy: sum
 
     partition fact_notification = m
         mode: import

@@ -1,6 +1,46 @@
 
 table dim_user_scd2
-    lineageTag: b9097540-438f-4780-b1d7-047acc84eadb
+    lineageTag: bb950e7c-18a0-4c10-9240-dc58e56ed2bb
+
+    column user_scd_key
+        dataType: int64
+        sourceColumn: user_scd_key
+        summarizeBy: none
+
+    column user_id
+        dataType: int64
+        sourceColumn: user_id
+        summarizeBy: none
+
+    column role_name
+        dataType: string
+        sourceColumn: role_name
+        summarizeBy: none
+
+    column status_name
+        dataType: string
+        sourceColumn: status_name
+        summarizeBy: none
+
+    column country
+        dataType: string
+        sourceColumn: country
+        summarizeBy: none
+
+    column valid_from
+        dataType: dateTime
+        sourceColumn: valid_from
+        summarizeBy: none
+
+    column valid_to
+        dataType: dateTime
+        sourceColumn: valid_to
+        summarizeBy: none
+
+    column is_current
+        dataType: int64
+        sourceColumn: is_current
+        summarizeBy: none
 
     partition dim_user_scd2 = m
         mode: import

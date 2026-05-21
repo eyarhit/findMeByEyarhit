@@ -1,6 +1,36 @@
 
 table etl_run_log
-    lineageTag: e3643292-2ef3-45a3-b409-268d0a3d26b6
+    lineageTag: f0fede6f-f01c-4357-b0aa-cc8c23a08a38
+
+    column run_id
+        dataType: int64
+        sourceColumn: run_id
+        summarizeBy: none
+
+    column started_at
+        dataType: dateTime
+        sourceColumn: started_at
+        summarizeBy: none
+
+    column finished_at
+        dataType: dateTime
+        sourceColumn: finished_at
+        summarizeBy: none
+
+    column status
+        dataType: string
+        sourceColumn: status
+        summarizeBy: none
+
+    column rows_loaded
+        dataType: int64
+        sourceColumn: rows_loaded
+        summarizeBy: sum
+
+    column error_message
+        dataType: string
+        sourceColumn: error_message
+        summarizeBy: none
 
     partition etl_run_log = m
         mode: import

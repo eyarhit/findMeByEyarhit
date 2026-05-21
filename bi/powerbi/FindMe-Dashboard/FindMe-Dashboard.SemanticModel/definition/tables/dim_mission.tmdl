@@ -1,6 +1,51 @@
 
 table dim_mission
-    lineageTag: cb1cf2e5-abd1-4e96-9a5f-e5307b589d8e
+    lineageTag: 37f7cd02-b856-453b-b5ff-13b512a6d051
+
+    column mission_key
+        dataType: int64
+        sourceColumn: mission_key
+        summarizeBy: none
+
+    column mission_id
+        dataType: int64
+        sourceColumn: mission_id
+        summarizeBy: none
+
+    column status_mission
+        dataType: string
+        sourceColumn: status_mission
+        summarizeBy: none
+
+    column type_contrat
+        dataType: string
+        sourceColumn: type_contrat
+        summarizeBy: none
+
+    column is_remote
+        dataType: int64
+        sourceColumn: is_remote
+        summarizeBy: none
+
+    column ville
+        dataType: string
+        sourceColumn: ville
+        summarizeBy: none
+
+    column pays
+        dataType: string
+        sourceColumn: pays
+        summarizeBy: none
+
+    column mission_name
+        dataType: string
+        sourceColumn: mission_name
+        summarizeBy: none
+
+    column reference_code
+        dataType: string
+        sourceColumn: reference_code
+        summarizeBy: none
 
     partition dim_mission = m
         mode: import

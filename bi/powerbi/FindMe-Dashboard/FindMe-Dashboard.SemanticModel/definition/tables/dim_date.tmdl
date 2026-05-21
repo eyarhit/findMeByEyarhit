@@ -1,6 +1,51 @@
 
 table dim_date
-    lineageTag: e5336ec9-38ea-469a-bac3-464d683ec229
+    lineageTag: 884f675c-bffd-4c39-a646-2af7959b8c93
+
+    column date_key
+        dataType: int64
+        sourceColumn: date_key
+        summarizeBy: none
+
+    column full_date
+        dataType: dateTime
+        sourceColumn: full_date
+        summarizeBy: none
+
+    column year_num
+        dataType: int64
+        sourceColumn: year_num
+        summarizeBy: none
+
+    column month_num
+        dataType: int64
+        sourceColumn: month_num
+        summarizeBy: none
+
+    column quarter_num
+        dataType: int64
+        sourceColumn: quarter_num
+        summarizeBy: none
+
+    column month_name
+        dataType: string
+        sourceColumn: month_name
+        summarizeBy: none
+
+    column day_of_week
+        dataType: int64
+        sourceColumn: day_of_week
+        summarizeBy: none
+
+    column week_of_year
+        dataType: int64
+        sourceColumn: week_of_year
+        summarizeBy: none
+
+    column is_weekend
+        dataType: int64
+        sourceColumn: is_weekend
+        summarizeBy: none
 
     partition dim_date = m
         mode: import

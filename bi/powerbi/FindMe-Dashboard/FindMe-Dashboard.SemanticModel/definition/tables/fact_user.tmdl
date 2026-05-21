@@ -1,6 +1,16 @@
 
 table fact_user
-    lineageTag: 1309130a-b288-4877-a7e0-19b81339479e
+    lineageTag: f9f1c944-3b7d-45f6-81be-5947193a9fe5
+
+    column user_key
+        dataType: int64
+        sourceColumn: user_key
+        summarizeBy: none
+
+    column user_count
+        dataType: int64
+        sourceColumn: user_count
+        summarizeBy: sum
 
     partition fact_user = m
         mode: import

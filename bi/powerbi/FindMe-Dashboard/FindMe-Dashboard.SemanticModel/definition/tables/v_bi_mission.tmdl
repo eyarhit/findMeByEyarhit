@@ -1,6 +1,61 @@
 
 table v_bi_mission
-    lineageTag: a4cb4d8b-a53b-4c73-b8bc-229f61d9391e
+    lineageTag: 08430a11-9f4a-427a-a24f-1a453eb1d024
+
+    column full_date
+        dataType: dateTime
+        sourceColumn: full_date
+        summarizeBy: none
+
+    column year_num
+        dataType: int64
+        sourceColumn: year_num
+        summarizeBy: none
+
+    column month_num
+        dataType: int64
+        sourceColumn: month_num
+        summarizeBy: none
+
+    column mission_name
+        dataType: string
+        sourceColumn: mission_name
+        summarizeBy: none
+
+    column status_mission
+        dataType: string
+        sourceColumn: status_mission
+        summarizeBy: none
+
+    column type_contrat
+        dataType: string
+        sourceColumn: type_contrat
+        summarizeBy: none
+
+    column is_remote
+        dataType: int64
+        sourceColumn: is_remote
+        summarizeBy: none
+
+    column ville
+        dataType: string
+        sourceColumn: ville
+        summarizeBy: none
+
+    column pays
+        dataType: string
+        sourceColumn: pays
+        summarizeBy: none
+
+    column mission_count
+        dataType: int64
+        sourceColumn: mission_count
+        summarizeBy: sum
+
+    column publisher_user_id
+        dataType: int64
+        sourceColumn: publisher_user_id
+        summarizeBy: none
 
     partition v_bi_mission = m
         mode: import

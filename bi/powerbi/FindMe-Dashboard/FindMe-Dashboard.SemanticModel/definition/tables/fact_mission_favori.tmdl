@@ -1,6 +1,31 @@
 
 table fact_mission_favori
-    lineageTag: 46d619d8-cdb3-43d8-929c-b5702feed24a
+    lineageTag: 3a6426a1-4eb2-4fa6-b7d1-8f434262eaca
+
+    column favori_key
+        dataType: int64
+        sourceColumn: favori_key
+        summarizeBy: none
+
+    column date_key
+        dataType: int64
+        sourceColumn: date_key
+        summarizeBy: none
+
+    column mission_key
+        dataType: int64
+        sourceColumn: mission_key
+        summarizeBy: none
+
+    column user_type
+        dataType: string
+        sourceColumn: user_type
+        summarizeBy: none
+
+    column favori_count
+        dataType: int64
+        sourceColumn: favori_count
+        summarizeBy: sum
 
     partition fact_mission_favori = m
         mode: import

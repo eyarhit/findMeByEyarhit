@@ -1,6 +1,51 @@
 
 table fact_candidature
-    lineageTag: c32abd7d-26c8-4c7a-a241-d0fbc47b9b37
+    lineageTag: 5c494446-5446-41f8-8723-ed647a08a23f
+
+    column candidature_key
+        dataType: int64
+        sourceColumn: candidature_key
+        summarizeBy: none
+
+    column date_key
+        dataType: int64
+        sourceColumn: date_key
+        summarizeBy: none
+
+    column mission_key
+        dataType: int64
+        sourceColumn: mission_key
+        summarizeBy: none
+
+    column candidat_user_id
+        dataType: int64
+        sourceColumn: candidat_user_id
+        summarizeBy: none
+
+    column statut_candidature
+        dataType: string
+        sourceColumn: statut_candidature
+        summarizeBy: none
+
+    column candidature_count
+        dataType: int64
+        sourceColumn: candidature_count
+        summarizeBy: sum
+
+    column is_accepted
+        dataType: int64
+        sourceColumn: is_accepted
+        summarizeBy: sum
+
+    column is_refused
+        dataType: int64
+        sourceColumn: is_refused
+        summarizeBy: sum
+
+    column is_en_cours
+        dataType: int64
+        sourceColumn: is_en_cours
+        summarizeBy: sum
 
     partition fact_candidature = m
         mode: import

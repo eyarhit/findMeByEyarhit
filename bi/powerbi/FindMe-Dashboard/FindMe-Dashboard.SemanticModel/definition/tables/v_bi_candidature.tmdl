@@ -1,6 +1,86 @@
 
 table v_bi_candidature
-    lineageTag: a606788f-4984-43a6-a828-9389e2101f50
+    lineageTag: f190f41b-7537-4118-9696-9dd23f78a1fd
+
+    column full_date
+        dataType: dateTime
+        sourceColumn: full_date
+        summarizeBy: none
+
+    column year_num
+        dataType: int64
+        sourceColumn: year_num
+        summarizeBy: none
+
+    column month_num
+        dataType: int64
+        sourceColumn: month_num
+        summarizeBy: none
+
+    column month_name
+        dataType: string
+        sourceColumn: month_name
+        summarizeBy: none
+
+    column mission_name
+        dataType: string
+        sourceColumn: mission_name
+        summarizeBy: none
+
+    column reference_code
+        dataType: string
+        sourceColumn: reference_code
+        summarizeBy: none
+
+    column status_mission
+        dataType: string
+        sourceColumn: status_mission
+        summarizeBy: none
+
+    column type_contrat
+        dataType: string
+        sourceColumn: type_contrat
+        summarizeBy: none
+
+    column ville
+        dataType: string
+        sourceColumn: ville
+        summarizeBy: none
+
+    column pays
+        dataType: string
+        sourceColumn: pays
+        summarizeBy: none
+
+    column statut_candidature
+        dataType: string
+        sourceColumn: statut_candidature
+        summarizeBy: none
+
+    column candidature_count
+        dataType: int64
+        sourceColumn: candidature_count
+        summarizeBy: sum
+
+    column is_accepted
+        dataType: int64
+        sourceColumn: is_accepted
+        summarizeBy: sum
+
+    column is_refused
+        dataType: int64
+        sourceColumn: is_refused
+        summarizeBy: sum
+
+    column is_en_cours
+        dataType: int64
+        sourceColumn: is_en_cours
+        summarizeBy: sum
+
+    column candidat_user_id
+        dataType: int64
+        sourceColumn: candidat_user_id
+        summarizeBy: none
 
     partition v_bi_candidature = m
         mode: import

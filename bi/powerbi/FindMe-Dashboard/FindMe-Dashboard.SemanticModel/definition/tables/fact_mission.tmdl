@@ -1,6 +1,26 @@
 
 table fact_mission
-    lineageTag: d2a557db-a771-48db-a2c2-2e73df6a1050
+    lineageTag: 85bb0cd3-46bb-48bf-b174-132f3e4dc4ca
+
+    column mission_key
+        dataType: int64
+        sourceColumn: mission_key
+        summarizeBy: none
+
+    column date_key
+        dataType: int64
+        sourceColumn: date_key
+        summarizeBy: none
+
+    column publisher_user_id
+        dataType: int64
+        sourceColumn: publisher_user_id
+        summarizeBy: none
+
+    column mission_count
+        dataType: int64
+        sourceColumn: mission_count
+        summarizeBy: sum
 
     partition fact_mission = m
         mode: import

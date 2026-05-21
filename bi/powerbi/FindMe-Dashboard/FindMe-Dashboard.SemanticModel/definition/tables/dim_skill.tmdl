@@ -1,6 +1,26 @@
 
 table dim_skill
-    lineageTag: 273046ea-272a-4c13-80bf-a88663edf8ef
+    lineageTag: c1952353-a570-4329-820d-3cc648cbdd15
+
+    column skill_key
+        dataType: int64
+        sourceColumn: skill_key
+        summarizeBy: none
+
+    column skill_label
+        dataType: string
+        sourceColumn: skill_label
+        summarizeBy: none
+
+    column skill_category
+        dataType: string
+        sourceColumn: skill_category
+        summarizeBy: none
+
+    column usage_count
+        dataType: int64
+        sourceColumn: usage_count
+        summarizeBy: sum
 
     partition dim_skill = m
         mode: import

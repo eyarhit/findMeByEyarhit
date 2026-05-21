@@ -1,6 +1,41 @@
 
 table fact_codingame
-    lineageTag: bc1059d1-edfe-44b6-9f2f-5de9f9fb3f1f
+    lineageTag: 174b9fc8-720c-4fe7-a586-b600a524ff50
+
+    column codingame_key
+        dataType: int64
+        sourceColumn: codingame_key
+        summarizeBy: none
+
+    column date_key
+        dataType: int64
+        sourceColumn: date_key
+        summarizeBy: none
+
+    column user_key
+        dataType: int64
+        sourceColumn: user_key
+        summarizeBy: none
+
+    column framework_name
+        dataType: string
+        sourceColumn: framework_name
+        summarizeBy: none
+
+    column score
+        dataType: double
+        sourceColumn: score
+        summarizeBy: sum
+
+    column total_score
+        dataType: double
+        sourceColumn: total_score
+        summarizeBy: sum
+
+    column session_count
+        dataType: int64
+        sourceColumn: session_count
+        summarizeBy: sum
 
     partition fact_codingame = m
         mode: import

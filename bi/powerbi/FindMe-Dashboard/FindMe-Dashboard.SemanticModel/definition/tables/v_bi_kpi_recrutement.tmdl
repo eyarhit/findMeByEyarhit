@@ -1,6 +1,36 @@
 
 table v_bi_kpi_recrutement
-    lineageTag: 092e7fc4-3f35-4b84-a52d-efddf0300727
+    lineageTag: f8b58031-0f95-4797-bf0d-9b2c57422d1f
+
+    column year_num
+        dataType: int64
+        sourceColumn: year_num
+        summarizeBy: none
+
+    column month_num
+        dataType: int64
+        sourceColumn: month_num
+        summarizeBy: none
+
+    column candidatures
+        dataType: int64
+        sourceColumn: candidatures
+        summarizeBy: sum
+
+    column acceptees
+        dataType: int64
+        sourceColumn: acceptees
+        summarizeBy: sum
+
+    column refusees
+        dataType: int64
+        sourceColumn: refusees
+        summarizeBy: sum
+
+    column taux_acceptation_pct
+        dataType: double
+        sourceColumn: taux_acceptation_pct
+        summarizeBy: average
 
     partition v_bi_kpi_recrutement = m
         mode: import

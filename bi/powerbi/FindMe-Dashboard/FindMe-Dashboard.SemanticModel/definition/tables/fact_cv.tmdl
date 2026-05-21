@@ -1,6 +1,31 @@
 
 table fact_cv
-    lineageTag: f70b2562-ddba-47b6-9811-de147b9296a5
+    lineageTag: a886c933-2e95-4f68-8dc1-626a8734289c
+
+    column cv_key
+        dataType: int64
+        sourceColumn: cv_key
+        summarizeBy: none
+
+    column date_key
+        dataType: int64
+        sourceColumn: date_key
+        summarizeBy: none
+
+    column user_key
+        dataType: int64
+        sourceColumn: user_key
+        summarizeBy: none
+
+    column cv_count
+        dataType: int64
+        sourceColumn: cv_count
+        summarizeBy: sum
+
+    column steps_completed
+        dataType: int64
+        sourceColumn: steps_completed
+        summarizeBy: sum
 
     partition fact_cv = m
         mode: import

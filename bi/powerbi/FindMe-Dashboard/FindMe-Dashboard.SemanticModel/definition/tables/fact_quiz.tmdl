@@ -1,6 +1,36 @@
 
 table fact_quiz
-    lineageTag: ecfaab90-2837-4af2-b197-ca639d6d11cd
+    lineageTag: e3c5a613-c542-4581-96bc-38eeba88a327
+
+    column quiz_key
+        dataType: int64
+        sourceColumn: quiz_key
+        summarizeBy: none
+
+    column date_key
+        dataType: int64
+        sourceColumn: date_key
+        summarizeBy: none
+
+    column user_key
+        dataType: int64
+        sourceColumn: user_key
+        summarizeBy: none
+
+    column score
+        dataType: int64
+        sourceColumn: score
+        summarizeBy: sum
+
+    column passed
+        dataType: int64
+        sourceColumn: passed
+        summarizeBy: none
+
+    column attempt_count
+        dataType: int64
+        sourceColumn: attempt_count
+        summarizeBy: sum
 
     partition fact_quiz = m
         mode: import

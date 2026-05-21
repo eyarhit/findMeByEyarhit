@@ -1,6 +1,36 @@
 
 table dim_user
-    lineageTag: 05b48e4a-7220-4c8c-a44a-ffe1dd744e41
+    lineageTag: da9d8715-a056-47f9-8157-2be6fa067259
+
+    column user_key
+        dataType: int64
+        sourceColumn: user_key
+        summarizeBy: none
+
+    column user_id
+        dataType: int64
+        sourceColumn: user_id
+        summarizeBy: none
+
+    column role_name
+        dataType: string
+        sourceColumn: role_name
+        summarizeBy: none
+
+    column status_name
+        dataType: string
+        sourceColumn: status_name
+        summarizeBy: none
+
+    column country
+        dataType: string
+        sourceColumn: country
+        summarizeBy: none
+
+    column sexe
+        dataType: string
+        sourceColumn: sexe
+        summarizeBy: none
 
     partition dim_user = m
         mode: import

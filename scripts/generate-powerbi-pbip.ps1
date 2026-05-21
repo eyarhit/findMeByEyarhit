@@ -24,6 +24,179 @@ $tables = @(
     "v_bi_candidature", "v_bi_mission", "v_bi_kpi_recrutement"
 )
 
+# Colonnes TMDL (obligatoires pour que le volet Donnees et les visuels PBIR fonctionnent)
+function C([string]$Name, [string]$Type = 'string', [string]$Sum = 'none') {
+    [pscustomobject]@{ Name = $Name; Type = $Type; Sum = $Sum }
+}
+
+$tableColumns = @{
+    dim_date = @(
+        C 'date_key' 'int64' 'none'
+        C 'full_date' 'dateTime' 'none'
+        C 'year_num' 'int64' 'none'
+        C 'month_num' 'int64' 'none'
+        C 'quarter_num' 'int64' 'none'
+        C 'month_name' 'string' 'none'
+        C 'day_of_week' 'int64' 'none'
+        C 'week_of_year' 'int64' 'none'
+        C 'is_weekend' 'int64' 'none'
+    )
+    dim_user = @(
+        C 'user_key' 'int64' 'none'
+        C 'user_id' 'int64' 'none'
+        C 'role_name' 'string' 'none'
+        C 'status_name' 'string' 'none'
+        C 'country' 'string' 'none'
+        C 'sexe' 'string' 'none'
+    )
+    dim_user_scd2 = @(
+        C 'user_scd_key' 'int64' 'none'
+        C 'user_id' 'int64' 'none'
+        C 'role_name' 'string' 'none'
+        C 'status_name' 'string' 'none'
+        C 'country' 'string' 'none'
+        C 'valid_from' 'dateTime' 'none'
+        C 'valid_to' 'dateTime' 'none'
+        C 'is_current' 'int64' 'none'
+    )
+    dim_mission = @(
+        C 'mission_key' 'int64' 'none'
+        C 'mission_id' 'int64' 'none'
+        C 'status_mission' 'string' 'none'
+        C 'type_contrat' 'string' 'none'
+        C 'is_remote' 'int64' 'none'
+        C 'ville' 'string' 'none'
+        C 'pays' 'string' 'none'
+        C 'mission_name' 'string' 'none'
+        C 'reference_code' 'string' 'none'
+    )
+    dim_skill = @(
+        C 'skill_key' 'int64' 'none'
+        C 'skill_label' 'string' 'none'
+        C 'skill_category' 'string' 'none'
+        C 'usage_count' 'int64' 'sum'
+    )
+    fact_user = @(
+        C 'user_key' 'int64' 'none'
+        C 'user_count' 'int64' 'sum'
+    )
+    fact_notification = @(
+        C 'notification_key' 'int64' 'none'
+        C 'date_key' 'int64' 'none'
+        C 'user_id_degen' 'string' 'none'
+        C 'is_read' 'int64' 'none'
+        C 'notification_count' 'int64' 'sum'
+    )
+    fact_mission = @(
+        C 'mission_key' 'int64' 'none'
+        C 'date_key' 'int64' 'none'
+        C 'publisher_user_id' 'int64' 'none'
+        C 'mission_count' 'int64' 'sum'
+    )
+    fact_candidature = @(
+        C 'candidature_key' 'int64' 'none'
+        C 'date_key' 'int64' 'none'
+        C 'mission_key' 'int64' 'none'
+        C 'candidat_user_id' 'int64' 'none'
+        C 'statut_candidature' 'string' 'none'
+        C 'candidature_count' 'int64' 'sum'
+        C 'is_accepted' 'int64' 'sum'
+        C 'is_refused' 'int64' 'sum'
+        C 'is_en_cours' 'int64' 'sum'
+    )
+    fact_mission_favori = @(
+        C 'favori_key' 'int64' 'none'
+        C 'date_key' 'int64' 'none'
+        C 'mission_key' 'int64' 'none'
+        C 'user_type' 'string' 'none'
+        C 'favori_count' 'int64' 'sum'
+    )
+    fact_cv = @(
+        C 'cv_key' 'int64' 'none'
+        C 'date_key' 'int64' 'none'
+        C 'user_key' 'int64' 'none'
+        C 'cv_count' 'int64' 'sum'
+        C 'steps_completed' 'int64' 'sum'
+    )
+    fact_quiz = @(
+        C 'quiz_key' 'int64' 'none'
+        C 'date_key' 'int64' 'none'
+        C 'user_key' 'int64' 'none'
+        C 'score' 'int64' 'sum'
+        C 'passed' 'int64' 'none'
+        C 'attempt_count' 'int64' 'sum'
+    )
+    fact_codingame = @(
+        C 'codingame_key' 'int64' 'none'
+        C 'date_key' 'int64' 'none'
+        C 'user_key' 'int64' 'none'
+        C 'framework_name' 'string' 'none'
+        C 'score' 'double' 'sum'
+        C 'total_score' 'double' 'sum'
+        C 'session_count' 'int64' 'sum'
+    )
+    etl_run_log = @(
+        C 'run_id' 'int64' 'none'
+        C 'started_at' 'dateTime' 'none'
+        C 'finished_at' 'dateTime' 'none'
+        C 'status' 'string' 'none'
+        C 'rows_loaded' 'int64' 'sum'
+        C 'error_message' 'string' 'none'
+    )
+    v_bi_candidature = @(
+        C 'full_date' 'dateTime' 'none'
+        C 'year_num' 'int64' 'none'
+        C 'month_num' 'int64' 'none'
+        C 'month_name' 'string' 'none'
+        C 'mission_name' 'string' 'none'
+        C 'reference_code' 'string' 'none'
+        C 'status_mission' 'string' 'none'
+        C 'type_contrat' 'string' 'none'
+        C 'ville' 'string' 'none'
+        C 'pays' 'string' 'none'
+        C 'statut_candidature' 'string' 'none'
+        C 'candidature_count' 'int64' 'sum'
+        C 'is_accepted' 'int64' 'sum'
+        C 'is_refused' 'int64' 'sum'
+        C 'is_en_cours' 'int64' 'sum'
+        C 'candidat_user_id' 'int64' 'none'
+    )
+    v_bi_mission = @(
+        C 'full_date' 'dateTime' 'none'
+        C 'year_num' 'int64' 'none'
+        C 'month_num' 'int64' 'none'
+        C 'mission_name' 'string' 'none'
+        C 'status_mission' 'string' 'none'
+        C 'type_contrat' 'string' 'none'
+        C 'is_remote' 'int64' 'none'
+        C 'ville' 'string' 'none'
+        C 'pays' 'string' 'none'
+        C 'mission_count' 'int64' 'sum'
+        C 'publisher_user_id' 'int64' 'none'
+    )
+    v_bi_kpi_recrutement = @(
+        C 'year_num' 'int64' 'none'
+        C 'month_num' 'int64' 'none'
+        C 'candidatures' 'int64' 'sum'
+        C 'acceptees' 'int64' 'sum'
+        C 'refusees' 'int64' 'sum'
+        C 'taux_acceptation_pct' 'double' 'average'
+    )
+}
+
+function Format-TmdlColumns([array]$columns) {
+    if (-not $columns -or $columns.Count -eq 0) { return '' }
+    $lines = New-Object System.Collections.Generic.List[string]
+    foreach ($col in $columns) {
+        [void]$lines.Add("    column $($col.Name)")
+        [void]$lines.Add("        dataType: $($col.Type)")
+        [void]$lines.Add("        sourceColumn: $($col.Name)")
+        [void]$lines.Add("        summarizeBy: $($col.Sum)")
+        [void]$lines.Add('')
+    }
+    return ($lines -join "`n")
+}
+
 function New-Dir($p) {
     if (-not (Test-Path $p)) { New-Item -ItemType Directory -Path $p -Force | Out-Null }
 }
@@ -90,11 +263,13 @@ $refs
 
 foreach ($t in $tables) {
     $tag = [guid]::NewGuid().ToString()
+    $colBlock = Format-TmdlColumns $tableColumns[$t]
     @"
 
 table $t
     lineageTag: $tag
 
+$colBlock
     partition $t = m
         mode: import
         source =
