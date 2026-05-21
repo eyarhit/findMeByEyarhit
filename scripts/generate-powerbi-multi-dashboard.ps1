@@ -311,6 +311,14 @@ $reportJson = @'
 '@
 Write-Utf8NoBom (Join-Path $Rp 'definition\report.json') $reportJson
 
+$versionJson = @'
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/versionMetadata/1.0.0/schema.json",
+  "version": "2.0.0"
+}
+'@
+Write-Utf8NoBom (Join-Path $Rp 'definition\version.json') $versionJson
+
 # definition.pbir
 $pbir = @"
 {
