@@ -498,17 +498,25 @@ def load_fact_codingame(cur, src, user_map: dict[int, int]) -> None:
     print(f"fact_codingame : {n} lignes")
 
 
-def _existing_dw_tables(conn) -> set[str]:
-    with conn.cursor() as cur:
-        cur.execute(
-            """
-            SELECT LOWER(table_name) AS table_name
-            FROM information_schema.tables
-            WHERE table_schema = %s
-            """,
-            (DW,),
-        )
-        return {row["table_name"] for row in cur.fetchall()}
+def _row_value(row: dict) -> str:
+    """DictCursor : clé variable selon MySQL (table_name, TABLE_NAME, Tables_in_findme_dw)."""
+    return str(next(iter(row.values()))).lower()
+
+
+def _existing_dw_tables() -> set[str]:
+    """Liste les tables de findme_dw (SHOW TABLES, plus fiable que information_schema multi-connexion)."""
+    try:
+        dw_conn = connect(DW)
+    except pymysql.err.OperationalError as exc:
+        if exc.args and exc.args[0] == 1049:
+            return set()
+        raise
+    try:
+        with dw_conn.cursor() as cur:
+            cur.execute("SHOW TABLES")
+            return {_row_value(row) for row in cur.fetchall()}
+    finally:
+        dw_conn.close()
 
 
 def _strip_sql_comments(sql: str) -> str:
@@ -549,17 +557,41 @@ def _apply_sql_file(path: Path, label: str) -> None:
     try:
         with dw_conn.cursor() as cur:
             cur.execute("SET FOREIGN_KEY_CHECKS = 0")
-            for stmt in statements:
+            for i, stmt in enumerate(statements, 1):
+                preview = " ".join(stmt.split()[:4])
                 try:
                     cur.execute(stmt)
-                except pymysql.err.ProgrammingError as exc:
-                    if exc.args[0] not in (1050, 1061):
-                        raise
+                except pymysql.err.MySQLError as exc:
+                    code = exc.args[0] if exc.args else 0
+                    if code in (1050, 1061):
+                        continue
+                    print(
+                        f"ERREUR SQL [{i}/{len(statements)}] {preview}: {exc}",
+                        file=sys.stderr,
+                    )
+                    raise
             cur.execute("SET FOREIGN_KEY_CHECKS = 1")
         dw_conn.commit()
-        print(f"Schéma findme_dw : {label} ({path.name}, {len(statements)} requêtes)")
+        created = _existing_dw_tables()
+        print(
+            f"Schéma findme_dw : {label} ({path.name}, {len(statements)} requêtes, "
+            f"{len(created)} tables/vues)"
+        )
     finally:
         dw_conn.close()
+
+
+def _reset_dw_database(conn) -> None:
+    print("findme_dw : réinitialisation (schéma incohérent détecté)")
+    with conn.cursor() as cur:
+        cur.execute(f"DROP DATABASE IF EXISTS `{DW}`")
+        cur.execute(f"CREATE DATABASE `{DW}`")
+    conn.commit()
+
+
+def _missing_required_tables() -> list[str]:
+    present = _existing_dw_tables()
+    return [t for t in REQUIRED_DW_TABLES if t not in present]
 
 
 def ensure_dw_schema(conn) -> None:
@@ -567,26 +599,34 @@ def ensure_dw_schema(conn) -> None:
     with conn.cursor() as cur:
         cur.execute(f"CREATE DATABASE IF NOT EXISTS `{DW}`")
     conn.commit()
-    present = _existing_dw_tables(conn)
-    missing = [t for t in REQUIRED_DW_TABLES if t not in present]
+
+    missing = _missing_required_tables()
     if not missing:
         print("findme_dw : schéma complet")
         return
+
     print(f"findme_dw : tables manquantes → {', '.join(missing)}")
+    present = _existing_dw_tables()
     if "dim_date" not in present:
         _apply_sql_file(Path(SCHEMA_SQL), "DDL complet")
     else:
         _apply_sql_file(Path(PATCH_SQL), "patch")
-        still = [t for t in REQUIRED_DW_TABLES if t not in _existing_dw_tables(conn)]
-        if still:
-            print(f"findme_dw : complément DDL complet pour {still}")
+        if _missing_required_tables():
+            print(f"findme_dw : complément DDL pour {_missing_required_tables()}")
             _apply_sql_file(Path(SCHEMA_SQL), "complément")
-    present_after = _existing_dw_tables(conn)
-    still_missing = [t for t in REQUIRED_DW_TABLES if t not in present_after]
+
+    if _missing_required_tables():
+        _reset_dw_database(conn)
+        _apply_sql_file(Path(SCHEMA_SQL), "DDL complet (reset)")
+
+    still_missing = _missing_required_tables()
     if still_missing:
+        present_now = sorted(_existing_dw_tables())
         raise RuntimeError(
-            f"Schéma findme_dw incomplet après DDL : {', '.join(still_missing)}"
+            f"Schéma findme_dw incomplet après DDL : {', '.join(still_missing)}. "
+            f"Tables présentes : {present_now or '(aucune)'}"
         )
+    print("findme_dw : schéma prêt")
 
 
 def _etl_log_start(cur) -> int:

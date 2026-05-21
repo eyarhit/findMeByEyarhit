@@ -208,6 +208,13 @@ docker compose run --rm bi-etl
 
 Si ça échoue encore, voir la dernière ligne `ERREUR ETL:` dans les logs.
 
+Message `Schéma findme_dw incomplet après DDL` : l’ETL récent **réinitialise automatiquement** `findme_dw` une fois. Sinon, à la main :
+
+```cmd
+docker exec -i findme-mysql mysql -uroot -proot -e "DROP DATABASE IF EXISTS findme_dw;"
+docker compose run --rm bi-etl
+```
+
 **Contournement pour démarrer l’app sans attendre l’ETL** (BI vide temporairement) :
 
 ```cmd
