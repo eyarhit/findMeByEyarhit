@@ -213,10 +213,17 @@ docker compose run --rm metabase-seed
 
 ### ETL : `Cannot delete or update a parent row` (FK `fact_cv` → `dim_user`)
 
-Relancer après `git pull` (ordre des DELETE corrigé) :
+**Cause :** ancienne image Docker (`load_star_schema.py` ligne 143 = `DELETE dim_user` sans vider `fact_cv`).
 
 ```cmd
-docker compose build bi-etl
+git pull
+scripts\fix-bi-mysql.cmd
+```
+
+Vérifier dans les logs : `build ETL : 852bbf6-fk-grants`. Si cette ligne **n’apparaît pas**, l’image n’a pas été reconstruite :
+
+```cmd
+docker compose build --no-cache bi-etl
 docker compose run --rm bi-etl
 ```
 

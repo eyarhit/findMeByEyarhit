@@ -5,8 +5,10 @@ echo === Demarrage services (sans ETL BI) ===
 docker compose up -d %*
 if errorlevel 1 exit /b 1
 echo.
-echo === ETL findme_dw ===
-docker compose build bi-etl
+echo === GRANT MySQL BI ===
+docker exec -i findme-mysql mysql -uroot -proot -e "GRANT SELECT ON findme_dw.* TO 'findme_bi'@'%%'; FLUSH PRIVILEGES;" 2>nul
+echo === ETL findme_dw (rebuild image) ===
+docker compose build --no-cache bi-etl
 docker compose run --rm bi-etl
 if errorlevel 1 (
   echo ERREUR bi-etl. Logs : docker compose logs bi-etl

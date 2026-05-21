@@ -250,6 +250,8 @@ services:
       MYSQL_PORT: 3306
       MYSQL_USER: findme_bi
       MYSQL_PASSWORD: findme_bi_readonly
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: root
       BI_MANIFEST_PATH: /output/bi-manifest.json
     volumes:
       - ./find-me-front-2.1/src/assets/bi:/output

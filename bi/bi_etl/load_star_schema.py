@@ -20,6 +20,7 @@ MYSQL_USER = os.environ.get("MYSQL_ETL_USER", "root")
 MYSQL_PASSWORD = os.environ.get("MYSQL_ETL_PASSWORD", "root")
 
 DW = "findme_dw"
+ETL_BUILD = "852bbf6-fk-grants"  # affiché au démarrage — vérifier après docker compose build bi-etl
 UNKNOWN_DATE_KEY = 19000101
 SCHEMA_SQL = os.environ.get("DW_SCHEMA_SQL", "/ddl/schema.sql")
 PATCH_SQL = os.environ.get("DW_PATCH_SQL", "/ddl/migrations/001_patch_etl_log_scd2.sql")
@@ -740,6 +741,7 @@ def _etl_log_finish(cur, run_id: int, status: str, rows: int | None = None, err:
 
 def main() -> None:
     print("ETL Find-Me → findme_dw (schéma en étoile)", flush=True)
+    print(f"  build ETL  : {ETL_BUILD}", flush=True)
     print(f"  schema DDL : {SCHEMA_SQL} (exists={Path(SCHEMA_SQL).is_file()})", flush=True)
     wait_for_mysql()
     root = connect()

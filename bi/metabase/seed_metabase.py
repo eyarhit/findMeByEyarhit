@@ -14,6 +14,9 @@ from pathlib import Path
 
 import requests
 
+MYSQL_ROOT_USER = os.environ.get("MYSQL_ROOT_USER", "root")
+MYSQL_ROOT_PASSWORD = os.environ.get("MYSQL_ROOT_PASSWORD", "root")
+
 MB_URL = os.environ.get("METABASE_URL", "http://metabase:3000").rstrip("/")
 MB_EXTERNAL = os.environ.get("METABASE_EXTERNAL_URL", "http://localhost:3030").rstrip("/")
 MYSQL_HOST = os.environ.get("MYSQL_HOST", "mysql")
@@ -812,7 +815,33 @@ def find_existing_tier_dashboards(sess: requests.Session, session_id: str) -> li
     return found
 
 
+def ensure_mysql_grants() -> None:
+    """findme_bi doit lire findme_dw (volumes MySQL créés avant le GRANT)."""
+    try:
+        import pymysql
+    except ImportError:
+        print("ATTENTION: pymysql absent — GRANT findme_dw ignoré", file=sys.stderr)
+        return
+    try:
+        conn = pymysql.connect(
+            host=MYSQL_HOST,
+            port=MYSQL_PORT,
+            user=MYSQL_ROOT_USER,
+            password=MYSQL_ROOT_PASSWORD,
+            charset="utf8mb4",
+        )
+        with conn.cursor() as cur:
+            cur.execute("GRANT SELECT ON findme_dw.* TO 'findme_bi'@'%'")
+            cur.execute("FLUSH PRIVILEGES")
+        conn.commit()
+        conn.close()
+        print("MySQL : findme_bi → SELECT sur findme_dw")
+    except Exception as exc:
+        print(f"ATTENTION: GRANT findme_dw échoué ({exc})", file=sys.stderr)
+
+
 def main() -> None:
+    ensure_mysql_grants()
     sess = requests.Session()
     wait_for_metabase(sess)
     time.sleep(2)
