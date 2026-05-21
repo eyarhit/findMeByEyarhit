@@ -1,6 +1,6 @@
 
 table fact_candidature
-    lineageTag: f6b08fb6-ce75-45f0-929e-7606f8f0a5a2
+    lineageTag: c32abd7d-26c8-4c7a-a241-d0fbc47b9b37
 
     partition fact_candidature = m
         mode: import

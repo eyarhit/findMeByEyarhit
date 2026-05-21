@@ -30,12 +30,13 @@ ONE_COMMANDE_POWERBI.cmd
 
 **Premiere ouverture seulement** : identifiants `findme_bi` / `findme_bi_readonly` puis **Actualiser**.
 
-Pages :
-| Page | Contenu |
-|------|---------|
-| 01 Executive | KPI candidatures, acceptees, taux + tableau KPI |
-| 02 Managerial | Barres missions / statuts + tableau candidatures |
-| 03 Operationnel | KPI users/CV/notifications + tableaux |
+Pages (generees automatiquement — rien a configurer) :
+
+| Page | KPI (cartes) | Graphiques | Tableau detail | Filtres (segments) |
+|------|--------------|------------|----------------|-------------------|
+| **01 Executive** | Candidatures, acceptees, taux % | Courbe mensuelle, donut | KPI par mois | Annee (`dim_date`) |
+| **02 Managerial** | — | Barres missions/statuts, colonnes statut mission | Candidatures par mission | Statut, annee |
+| **03 Operationnel** | Users, CV, notifications, missions | Barres competences | Notifications + CV | Lu / non lu |
 
 **Publier le modele** (eyarh, une fois apres avoir finalise le rapport) :
 

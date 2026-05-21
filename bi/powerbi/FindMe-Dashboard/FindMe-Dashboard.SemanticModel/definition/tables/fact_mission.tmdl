@@ -1,6 +1,6 @@
 
 table fact_mission
-    lineageTag: 8544256f-5641-4410-a9e4-90dc4110eefa
+    lineageTag: d2a557db-a771-48db-a2c2-2e73df6a1050
 
     partition fact_mission = m
         mode: import

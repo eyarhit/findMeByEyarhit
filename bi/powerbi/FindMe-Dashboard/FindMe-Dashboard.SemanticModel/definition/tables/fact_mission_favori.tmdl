@@ -1,6 +1,6 @@
 
 table fact_mission_favori
-    lineageTag: 251caf8d-a291-4b8d-b3d8-cfd1f0cd1017
+    lineageTag: 46d619d8-cdb3-43d8-929c-b5702feed24a
 
     partition fact_mission_favori = m
         mode: import

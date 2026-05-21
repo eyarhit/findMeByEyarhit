@@ -179,7 +179,22 @@ $qTableKpi = @{
         )
     }
 }
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\tbl_kpi\visual.json") (New-Visual 'tbl_kpi' 24 220 1230 470 1000 4000 'tableEx' $qTableKpi)
+Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\tbl_kpi\visual.json") (New-Visual 'tbl_kpi' 590 210 660 480 1000 4000 'tableEx' $qTableKpi)
+
+$qSlicerYear = @{ Values = @{ projections = @(New-ColumnProjection 'dim_date' 'year_num' $true) } }
+Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\slicer_year\visual.json") (New-Visual 'slicer_year' 920 72 340 88 3000 5000 'slicer' $qSlicerYear)
+
+$qLineTrend = @{
+    Category = @{ projections = @(New-ColumnProjection 'v_bi_kpi_recrutement' 'month_num' $true) }
+    Y        = @{ projections = @(New-SumProjection 'v_bi_kpi_recrutement' 'candidatures') }
+}
+Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\line_trend\visual.json") (New-Visual 'line_trend' 24 210 550 200 1001 3000 'lineChart' $qLineTrend)
+
+$qDonutExec = @{
+    Category = @{ projections = @(New-ColumnProjection 'v_bi_kpi_recrutement' 'month_num' $true) }
+    Y        = @{ projections = @(New-SumProjection 'v_bi_kpi_recrutement' 'acceptees') }
+}
+Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\donut_acc\visual.json") (New-Visual 'donut_acc' 24 430 350 260 1002 3500 'donutChart' $qDonutExec)
 
 # Page Managerial
 Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\title02\visual.json") (New-TitleVisual 'title02' 24 16 900 'Find-Me — Missions & Candidatures (Managerial)')
@@ -208,6 +223,18 @@ $qTblCand = @{
     }
 }
 Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\tbl_cand\visual.json") (New-Visual 'tbl_cand' 24 400 1230 290 1000 3000 'tableEx' $qTblCand)
+
+$qSlicerStatut = @{ Values = @{ projections = @(New-ColumnProjection 'v_bi_candidature' 'statut_candidature' $true) } }
+Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\slicer_statut\visual.json") (New-Visual 'slicer_statut' 920 72 340 88 3000 5000 'slicer' $qSlicerStatut)
+
+$qSlicerMgrYear = @{ Values = @{ projections = @(New-ColumnProjection 'v_bi_candidature' 'year_num' $true) } }
+Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\slicer_year\visual.json") (New-Visual 'slicer_year' 920 172 340 88 3001 5100 'slicer' $qSlicerMgrYear)
+
+$qColMission = @{
+    Category = @{ projections = @(New-ColumnProjection 'dim_mission' 'status_mission' $true) }
+    Y        = @{ projections = @(New-SumProjection 'v_bi_mission' 'mission_count') }
+}
+Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\col_status\visual.json") (New-Visual 'col_status' 24 400 580 290 1002 4000 'columnChart' $qColMission)
 
 # Page Operationnel
 Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\title03\visual.json") (New-TitleVisual 'title03' 24 16 900 'Find-Me — CV, Utilisateurs, Notifications (Operationnel)')
@@ -242,6 +269,18 @@ $qTblCv = @{
     }
 }
 Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\tbl_cv\visual.json") (New-Visual 'tbl_cv' 640 220 610 470 1001 5000 'tableEx' $qTblCv)
+
+$qCardMission = @{ Values = @{ projections = @(New-SumProjection 'fact_mission' 'mission_count') } }
+Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\kpi_mission\visual.json") (New-Visual 'kpi_mission' 920 72 280 120 2003 1000 'card' $qCardMission)
+
+$qSlicerRead = @{ Values = @{ projections = @(New-ColumnProjection 'fact_notification' 'is_read' $true) } }
+Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\slicer_read\visual.json") (New-Visual 'slicer_read' 920 210 340 88 3000 6000 'slicer' $qSlicerRead)
+
+$qBarSkill = @{
+    Category = @{ projections = @(New-ColumnProjection 'dim_skill' 'skill_label' $true) }
+    Y        = @{ projections = @(New-SumProjection 'dim_skill' 'usage_count') }
+}
+Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\bar_skills\visual.json") (New-Visual 'bar_skills' 24 430 1230 260 1002 5500 'clusteredBarChart' $qBarSkill)
 
 # report.json (PBIR)
 $reportJson = @'

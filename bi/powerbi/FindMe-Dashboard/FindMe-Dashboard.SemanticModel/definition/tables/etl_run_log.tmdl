@@ -1,6 +1,6 @@
 
 table etl_run_log
-    lineageTag: 4baf42ce-ea72-48d2-a87b-b381e9ebf4fb
+    lineageTag: e3643292-2ef3-45a3-b409-268d0a3d26b6
 
     partition etl_run_log = m
         mode: import

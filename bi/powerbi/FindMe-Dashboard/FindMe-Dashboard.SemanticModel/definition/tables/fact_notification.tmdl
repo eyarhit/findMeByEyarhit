@@ -1,6 +1,6 @@
 
 table fact_notification
-    lineageTag: 1d4eb548-e584-4a5e-b942-6bc816440ffb
+    lineageTag: a9abcdc8-2805-4d73-82f6-8b3cc65e4ca9
 
     partition fact_notification = m
         mode: import

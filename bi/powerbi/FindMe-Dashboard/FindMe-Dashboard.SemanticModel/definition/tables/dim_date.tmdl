@@ -1,6 +1,6 @@
 
 table dim_date
-    lineageTag: f7197c63-e239-47bd-83d8-9bec47a2fc7f
+    lineageTag: e5336ec9-38ea-469a-bac3-464d683ec229
 
     partition dim_date = m
         mode: import

@@ -1,6 +1,6 @@
 
 table v_bi_mission
-    lineageTag: 6f3f969e-8b19-4ce7-8a70-fac7531aee25
+    lineageTag: a4cb4d8b-a53b-4c73-b8bc-229f61d9391e
 
     partition v_bi_mission = m
         mode: import
