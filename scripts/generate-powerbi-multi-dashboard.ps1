@@ -158,7 +158,7 @@ Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\page.json") (New-PageJson $pageMg
 Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\page.json") (New-PageJson $pageOps '03 - Operationnel')
 
 # Page Executive
-Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\title01\visual.json") (New-TitleVisual 'title01' 24 16 900 'Find-Me — KPI Recrutement (Executive)')
+Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\title01\visual.json") (New-TitleVisual 'title01' 24 16 900 'Find-Me - KPI Recrutement (Executive)')
 
 $qCard1 = @{ Values = @{ projections = @(New-SumProjection 'v_bi_kpi_recrutement' 'candidatures') } }
 $qCard2 = @{ Values = @{ projections = @(New-SumProjection 'v_bi_kpi_recrutement' 'acceptees') } }
@@ -197,7 +197,7 @@ $qDonutExec = @{
 Write-Utf8NoBom (Join-Path $PagesDir "$pageExec\visuals\donut_acc\visual.json") (New-Visual 'donut_acc' 24 430 350 260 1002 3500 'donutChart' $qDonutExec)
 
 # Page Managerial
-Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\title02\visual.json") (New-TitleVisual 'title02' 24 16 900 'Find-Me — Missions & Candidatures (Managerial)')
+Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\title02\visual.json") (New-TitleVisual 'title02' 24 16 900 'Find-Me - Missions et Candidatures (Managerial)')
 
 $qBarMission = @{
     Category = @{ projections = @(New-ColumnProjection 'v_bi_mission' 'mission_name' $true) }
@@ -237,7 +237,7 @@ $qColMission = @{
 Write-Utf8NoBom (Join-Path $PagesDir "$pageMgr\visuals\col_status\visual.json") (New-Visual 'col_status' 24 400 580 290 1002 4000 'columnChart' $qColMission)
 
 # Page Operationnel
-Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\title03\visual.json") (New-TitleVisual 'title03' 24 16 900 'Find-Me — CV, Utilisateurs, Notifications (Operationnel)')
+Write-Utf8NoBom (Join-Path $PagesDir "$pageOps\visuals\title03\visual.json") (New-TitleVisual 'title03' 24 16 900 'Find-Me - CV, Utilisateurs, Notifications (Operationnel)')
 
 $qCardUsers = @{ Values = @{ projections = @(New-SumProjection 'fact_user' 'user_count') } }
 $qCardCv    = @{ Values = @{ projections = @(New-SumProjection 'fact_cv' 'cv_count') } }

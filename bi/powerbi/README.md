@@ -28,6 +28,12 @@ Voir **[GUIDE_AUTRE_PC.md](GUIDE_AUTRE_PC.md)** (clone ou ZIP + `ONE_COMMANDE_PO
 ONE_COMMANDE_POWERBI.cmd
 ```
 
+Ouvre **`FindMe-Dashboard.pbip`** (3 pages). Si les cartes affichent **(Vide)** : cliquez **Actualiser maintenant**, serveur **`127.0.0.1`**, base **`findme_dw`**, login **`findme_bi`** / **`findme_bi_readonly`**.
+
+Verification MySQL avant Power BI : `scripts\verify-mysql-dw.ps1`
+
+Rapport 1 page (ancien) : `ONE_COMMANDE_POWERBI.cmd -UsePbix`
+
 Si `git pull` refuse (fichiers `.tmdl` modifies) :
 
 ```cmd

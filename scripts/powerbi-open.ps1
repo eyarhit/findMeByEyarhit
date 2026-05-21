@@ -1,8 +1,8 @@
-# Une commande : ETL Talend + ouverture Power BI (.pbix recommande, pas .pbip)
+# Une commande : ETL Talend + ouverture Power BI (PBIP 3 pages par defaut)
 param(
     [switch]$SkipEtl,
     [switch]$SkipDocker,
-    [switch]$UsePbip
+    [switch]$UsePbix
 )
 
 $ErrorActionPreference = "Stop"
@@ -40,7 +40,7 @@ function Get-PbidsPath {
     return $null
 }
 
-if (-not $UsePbip) { Remove-PbipTraps }
+if (-not $UsePbix) { Remove-PbipTraps }
 
 function Ensure-DashboardPbix {
     if (Test-Path $PbixPath) { return }
@@ -152,7 +152,7 @@ function Open-PowerBiReport {
 Write-Step "1/4 - Generation dashboard (3 pages, visuels)"
 & $GenDashboardScript
 
-if (-not $UsePbip) {
+if ($UsePbix) {
     Ensure-DashboardPbix
 }
 
@@ -172,36 +172,41 @@ if (-not $SkipEtl) {
 }
 
 Write-Step "4/4 - Ouverture Power BI Desktop"
-Ensure-DashboardPbix
+if ($UsePbix) { Ensure-DashboardPbix }
 
-# .pbix deja configure = affichage garanti (donnees + visuels)
-if (Test-Path $PbixPath) {
+function Show-PbipRefreshHelp {
+    Write-Host ""
+    Write-Host "========== DASHBOARD FIND-ME (3 pages PBIP) ==========" -ForegroundColor Green
+    Write-Host "  01 Executive | 02 Managerial | 03 Operationnel"
+    Write-Host ""
+    Write-Host "IMPORTANT - remplir les visuels (Vide) :" -ForegroundColor Yellow
+    Write-Host "  1. Banniere jaune : cliquez Actualiser maintenant"
+    Write-Host "  2. Parametres source : serveur 127.0.0.1  base findme_dw"
+    Write-Host "  3. Identifiants : findme_bi / findme_bi_readonly"
+    Write-Host "  4. Si erreur connexion : docker compose up -d mysql puis relancer ETL"
+    Write-Host ""
+    Write-Host "Ancien rapport 1 page : ONE_COMMANDE_POWERBI.cmd -UsePbix"
+}
+
+# PBIP 3 pages (defaut)
+if (-not $UsePbix -and (Test-Path $DashboardPbipPath)) {
+    $openPath = $DashboardPbipPath
+    Write-Host "Projet 3 pages : $openPath" -ForegroundColor Green
+    Open-PowerBiReport -ReportPath $openPath
+    Show-PbipRefreshHelp
+} elseif (-not $UsePbix -and (Test-Path $DashboardPbirPath)) {
+    $openPath = $DashboardPbirPath
+    Write-Host "Projet PBIR : $openPath" -ForegroundColor Green
+    Open-PowerBiReport -ReportPath $openPath
+    Show-PbipRefreshHelp
+} elseif ($UsePbix -and (Test-Path $PbixPath)) {
     $openPath = $PbixPath
-    Write-Host "Rapport .pbix (recommande) : $openPath" -ForegroundColor Green
+    Write-Host "Rapport .pbix (1 page) : $openPath" -ForegroundColor Green
     Open-PowerBiReport -ReportPath $openPath
     Write-Host ""
     Write-Host "========== DASHBOARD FIND-ME (.pbix) ==========" -ForegroundColor Green
     Write-Host "Cliquez Accueil - Actualiser si la banniere jaune apparait."
-} elseif (Test-Path $DashboardPbirPath) {
-    $openPath = $DashboardPbirPath
-    Write-Host "Projet PBIR : $openPath" -ForegroundColor Green
-    Open-PowerBiReport -ReportPath $openPath
-    Write-Host ""
-    Write-Host "========== SI ECRAN VIDE ==========" -ForegroundColor Yellow
-    Write-Host "  1. Cliquez 'Actualiser maintenant' (banniere jaune)"
-    Write-Host "  2. Identifiants : findme_bi / findme_bi_readonly"
-    Write-Host "  3. Options - Fonctionnalites preliminaires : activer TMDL + PBIR"
-    Write-Host "  4. Fermer PBI, relancer ONE_COMMANDE_POWERBI.cmd"
-    Write-Host "  5. Ou enregistrez sous bi\powerbi\reports\FindMe_BI_Auto.pbix (1 fois)"
-} elseif (Test-Path $DashboardPbipPath) {
-    $openPath = $DashboardPbipPath
-    Write-Host "Projet : $openPath" -ForegroundColor Green
-    Open-PowerBiReport -ReportPath $openPath
-    Write-Host ""
-    Write-Host "========== DASHBOARD FIND-ME (3 pages) ==========" -ForegroundColor Green
-    Write-Host "  01 Executive | 02 Managerial | 03 Operationnel"
-    Write-Host "Premiere fois : findme_bi / findme_bi_readonly puis Actualiser."
-} elseif ($UsePbip -and (Test-Path $DevPbipPath)) {
+} elseif ($UsePbix -and (Test-Path $DevPbipPath)) {
     $openPath = $DevPbipPath
     Write-Host "Fichier (mode dev) : $openPath" -ForegroundColor Green
     Open-PowerBiReport -ReportPath $openPath

@@ -9,7 +9,7 @@ expression fn_MySQLTable =
 		let
 		    fn = (tableName as text) =>
 		    let
-		        Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+		        Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase, [CreateNavigationProperties=false]),
 		        Data = Source{[Schema=PBI_MySqlDatabase, Item=tableName]}[Data]
 		    in
 		        Data
@@ -17,7 +17,7 @@ expression fn_MySQLTable =
 		    fn
 		meta [IsParameterQuery=false]
 
-expression PBI_MySqlServer = "localhost:3306" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+expression PBI_MySqlServer = "127.0.0.1" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 expression PBI_MySqlDatabase = "findme_dw" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 
 ref table dim_date
