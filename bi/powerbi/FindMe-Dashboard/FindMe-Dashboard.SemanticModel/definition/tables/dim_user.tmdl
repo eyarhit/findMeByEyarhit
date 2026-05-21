@@ -1,6 +1,6 @@
 
 table dim_user
-    lineageTag: c521d92c-d0b6-4821-9e92-7cecb4fb9320
+    lineageTag: 5a20d3e3-be02-4856-bca1-6dda9f19b306
 
     column user_key
         dataType: int64
@@ -36,6 +36,7 @@ table dim_user
         mode: import
         source =
             let
-                Data = fn_MySQLTable("dim_user")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="dim_user"]}[Data]
             in
                 Data

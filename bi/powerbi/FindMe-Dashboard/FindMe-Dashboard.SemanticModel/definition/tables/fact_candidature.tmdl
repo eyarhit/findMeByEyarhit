@@ -1,6 +1,6 @@
 
 table fact_candidature
-    lineageTag: 0d422724-d37e-47c9-bd15-96f48676e829
+    lineageTag: 0c9fc51c-4577-4a5a-a087-4f3dae28de49
 
     column candidature_key
         dataType: int64
@@ -51,6 +51,7 @@ table fact_candidature
         mode: import
         source =
             let
-                Data = fn_MySQLTable("fact_candidature")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="fact_candidature"]}[Data]
             in
                 Data

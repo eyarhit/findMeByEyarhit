@@ -1,6 +1,6 @@
 
 table etl_run_log
-    lineageTag: c68f5503-bb56-4efe-983e-ba0a2f4258de
+    lineageTag: a882add1-fb1e-4f29-af97-f238b765f87b
 
     column run_id
         dataType: int64
@@ -36,6 +36,7 @@ table etl_run_log
         mode: import
         source =
             let
-                Data = fn_MySQLTable("etl_run_log")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="etl_run_log"]}[Data]
             in
                 Data

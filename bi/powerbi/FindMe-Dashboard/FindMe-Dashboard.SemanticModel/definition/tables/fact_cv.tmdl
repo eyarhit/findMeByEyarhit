@@ -1,6 +1,6 @@
 
 table fact_cv
-    lineageTag: 98168b90-693c-4c01-a79f-a8bcee9bcbeb
+    lineageTag: 6868c1f9-f528-402e-974e-072267ce661d
 
     column cv_key
         dataType: int64
@@ -31,6 +31,7 @@ table fact_cv
         mode: import
         source =
             let
-                Data = fn_MySQLTable("fact_cv")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="fact_cv"]}[Data]
             in
                 Data

@@ -1,6 +1,6 @@
 
 table fact_user
-    lineageTag: 09bc1fcd-bcd5-4887-a46b-8e8847ca06d3
+    lineageTag: 0ec6d3ee-a724-4caf-b6b4-0b20653cfcff
 
     column user_key
         dataType: int64
@@ -16,6 +16,7 @@ table fact_user
         mode: import
         source =
             let
-                Data = fn_MySQLTable("fact_user")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="fact_user"]}[Data]
             in
                 Data

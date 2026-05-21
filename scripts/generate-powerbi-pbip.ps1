@@ -233,6 +233,8 @@ database
     compatibilityLevel: 1550
 '@ | ForEach-Object { Write-Utf8NoBom (Join-Path $Def "database.tmdl") $_ }
 
+$queryOrder = (@('PBI_MySqlServer', 'PBI_MySqlDatabase') + $tables) | ForEach-Object { "`"$_`"" }
+$queryOrderJson = $queryOrder -join ','
 $refs = ($tables | ForEach-Object { "ref table $_" }) -join "`n"
 @"
 
@@ -240,22 +242,7 @@ model Model
     culture: fr-FR
     defaultPowerBIDataSourceVersion: powerBI_V3
 
-    annotation PBI_QueryOrder = ["fn_MySQLTable","PBI_MySqlServer","PBI_MySqlDatabase"]
-
-expression fn_MySQLTable =
-		let
-		    fn = (tableName as text) =>
-		    let
-		        Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase, [CreateNavigationProperties=false]),
-		        Nav = try Source{[Schema=PBI_MySqlDatabase, Item=tableName]}[Data]
-		            otherwise try Source{[Item=tableName, Kind="Table"]}[Data]
-		            otherwise try Source{[Item=tableName]}[Data]
-		            otherwise Value.NativeQuery(Source, "SELECT * FROM " & tableName, null, [EnableFolding=false])
-		    in
-		        Nav
-		in
-		    fn
-		meta [IsParameterQuery=false]
+    annotation PBI_QueryOrder = [$queryOrderJson]
 
 expression PBI_MySqlServer = "localhost:3306" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 expression PBI_MySqlDatabase = "findme_dw" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
@@ -277,7 +264,8 @@ $colBlock
         mode: import
         source =
             let
-                Data = fn_MySQLTable("$t")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="$t"]}[Data]
             in
                 Data
 

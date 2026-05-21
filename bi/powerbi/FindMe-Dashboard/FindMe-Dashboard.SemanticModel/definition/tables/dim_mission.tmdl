@@ -1,6 +1,6 @@
 
 table dim_mission
-    lineageTag: 27965b11-0992-44f5-a2a2-66e8512dd871
+    lineageTag: ba08a5f6-4638-47f0-b282-2ba50b0adec6
 
     column mission_key
         dataType: int64
@@ -51,6 +51,7 @@ table dim_mission
         mode: import
         source =
             let
-                Data = fn_MySQLTable("dim_mission")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="dim_mission"]}[Data]
             in
                 Data

@@ -1,6 +1,6 @@
 
 table dim_user_scd2
-    lineageTag: 213e39de-c362-49f4-a9bc-78ac1f19d63a
+    lineageTag: f516d7f5-6b7d-4a8e-9baa-b627d697d7dc
 
     column user_scd_key
         dataType: int64
@@ -46,6 +46,7 @@ table dim_user_scd2
         mode: import
         source =
             let
-                Data = fn_MySQLTable("dim_user_scd2")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="dim_user_scd2"]}[Data]
             in
                 Data

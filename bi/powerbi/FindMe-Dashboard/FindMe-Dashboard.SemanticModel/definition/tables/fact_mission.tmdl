@@ -1,6 +1,6 @@
 
 table fact_mission
-    lineageTag: 08ee0888-117e-4bb0-a5a4-6ea4b3ac9277
+    lineageTag: a2b8f068-3ee7-4afd-a09e-ffeb98c799b9
 
     column mission_key
         dataType: int64
@@ -26,6 +26,7 @@ table fact_mission
         mode: import
         source =
             let
-                Data = fn_MySQLTable("fact_mission")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="fact_mission"]}[Data]
             in
                 Data

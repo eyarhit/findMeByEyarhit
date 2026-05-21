@@ -1,6 +1,6 @@
 
 table fact_notification
-    lineageTag: 23db9ad2-df1e-463c-957f-cceda8a6d1b6
+    lineageTag: b25eebeb-7be6-4c59-adc4-333d0c13c274
 
     column notification_key
         dataType: int64
@@ -31,6 +31,7 @@ table fact_notification
         mode: import
         source =
             let
-                Data = fn_MySQLTable("fact_notification")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="fact_notification"]}[Data]
             in
                 Data

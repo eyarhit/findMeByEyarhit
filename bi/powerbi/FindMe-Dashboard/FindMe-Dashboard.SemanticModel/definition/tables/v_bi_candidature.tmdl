@@ -1,6 +1,6 @@
 
 table v_bi_candidature
-    lineageTag: 30d14c87-7cf5-414b-9ee8-df47f71c20a5
+    lineageTag: df9d67e2-d4bc-4368-8e69-97b7aab2f241
 
     column full_date
         dataType: dateTime
@@ -86,6 +86,7 @@ table v_bi_candidature
         mode: import
         source =
             let
-                Data = fn_MySQLTable("v_bi_candidature")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="v_bi_candidature"]}[Data]
             in
                 Data

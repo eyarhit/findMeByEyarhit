@@ -1,6 +1,6 @@
 
 table v_bi_mission
-    lineageTag: 12cbc637-73c4-4001-bca6-47353d422704
+    lineageTag: a891d20b-247e-47f7-9776-b7c0c4b0f651
 
     column full_date
         dataType: dateTime
@@ -61,6 +61,7 @@ table v_bi_mission
         mode: import
         source =
             let
-                Data = fn_MySQLTable("v_bi_mission")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="v_bi_mission"]}[Data]
             in
                 Data

@@ -1,6 +1,6 @@
 
 table dim_skill
-    lineageTag: c517370d-18ff-43f6-8230-4a5c30b8a3e6
+    lineageTag: bfc3e465-af4d-4d9a-a546-d2aea12614ba
 
     column skill_key
         dataType: int64
@@ -26,6 +26,7 @@ table dim_skill
         mode: import
         source =
             let
-                Data = fn_MySQLTable("dim_skill")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="dim_skill"]}[Data]
             in
                 Data

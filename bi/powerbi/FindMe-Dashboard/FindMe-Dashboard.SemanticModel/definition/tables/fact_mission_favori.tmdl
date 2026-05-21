@@ -1,6 +1,6 @@
 
 table fact_mission_favori
-    lineageTag: bf4e093b-cd62-4854-b0f0-ca740f750226
+    lineageTag: 09b6453a-8a8d-4d89-a7e9-fb1e2d700695
 
     column favori_key
         dataType: int64
@@ -31,6 +31,7 @@ table fact_mission_favori
         mode: import
         source =
             let
-                Data = fn_MySQLTable("fact_mission_favori")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="fact_mission_favori"]}[Data]
             in
                 Data

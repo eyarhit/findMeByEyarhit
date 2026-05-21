@@ -12,5 +12,8 @@ echo === Dans Power BI (deja ouvert ou apres ONE_COMMANDE_POWERBI.cmd) ===
 echo   1. Fermer et rouvrir FindMe-Dashboard.pbip
 echo   2. Accueil - Actualiser
 echo   3. Parametres : localhost:3306 / findme_dw / findme_bi / findme_bi_readonly
-echo   4. Si triangles rouges : Transformer les donnees - Parametres source - Modifier
+echo   4. Si triangles rouges : Transformer les donnees - Parametres source
+echo      - Supprimer les permissions MySQL enregistrees (si anciennes)
+echo      - Modifier : findme_bi / findme_bi_readonly
+echo   5. Accueil - Actualiser (attendre la fin, 17 tables)
 pause

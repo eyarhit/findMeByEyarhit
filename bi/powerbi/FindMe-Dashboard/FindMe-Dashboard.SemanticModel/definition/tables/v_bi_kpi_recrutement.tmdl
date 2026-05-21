@@ -1,6 +1,6 @@
 
 table v_bi_kpi_recrutement
-    lineageTag: 715e1068-45ce-4413-9ea0-31ab09e78f32
+    lineageTag: 5655d9ca-9aaf-4ee2-9260-f632c0ebeb1b
 
     column year_num
         dataType: int64
@@ -36,6 +36,7 @@ table v_bi_kpi_recrutement
         mode: import
         source =
             let
-                Data = fn_MySQLTable("v_bi_kpi_recrutement")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="v_bi_kpi_recrutement"]}[Data]
             in
                 Data

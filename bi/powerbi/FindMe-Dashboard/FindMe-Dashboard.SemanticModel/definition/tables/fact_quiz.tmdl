@@ -1,6 +1,6 @@
 
 table fact_quiz
-    lineageTag: da73b7a3-c799-4203-931c-338f6bce2a4a
+    lineageTag: 9e61d8fb-c568-4c06-9d5f-cf41b8cdd4e2
 
     column quiz_key
         dataType: int64
@@ -36,6 +36,7 @@ table fact_quiz
         mode: import
         source =
             let
-                Data = fn_MySQLTable("fact_quiz")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="fact_quiz"]}[Data]
             in
                 Data

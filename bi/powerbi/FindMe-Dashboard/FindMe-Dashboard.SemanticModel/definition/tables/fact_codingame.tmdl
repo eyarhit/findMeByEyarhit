@@ -1,6 +1,6 @@
 
 table fact_codingame
-    lineageTag: bc869ada-ebdc-46d1-8723-ab43f987c5d2
+    lineageTag: 229641e5-b0d1-452c-bcf5-599ec67337ca
 
     column codingame_key
         dataType: int64
@@ -41,6 +41,7 @@ table fact_codingame
         mode: import
         source =
             let
-                Data = fn_MySQLTable("fact_codingame")
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = Source{[Schema=PBI_MySqlDatabase, Item="fact_codingame"]}[Data]
             in
                 Data
