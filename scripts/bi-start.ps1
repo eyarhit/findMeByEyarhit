@@ -24,15 +24,14 @@ function Load-BiEnv {
 
 function Ensure-TalendInstaller {
     $dir = Join-Path $Root "bi\talend\studio-docker\installer"
-    $existing = Get-ChildItem -Path $dir -Filter "Talend-Studio*.tar.xz" -ErrorAction SilentlyContinue | Select-Object -First 1
+    $existing = Get-ChildItem -Path $dir -Include "Talend-Studio*.tar.xz","Talend-Studio*.tar.gz","Talend*.zip" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($existing) {
         Write-Host "Talend installer : $($existing.Name)"
         return
     }
     $url = $env:TALEND_INSTALLER_URL
     if ([string]::IsNullOrWhiteSpace($url)) {
-        Write-Host "Talend : placez Talend-Studio-*.tar.xz dans bi\talend\studio-docker\installer\" -ForegroundColor Yellow
-        Write-Host "  (ou definissez TALEND_INSTALLER_URL dans scripts\.env.bi)" -ForegroundColor Yellow
+        Write-Host "Talend : scripts\download-talend.cmd (voir scripts\.env.bi.example)" -ForegroundColor Yellow
         return
     }
     Write-Host "Telechargement Talend depuis TALEND_INSTALLER_URL ..."

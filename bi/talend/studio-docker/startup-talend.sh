@@ -6,8 +6,8 @@ TALEND_HOME="${TALEND_INSTALL_DIR:-/home/kasm-user/talend-studio}"
 
 if [ -d "$TALEND_HOME" ] && [ -f "$TALEND_HOME/studio" ]; then
   echo "[findme] Talend Studio déjà installé dans $TALEND_HOME"
-elif ls "$INSTALLER_DIR"/Talend-Studio-*.tar.xz 1>/dev/null 2>&1; then
-  ARCHIVE=$(ls "$INSTALLER_DIR"/Talend-Studio-*.tar.xz | head -1)
+elif ls "$INSTALLER_DIR"/Talend-Studio-*.tar.xz "$INSTALLER_DIR"/Talend-Studio-*.tar.gz "$INSTALLER_DIR"/Talend*.zip 2>/dev/null | head -1 | grep -q .; then
+  ARCHIVE=$(ls "$INSTALLER_DIR"/Talend-Studio-*.tar.xz "$INSTALLER_DIR"/Talend-Studio-*.tar.gz "$INSTALLER_DIR"/Talend*.zip 2>/dev/null | head -1)
   echo "[findme] Extraction de $ARCHIVE …"
   mkdir -p "$TALEND_HOME"
   tar -xJf "$ARCHIVE" -C "$TALEND_HOME" --strip-components=1 2>/dev/null \

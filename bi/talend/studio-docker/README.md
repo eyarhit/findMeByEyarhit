@@ -10,18 +10,27 @@ Interface **identique au poste local** : bureau Linux + **Talend Open Studio** a
 
 Depuis l’app : **Admin → BI → Ouvrir Talend Open Studio**
 
-## Première utilisation (installateur Talend)
+## Télécharger Talend (CMD)
 
-1. Télécharger **Talend Open Studio for Data Integration** (Linux x86_64) sur [talend.com](https://www.talend.com/products/talend-open-studio/).
-2. Copier l’archive dans :
-   ```
-   bi/talend/studio-docker/installer/Talend-Studio-8.x.x-linux-gtk-x86_64.tar.xz
-   ```
-3. Reconstruire et démarrer :
-   ```cmd
-   docker compose build talend-studio
-   docker compose up -d talend-studio
-   ```
+Talend ne fournit plus de lien public fixe : copiez le lien après connexion sur le site.
+
+```cmd
+REM Option A : URL en argument (lien copie depuis le navigateur)
+scripts\download-talend.cmd "https://VOTRE-LIEN-TALEND"
+
+REM Option B : URL dans scripts\.env.bi (TALEND_INSTALLER_URL=...)
+copy scripts\.env.bi.example scripts\.env.bi
+scripts\download-talend.cmd
+
+docker compose build talend-studio
+docker compose up -d talend-studio
+```
+
+Equivalent **curl** (si vous avez deja l’URL) :
+
+```cmd
+curl -L -o "bi\talend\studio-docker\installer\Talend-Studio-linux.tar.xz" "https://VOTRE-LIEN-TALEND"
+```
 
 Le job documenté du PFE est dans le conteneur : `/home/kasm-user/findme-talend/FindMe_Load_DW`.
 
