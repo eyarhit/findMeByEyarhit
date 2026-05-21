@@ -293,7 +293,6 @@ $reportJson = @'
       "type": "SharedResources"
     }
   },
-  "layoutOptimization": 0,
   "resourcePackages": [
     {
       "name": "SharedResources",

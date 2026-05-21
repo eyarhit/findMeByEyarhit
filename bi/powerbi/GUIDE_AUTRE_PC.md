@@ -74,6 +74,7 @@ puis lancer `ONE_COMMANDE_POWERBI.cmd` → ouverture directe avec visuels.
 |----------|----------|
 | `model.bim` manquant | Dans `FindMe-Dashboard.SemanticModel\definition.pbism` : `"version": "4.0"` |
 | `version.json` manquant | Fichier requis : `FindMe-Dashboard.Report\definition\version.json` (voir repo ou `git pull`) |
+| `layoutOptimization` dans report.json | Retirer cette ligne (schéma PBIR 3.2.0) ; `git pull` ou regénérer le dashboard |
 | `git pull` bloqué | `git checkout -- bi/powerbi/` puis `git pull` |
 | Écran vide | Actualiser + identifiants MySQL ; ou utiliser `.pbix` |
 | Docker | Lancer **Docker Desktop** avant la commande |

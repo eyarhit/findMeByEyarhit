@@ -142,7 +142,6 @@ New-Dir (Join-Path $Rp "definition\pages")
 {
   "version": "1.0",
   "config": { "version": "5.0", "themeCollection": { "baseTheme": { "name": "CY24SU10", "type": "SharedResources" } } },
-  "layoutOptimization": 0,
   "resourcePackages": [],
   "sections": [{ "name": "ReportSection", "displayName": "Dashboard", "displayOption": 1, "height": 720, "width": 1280, "visualContainers": [] }]
 }

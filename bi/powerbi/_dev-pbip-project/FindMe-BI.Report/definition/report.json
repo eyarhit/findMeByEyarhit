@@ -1,7 +1,6 @@
 {
   "version": "1.0",
   "config": { "version": "5.0", "themeCollection": { "baseTheme": { "name": "CY24SU10", "type": "SharedResources" } } },
-  "layoutOptimization": 0,
   "resourcePackages": [],
   "sections": [
     {
