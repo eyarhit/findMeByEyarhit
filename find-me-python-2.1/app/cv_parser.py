@@ -120,6 +120,7 @@ SKILL_CATEGORIES: dict[str, str] = {
 # Limite alignée sur la colonne MySQL `competence.db` (varchar ~255)
 MAX_SKILL_FIELD_CHARS = 255
 MAX_SKILL_ITEM_CHARS = 80
+MAX_EXPERIENCE_DESC_CHARS = 240
 
 
 def _normalize_cv_text(text: str) -> str:
@@ -205,7 +206,7 @@ def _parse_personal(text: str) -> PersonalInfo:
                 and not re.search(r"^\d", ln)
                 and "@" not in ln
                 and not re.match(r"^(CONTACT|COMPÉTENCES|COMPETENCES|PROFIL)\b", ln, re.I)
-                and re.search(r"[a-zA-ZÀ-ÿ]{4}", ln)
+                and len(re.sub(r"[^A-Za-zÀ-ÿ]", "", ln)) >= 12
             ):
                 job_title = re.sub(r"\s+", " ", ln)[:220]
                 break
@@ -282,6 +283,8 @@ def _parse_education(text: str) -> list[EducationItem]:
         start = _year_to_date(m.group(2))
         end = _year_to_date(m.group(3), end_of_period=True)
         degree = _find_degree_near(search_text, m.start(), m.end())
+        if not degree or _degree_duplicates_institution(degree, institution):
+            degree = _next_degree_line(search_text, m.end())
         items.append(
             EducationItem(
                 institution=institution,
@@ -366,6 +369,28 @@ def _looks_like_institution(name: str) -> bool:
     )
     low = name.lower()
     return any(m in low for m in markers) or DEGREE_KEYWORDS.search(name) is None
+
+
+def _degree_duplicates_institution(degree: str | None, institution: str) -> bool:
+    if not degree:
+        return False
+    d = degree.lower().strip()
+    i = institution.lower().strip()
+    return d == i or d.startswith(i[: min(len(i), 25)]) or i.startswith(d[: min(len(d), 25)])
+
+
+def _next_degree_line(text: str, pos: int) -> str | None:
+    for line in text[pos : pos + 500].split("\n"):
+        line = line.strip()
+        if not line or SKILL_LINE_PREFIX.match(line):
+            continue
+        if VOLUNTEER_MARKERS.search(line):
+            continue
+        if DEGREE_KEYWORDS.search(line) and len(line) < 120:
+            return line.strip(" :")[:120]
+        if re.search(r"\b(licence|master|baccalauréat|baccalaureat|ingénieur|ingenieur)\b", line, re.I):
+            return line[:120]
+    return None
 
 
 def _find_degree_near(text: str, start: int, end: int) -> str | None:
@@ -475,6 +500,14 @@ def _skills_search_window(text: str) -> str:
         lang = upper.find("LANGAGES DE PROGRAMMATION")
         return text[lang:] if lang >= 0 else text
 
+    # PDF 2 colonnes : « COMPÉTENCES » puis « TECHNIQUES » sur la ligne suivante
+    if start >= 0:
+        chunk = upper[start : start + 40]
+        if "COMPÉTENCES" in chunk or "COMPETENCES" in chunk:
+            tech = upper.find("TECHNIQUES", start)
+            if tech >= 0 and tech - start < 40:
+                start = tech
+
     tech = upper.find("TECHNIQUES", start)
     if tech >= 0 and tech - start < 250:
         start = tech
@@ -487,6 +520,9 @@ def _skills_search_window(text: str) -> str:
     stop_headers = (
         "LANGUES",
         "PROFIL",
+        "ÉDUCATION",
+        "EDUCATION",
+        "FORMATION",
         "PROJET ACADEMIQUE",
         "PROJET ACADÉMIQUE",
         "PROJETS ACADEMIQUES",
@@ -494,12 +530,13 @@ def _skills_search_window(text: str) -> str:
         "STAGES",
         "EXPÉRIENCE",
         "EXPERIENCE",
+        "EXPÉRIENCES",
+        "EXPERIENCES",
         "BÉNÉVOLAT ET ENGAGEMENT",
         "BENEVOLAT ET ENGAGEMENT",
         "BÉNÉVOLAT",
         "BENEVOLAT",
         "CERTIFICATIONS",
-        "FORMATION",
     )
     for h in stop_headers:
         m = re.search(rf"(?:^|\n)\s*{re.escape(h)}\b", text[start:], re.I)
@@ -687,10 +724,7 @@ def _is_experience_description_line(line: str) -> bool:
     if re.match(r"^(pro|données|donnees|\.)\s*$", line, re.I):
         return False
     if _EXPERIENCE_DESC_HINT.search(line):
-        return True
-    if len(line) > 30 and not _SKILL_HEADER_LINE.search(line):
-        if not re.match(r"^[A-Z][a-z]+\s*:\s*[A-Z]", line):
-            return True
+        return len(line) < 220
     return False
 
 
@@ -728,7 +762,7 @@ def _parse_experiences(text: str) -> list[WorkExperienceItem]:
     items: list[WorkExperienceItem] = []
 
     stage_line_pattern = re.compile(
-        r"^(Stage[^\n|]{3,120}?)\s*[-–—]\s*([^|\n]+?)(?:\s*\|\s*(.+))?$",
+        r"^(Stage[^\n|]{3,120}?)\s*[-–—]\s*([^|\n]+?)(?:\s*\|\s*|\s+\|\s*)(.+)?$",
         re.I | re.M,
     )
     matches = list(stage_line_pattern.finditer(search))
@@ -770,7 +804,8 @@ def _collect_experience_description(text: str, pos: int, end_pos: int) -> str:
             break
         if _is_experience_description_line(ln):
             lines.append(ln)
-    return re.sub(r"\s+", " ", " ".join(lines)).strip()[:500]
+    joined = re.sub(r"\s+", " ", " ".join(lines[:4])).strip()
+    return joined[:MAX_EXPERIENCE_DESC_CHARS]
 
 
 def _parse_projects(text: str) -> list[ProjectItem]:

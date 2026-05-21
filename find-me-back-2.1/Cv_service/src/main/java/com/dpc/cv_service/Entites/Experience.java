@@ -30,6 +30,8 @@ public class Experience implements Serializable {
     private String nomProjet;
     private String client;
     private String equipe;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(columnDefinition = "TEXT")

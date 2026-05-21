@@ -273,17 +273,30 @@ public class CVService implements ICVService {
         return new Experience();
     }
 
+    private static final int MAX_EXPERIENCE_TEXT = 4000;
+
     private void copyExperienceFields(Experience target, Experience source) {
-        target.setEntreprise(source.getEntreprise());
+        target.setEntreprise(truncate(source.getEntreprise(), 255));
         target.setDateDebut(source.getDateDebut());
         target.setDateFin(source.getDateFin());
-        target.setPoste(source.getPoste());
-        target.setNomProjet(source.getNomProjet());
-        target.setClient(source.getClient());
-        target.setEquipe(source.getEquipe());
-        target.setDescription(source.getDescription());
-        target.setTravailRealise(source.getTravailRealise());
-        target.setEnvironnement(source.getEnvironnement());
+        target.setPoste(truncate(source.getPoste(), 255));
+        target.setNomProjet(truncate(source.getNomProjet(), 255));
+        target.setClient(truncate(source.getClient(), 255));
+        target.setEquipe(truncate(source.getEquipe(), 255));
+        target.setDescription(truncate(source.getDescription(), MAX_EXPERIENCE_TEXT));
+        target.setTravailRealise(truncate(source.getTravailRealise(), MAX_EXPERIENCE_TEXT));
+        target.setEnvironnement(truncate(source.getEnvironnement(), 500));
+    }
+
+    private static String truncate(String value, int maxLen) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        if (trimmed.length() <= maxLen) {
+            return trimmed;
+        }
+        return trimmed.substring(0, maxLen - 3) + "...";
     }
 
 

@@ -199,6 +199,11 @@ export class UploadCvComponent {
     return m ? m[0].trim() : '';
   }
 
+  private truncateText(value: string, maxLen: number): string {
+    const t = (value ?? '').trim();
+    return t.length > maxLen ? t.slice(0, maxLen - 3) + '...' : t;
+  }
+
   private safeJoin(arr: unknown, maxLen = 255): string {
     if (!Array.isArray(arr)) return '';
     const joined = arr.filter(Boolean).join(', ');
@@ -258,8 +263,8 @@ export class UploadCvComponent {
             entreprise: w.company ?? '',
             dateDebut: w.start_date ?? '',
             dateFin: w.end_date ?? '',
-            description: w.description ?? '',
-            travailRealise: w.description ?? '',
+            description: this.truncateText(w.description ?? '', 240),
+            travailRealise: this.truncateText(w.description ?? '', 4000),
             nomProjet: '',
             client: '',
             equipe: '',
