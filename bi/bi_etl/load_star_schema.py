@@ -137,10 +137,25 @@ def ensure_unknown_user(cur) -> int:
     return 0
 
 
+def _clear_user_dimension(cur) -> None:
+    """Supprime les faits liés à dim_user avant rechargement SCD1."""
+    for table in ("fact_codingame", "fact_quiz", "fact_cv", "fact_user"):
+        cur.execute(f"DELETE FROM {table}")
+    cur.execute("DELETE FROM dim_user WHERE user_key > 0")
+
+
+def ensure_metabase_grants(root_conn) -> None:
+    """Volumes MySQL créés avant findme_dw : findme_bi doit avoir SELECT sur l'entrepôt."""
+    with root_conn.cursor() as cur:
+        cur.execute("GRANT SELECT ON findme_dw.* TO 'findme_bi'@'%'")
+        cur.execute("FLUSH PRIVILEGES")
+    root_conn.commit()
+    print("findme_bi : SELECT sur findme_dw accordé")
+
+
 def load_dim_user(cur, src) -> dict[int, int]:
     """Retourne mapping user_id -> user_key."""
-    cur.execute("DELETE FROM fact_user")
-    cur.execute("DELETE FROM dim_user WHERE user_key > 0")
+    _clear_user_dimension(cur)
     src.execute(
         """
         SELECT u.user_id, COALESCE(r.role, 'INCONNU') AS role_name,
@@ -729,11 +744,13 @@ def main() -> None:
     wait_for_mysql()
     root = connect()
     ensure_dw_schema(root)
+    ensure_metabase_grants(root)
     src = connect()
     dw = connect(DW)
     run_id = 0
     try:
         with dw.cursor() as cur, src.cursor() as s:
+            cur.execute("SET FOREIGN_KEY_CHECKS = 0")
             run_id = _etl_log_start(cur)
             ensure_unknown_user(cur)
             populate_dim_date(cur)
@@ -758,6 +775,7 @@ def main() -> None:
             total_rows = _col(cur.fetchone(), "total_rows")
             run_dq_checks(cur)
             _etl_log_finish(cur, run_id, "SUCCESS", total_rows)
+            cur.execute("SET FOREIGN_KEY_CHECKS = 1")
         dw.commit()
         print("ETL terminé avec succès.")
     except Exception as e:

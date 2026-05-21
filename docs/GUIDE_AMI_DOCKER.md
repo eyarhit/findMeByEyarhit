@@ -202,6 +202,24 @@ Ne pas faire `docker compose down -v` sauf si vous voulez **effacer toutes les d
 
 ## 9. Dépannage fréquent
 
+### Metabase seed : `Access denied for user 'findme_bi' to database 'findme_dw'`
+
+Volume MySQL ancien sans le GRANT sur `findme_dw`. Après un ETL réussi, c’est corrigé automatiquement. Sinon :
+
+```cmd
+docker exec -i findme-mysql mysql -uroot -proot -e "GRANT SELECT ON findme_dw.* TO 'findme_bi'@'%%'; FLUSH PRIVILEGES;"
+docker compose run --rm metabase-seed
+```
+
+### ETL : `Cannot delete or update a parent row` (FK `fact_cv` → `dim_user`)
+
+Relancer après `git pull` (ordre des DELETE corrigé) :
+
+```cmd
+docker compose build bi-etl
+docker compose run --rm bi-etl
+```
+
 ### `bi-etl` exit 1 (service didn't complete successfully)
 
 **Cause fréquente :** volume MySQL **déjà existant** sans les tables `etl_run_log` / `dim_user_scd2`.
