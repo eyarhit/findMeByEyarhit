@@ -149,6 +149,17 @@ async def index():
     return FileResponse(Path(__file__).parent / "static" / "index.html")
 
 
+@app.get("/api/bi/stack")
+async def bi_stack():
+    """URLs des interfaces Talend Studio et Power BI (Docker)."""
+    return {
+        "talendStudioUrl": os.environ.get("TALEND_STUDIO_URL", "http://localhost:6080"),
+        "powerBiWebUrl": os.environ.get("POWERBI_WEB_URL", "http://localhost:8077/reports"),
+        "biHubUrl": os.environ.get("BI_HUB_URL", "http://localhost:3032"),
+        "courseStack": "Talend Open Studio + Power BI Report Server + findme_dw",
+    }
+
+
 @app.get("/api/health")
 async def health():
     mysql_ok = False

@@ -12,9 +12,9 @@
         <span class="dot"></span>
         {{ hubStatusLabel() }}
       </span>
-      <button type="button" class="open-btn primary" (click)="openTalendConsole()">Ouvrir Talend (console)</button>
-      <button type="button" class="open-btn primary" (click)="openPowerBiConsole()">Ouvrir Power BI (console)</button>
-      <button type="button" class="open-btn ghost" (click)="openPowerBiGuide()">Installer Power BI Desktop</button>
+      <button type="button" class="open-btn primary" (click)="openTalendStudio()">Talend Open Studio</button>
+      <button type="button" class="open-btn primary" (click)="openPowerBiWeb()">Power BI (portail)</button>
+      <button type="button" class="open-btn ghost" (click)="openBiHub()">Console BI</button>
     </div>
   </header>
 
@@ -41,9 +41,10 @@
 
   <div class="hub-banner" *ngIf="manifest">
     <p>
-      <strong>Zéro config :</strong> avec <code>docker compose up -d</code>, la console BI démarre sur
-      <a [href]="biHubBase" target="_blank" rel="noopener">{{ biHubBase }}</a>
-      — ETL Talend automatique si <code>findme_dw</code> est vide.
+      <strong>Stack conteneurisée (cours BIS) :</strong>
+      <a [href]="talendStudioUrl" target="_blank" rel="noopener">Talend Studio</a> (6080) ·
+      <a [href]="powerBiWebUrl" target="_blank" rel="noopener">Power BI</a> (8077) ·
+      <a [href]="biHubBase" target="_blank" rel="noopener">Hub BI</a> (3032)
     </p>
   </div>
 
@@ -54,8 +55,8 @@
     </button>
     <div *ngIf="showConnectionInfo" class="connection-content">
       <h3>Console Docker (recommandé)</h3>
-      <p>Talend : <a [href]="talendConsoleUrl" target="_blank" rel="noopener">{{ talendConsoleUrl }}</a></p>
-      <p>Power BI : <a [href]="powerBiConsoleUrl" target="_blank" rel="noopener">{{ powerBiConsoleUrl }}</a></p>
+      <p>Talend Studio : <a [href]="talendStudioUrl" target="_blank" rel="noopener">{{ talendStudioUrl }}</a> (VNC : <code>findme</code>)</p>
+      <p>Power BI RS : <a [href]="powerBiWebUrl" target="_blank" rel="noopener">{{ powerBiWebUrl }}</a></p>
       <h3>ETL manuel (ligne de commande)</h3>
       <pre class="cmd">docker compose run --rm talend-etl</pre>
       <h3>Power BI Desktop (Windows)</h3>

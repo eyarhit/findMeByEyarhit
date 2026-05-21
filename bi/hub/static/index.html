@@ -3,83 +3,63 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Find-Me — Console BI</title>
+  <title>Find-Me — BI (Talend + Power BI)</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
   <header class="top">
     <div>
-      <h1>Find-Me — Console BI</h1>
-      <p>Talend ETL · Power BI · entrepôt <code>findme_dw</code></p>
+      <h1>Find-Me — BI conteneurisé (formation BIS)</h1>
+      <p>Talend Open Studio · Power BI Report Server · ETL · <code>findme_dw</code></p>
     </div>
     <div class="status-pill" id="globalStatus">Chargement…</div>
   </header>
 
   <nav class="tabs">
-    <button type="button" class="tab active" data-tab="talend">Talend ETL</button>
-    <button type="button" class="tab" data-tab="powerbi">Power BI OLAP</button>
-    <button type="button" class="tab" data-tab="dw">Entrepôt</button>
+    <button type="button" class="tab active" data-tab="talend">Talend Open Studio</button>
+    <button type="button" class="tab" data-tab="powerbi">Power BI</button>
+    <button type="button" class="tab" data-tab="etl">ETL &amp; entrepôt</button>
   </nav>
 
   <main>
-    <section id="panel-talend" class="panel active">
+    <section id="panel-talend" class="panel active panel-embed">
+      <div class="embed-toolbar">
+        <a id="linkTalend" class="btn primary" href="#" target="_blank" rel="noopener">Ouvrir en plein écran</a>
+        <span class="hint">Mot de passe bureau : <code>findme</code> — job <code>FindMe_Load_DW</code></span>
+      </div>
+      <iframe id="iframeTalend" class="embed-frame" title="Talend Open Studio"></iframe>
+    </section>
+
+    <section id="panel-powerbi" class="panel panel-embed">
+      <div class="embed-toolbar">
+        <a id="linkPowerBi" class="btn primary" href="#" target="_blank" rel="noopener">Ouvrir Power BI (plein écran)</a>
+        <span class="hint" id="pbiHint">Portail Microsoft Power BI Report Server</span>
+      </div>
+      <iframe id="iframePowerBi" class="embed-frame" title="Power BI Report Server"></iframe>
+    </section>
+
+    <section id="panel-etl" class="panel">
       <div class="grid-2">
         <article class="card">
-          <h2>Job Talend — <code>FindMe_Load_DW</code></h2>
-          <p class="lead">Extraction → Transformation → Chargement vers le schéma en étoile (formation BIS).</p>
-          <pre class="pipeline">FindMe_Load_DW
-├── tPrejob → etl_run_log
-├── SubJob_Dim_Date / Dim_User / Dim_Mission / Dim_Skill
-├── SubJob_Fact_* (candidatures, CV, quiz, Codingame…)
-└── tPostjob → contrôles qualité + SUCCESS</pre>
-          <p class="hint">Studio : <code>bi/talend/studio/FindMe_Load_DW</code> — exécution Docker = même logique.</p>
+          <h2>ETL Talend — <code>FindMe_Load_DW</code></h2>
+          <p class="lead">Runtime Docker (même logique que le job Studio).</p>
           <div class="actions">
-            <button type="button" class="btn primary" id="btnRunEtl">Lancer l’ETL Talend</button>
-            <button type="button" class="btn" id="btnRefreshLog">Actualiser le journal</button>
+            <button type="button" class="btn primary" id="btnRunEtl">Lancer l’ETL</button>
+            <button type="button" class="btn" id="btnRefreshLog">Journal</button>
           </div>
+          <table class="stats-table">
+            <thead><tr><th>Table</th><th>Lignes</th></tr></thead>
+            <tbody id="statsBody"></tbody>
+          </table>
         </article>
         <article class="card log-card">
-          <h2>Journal d’exécution</h2>
+          <h2>Journal ETL</h2>
           <pre id="etlLog" class="log">En attente…</pre>
         </article>
       </div>
     </section>
-
-    <section id="panel-powerbi" class="panel">
-      <div class="grid-2">
-        <article class="card">
-          <h2>Aperçu OLAP (navigateur)</h2>
-          <p class="lead">Données <code>findme_dw</code> — même source que Power BI Desktop (Import).</p>
-          <div class="kpi-row" id="kpiRow"></div>
-          <canvas id="chartCandidatures" height="120"></canvas>
-          <p class="hint">Pour les rapports <code>.pbix</code> complets : Power BI Desktop (Windows) ci-dessous.</p>
-        </article>
-        <article class="card">
-          <h2>Power BI Desktop</h2>
-          <p>Connexion préconfigurée (aucune saisie si MySQL Docker est démarré) :</p>
-          <dl class="conn-dl" id="connDl"></dl>
-          <div class="actions">
-            <a class="btn primary" href="https://aka.ms/pbidesktop" target="_blank" rel="noopener">Installer Power BI Desktop</a>
-            <button type="button" class="btn" id="btnCopyConn">Copier la chaîne de connexion</button>
-          </div>
-          <h3>Rapports (.pbix)</h3>
-          <ul id="reportList" class="report-list"></ul>
-        </article>
-      </div>
-    </section>
-
-    <section id="panel-dw" class="panel">
-      <article class="card">
-        <h2>Tables findme_dw</h2>
-        <table class="stats-table">
-          <thead><tr><th>Table</th><th>Lignes</th></tr></thead>
-          <tbody id="statsBody"></tbody>
-        </table>
-      </article>
-    </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

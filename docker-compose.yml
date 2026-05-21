@@ -193,7 +193,27 @@ services:
     ports:
       - "8000:8000"
 
-  # Console BI (navigateur) : Talend ETL + aperçu Power BI — http://localhost:3032
+  # Talend Open Studio (interface graphique Eclipse) — http://localhost:6080
+  talend-studio:
+    build:
+      context: ./bi/talend
+      dockerfile: studio-docker/Dockerfile
+    container_name: findme-talend-studio
+    restart: unless-stopped
+    ports:
+      - "6080:6901"
+    environment:
+      VNC_PW: findme
+      MYSQL_HOST: mysql
+    volumes:
+      - ./bi/talend/studio-docker/installer:/installer:ro
+      - talend_studio_home:/home/kasm-user/talend-studio
+    shm_size: "2gb"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # Console BI (navigateur) : lance Talend Studio + Power BI RS + ETL — http://localhost:3032
   bi-hub:
     build:
       context: ./bi/hub
@@ -212,6 +232,8 @@ services:
       PBI_PORT: 3306
       PBI_USER: findme_bi
       PBI_PASSWORD: findme_bi_readonly
+      TALEND_STUDIO_URL: http://localhost:6080
+      POWERBI_WEB_URL: http://localhost:8077/reports
     volumes:
       - ./bi/dw/schema.sql:/ddl/schema.sql:ro
       - ./bi/dw/migrations/001_patch_etl_log_scd2.sql:/ddl/migrations/001_patch_etl_log_scd2.sql:ro
@@ -220,8 +242,10 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      talend-studio:
+        condition: service_started
 
-  # BI PFE (formation BIS) : Talend ETL → findme_dw → Power BI Desktop (OLAP)
+  # BI PFE (formation BIS) : Talend ETL → findme_dw → Power BI (OLAP)
   talend-etl:
     profiles: ["bi"]
     build:
@@ -267,3 +291,4 @@ services:
 volumes:
   mysql_data:
   minio_data:
+  talend_studio_home:

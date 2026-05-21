@@ -10,13 +10,13 @@
 | **OLAP** | Drill-down, filtres croisés, segments dans Power BI Desktop |
 | **Source** | MySQL `findme_dw` (alimenté par **Talend** avant ouverture des rapports) |
 
-## Accès rapide (recommandé)
+## Accès rapide (Docker — interface Power BI)
 
-1. `docker compose up -d`
-2. Console BI : **http://localhost:3032** (onglets Talend / Power BI)
-3. Ou **Admin → Tableaux de bord BI** dans l’app → boutons **Ouvrir Talend** / **Ouvrir Power BI**
+1. `scripts\docker-bi-powerbi-windows.cmd` (Docker en **conteneurs Windows**)
+2. Portail : **http://localhost:8077/reports** (`PBIRSAdmin` / `FindMe_PBIRS@123`)
+3. Ou **Admin → Tableaux de bord BI** → **Power BI (portail)**
 
-L’ETL se lance automatiquement au premier démarrage si `findme_dw` est vide.
+Importer les `.pbix` depuis `bi/powerbi/reports/`. Source MySQL : `host.docker.internal:3306`, base `findme_dw`, user `findme_bi`.
 
 ## Prérequis
 

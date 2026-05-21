@@ -105,12 +105,21 @@ Ou :
 scripts\fix-bi-pfe.cmd
 ```
 
-**Ordre (zéro config manuelle) :**
+**Stack BI conteneurisée (formation BIS) :**
 
-1. `docker compose up -d` — application + **console BI** (`findme-bi-hub` sur **http://localhost:3032**)  
-2. L’ETL Talend se lance **automatiquement** si `findme_dw` est vide (onglet **Talend ETL** dans la console).  
-3. Admin Angular → **Tableaux de bord BI** → boutons **Ouvrir Talend (console)** / **Ouvrir Power BI (console)**  
-4. **Power BI Desktop** (Windows, optionnel pour le rapport `.pbix`) — connexion déjà affichée dans la console ; MySQL sur `localhost:3306`.
+```cmd
+scripts\docker-bi-full.cmd
+scripts\docker-bi-powerbi-windows.cmd
+```
+
+| Outil | URL | Remarque |
+|-------|-----|----------|
+| **Talend Open Studio** | http://localhost:6080 | VNC : `findme` — installer Talend dans `bi/talend/studio-docker/installer/` (1ère fois) |
+| **Power BI Report Server** | http://localhost:8077/reports | Conteneur **Windows** — mode conteneurs Windows dans Docker Desktop |
+| **Hub BI** | http://localhost:3032 | ETL + liens intégrés |
+| **Admin app** | http://localhost:4200 → BI | Boutons Talend / Power BI |
+
+MySQL DW : `localhost:3306` / `findme_dw` / `findme_bi`
 
 La **première fois** : compter **5 à 15 minutes** (Maven déjà en cache = plus rapide).
 

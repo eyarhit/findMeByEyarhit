@@ -1,0 +1,21 @@
+# Power BI Report Server (Microsoft) — conteneur Windows
+# Prérequis : Docker Desktop → mode « Windows containers »
+# Usage : docker compose -f docker-compose.yml -f docker-compose.powerbi-windows.yml --profile bi-powerbi up -d
+
+services:
+  powerbi-rs:
+    profiles: ["bi-powerbi"]
+    image: ipierre1/ssrs-powerbi:latest
+    container_name: findme-powerbi-rs
+    platform: windows/amd64
+    restart: unless-stopped
+    ports:
+      - "8077:80"
+      - "14330:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      sa_password: "FindMe_Strong@Pass123"
+      pbirs_user: "PBIRSAdmin"
+      pbirs_password: "FindMe_PBIRS@123"
+    mem_limit: 6g
+    # MySQL Linux : utiliser host.docker.internal:3306 dans les sources PBIRS

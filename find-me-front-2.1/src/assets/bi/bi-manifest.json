@@ -6,8 +6,10 @@
   "biHub": {
     "port": 3032,
     "baseUrl": "http://localhost:3032",
-    "talendUrl": "http://localhost:3032/?tab=talend",
-    "powerBiUrl": "http://localhost:3032/?tab=powerbi",
+    "talendUrl": "http://localhost:6080",
+    "powerBiUrl": "http://localhost:8077/reports",
+    "talendStudioUrl": "http://localhost:6080",
+    "powerBiWebUrl": "http://localhost:8077/reports",
     "healthUrl": "http://localhost:3032/api/health"
   },
   "talend": {
@@ -18,7 +20,8 @@
     "buildId": "talend-findme-2026"
   },
   "powerBi": {
-    "desktopRequired": true,
+    "desktopRequired": false,
+    "reportServerUrl": "http://localhost:8077/reports",
     "connection": {
       "server": "localhost",
       "port": 3306,

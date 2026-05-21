@@ -29,6 +29,8 @@ export interface BiHubLinks {
   baseUrl: string;
   talendUrl: string;
   powerBiUrl: string;
+  talendStudioUrl?: string;
+  powerBiWebUrl?: string;
   healthUrl: string;
 }
 
@@ -113,12 +115,23 @@ export class BiDashboardComponent implements OnInit {
     return `http://${window.location.hostname}:${port}`;
   }
 
-  get talendConsoleUrl(): string {
-    return this.manifest?.biHub?.talendUrl || `${this.biHubBase}/?tab=talend`;
+  get talendStudioUrl(): string {
+    const h = window.location.hostname;
+    const port = this.manifest?.biHub?.talendStudioUrl
+      ? new URL(this.manifest.biHub.talendStudioUrl).port || '6080'
+      : '6080';
+    return this.manifest?.biHub?.talendStudioUrl?.replace('localhost', h)
+      || `http://${h}:${port}`;
   }
 
-  get powerBiConsoleUrl(): string {
-    return this.manifest?.biHub?.powerBiUrl || `${this.biHubBase}/?tab=powerbi`;
+  get powerBiWebUrl(): string {
+    const h = window.location.hostname;
+    return this.manifest?.biHub?.powerBiWebUrl?.replace('localhost', h)
+      || `http://${h}:8077/reports`;
+  }
+
+  get biHubLauncherUrl(): string {
+    return `${this.biHubBase}/?tab=talend`;
   }
 
   ngOnInit(): void {
@@ -159,16 +172,16 @@ export class BiDashboardComponent implements OnInit {
     return map[level] || level;
   }
 
-  openTalendConsole(): void {
-    window.open(this.talendConsoleUrl, '_blank', 'noopener,noreferrer');
+  openTalendStudio(): void {
+    window.open(this.talendStudioUrl, '_blank', 'noopener,noreferrer');
   }
 
-  openPowerBiConsole(): void {
-    window.open(this.powerBiConsoleUrl, '_blank', 'noopener,noreferrer');
+  openPowerBiWeb(): void {
+    window.open(this.powerBiWebUrl, '_blank', 'noopener,noreferrer');
   }
 
-  openPowerBiGuide(): void {
-    window.open('https://aka.ms/pbidesktop', '_blank', 'noopener,noreferrer');
+  openBiHub(): void {
+    window.open(this.biHubLauncherUrl, '_blank', 'noopener,noreferrer');
   }
 
   private checkBiHub(): void {

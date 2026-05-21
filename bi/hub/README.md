@@ -1,21 +1,18 @@
 # Console BI (`bi-hub`)
 
-Interface web Docker pour le PFE **sans configuration manuelle** :
+Portail Docker qui **embarque** les interfaces formation :
 
-| URL | Rôle |
-|-----|------|
-| http://localhost:3032/?tab=talend | Job Talend, lancer ETL, journal en direct |
-| http://localhost:3032/?tab=powerbi | Aperçu OLAP navigateur + paramètres Power BI Desktop |
-| http://localhost:3032/?tab=dw | Compteurs tables `findme_dw` |
+| URL | Outil (cours BIS) |
+|-----|-------------------|
+| http://localhost:6080 | **Talend Open Studio** (bureau + VNC, mot de passe `findme`) |
+| http://localhost:8077/reports | **Power BI Report Server** (portail Microsoft OLAP) |
+| http://localhost:3032 | Hub : iframes Studio + Power BI + ETL |
 
 ## Démarrage
 
-Inclus dans `docker compose up -d` (service `bi-hub`, port **3032**).
+```cmd
+scripts\docker-bi-full.cmd
+scripts\docker-bi-powerbi-windows.cmd
+```
 
-- Variable `BI_AUTO_ETL=1` (défaut) : charge `findme_dw` au premier démarrage si vide.
-- Boutons depuis l’app : **Admin → Tableaux de bord BI**.
-
-## Limites (formation)
-
-- **Talend Open Studio** (GUI graphique) reste un outil Windows à installer pour les captures rapport ; la console montre le **pipeline** et l’**exécution Docker** (même logique que le job).
-- **Power BI Desktop** est Windows ; la console fournit l’**aperçu navigateur** et les identifiants préremplis. Les fichiers `.pbix` dans `bi/powerbi/reports/` sont téléchargeables depuis la console.
+Voir aussi `bi/talend/studio-docker/README.md` et `bi/powerbi/report-server/README.md`.

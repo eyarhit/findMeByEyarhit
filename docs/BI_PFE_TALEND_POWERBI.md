@@ -20,10 +20,10 @@
 
 ## Technologies (exactement formation)
 
-- **Talend Open Studio** — conception job `FindMe_Load_DW`
-- **Docker** — `docker compose run --rm talend-etl`
+- **Talend Open Studio** — Docker `talend-studio` → http://localhost:6080
+- **Docker ETL** — `talend-etl` / Hub BI http://localhost:3032
 - **MySQL 8** — entrepôt + compte lecture `findme_bi`
-- **Power BI Desktop** — 3 rapports (Executive, Managérial, Opérationnel)
+- **Power BI Report Server** — Docker Windows → http://localhost:8077/reports (3 rapports .pbix)
 
 **Non utilisé** : Metabase, Superset, outils hors cours.
 

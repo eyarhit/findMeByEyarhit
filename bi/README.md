@@ -18,10 +18,10 @@ OLTP (5 bases)  →  Talend ETL (talend-etl)  →  findme_dw (étoile)
 docker compose up -d
 ```
 
-- **Console BI** (Talend + Power BI navigateur) : http://localhost:3032 — voir [hub/README.md](hub/README.md)
-- **Admin Angular** : menu *Tableaux de bord BI* → boutons Talend / Power BI
-- ETL manuel optionnel : `docker compose run --rm talend-etl`
-- Rapports `.pbix` : `bi/powerbi/README.md`
+- **Talend Open Studio** (Docker) : http://localhost:6080 — [studio-docker/README.md](talend/studio-docker/README.md)
+- **Power BI Report Server** (Docker) : http://localhost:8077/reports — [powerbi/report-server/README.md](powerbi/report-server/README.md)
+- **Hub BI** : http://localhost:3032 — [hub/README.md](hub/README.md)
+- Scripts : `scripts/docker-bi-full.cmd` + `scripts/docker-bi-powerbi-windows.cmd`
 
 ## Les 6 blocs méthodologiques
 
