@@ -10,6 +10,10 @@
 | **OLAP** | Drill-down, filtres croisés, segments dans Power BI Desktop |
 | **Source** | MySQL `findme_dw` (alimenté par **Talend** avant ouverture des rapports) |
 
+## Tables et mesures DAX
+
+Guide détaillé de chaque table / colonne + exemples de mesures : **[POWERBI_TABLES_ET_MESURES.md](POWERBI_TABLES_ET_MESURES.md)**
+
 ## Accès rapide (Docker — interface Power BI)
 
 1. `scripts\docker-bi-powerbi-windows.cmd` (Docker en **conteneurs Windows**)
