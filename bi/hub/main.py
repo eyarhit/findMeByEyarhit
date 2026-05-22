@@ -284,8 +284,21 @@ async def kpis_page(level: str):
 
 @app.get("/api/kpis/card/{slug}")
 async def kpis_card(slug: str):
+    loop = asyncio.get_event_loop()
     try:
-        return run_slug_query(_dw_connect, slug)
+        return await asyncio.wait_for(
+            loop.run_in_executor(None, lambda: run_slug_query(_dw_connect, slug)),
+            timeout=20.0,
+        )
+    except asyncio.TimeoutError:
+        return {
+            "kind": "error",
+            "error": "Requête SQL trop longue (20s)",
+            "points": [],
+            "scalars": {},
+            "scalar": None,
+            "slug": slug,
+        }
     except Exception as exc:
         raise HTTPException(503, str(exc)) from exc
 

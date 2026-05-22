@@ -4,7 +4,7 @@
       <p class="admin-bi__eyebrow">Pilotage décisionnel</p>
       <h1>{{ selectedReport?.name }}</h1>
       <p class="admin-bi__lead">{{ selectedReport?.description }}</p>
-      <p class="admin-bi__meta" *ngIf="hubDetail">{{ hubDetail }}</p>
+      <p class="admin-bi__meta" *ngIf="hubDetail">{{ hubDetail }} · données live MySQL</p>
     </div>
     <div class="admin-bi__actions">
       <span class="status-pill" [class.ok]="hubStatus === 'ok'" [class.warn]="hubStatus !== 'ok'">
@@ -57,10 +57,7 @@
     </article>
   </div>
 
-  <div class="widgets-grid" [class.widgets-grid--loading]="chartsLoading">
-    <p class="widgets-loading-inline" *ngIf="chartsLoading">
-      <span class="spinner"></span> Chargement des graphiques…
-    </p>
+  <div class="widgets-grid">
     <article
       class="widget"
       *ngFor="let card of pageCards"
@@ -71,6 +68,10 @@
       </header>
 
       <div class="widget__body">
+        <p class="widget__pending" *ngIf="isCardLoading(card.slug)">
+          <span class="spinner spinner--sm"></span> Interrogation findme_dw…
+        </p>
+
         <ng-container *ngIf="chartFor(card.slug) as ch">
           <p class="widget__err" *ngIf="ch.kind === 'error'">{{ ch.error }}</p>
 
@@ -84,6 +85,25 @@
           <div class="widget__gauge-meta" *ngIf="ch.kind === 'gauge'">
             <span class="gauge-big">{{ (ch.scalar ?? 0) | number:'1.0-1' }}%</span>
             <span class="gauge-sub">taux de conversion</span>
+          </div>
+
+          <div class="widget__kpi-scalar" *ngIf="ch.kind === 'kpi'">
+            <span class="gauge-big">{{ (ch.scalar ?? 0) | number:'1.0-1' }}</span>
+          </div>
+
+          <div class="widget__table-wrap" *ngIf="ch.kind === 'table' && tableRows(card.slug).length">
+            <table class="widget__table">
+              <thead>
+                <tr>
+                  <th *ngFor="let col of tableColumns(card.slug)">{{ col }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of tableRows(card.slug)">
+                  <td *ngFor="let col of tableColumns(card.slug)">{{ formatCell(row[col]) }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           <div class="widget__chart" *ngIf="usesCanvas(card.slug)">

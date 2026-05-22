@@ -6,6 +6,7 @@
   "githubRepo": "https://github.com/eyarhit/findMeByEyarhit",
   "biHub": {
     "port": 3032,
+    "dockerProxyPath": "/bi-api",
     "baseUrl": "http://localhost:3032",
     "talendUrl": "http://localhost:6080",
     "powerBiUrl": "http://localhost:8077/reports",

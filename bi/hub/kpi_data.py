@@ -250,29 +250,41 @@ def run_slug_query(connect_fn: Callable[[], Any], slug: str) -> dict[str, Any]:
 
 
 def run_page_queries(connect_fn: Callable[[], Any], level: str) -> dict[str, dict[str, Any]]:
-    """Une seule connexion MySQL pour toute la page (évite blocage / saturation)."""
-    charts: dict[str, dict[str, Any]] = {}
+    """Requêtes en parallèle (une connexion par carte) — une requête lente ne bloque pas toute la page."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
     slugs = page_slugs(level)
-    try:
-        with connect_fn() as conn:
-            for slug in slugs:
-                try:
-                    charts[slug] = _execute_slug(conn, slug)
-                except Exception as exc:
-                    charts[slug] = {
-                        "kind": "error",
-                        "error": str(exc)[:200],
-                        "points": [],
-                        "scalars": {},
-                        "scalar": None,
-                        "slug": slug,
-                    }
-    except Exception as exc:
-        err = str(exc)[:200]
-        for slug in slugs:
+    charts: dict[str, dict[str, Any]] = {}
+
+    def _one(slug: str) -> tuple[str, dict[str, Any]]:
+        try:
+            with connect_fn() as conn:
+                return slug, _execute_slug(conn, slug)
+        except Exception as exc:
+            return slug, {
+                "kind": "error",
+                "error": str(exc)[:200],
+                "points": [],
+                "scalars": {},
+                "scalar": None,
+                "slug": slug,
+            }
+
+    if not slugs:
+        return charts
+
+    workers = min(4, len(slugs))
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = {pool.submit(_one, slug): slug for slug in slugs}
+        for fut in as_completed(futures, timeout=45):
+            slug, data = fut.result()
+            charts[slug] = data
+
+    for slug in slugs:
+        if slug not in charts:
             charts[slug] = {
                 "kind": "error",
-                "error": err,
+                "error": "Délai dépassé",
                 "points": [],
                 "scalars": {},
                 "scalar": None,

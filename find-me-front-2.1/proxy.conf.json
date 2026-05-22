@@ -1,0 +1,10 @@
+{
+  "/bi-api": {
+    "target": "http://localhost:3032",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/bi-api": ""
+    }
+  }
+}

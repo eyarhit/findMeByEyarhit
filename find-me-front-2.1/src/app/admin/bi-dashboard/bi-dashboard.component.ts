@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import Chart, { ChartConfiguration } from 'chart.js/auto';
-import { Subscription, interval, of } from 'rxjs';
-import { catchError, switchMap, timeout } from 'rxjs/operators';
+import { Observable, Subscription, forkJoin, interval, of } from 'rxjs';
+import { catchError, finalize, map, switchMap, timeout } from 'rxjs/operators';
 
 export interface BiManifestCard {
   id: number;
@@ -31,7 +31,7 @@ export interface BiPowerBiReport {
 export interface BiManifest {
   version: number;
   dwDatabase: string;
-  biHub?: { port: number; healthUrl?: string };
+  biHub?: BiHubConfig;
   powerBi?: { reports: BiPowerBiReport[] };
   cards: BiManifestCard[];
   tabs: BiManifestTab[];
@@ -49,6 +49,13 @@ export interface CardChart {
   scalars: Record<string, number>;
   scalar: number | null;
   error?: string;
+  rows?: Record<string, unknown>[];
+}
+
+interface BiHubConfig {
+  port?: number;
+  healthUrl?: string;
+  dockerProxyPath?: string;
 }
 
 interface HubHealth {
@@ -92,6 +99,7 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
   executiveKpis: ExecutiveKpis | null = null;
   dwStats: Record<string, number> = {};
   cardCharts: Record<string, CardChart> = {};
+  cardLoading: Record<string, boolean> = {};
   chartsLoading = false;
   chartsError = '';
   etlRunning = false;
@@ -131,8 +139,14 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
   }
 
   get biHubBase(): string {
-    const port = this.manifest?.biHub?.port ?? 3032;
-    return `http://${window.location.hostname}:${port}`;
+    const hub = this.manifest?.biHub;
+    const proxy = hub?.dockerProxyPath;
+    const port = window.location.port;
+    if (proxy && (port === '4200' || port === '80' || port === '')) {
+      return proxy.replace(/\/$/, '');
+    }
+    const hubPort = hub?.port ?? 3032;
+    return `http://${window.location.hostname}:${hubPort}`;
   }
 
   get headlineKpis(): { label: string; value: number | string; icon: string }[] {
@@ -168,7 +182,9 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
           this.manifest = m;
           this.bindRouteNiveau();
           if (!this.route.snapshot.paramMap.get('niveau')) {
-            this.router.navigate(['/utilisateur/bi/executive'], { replaceUrl: true });
+            void this.router
+              .navigate(['/utilisateur/bi/executive'], { replaceUrl: true })
+              .then(() => this.refreshHubData());
             return;
           }
           this.refreshHubData();
@@ -184,6 +200,8 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
     this.routeSub = this.route.paramMap.subscribe(() => {
       this.bindRouteNiveau();
       this.destroyCharts();
+      this.cardCharts = {};
+      this.cardLoading = {};
       if (this.manifest) {
         this.loadHeadlineKpis();
         this.loadPageCharts();
@@ -233,12 +251,38 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
 
   usesCanvas(slug: string): boolean {
     const k = this.chartFor(slug)?.kind;
-    return !!k && !['matrix', 'error', 'empty'].includes(k);
+    return !!k && !['matrix', 'error', 'empty', 'table', 'kpi'].includes(k);
   }
 
   isWideWidget(card: BiManifestCard): boolean {
     const k = this.chartFor(card.slug)?.kind;
-    return k === 'matrix' || k === 'line' || card.slug === 'executive_kpis';
+    return k === 'matrix' || k === 'line' || k === 'table' || card.slug === 'executive_kpis';
+  }
+
+  isCardLoading(slug: string): boolean {
+    return !!this.cardLoading[slug];
+  }
+
+  tableRows(slug: string): Record<string, unknown>[] {
+    return this.chartFor(slug)?.rows || [];
+  }
+
+  tableColumns(slug: string): string[] {
+    const rows = this.tableRows(slug);
+    if (!rows.length) {
+      return [];
+    }
+    return Object.keys(rows[0]);
+  }
+
+  formatCell(value: unknown): string {
+    if (value == null) {
+      return '—';
+    }
+    if (typeof value === 'number') {
+      return Number.isInteger(value) ? String(value) : value.toFixed(1);
+    }
+    return String(value);
   }
 
   selectReportLevel(level: string): void {
@@ -292,39 +336,77 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
     this.loadDwStats();
   }
 
-  private loadPageCharts(): void {
+  private loadPageCharts(background = false): void {
     if (!this.manifest) {
       return;
     }
-    this.chartsLoading = true;
+    const slugs = this.pageCards.map((c) => c.slug);
+    if (!slugs.length) {
+      this.chartsLoading = false;
+      return;
+    }
+
+    const hasCharts = slugs.some((s) => {
+      const k = this.cardCharts[s]?.kind;
+      return !!k && k !== 'error';
+    });
+    if (!background || !hasCharts) {
+      this.chartsLoading = true;
+    }
     this.chartsError = '';
-    this.destroyCharts();
+    if (!background) {
+      this.destroyCharts();
+    }
+
+    slugs.forEach((s) => {
+      this.cardLoading[s] = true;
+    });
+
     this.chartsReqSub?.unsubscribe();
-    this.chartsReqSub = this.http
-      .get<{ charts: Record<string, CardChart> }>(
-        `${this.biHubBase}/api/kpis/page/${this.selectedReportLevel}`,
-        { params: { t: Date.now().toString() } }
-      )
+    const requests: Record<string, Observable<CardChart>> = {};
+    for (const slug of slugs) {
+      requests[slug] = this.http
+        .get<CardChart>(`${this.biHubBase}/api/kpis/card/${slug}`, {
+          params: { t: Date.now().toString() },
+        })
+        .pipe(
+          timeout(15000),
+          map((ch) => ({ ...ch, slug })),
+          catchError((err) =>
+            of({
+              kind: 'error',
+              slug,
+              error:
+                err?.status === 404
+                  ? 'Hub BI obsolète — docker compose build bi-hub frontend && docker compose up -d'
+                  : 'Indisponible (Hub MySQL)',
+              points: [],
+              scalars: {},
+              scalar: null,
+            } as CardChart)
+          )
+        );
+    }
+
+    this.chartsReqSub = forkJoin(requests)
       .pipe(
-        timeout(25000),
-        catchError(() => {
-          this.chartsError =
-            'Délai dépassé ou Hub BI indisponible — docker compose build bi-hub && docker compose up -d bi-hub';
-          return of({ charts: {} as Record<string, CardChart> });
+        finalize(() => {
+          this.chartsLoading = false;
+          slugs.forEach((s) => {
+            this.cardLoading[s] = false;
+          });
+          this.lastUpdate = new Date();
+          this.scheduleRenderCharts();
         })
       )
       .subscribe({
-        next: (res) => {
-          this.cardCharts = res.charts || {};
-          this.chartsLoading = false;
-          this.lastUpdate = new Date();
-          this.scheduleRenderCharts();
-        },
-        error: () => {
-          this.cardCharts = {};
-          this.chartsLoading = false;
-          this.chartsError =
-            'Données indisponibles — reconstruire bi-hub : docker compose build bi-hub && docker compose up -d bi-hub';
+        next: (charts) => {
+          this.cardCharts = { ...this.cardCharts, ...charts };
+          const errors = Object.values(charts).filter((c) => c.kind === 'error').length;
+          if (errors === slugs.length) {
+            this.chartsError =
+              'Entrepôt inaccessible — docker compose up -d mysql bi-hub puis Synchroniser';
+          }
         },
       });
   }
@@ -554,9 +636,9 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
         next: (h) => {
           const was = this.etlRunning;
           this.etlRunning = !!h.etlRunning;
-          if (was && !this.etlRunning && !this.chartsLoading) {
+          if (was && !this.etlRunning) {
             this.loadHeadlineKpis();
-            this.loadPageCharts();
+            this.loadPageCharts(true);
           }
         },
       });
@@ -565,9 +647,9 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
   private startAutoRefresh(): void {
     this.refreshSub?.unsubscribe();
     this.refreshSub = interval(60000).subscribe(() => {
-      if (this.autoRefresh && this.hubStatus === 'ok' && !this.etlRunning && !this.chartsLoading && this.manifest) {
+      if (this.autoRefresh && this.hubStatus === 'ok' && !this.etlRunning && this.manifest) {
         this.loadHeadlineKpis();
-        this.loadPageCharts();
+        this.loadPageCharts(true);
       }
     });
   }
