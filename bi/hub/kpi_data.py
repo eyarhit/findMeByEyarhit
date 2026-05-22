@@ -205,28 +205,39 @@ def shape_result(
     return {"kind": "table", "points": [], "scalars": {}, "scalar": None, "rows": rows[:20]}
 
 
-def run_slug_query(connect_fn: Callable[[], Any], slug: str) -> dict[str, Any]:
+def _execute_slug(conn: Any, slug: str) -> dict[str, Any]:
     display = card_display(slug)
     fname = slug_sql_file(slug)
     if not fname:
-        return {"kind": "error", "error": "SQL inconnu", "points": [], "scalars": {}, "scalar": None}
+        return {"kind": "error", "error": "SQL inconnu", "points": [], "scalars": {}, "scalar": None, "slug": slug}
     path = KPI_SQL_DIR / fname
     if not path.is_file():
-        return {"kind": "error", "error": f"Fichier absent: {fname}", "points": [], "scalars": {}, "scalar": None}
+        return {
+            "kind": "error",
+            "error": f"Fichier absent: {fname}",
+            "points": [],
+            "scalars": {},
+            "scalar": None,
+            "slug": slug,
+        }
     sql = _strip_sql_comments(path.read_text(encoding="utf-8"))
     if not sql:
-        return {"kind": "error", "error": "SQL vide", "points": [], "scalars": {}, "scalar": None}
+        return {"kind": "error", "error": "SQL vide", "points": [], "scalars": {}, "scalar": None, "slug": slug}
+    with conn.cursor() as cur:
+        cur.execute(sql)
+        rows = list(cur.fetchall() or [])
+        cols = [d[0] for d in (cur.description or [])]
+    if not cols and rows:
+        cols = list(rows[0].keys())
+    out = shape_result(rows, cols, display, slug)
+    out["slug"] = slug
+    return out
+
+
+def run_slug_query(connect_fn: Callable[[], Any], slug: str) -> dict[str, Any]:
     try:
         with connect_fn() as conn:
-            with conn.cursor() as cur:
-                cur.execute(sql)
-                rows = list(cur.fetchall() or [])
-                cols = [d[0] for d in (cur.description or [])]
-        if not cols and rows:
-            cols = list(rows[0].keys())
-        out = shape_result(rows, cols, display, slug)
-        out["slug"] = slug
-        return out
+            return _execute_slug(conn, slug)
     except Exception as exc:
         return {
             "kind": "error",
@@ -239,7 +250,32 @@ def run_slug_query(connect_fn: Callable[[], Any], slug: str) -> dict[str, Any]:
 
 
 def run_page_queries(connect_fn: Callable[[], Any], level: str) -> dict[str, dict[str, Any]]:
+    """Une seule connexion MySQL pour toute la page (évite blocage / saturation)."""
     charts: dict[str, dict[str, Any]] = {}
-    for slug in page_slugs(level):
-        charts[slug] = run_slug_query(connect_fn, slug)
+    slugs = page_slugs(level)
+    try:
+        with connect_fn() as conn:
+            for slug in slugs:
+                try:
+                    charts[slug] = _execute_slug(conn, slug)
+                except Exception as exc:
+                    charts[slug] = {
+                        "kind": "error",
+                        "error": str(exc)[:200],
+                        "points": [],
+                        "scalars": {},
+                        "scalar": None,
+                        "slug": slug,
+                    }
+    except Exception as exc:
+        err = str(exc)[:200]
+        for slug in slugs:
+            charts[slug] = {
+                "kind": "error",
+                "error": err,
+                "points": [],
+                "scalars": {},
+                "scalar": None,
+                "slug": slug,
+            }
     return charts

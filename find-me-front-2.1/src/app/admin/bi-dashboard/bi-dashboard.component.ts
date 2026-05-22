@@ -1,14 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import {
-  AfterViewChecked,
-  Component,
-  OnDestroy,
-  OnInit,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import Chart, { ChartConfiguration } from 'chart.js/auto';
-import { Subscription, interval } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Subscription, interval, of } from 'rxjs';
+import { catchError, switchMap, timeout } from 'rxjs/operators';
 
 export interface BiManifestCard {
   id: number;
@@ -88,7 +83,7 @@ const CHART_COLORS = [
   templateUrl: './bi-dashboard.component.html',
   styleUrls: ['./bi-dashboard.component.scss'],
 })
-export class BiDashboardComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class BiDashboardComponent implements OnInit, OnDestroy {
   manifest: BiManifest | null = null;
   manifestError = '';
   hubStatus: 'unknown' | 'ok' | 'degraded' | 'error' = 'unknown';
@@ -102,14 +97,15 @@ export class BiDashboardComponent implements OnInit, OnDestroy, AfterViewChecked
   etlRunning = false;
   etlMessage = '';
   periodMonths = 0;
-  autoRefresh = true;
+  autoRefresh = false;
   lastUpdate: Date | null = null;
 
   private chartInstances = new Map<string, Chart>();
-  private chartsDirty = false;
+  private chartsReqSub?: Subscription;
   private etlPollSub?: Subscription;
   private refreshSub?: Subscription;
   private routeSub?: Subscription;
+  private renderTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
     private http: HttpClient,
@@ -171,6 +167,10 @@ export class BiDashboardComponent implements OnInit, OnDestroy, AfterViewChecked
         next: (m) => {
           this.manifest = m;
           this.bindRouteNiveau();
+          if (!this.route.snapshot.paramMap.get('niveau')) {
+            this.router.navigate(['/utilisateur/bi/executive'], { replaceUrl: true });
+            return;
+          }
           this.refreshHubData();
           this.startEtlPolling();
           this.startAutoRefresh();
@@ -185,20 +185,18 @@ export class BiDashboardComponent implements OnInit, OnDestroy, AfterViewChecked
       this.bindRouteNiveau();
       this.destroyCharts();
       if (this.manifest) {
+        this.loadHeadlineKpis();
         this.loadPageCharts();
       }
     });
   }
 
-  ngAfterViewChecked(): void {
-    if (this.chartsDirty && !this.chartsLoading) {
-      this.chartsDirty = false;
-      this.renderCharts();
-    }
-  }
-
   ngOnDestroy(): void {
+    if (this.renderTimer) {
+      clearTimeout(this.renderTimer);
+    }
     this.destroyCharts();
+    this.chartsReqSub?.unsubscribe();
     this.etlPollSub?.unsubscribe();
     this.refreshSub?.unsubscribe();
     this.routeSub?.unsubscribe();
@@ -248,7 +246,7 @@ export class BiDashboardComponent implements OnInit, OnDestroy, AfterViewChecked
   }
 
   onFilterChange(): void {
-    this.chartsDirty = true;
+    this.scheduleRenderCharts();
   }
 
   runEtl(): void {
@@ -285,9 +283,13 @@ export class BiDashboardComponent implements OnInit, OnDestroy, AfterViewChecked
 
   private refreshHubData(): void {
     this.checkBiHub();
+    this.loadHeadlineKpis();
+    this.loadPageCharts();
+  }
+
+  private loadHeadlineKpis(): void {
     this.loadExecutiveKpis();
     this.loadDwStats();
-    this.loadPageCharts();
   }
 
   private loadPageCharts(): void {
@@ -297,17 +299,26 @@ export class BiDashboardComponent implements OnInit, OnDestroy, AfterViewChecked
     this.chartsLoading = true;
     this.chartsError = '';
     this.destroyCharts();
-    this.http
+    this.chartsReqSub?.unsubscribe();
+    this.chartsReqSub = this.http
       .get<{ charts: Record<string, CardChart> }>(
         `${this.biHubBase}/api/kpis/page/${this.selectedReportLevel}`,
         { params: { t: Date.now().toString() } }
+      )
+      .pipe(
+        timeout(25000),
+        catchError(() => {
+          this.chartsError =
+            'Délai dépassé ou Hub BI indisponible — docker compose build bi-hub && docker compose up -d bi-hub';
+          return of({ charts: {} as Record<string, CardChart> });
+        })
       )
       .subscribe({
         next: (res) => {
           this.cardCharts = res.charts || {};
           this.chartsLoading = false;
           this.lastUpdate = new Date();
-          this.chartsDirty = true;
+          this.scheduleRenderCharts();
         },
         error: () => {
           this.cardCharts = {};
@@ -316,6 +327,13 @@ export class BiDashboardComponent implements OnInit, OnDestroy, AfterViewChecked
             'Données indisponibles — reconstruire bi-hub : docker compose build bi-hub && docker compose up -d bi-hub';
         },
       });
+  }
+
+  private scheduleRenderCharts(): void {
+    if (this.renderTimer) {
+      clearTimeout(this.renderTimer);
+    }
+    this.renderTimer = setTimeout(() => this.renderCharts(), 150);
   }
 
   private renderCharts(): void {
@@ -365,23 +383,8 @@ export class BiDashboardComponent implements OnInit, OnDestroy, AfterViewChecked
             tooltip: { enabled: true },
           },
         },
-        plugins: [
-          {
-            id: 'gaugeCenter',
-            afterDraw: (chart) => {
-              const { ctx, chartArea } = chart;
-              if (!chartArea) return;
-              ctx.save();
-              ctx.font = 'bold 22px system-ui';
-              ctx.fillStyle = '#5A3FC9';
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.fillText(`${rate}%`, (chartArea.left + chartArea.right) / 2, (chartArea.top + chartArea.bottom) / 2);
-              ctx.restore();
-            },
-          },
-        ],
       };
+      return doughnutCfg;
     }
 
     if (ch.kind === 'line') {
@@ -545,14 +548,15 @@ export class BiDashboardComponent implements OnInit, OnDestroy, AfterViewChecked
 
   private startEtlPolling(): void {
     this.etlPollSub?.unsubscribe();
-    this.etlPollSub = interval(4000)
+    this.etlPollSub = interval(12000)
       .pipe(switchMap(() => this.http.get<HubHealth>(`${this.biHubBase}/api/health`)))
       .subscribe({
         next: (h) => {
           const was = this.etlRunning;
           this.etlRunning = !!h.etlRunning;
-          if (was && !this.etlRunning) {
-            this.refreshHubData();
+          if (was && !this.etlRunning && !this.chartsLoading) {
+            this.loadHeadlineKpis();
+            this.loadPageCharts();
           }
         },
       });
@@ -560,10 +564,9 @@ export class BiDashboardComponent implements OnInit, OnDestroy, AfterViewChecked
 
   private startAutoRefresh(): void {
     this.refreshSub?.unsubscribe();
-    this.refreshSub = interval(25000).subscribe(() => {
-      if (this.autoRefresh && this.hubStatus === 'ok' && !this.etlRunning && this.manifest) {
-        this.loadExecutiveKpis();
-        this.loadDwStats();
+    this.refreshSub = interval(60000).subscribe(() => {
+      if (this.autoRefresh && this.hubStatus === 'ok' && !this.etlRunning && !this.chartsLoading && this.manifest) {
+        this.loadHeadlineKpis();
         this.loadPageCharts();
       }
     });

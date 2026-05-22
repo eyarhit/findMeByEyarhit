@@ -28,7 +28,7 @@
       </label>
       <label class="filter-check">
         <input type="checkbox" [(ngModel)]="autoRefresh" />
-        Actualisation auto (25 s)
+        Actualisation auto (60 s)
       </label>
     </div>
     <span class="bi-toolbar__time" *ngIf="lastUpdate">
@@ -57,12 +57,10 @@
     </article>
   </div>
 
-  <div class="widgets-loading" *ngIf="chartsLoading">
-    <span class="spinner"></span>
-    Chargement depuis findme_dw…
-  </div>
-
-  <div class="widgets-grid" *ngIf="!chartsLoading">
+  <div class="widgets-grid" [class.widgets-grid--loading]="chartsLoading">
+    <p class="widgets-loading-inline" *ngIf="chartsLoading">
+      <span class="spinner"></span> Chargement des graphiques…
+    </p>
     <article
       class="widget"
       *ngFor="let card of pageCards"

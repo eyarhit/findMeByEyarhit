@@ -5,7 +5,7 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py kpi_data.py pbi_layout.py pbi_measures.py ./
+COPY main.py kpi_data.py ./
 COPY static ./static/
 
 ENV DW_SCHEMA_SQL=/ddl/schema.sql

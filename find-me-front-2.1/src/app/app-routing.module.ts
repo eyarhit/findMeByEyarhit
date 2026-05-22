@@ -168,8 +168,8 @@ const routes: Routes = [
     canActivate: [AuthGuard, roleGuard],
     data: { expectedRole: ['ADMIN'] },
     children: [
-      { path: '', redirectTo: 'bi', pathMatch: 'full' },
-      { path: 'bi', component: BiDashboardComponent },
+      { path: '', redirectTo: 'bi/executive', pathMatch: 'full' },
+      { path: 'bi', redirectTo: 'bi/executive', pathMatch: 'full' },
       { path: 'bi/:niveau', component: BiDashboardComponent },
       { path: 'utilisateurs', component: ListUtilisateurComponent, data: { userRole: 'CANDIDAT' } },
       { path: 'accueil', redirectTo: 'bi', pathMatch: 'full' },
