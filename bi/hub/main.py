@@ -16,6 +16,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from kpi_data import run_page_queries, run_slug_query
+
 MYSQL_HOST = os.environ.get("MYSQL_HOST", "mysql")
 MYSQL_PORT = int(os.environ.get("MYSQL_PORT", "3306"))
 MYSQL_USER = os.environ.get("MYSQL_ETL_USER", "root")
@@ -257,14 +259,39 @@ async def kpis_executive():
         raise HTTPException(503, str(exc)) from exc
 
 
+def _dw_connect():
+    return _connect(DW)
+
+
+@app.get("/api/kpis/page/{level}")
+async def kpis_page(level: str):
+    allowed = {"executive", "managerial", "operational", "technique"}
+    if level not in allowed:
+        raise HTTPException(404, "Niveau BI inconnu")
+    try:
+        charts = run_page_queries(_dw_connect, level)
+        return {"level": level, "charts": charts}
+    except Exception as exc:
+        raise HTTPException(503, str(exc)) from exc
+
+
+@app.get("/api/kpis/card/{slug}")
+async def kpis_card(slug: str):
+    try:
+        return run_slug_query(_dw_connect, slug)
+    except Exception as exc:
+        raise HTTPException(503, str(exc)) from exc
+
+
 @app.get("/api/kpis/candidatures_par_mois")
 async def kpis_candidatures_mois():
     sql = """
-    SELECT d.year_number AS y, d.month_number AS m,
+    SELECT d.year_num AS y, d.month_num AS m,
            SUM(f.candidature_count) AS total
     FROM fact_candidature f
     JOIN dim_date d ON d.date_key = f.date_key
-    GROUP BY d.year_number, d.month_number
+    WHERE f.date_key > 19000101
+    GROUP BY d.year_num, d.month_num
     ORDER BY y, m
     LIMIT 24
     """

@@ -40,6 +40,21 @@ export interface BiManifest {
   tabs: BiManifestTab[];
 }
 
+export interface ChartPoint {
+  label: string;
+  value: number;
+}
+
+export interface CardChart {
+  slug?: string;
+  kind: string;
+  points: ChartPoint[];
+  scalars: Record<string, number>;
+  scalar: number | null;
+  error?: string;
+  rows?: Record<string, unknown>[];
+}
+
 interface HubHealth {
   mysql: boolean;
   dw: boolean;
@@ -54,11 +69,6 @@ interface ExecutiveKpis {
   total_missions?: number;
   total_candidatures?: number;
   total_cv?: number;
-}
-
-interface MoisPoint {
-  label: string;
-  value: number;
 }
 
 interface PbiConnection {
@@ -80,8 +90,10 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
   hubDetail = '';
   selectedReportLevel = 'executive';
   executiveKpis: ExecutiveKpis | null = null;
-  candidaturesMois: MoisPoint[] = [];
   dwStats: Record<string, number> = {};
+  cardCharts: Record<string, CardChart> = {};
+  chartsLoading = false;
+  chartsError = '';
   pbiConnection: PbiConnection | null = null;
   etlRunning = false;
   etlMessage = '';
@@ -126,11 +138,9 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
       ];
     }
     if (this.selectedReportLevel === 'technique') {
-      const dates = this.dwStats['dim_date'] ?? 0;
-      const users = this.dwStats['dim_user'] ?? 0;
       return [
-        { label: 'Dates DW', value: dates },
-        { label: 'Utilisateurs DW', value: users },
+        { label: 'Dates DW', value: this.dwStats['dim_date'] ?? 0 },
+        { label: 'Utilisateurs DW', value: this.dwStats['dim_user'] ?? 0 },
         { label: 'Candidatures (fait)', value: this.dwStats['fact_candidature'] ?? 0 },
         { label: 'CV (fait)', value: this.dwStats['fact_cv'] ?? 0 },
       ];
@@ -161,12 +171,39 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
         },
       });
 
-    this.routeSub = this.route.paramMap.subscribe(() => this.bindRouteNiveau());
+    this.routeSub = this.route.paramMap.subscribe(() => {
+      this.bindRouteNiveau();
+      if (this.manifest) {
+        this.loadPageCharts();
+      }
+    });
   }
 
   ngOnDestroy(): void {
     this.etlPollSub?.unsubscribe();
     this.routeSub?.unsubscribe();
+  }
+
+  chartFor(slug: string): CardChart | undefined {
+    return this.cardCharts[slug];
+  }
+
+  maxChartValue(slug: string): number {
+    const pts = this.chartFor(slug)?.points || [];
+    return Math.max(1, ...pts.map((p) => p.value));
+  }
+
+  donutTotal(slug: string): number {
+    const pts = this.chartFor(slug)?.points || [];
+    return pts.reduce((s, p) => s + p.value, 0) || 1;
+  }
+
+  scalarKeys(slug: string): string[] {
+    return Object.keys(this.chartFor(slug)?.scalars || {});
+  }
+
+  formatScalarKey(key: string): string {
+    return key.replace(/_/g, ' ');
   }
 
   selectReportLevel(level: string): void {
@@ -184,7 +221,7 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
         this.etlMessage =
           err?.status === 409
             ? 'Synchronisation déjà en cours.'
-            : 'Service BI indisponible (docker compose up -d bi-hub mysql).';
+            : 'Service BI indisponible — reconstruire bi-hub : docker compose build bi-hub && docker compose up -d bi-hub';
       },
     });
   }
@@ -199,20 +236,6 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
     return map[this.hubStatus] || map['unknown'];
   }
 
-  displayIcon(type: string): string {
-    const t = (type || '').toLowerCase();
-    if (t.includes('line')) return 'chart-line';
-    if (t.includes('bar') || t.includes('histogram')) return 'chart-bar';
-    if (t.includes('donut') || t.includes('pie')) return 'chart-pie';
-    if (t.includes('gauge') || t.includes('kpi') || t.includes('matrix')) return 'gauge';
-    if (t.includes('table')) return 'table';
-    return 'chart';
-  }
-
-  maxMoisValue(): number {
-    return Math.max(1, ...this.candidaturesMois.map((p) => p.value));
-  }
-
   private bindRouteNiveau(): void {
     const niveau = (this.route.snapshot.paramMap.get('niveau') || 'executive').toLowerCase();
     const allowed = ['executive', 'managerial', 'operational', 'technique'];
@@ -223,8 +246,33 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
     this.checkBiHub();
     this.loadExecutiveKpis();
     this.loadDwStats();
-    this.loadCandidaturesMois();
+    this.loadPageCharts();
     this.loadPbiConnection();
+  }
+
+  private loadPageCharts(): void {
+    if (!this.manifest) {
+      return;
+    }
+    this.chartsLoading = true;
+    this.chartsError = '';
+    this.http
+      .get<{ level: string; charts: Record<string, CardChart> }>(
+        `${this.biHubBase}/api/kpis/page/${this.selectedReportLevel}`,
+        { params: { t: Date.now().toString() } }
+      )
+      .subscribe({
+        next: (res) => {
+          this.cardCharts = res.charts || {};
+          this.chartsLoading = false;
+        },
+        error: () => {
+          this.cardCharts = {};
+          this.chartsLoading = false;
+          this.chartsError =
+            'Impossible de charger les graphiques. Reconstruisez le conteneur bi-hub (git pull + docker compose build bi-hub).';
+        },
+      });
   }
 
   private checkBiHub(): void {
@@ -275,15 +323,6 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  private loadCandidaturesMois(): void {
-    this.http
-      .get<MoisPoint[]>(`${this.biHubBase}/api/kpis/candidatures_par_mois`)
-      .subscribe({
-        next: (rows) => (this.candidaturesMois = rows || []),
-        error: () => (this.candidaturesMois = []),
-      });
-  }
-
   private loadPbiConnection(): void {
     this.http
       .get<PbiConnection>(`${this.biHubBase}/api/powerbi/connection`)
@@ -295,14 +334,16 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
 
   private startEtlPolling(): void {
     this.etlPollSub?.unsubscribe();
-    this.etlPollSub = interval(8000)
+    this.etlPollSub = interval(5000)
       .pipe(switchMap(() => this.http.get<HubHealth>(`${this.biHubBase}/api/health`)))
       .subscribe({
         next: (h) => {
           const was = this.etlRunning;
           this.etlRunning = !!h.etlRunning;
-          if (was && !this.etlRunning && h.etlLastSuccess) {
-            this.etlMessage = `Synchronisation terminée : ${h.etlLastSuccess}`;
+          if (was && !this.etlRunning) {
+            if (h.etlLastSuccess) {
+              this.etlMessage = `Synchronisation terminée : ${h.etlLastSuccess}`;
+            }
             this.refreshHubData();
           }
         },

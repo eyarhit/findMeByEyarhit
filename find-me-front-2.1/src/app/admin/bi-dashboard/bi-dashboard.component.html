@@ -21,6 +21,7 @@
   </header>
 
   <p class="admin-bi__sync" *ngIf="etlMessage">{{ etlMessage }}</p>
+  <p class="admin-bi__sync err" *ngIf="chartsError">{{ chartsError }}</p>
 
   <nav class="admin-bi__nav" *ngIf="reports.length">
     <button
@@ -40,41 +41,66 @@
     </article>
   </div>
 
-  <div class="chart-panel" *ngIf="selectedReportLevel === 'executive' && candidaturesMois.length">
-    <h2>Candidatures par mois</h2>
-    <p class="chart-panel__sub">Même indicateur que la page <strong>01 - Executive</strong> dans Power BI</p>
-    <div class="bar-chart">
-      <div class="bar-chart__item" *ngFor="let p of candidaturesMois">
-        <div
-          class="bar-chart__bar"
-          [style.height.%]="(p.value / maxMoisValue()) * 100"
-          [title]="p.value + ' — ' + p.label"></div>
-        <span class="bar-chart__label">{{ p.label }}</span>
-      </div>
-    </div>
-  </div>
-
   <section class="indicators">
-    <h2>Indicateurs de cette page Power BI</h2>
-    <p class="indicators__sub">
-      Visualisations du projet <code>FindMe-Dashboard.pbip</code> — onglet
-      <strong>{{ selectedReport?.page }}</strong>
-    </p>
-    <div class="indicator-grid">
+    <h2>Indicateurs — même source que Power BI (findme_dw)</h2>
+    <p class="indicators__sub" *ngIf="chartsLoading">Chargement des données…</p>
+
+    <div class="indicator-grid" *ngIf="!chartsLoading">
       <article class="indicator-card" *ngFor="let card of pageCards">
-        <div class="indicator-card__icon" [attr.data-type]="displayIcon(card.display)"></div>
         <h3>{{ card.title }}</h3>
         <p class="indicator-card__type">{{ card.display }}</p>
-        <p class="indicator-card__page">{{ card.powerBiPage }}</p>
+
+        <ng-container *ngIf="chartFor(card.slug) as ch">
+          <!-- Erreur SQL -->
+          <p class="chart-empty err" *ngIf="ch.kind === 'error'">{{ ch.error }}</p>
+          <p class="chart-empty" *ngIf="ch.kind === 'empty'">Aucune donnée — synchronisez puis réessayez.</p>
+
+          <!-- Jauge / KPI scalaire -->
+          <div class="chart-gauge" *ngIf="ch.kind === 'gauge' || ch.kind === 'kpi'">
+            <span class="chart-gauge__value">{{ (ch.scalar ?? 0) | number:'1.0-1' }}</span>
+            <span class="chart-gauge__unit" *ngIf="ch.kind === 'gauge'">%</span>
+          </div>
+
+          <!-- Matrice KPI exécutifs -->
+          <div class="chart-matrix" *ngIf="ch.kind === 'matrix'">
+            <div class="chart-matrix__cell" *ngFor="let key of scalarKeys(card.slug)">
+              <span class="chart-matrix__val">{{ ch.scalars[key] | number:'1.0-0' }}</span>
+              <span class="chart-matrix__lbl">{{ formatScalarKey(key) }}</span>
+            </div>
+          </div>
+
+          <!-- Barres / lignes -->
+          <div class="mini-chart" *ngIf="ch.kind === 'bar' || ch.kind === 'line'">
+            <div class="mini-chart__item" *ngFor="let p of ch.points">
+              <div
+                class="mini-chart__bar"
+                [style.height.%]="(p.value / maxChartValue(card.slug)) * 100"
+                [title]="p.label + ' : ' + p.value"></div>
+              <span class="mini-chart__lbl">{{ p.label }}</span>
+            </div>
+          </div>
+
+          <!-- Donut (barres horizontales proportionnelles) -->
+          <div class="chart-donut" *ngIf="ch.kind === 'donut'">
+            <div class="chart-donut__row" *ngFor="let p of ch.points">
+              <span class="chart-donut__lbl">{{ p.label }}</span>
+              <div class="chart-donut__track">
+                <div
+                  class="chart-donut__fill"
+                  [style.width.%]="(p.value / donutTotal(card.slug)) * 100"></div>
+              </div>
+              <span class="chart-donut__val">{{ p.value | number:'1.0-0' }}</span>
+            </div>
+          </div>
+        </ng-container>
+
+        <p class="chart-empty" *ngIf="!chartFor(card.slug) && !chartsLoading">—</p>
       </article>
     </div>
-    <p class="indicators__empty" *ngIf="!pageCards.length">
-      Aucun indicateur configuré pour cette page.
-    </p>
   </section>
 
   <section class="dw-panel" *ngIf="selectedReportLevel === 'technique' && dwStats">
-    <h2>Volumes entrepôt (page Technique)</h2>
+    <h2>Volumes entrepôt</h2>
     <div class="dw-table">
       <div class="dw-table__row" *ngFor="let row of dwStats | keyvalue">
         <span>{{ row.key }}</span>
@@ -85,10 +111,8 @@
 
   <footer class="admin-bi__footer" *ngIf="pbiConnection">
     <p>
-      <strong>Power BI Desktop</strong> — après synchronisation, ouvrez le PBIP et cliquez sur
-      <em>Actualiser</em> :
-      {{ pbiConnection.server }}:{{ pbiConnection.port }} · {{ pbiConnection.database }} ·
-      {{ pbiConnection.user }}
+      Rapport complet dans <strong>Power BI Desktop</strong> (PBIP) — après synchro :
+      Actualiser sur {{ pbiConnection.database }} ({{ pbiConnection.server }}:{{ pbiConnection.port }}).
     </p>
   </footer>
 </section>
@@ -96,6 +120,5 @@
 <ng-template #biError>
   <div class="admin-bi admin-bi--error">
     <p>{{ manifestError }}</p>
-    <button type="button" class="btn-primary" (click)="runEtl()">Réessayer la synchronisation</button>
   </div>
 </ng-template>

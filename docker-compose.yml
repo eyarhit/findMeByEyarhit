@@ -230,6 +230,8 @@ services:
       MYSQL_ETL_PASSWORD: root
       BI_AUTO_ETL: "1"
       ETL_SCRIPT: /app/etl_load_dw.py
+      KPI_SQL_DIR: /app/kpis/sql
+      BI_MANIFEST_PATH: /app/bi-manifest.json
       PBI_SERVER: localhost
       PBI_PORT: 3306
       PBI_USER: findme_bi
@@ -241,6 +243,8 @@ services:
       - ./bi/dw/migrations/001_patch_etl_log_scd2.sql:/ddl/migrations/001_patch_etl_log_scd2.sql:ro
       - ./bi/talend/docker/etl_load_dw.py:/app/etl_load_dw.py:ro
       - ./bi/powerbi/reports:/app/reports:ro
+      - ./bi/kpis/sql:/app/kpis/sql:ro
+      - ./find-me-front-2.1/src/assets/bi/bi-manifest.json:/app/bi-manifest.json:ro
     depends_on:
       mysql:
         condition: service_healthy
