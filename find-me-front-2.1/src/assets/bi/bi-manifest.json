@@ -1,157 +1,77 @@
 {
-  "version": 5,
-  "stack": "findme_dw → Power BI (4 pages PBIP)",
-  "generatedAt": "2026-05-22T00:00:00Z",
+  "version": 4,
+  "stack": "Talend ETL + Power BI OLAP",
+  "generatedAt": "2026-05-20T00:00:00Z",
   "dwDatabase": "findme_dw",
-  "githubRepo": "https://github.com/eyarhit/findMeByEyarhit",
   "biHub": {
     "port": 3032,
-    "dockerProxyPath": "/bi-api",
     "baseUrl": "http://localhost:3032",
     "talendUrl": "http://localhost:6080",
     "powerBiUrl": "http://localhost:8077/reports",
     "talendStudioUrl": "http://localhost:6080",
     "powerBiWebUrl": "http://localhost:8077/reports",
-    "healthPath": "/api/health"
+    "healthUrl": "http://localhost:3032/api/health"
   },
   "talend": {
     "jobName": "FindMe_Load_DW",
     "studioPath": "bi/talend/studio/FindMe_Load_DW",
     "dockerService": "talend-etl",
     "hubService": "bi-hub",
-    "etlCommand": "docker compose run --rm talend-etl"
+    "buildId": "talend-findme-2026"
   },
   "powerBi": {
-    "pbipProject": "bi/powerbi/FindMe-Dashboard/FindMe-Dashboard.pbip",
-    "openCommandWin": "ONE_COMMANDE_POWERBI.cmd",
-    "friendCommandWin": "DOCKER_TEST_AMI.cmd",
-    "friendCommandPowerBi": "GIT_PULL_BI.cmd",
-    "fixPage04Command": "FIX_PAGE04_TECHNIQUE.cmd",
-    "connectionHint": "localhost:3306 · findme_dw · utilisateur findme_bi (mot de passe dans docker/mysql-init/02-findme-bi-readonly.sql)",
-    "guidePaths": [
-      "bi/powerbi/GUIDE_BI_POWER_BI_COMPLET.md",
-      "bi/GUIDE_TEST_AMI_APRES_PULL.md",
-      "bi/powerbi/README.md",
-      "bi/powerbi/GUIDE_AUTRE_PC.md",
-      "bi/powerbi/POWERBI_TABLES_ET_MESURES.md"
-    ],
+    "desktopRequired": false,
+    "reportServerUrl": "http://localhost:8077/reports",
+    "connection": {
+      "server": "localhost",
+      "port": 3306,
+      "database": "findme_dw",
+      "user": "findme_bi",
+      "password": "findme_bi_readonly"
+    },
     "reports": [
       {
         "level": "executive",
-        "name": "01 - Executive",
-        "page": "01 - Executive",
-        "description": "KPI direction : candidatures, acceptation, missions, top missions"
+        "name": "Find-Me — BI Executive",
+        "file": "FindMe_BI_Executive.pbix",
+        "description": "Synthèse direction — KPIs globaux (OLAP)"
       },
       {
         "level": "managerial",
-        "name": "02 - Managerial",
-        "page": "02 - Managerial",
-        "description": "Pilotage RH : statuts, contrats, villes, tableau détail missions"
+        "name": "Find-Me — BI Managérial",
+        "file": "FindMe_BI_Managerial.pbix",
+        "description": "Pilotage RH / missions / candidatures"
       },
       {
         "level": "operational",
-        "name": "03 - Operationnel",
-        "page": "03 - Operationnel",
-        "description": "Activité : utilisateurs, notifications, CV, compétences"
-      },
-      {
-        "level": "technique",
-        "name": "04 - Technique",
-        "page": "04 - Technique",
-        "description": "Quiz, CodinGame, fraîcheur ETL (logs)"
+        "name": "Find-Me — BI Opérationnel",
+        "file": "FindMe_BI_Operational.pbix",
+        "description": "Détail notifications, CV, évaluations"
       }
-    ]
+    ],
+    "guidePath": "bi/powerbi/README.md"
   },
-  "adminWorkflow": [
-    "Démarrer Docker : docker compose up -d mysql",
-    "Lancer l'ETL Talend (bouton ci-dessous ou docker compose run --rm talend-etl)",
-    "Ouvrir le dashboard : ONE_COMMANDE_POWERBI.cmd (Windows) ou GIT_PULL_BI.cmd",
-    "Dans Power BI Desktop : Actualiser — serveur localhost:3306, base findme_dw, compte findme_bi"
-  ],
-  "friendWorkflow": [
-    "git clone https://github.com/eyarhit/findMeByEyarhit.git puis git pull",
-    "Docker Desktop demarre — scripts\\docker-compose-up.cmd (ou docker compose up -d)",
-    "ETL : docker compose run --rm talend-etl — Hub : http://localhost:3032",
-    "App Docker : http://localhost:4200 — admin@gmail.com / admin — menu Tableaux de bord BI",
-    "Power BI Desktop (Windows) : GIT_PULL_BI.cmd puis Actualiser localhost:3306 / findme_dw / findme_bi",
-    "Guide : bi/GUIDE_TEST_AMI_APRES_PULL.md et docs/GUIDE_AMI_DOCKER.md"
+  "credentials": {
+    "mysqlReadOnlyUser": "findme_bi",
+    "mysqlReadOnlyPassword": "findme_bi_readonly"
+  },
+  "dashboards": [
+    { "level": "executive", "name": "Find-Me — BI Executive", "reportFile": "FindMe_BI_Executive.pbix" },
+    { "level": "managerial", "name": "Find-Me — BI Managérial", "reportFile": "FindMe_BI_Managerial.pbix" },
+    { "level": "operational", "name": "Find-Me — BI Opérationnel", "reportFile": "FindMe_BI_Operational.pbix" }
   ],
   "tabs": [
-    {
-      "key": "executive",
-      "label": "Executive",
-      "cardSlugs": [
-        "executive_kpis",
-        "users_by_role",
-        "applications_by_month",
-        "application_conversion_rate",
-        "missions_by_month",
-        "cvs_by_month"
-      ]
-    },
-    {
-      "key": "managerial",
-      "label": "Managerial",
-      "cardSlugs": [
-        "users_by_status",
-        "users_by_country",
-        "missions_by_status",
-        "applications_by_status",
-        "missions_by_contract",
-        "missions_top_cities",
-        "top_missions_applications",
-        "missions_remote_split",
-        "favorites_by_user_type",
-        "quiz_pass_fail"
-      ]
-    },
-    {
-      "key": "operational",
-      "label": "Operationnel",
-      "cardSlugs": [
-        "notifications_by_month",
-        "cv_steps_completed",
-        "cv_top_skills",
-        "codingame_sessions",
-        "codingame_avg_score",
-        "codingame_by_framework"
-      ]
-    },
-    {
-      "key": "technique",
-      "label": "Technique",
-      "cardSlugs": [
-        "quiz_avg_score",
-        "quiz_pass_fail",
-        "codingame_by_framework",
-        "codingame_sessions_month"
-      ]
-    }
+    { "key": "executive", "label": "Executive", "cardSlugs": ["executive_kpis", "users_by_role", "applications_by_month", "application_conversion_rate", "missions_by_month", "cvs_by_month"] },
+    { "key": "managerial", "label": "Managérial", "cardSlugs": ["users_by_status", "users_by_country", "missions_by_status", "applications_by_status", "missions_by_contract", "missions_top_cities", "top_missions_applications", "missions_remote_split", "favorites_by_user_type", "cv_top_skills", "quiz_pass_fail"] },
+    { "key": "operational", "label": "Opérationnel", "cardSlugs": ["notifications_by_month", "notifications_read_unread", "cv_steps_completed", "codingame_sessions", "codingame_avg_score", "codingame_by_framework"] }
   ],
   "cards": [
-    { "id": 1, "slug": "executive_kpis", "title": "KPI exécutifs (matrice)", "domain": "executive", "display": "Matrix", "db": "findme_dw", "sqlFile": "bi/kpis/sql/05_kpi_executif.sql", "powerBiPage": "01 - Executive" },
-    { "id": 2, "slug": "users_by_role", "title": "Utilisateurs par rôle", "domain": "executive", "display": "Bar chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/01_utilisateurs_par_role.sql", "powerBiPage": "01 - Executive" },
-    { "id": 3, "slug": "applications_by_month", "title": "Candidatures par mois", "domain": "executive", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/12_candidatures_par_mois.sql", "powerBiPage": "01 - Executive" },
-    { "id": 4, "slug": "application_conversion_rate", "title": "Taux conversion candidatures", "domain": "executive", "display": "Gauge", "db": "findme_dw", "sqlFile": "bi/kpis/sql/13_taux_conversion_candidatures.sql", "powerBiPage": "01 - Executive" },
-    { "id": 5, "slug": "missions_by_month", "title": "Missions par mois", "domain": "executive", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/07_missions_par_mois.sql", "powerBiPage": "01 - Executive" },
-    { "id": 6, "slug": "cvs_by_month", "title": "CV par mois", "domain": "executive", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/16_cv_par_mois.sql", "powerBiPage": "01 - Executive" },
-    { "id": 7, "slug": "users_by_status", "title": "Utilisateurs par statut", "domain": "managerial", "display": "Donut", "db": "findme_dw", "sqlFile": "bi/kpis/sql/02_utilisateurs_par_statut.sql", "powerBiPage": "02 - Managerial" },
-    { "id": 8, "slug": "users_by_country", "title": "Utilisateurs par pays", "domain": "managerial", "display": "Bar chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/03_utilisateurs_par_pays.sql", "powerBiPage": "02 - Managerial" },
-    { "id": 9, "slug": "missions_by_status", "title": "Missions par statut", "domain": "managerial", "display": "Bar chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/06_missions_par_statut.sql", "powerBiPage": "02 - Managerial" },
-    { "id": 10, "slug": "applications_by_status", "title": "Candidatures par statut", "domain": "managerial", "display": "Donut", "db": "findme_dw", "sqlFile": "bi/kpis/sql/08_candidatures_par_statut.sql", "powerBiPage": "02 - Managerial" },
-    { "id": 11, "slug": "missions_by_contract", "title": "Missions par type contrat", "domain": "managerial", "display": "Bar chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/09_type_contrat.sql", "powerBiPage": "02 - Managerial" },
-    { "id": 12, "slug": "missions_top_cities", "title": "Top villes missions", "domain": "managerial", "display": "Bar chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/10_top_villes.sql", "powerBiPage": "02 - Managerial" },
-    { "id": 13, "slug": "top_missions_applications", "title": "Top missions (candidatures)", "domain": "managerial", "display": "Table", "db": "findme_dw", "sqlFile": "bi/kpis/sql/14_top_missions_candidatures.sql", "powerBiPage": "02 - Managerial" },
-    { "id": 14, "slug": "missions_remote_split", "title": "Missions télétravail", "domain": "managerial", "display": "Pie", "db": "findme_dw", "sqlFile": "bi/kpis/sql/15_missions_teletravail.sql", "powerBiPage": "02 - Managerial" },
-    { "id": 15, "slug": "favorites_by_user_type", "title": "Favoris par type utilisateur", "domain": "managerial", "display": "Bar chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/11_favoris_par_user_type.sql", "powerBiPage": "02 - Managerial" },
-    { "id": 16, "slug": "notifications_by_month", "title": "Notifications par mois", "domain": "operational", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/04_notifications_par_mois.sql", "powerBiPage": "03 - Operationnel" },
-    { "id": 17, "slug": "cv_steps_completed", "title": "CV — étapes complétées", "domain": "operational", "display": "Histogram", "db": "findme_dw", "sqlFile": "bi/kpis/sql/18_cv_etapes_completees.sql", "powerBiPage": "03 - Operationnel" },
-    { "id": 18, "slug": "cv_top_skills", "title": "Top compétences (CV)", "domain": "operational", "display": "Bar chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/17_top_competences.sql", "powerBiPage": "03 - Operationnel" },
-    { "id": 19, "slug": "codingame_sessions", "title": "Sessions CodinGame", "domain": "operational", "display": "KPI", "db": "findme_dw", "sqlFile": "bi/kpis/sql/21_codingame_sessions_mois.sql", "powerBiPage": "03 - Operationnel" },
-    { "id": 20, "slug": "codingame_avg_score", "title": "Score moyen CodinGame", "domain": "operational", "display": "KPI", "db": "findme_dw", "sqlFile": "bi/kpis/sql/22_codingame_score_moyen.sql", "powerBiPage": "03 - Operationnel" },
-    { "id": 21, "slug": "quiz_pass_fail", "title": "Quiz — réussite / échec", "domain": "managerial", "display": "Donut", "db": "findme_dw", "sqlFile": "bi/kpis/sql/19_quiz_reussite.sql", "powerBiPage": "04 - Technique" },
-    { "id": 22, "slug": "quiz_avg_score", "title": "Score moyen quiz", "domain": "technique", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/20_score_moyen_quiz.sql", "powerBiPage": "04 - Technique" },
-    { "id": 23, "slug": "codingame_by_framework", "title": "CodinGame par framework", "domain": "technique", "display": "Bar chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/23_codingame_par_framework.sql", "powerBiPage": "04 - Technique" },
-    { "id": 24, "slug": "codingame_sessions_month", "title": "Sessions CodinGame / mois", "domain": "technique", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/21_codingame_sessions_mois.sql", "powerBiPage": "04 - Technique" }
-  ]
+    { "id": 1, "slug": "executive_kpis", "title": "KPI exécutifs", "domain": "executive", "display": "Matrix", "db": "findme_dw", "sqlFile": "bi/kpis/sql/05_kpi_executif.sql" },
+    { "id": 2, "slug": "users_by_role", "title": "Utilisateurs par rôle", "domain": "executive", "display": "Bar chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/01_utilisateurs_par_role.sql" },
+    { "id": 3, "slug": "applications_by_month", "title": "Candidatures par mois", "domain": "executive", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/12_candidatures_par_mois.sql" },
+    { "id": 4, "slug": "application_conversion_rate", "title": "Taux de conversion", "domain": "executive", "display": "Gauge", "db": "findme_dw", "sqlFile": "bi/kpis/sql/13_taux_conversion_candidatures.sql" },
+    { "id": 5, "slug": "missions_by_month", "title": "Missions par mois", "domain": "executive", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/07_missions_par_mois.sql" },
+    { "id": 6, "slug": "cvs_by_month", "title": "CV par mois", "domain": "executive", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/16_cv_par_mois.sql" }
+  ],
+  "_note": "Power BI : ouvrir les .pbix dans bi/powerbi/reports/ après ETL Talend. Metabase supprimé."
 }

@@ -1,139 +1,114 @@
-<section class="admin-bi" *ngIf="!manifestError; else biError">
-  <header class="admin-bi__header">
+<section class="bi-page">
+  <header class="bi-header">
     <div>
-      <p class="admin-bi__eyebrow">Pilotage décisionnel</p>
-      <h1>{{ selectedReport?.name }}</h1>
-      <p class="admin-bi__lead">{{ selectedReport?.description }}</p>
-      <p class="admin-bi__meta" *ngIf="hubDetail">{{ hubDetail }} · données live MySQL</p>
+      <h1>Business Intelligence Find-Me</h1>
+      <p>
+        <strong>{{ stackLabel }}</strong> — entrepôt <strong>findme_dw</strong> (schéma en étoile).
+        Alimentation <strong>Talend</strong> (ETL) puis analyse <strong>OLAP Power BI</strong>.
+      </p>
     </div>
-    <div class="admin-bi__actions">
-      <span class="status-pill" [class.ok]="hubStatus === 'ok'" [class.warn]="hubStatus !== 'ok'">
+    <div class="bi-actions">
+      <span class="status-badge" [class.connected]="hubStatus === 'ok'" [class.warn]="hubStatus === 'degraded' || hubStatus === 'unknown'" [class.error]="hubStatus === 'error'">
+        <span class="dot"></span>
         {{ hubStatusLabel() }}
       </span>
-      <button type="button" class="btn-primary" (click)="runEtl()" [disabled]="etlRunning">
-        {{ etlRunning ? 'Synchronisation…' : 'Synchroniser' }}
-      </button>
+      <button type="button" class="open-btn primary" (click)="openTalendStudio()">Talend Open Studio</button>
+      <button type="button" class="open-btn primary" (click)="openPowerBiWeb()">Power BI (portail)</button>
+      <button type="button" class="open-btn ghost" (click)="openBiHub()">Console BI</button>
     </div>
   </header>
 
-  <div class="bi-toolbar">
-    <div class="bi-toolbar__filters">
-      <label class="filter-label">
-        Période
-        <select class="filter-select" [(ngModel)]="periodMonths" (ngModelChange)="onFilterChange()">
-          <option [ngValue]="0">Toutes</option>
-          <option [ngValue]="6">6 derniers mois</option>
-          <option [ngValue]="12">12 derniers mois</option>
-        </select>
-      </label>
-      <label class="filter-check">
-        <input type="checkbox" [(ngModel)]="autoRefresh" />
-        Actualisation auto (60 s)
-      </label>
+  <div class="alert warn" *ngIf="manifestError">{{ manifestError }}</div>
+
+  <div class="kpi-strip" *ngIf="manifest">
+    <div class="kpi">
+      <span class="kpi-value">{{ talendJob }}</span>
+      <span class="kpi-label">job Talend</span>
     </div>
-    <span class="bi-toolbar__time" *ngIf="lastUpdate">
-      Données live · {{ lastUpdate | date:'HH:mm:ss' }}
-    </span>
+    <div class="kpi">
+      <span class="kpi-value">{{ reports.length }}</span>
+      <span class="kpi-label">rapports Power BI</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-value">{{ manifest.cards?.length || 0 }}</span>
+      <span class="kpi-label">indicateurs SQL</span>
+    </div>
+    <div class="kpi">
+      <span class="kpi-value kpi-small">{{ manifest.dwDatabase }}</span>
+      <span class="kpi-label">base DW</span>
+    </div>
   </div>
 
-  <p class="admin-bi__sync" *ngIf="etlMessage">{{ etlMessage }}</p>
-  <p class="admin-bi__sync err" *ngIf="chartsError">{{ chartsError }}</p>
+  <div class="hub-banner" *ngIf="manifest">
+    <p>
+      <strong>Stack conteneurisée (cours BIS) :</strong>
+      <a [href]="talendStudioUrl" target="_blank" rel="noopener">Talend Studio</a> (6080) ·
+      <a [href]="powerBiWebUrl" target="_blank" rel="noopener">Power BI</a> (8077) ·
+      <a [href]="biHubBase" target="_blank" rel="noopener">Hub BI</a> (3032)
+    </p>
+  </div>
 
-  <nav class="admin-bi__nav">
-    <button
-      *ngFor="let r of reports"
-      type="button"
-      class="nav-pill"
-      [class.active]="selectedReportLevel === r.level"
-      (click)="selectReportLevel(r.level)">
-      {{ r.name }}
+  <div class="connection-box">
+    <button type="button" class="collapse-btn" (click)="toggleConnectionInfo()">
+      Détails techniques (optionnel)
+      <span>{{ showConnectionInfo ? '▲' : '▼' }}</span>
     </button>
-  </nav>
-
-  <div class="kpi-row">
-    <article class="kpi-tile" *ngFor="let k of headlineKpis">
-      <span class="kpi-tile__value">{{ k.value }}</span>
-      <span class="kpi-tile__label">{{ k.label }}</span>
-    </article>
-  </div>
-
-  <div class="widgets-grid">
-    <article
-      class="widget"
-      *ngFor="let card of pageCards"
-      [class.widget--wide]="isWideWidget(card)">
-      <header class="widget__head">
-        <h3>{{ card.title }}</h3>
-        <span class="widget__badge">{{ card.display }}</span>
-      </header>
-
-      <div class="widget__body">
-        <p class="widget__pending" *ngIf="isCardLoading(card.slug)">
-          <span class="spinner spinner--sm"></span> Interrogation findme_dw…
-        </p>
-
-        <ng-container *ngIf="chartFor(card.slug) as ch">
-          <p class="widget__err" *ngIf="ch.kind === 'error'">{{ ch.error }}</p>
-
-          <div class="widget__matrix" *ngIf="ch.kind === 'matrix'">
-            <div class="matrix-cell" *ngFor="let key of scalarKeys(card.slug)">
-              <span class="matrix-cell__val">{{ ch.scalars[key] | number:'1.0-0' }}</span>
-              <span class="matrix-cell__lbl">{{ formatScalarKey(key) }}</span>
-            </div>
-          </div>
-
-          <div class="widget__gauge-meta" *ngIf="ch.kind === 'gauge'">
-            <span class="gauge-big">{{ (ch.scalar ?? 0) | number:'1.0-1' }}%</span>
-            <span class="gauge-sub">taux de conversion</span>
-          </div>
-
-          <div class="widget__kpi-scalar" *ngIf="ch.kind === 'kpi'">
-            <span class="gauge-big">{{ (ch.scalar ?? 0) | number:'1.0-1' }}</span>
-          </div>
-
-          <div class="widget__table-wrap" *ngIf="ch.kind === 'table' && tableRows(card.slug).length">
-            <table class="widget__table">
-              <thead>
-                <tr>
-                  <th *ngFor="let col of tableColumns(card.slug)">{{ col }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let row of tableRows(card.slug)">
-                  <td *ngFor="let col of tableColumns(card.slug)">{{ formatCell(row[col]) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="widget__chart" *ngIf="usesCanvas(card.slug)">
-            <canvas [id]="'bi-chart-' + card.slug"></canvas>
-          </div>
-
-          <p class="widget__empty" *ngIf="ch.kind === 'empty'">
-            Aucune donnée — cliquez sur Synchroniser.
-          </p>
-          <p
-            class="widget__empty"
-            *ngIf="ch.kind !== 'empty' && ch.kind !== 'matrix' && ch.kind !== 'error' && usesCanvas(card.slug) && filteredPoints(card.slug).length === 0">
-            Aucun point sur la période filtrée.
-          </p>
-        </ng-container>
-      </div>
-    </article>
-  </div>
-
-  <section class="dw-panel" *ngIf="selectedReportLevel === 'technique'">
-    <h2>Tables entrepôt</h2>
-    <div class="dw-table">
-      <div class="dw-table__row" *ngFor="let row of dwStats | keyvalue">
-        <span>{{ row.key }}</span>
-        <strong>{{ row.value }}</strong>
-      </div>
+    <div *ngIf="showConnectionInfo" class="connection-content">
+      <h3>Console Docker (recommandé)</h3>
+      <p>Talend Studio : <a [href]="talendStudioUrl" target="_blank" rel="noopener">{{ talendStudioUrl }}</a> (VNC : <code>findme</code>)</p>
+      <p>Power BI RS : <a [href]="powerBiWebUrl" target="_blank" rel="noopener">{{ powerBiWebUrl }}</a></p>
+      <h3>ETL manuel (ligne de commande)</h3>
+      <pre class="cmd">docker compose run --rm talend-etl</pre>
+      <h3>Power BI Desktop (Windows)</h3>
+      <p *ngIf="connection">
+        {{ connection.server }}:{{ connection.port }} · {{ connection.database }} · {{ connection.user }}
+      </p>
     </div>
-  </section>
-</section>
+  </div>
 
-<ng-template #biError>
-  <div class="admin-bi admin-bi--error"><p>{{ manifestError }}</p></div>
-</ng-template>
+  <article class="dashboard-wrapper">
+    <h2>Rapports Power BI (3 niveaux — OLAP)</h2>
+    <div class="tier-buttons" *ngIf="reports.length">
+      <button
+        *ngFor="let r of reports"
+        type="button"
+        class="tier-btn"
+        [class.active]="selectedReportLevel === r.level"
+        (click)="selectReportLevel(r.level)">
+        {{ tierLabel(r.level) }}
+      </button>
+    </div>
+    <div class="metabase-link-panel" *ngIf="selectedReport">
+      <p class="panel-lead">{{ selectedReport.description || selectedReport.name }}</p>
+      <p><strong>Fichier :</strong> <code>bi/powerbi/reports/{{ selectedReport.file }}</code></p>
+      <p class="hint">
+        Utilisez <strong>Ouvrir Power BI (console)</strong> pour l’aperçu navigateur, ou téléchargez le
+        <code>.pbix</code> depuis la console si présent dans <code>bi/powerbi/reports/</code>.
+      </p>
+    </div>
+  </article>
+
+  <div class="bi-layout" *ngIf="tabs.length">
+    <aside class="tabs">
+      <button
+        *ngFor="let tab of tabs"
+        type="button"
+        class="tab-btn"
+        [class.active]="selectedTabKey === tab.key"
+        (click)="selectTab(tab.key)">
+        {{ tab.label }}
+      </button>
+    </aside>
+    <section class="reports">
+      <h2>{{ selectedTab?.label }} - requetes KPI (sources Power BI)</h2>
+      <div class="cards-grid">
+        <article class="report-card" *ngFor="let card of selectedCards">
+          <h3>{{ card.title }}</h3>
+          <p class="card-meta">{{ card.display }} · {{ card.db }}</p>
+          <p class="card-meta" *ngIf="card.sqlFile"><code>{{ card.sqlFile }}</code></p>
+        </article>
+      </div>
+      <p class="reports-lead" *ngIf="!selectedCards.length">Voir <code>bi/kpis/kpis_catalogue.md</code> pour les 23 KPIs.</p>
+    </section>
+  </div>
+</section>
