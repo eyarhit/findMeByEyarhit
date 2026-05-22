@@ -27,6 +27,149 @@
     margin: 0.35rem 0 0;
     color: #475569;
   }
+
+  .sub {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+}
+
+.live-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.live-card {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  color: #fff;
+}
+
+.live-value {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.live-label {
+  font-size: 0.78rem;
+  opacity: 0.9;
+}
+
+.etl-hint {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #4338ca;
+  background: #eef2ff;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.workflow-panel {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+
+  h2 {
+    margin: 0 0 0.6rem;
+    font-size: 1.05rem;
+    color: #111827;
+  }
+
+  ol {
+    margin: 0;
+    padding-left: 1.2rem;
+    color: #334155;
+    line-height: 1.55;
+  }
+
+  &.friend {
+    border-color: #c7d2fe;
+    background: #fafaff;
+  }
+}
+
+.cmd-block {
+  margin: 0.6rem 0 0;
+  font-size: 0.88rem;
+
+  code {
+    background: #f1f5f9;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.82rem;
+  }
+}
+
+.open-btn.accent {
+  background: #059669;
+  border: 0;
+}
+
+.open-btn.accent:hover:not(:disabled) {
+  background: #047857;
+}
+
+.report-panel {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  background: #f8fafc;
+}
+
+.dw-stats {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1rem;
+
+  h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.05rem;
+  }
+}
+
+.dw-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+
+.dw-cell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.45rem 0.65rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.dw-count {
+  font-weight: 700;
+  color: #4f46e5;
+}
+
+.tag {
+  display: inline-block;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 0.7rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  margin-right: 0.25rem;
+}
+
+.cmd {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  overflow-x: auto;
 }
 
 .alert {
@@ -407,6 +550,10 @@
 @media (max-width: 900px) {
   .cards-grid {
     grid-template-columns: 1fr;
+  }
+
+  .live-kpis {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .bi-header {

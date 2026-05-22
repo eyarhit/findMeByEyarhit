@@ -3,22 +3,51 @@
     <div>
       <h1>Business Intelligence Find-Me</h1>
       <p>
-        <strong>{{ stackLabel }}</strong> — entrepôt <strong>findme_dw</strong> (schéma en étoile).
-        Alimentation <strong>Talend</strong> (ETL) puis analyse <strong>OLAP Power BI</strong>.
+        <strong>{{ stackLabel }}</strong> — chaîne PFE :
+        <strong>Talend</strong> → entrepôt <strong>findme_dw</strong> (étoile) →
+        <strong>Power BI</strong> (4 pages OLAP).
       </p>
+      <p class="sub" *ngIf="hubDetail">{{ hubDetail }}</p>
     </div>
     <div class="bi-actions">
-      <span class="status-badge" [class.connected]="hubStatus === 'ok'" [class.warn]="hubStatus === 'degraded' || hubStatus === 'unknown'" [class.error]="hubStatus === 'error'">
+      <span
+        class="status-badge"
+        [class.connected]="hubStatus === 'ok'"
+        [class.warn]="hubStatus === 'degraded' || hubStatus === 'unknown'"
+        [class.error]="hubStatus === 'error'">
         <span class="dot"></span>
         {{ hubStatusLabel() }}
       </span>
-      <button type="button" class="open-btn primary" (click)="openTalendStudio()">Talend Open Studio</button>
-      <button type="button" class="open-btn primary" (click)="openPowerBiWeb()">Power BI (portail)</button>
-      <button type="button" class="open-btn ghost" (click)="openBiHub()">Console BI</button>
+      <button type="button" class="open-btn accent" (click)="runEtl()" [disabled]="etlRunning">
+        {{ etlRunning ? 'ETL en cours…' : 'Lancer ETL Talend' }}
+      </button>
+      <button type="button" class="open-btn primary" (click)="openBiHub()">Console BI</button>
+      <button type="button" class="open-btn ghost" (click)="openTalendStudio()">Talend Studio</button>
     </div>
   </header>
 
   <div class="alert warn" *ngIf="manifestError">{{ manifestError }}</div>
+  <p class="etl-hint" *ngIf="etlMessage">{{ etlMessage }}</p>
+
+  <!-- KPIs live depuis findme_dw -->
+  <div class="live-kpis" *ngIf="executiveKpis">
+    <div class="live-card">
+      <span class="live-value">{{ executiveKpis.total_utilisateurs ?? '—' }}</span>
+      <span class="live-label">Utilisateurs (DW)</span>
+    </div>
+    <div class="live-card">
+      <span class="live-value">{{ executiveKpis.total_missions ?? '—' }}</span>
+      <span class="live-label">Missions</span>
+    </div>
+    <div class="live-card">
+      <span class="live-value">{{ executiveKpis.total_candidatures ?? '—' }}</span>
+      <span class="live-label">Candidatures</span>
+    </div>
+    <div class="live-card">
+      <span class="live-value">{{ executiveKpis.total_cv ?? '—' }}</span>
+      <span class="live-label">CV</span>
+    </div>
+  </div>
 
   <div class="kpi-strip" *ngIf="manifest">
     <div class="kpi">
@@ -27,47 +56,67 @@
     </div>
     <div class="kpi">
       <span class="kpi-value">{{ reports.length }}</span>
-      <span class="kpi-label">rapports Power BI</span>
+      <span class="kpi-label">pages Power BI</span>
     </div>
     <div class="kpi">
       <span class="kpi-value">{{ manifest.cards?.length || 0 }}</span>
-      <span class="kpi-label">indicateurs SQL</span>
+      <span class="kpi-label">requêtes KPI SQL</span>
     </div>
     <div class="kpi">
       <span class="kpi-value kpi-small">{{ manifest.dwDatabase }}</span>
-      <span class="kpi-label">base DW</span>
+      <span class="kpi-label">entrepôt</span>
     </div>
   </div>
+
+  <!-- Workflow admin -->
+  <article class="workflow-panel" *ngIf="manifest?.adminWorkflow?.length">
+    <h2>Parcours administrateur</h2>
+    <ol>
+      <li *ngFor="let step of manifest.adminWorkflow">{{ step }}</li>
+    </ol>
+    <p class="cmd-block">
+      <strong>Projet Power BI :</strong>
+      <code>{{ pbipPath }}</code>
+    </p>
+    <p class="cmd-block" *ngIf="manifest.powerBi?.openCommandWin">
+      <strong>Windows :</strong> <code>{{ manifest.powerBi.openCommandWin }}</code>
+    </p>
+    <p class="hint" *ngIf="manifest.powerBi?.connectionHint">{{ manifest.powerBi.connectionHint }}</p>
+  </article>
+
+  <!-- Guide ami -->
+  <article class="workflow-panel friend" *ngIf="manifest">
+    <button type="button" class="collapse-btn" (click)="toggleFriendGuide()">
+      Guide — faire tester un ami après git pull
+      <span>{{ showFriendGuide ? '▲' : '▼' }}</span>
+    </button>
+    <div *ngIf="showFriendGuide">
+      <ol *ngIf="manifest.friendWorkflow?.length">
+        <li *ngFor="let step of manifest.friendWorkflow">{{ step }}</li>
+      </ol>
+      <p>
+        Dépôt :
+        <a href="#" (click)="openGithub(); $event.preventDefault()">{{ manifest.githubRepo }}</a>
+      </p>
+      <p class="cmd-block" *ngIf="manifest.powerBi?.friendCommandWin">
+        Commande unique : <code>{{ manifest.powerBi.friendCommandWin }}</code>
+      </p>
+      <p class="hint">Doc : <code>bi/powerbi/GUIDE_AUTRE_PC.md</code> · <code>bi/GUIDE_TEST_AMI_APRES_PULL.md</code></p>
+    </div>
+  </article>
 
   <div class="hub-banner" *ngIf="manifest">
     <p>
-      <strong>Stack conteneurisée (cours BIS) :</strong>
-      <a [href]="talendStudioUrl" target="_blank" rel="noopener">Talend Studio</a> (6080) ·
-      <a [href]="powerBiWebUrl" target="_blank" rel="noopener">Power BI</a> (8077) ·
-      <a [href]="biHubBase" target="_blank" rel="noopener">Hub BI</a> (3032)
+      <strong>Outils :</strong>
+      <a [href]="biHubBase" target="_blank" rel="noopener">Hub BI (3032)</a> ·
+      <a [href]="talendStudioUrl" target="_blank" rel="noopener">Talend (6080)</a> ·
+      <a [href]="powerBiWebUrl" target="_blank" rel="noopener">Power BI RS (8077)</a>
     </p>
   </div>
 
-  <div class="connection-box">
-    <button type="button" class="collapse-btn" (click)="toggleConnectionInfo()">
-      Détails techniques (optionnel)
-      <span>{{ showConnectionInfo ? '▲' : '▼' }}</span>
-    </button>
-    <div *ngIf="showConnectionInfo" class="connection-content">
-      <h3>Console Docker (recommandé)</h3>
-      <p>Talend Studio : <a [href]="talendStudioUrl" target="_blank" rel="noopener">{{ talendStudioUrl }}</a> (VNC : <code>findme</code>)</p>
-      <p>Power BI RS : <a [href]="powerBiWebUrl" target="_blank" rel="noopener">{{ powerBiWebUrl }}</a></p>
-      <h3>ETL manuel (ligne de commande)</h3>
-      <pre class="cmd">docker compose run --rm talend-etl</pre>
-      <h3>Power BI Desktop (Windows)</h3>
-      <p *ngIf="connection">
-        {{ connection.server }}:{{ connection.port }} · {{ connection.database }} · {{ connection.user }}
-      </p>
-    </div>
-  </div>
-
+  <!-- Power BI 4 pages -->
   <article class="dashboard-wrapper">
-    <h2>Rapports Power BI (3 niveaux — OLAP)</h2>
+    <h2>Dashboard Power BI — 4 pages (PBIP)</h2>
     <div class="tier-buttons" *ngIf="reports.length">
       <button
         *ngFor="let r of reports"
@@ -78,16 +127,31 @@
         {{ tierLabel(r.level) }}
       </button>
     </div>
-    <div class="metabase-link-panel" *ngIf="selectedReport">
-      <p class="panel-lead">{{ selectedReport.description || selectedReport.name }}</p>
-      <p><strong>Fichier :</strong> <code>bi/powerbi/reports/{{ selectedReport.file }}</code></p>
-      <p class="hint">
-        Utilisez <strong>Ouvrir Power BI (console)</strong> pour l’aperçu navigateur, ou téléchargez le
-        <code>.pbix</code> depuis la console si présent dans <code>bi/powerbi/reports/</code>.
+    <div class="report-panel" *ngIf="selectedReport">
+      <h3>{{ selectedReport.name }}</h3>
+      <p class="panel-lead">{{ selectedReport.description }}</p>
+      <p *ngIf="selectedReport.page">
+        <strong>Onglet Power BI :</strong> {{ selectedReport.page }}
+      </p>
+      <p>
+        Mesures DAX : table <code>MesuresBI</code> — voir
+        <code>bi/powerbi/POWERBI_TABLES_ET_MESURES.md</code>
       </p>
     </div>
   </article>
 
+  <!-- DW stats -->
+  <article class="dw-stats" *ngIf="dwStatsEntries().length">
+    <h2>Volume entrepôt (après ETL)</h2>
+    <div class="dw-grid">
+      <div class="dw-cell" *ngFor="let row of dwStatsEntries()">
+        <span class="dw-name">{{ row.name }}</span>
+        <span class="dw-count">{{ row.count }}</span>
+      </div>
+    </div>
+  </article>
+
+  <!-- Catalogue KPI par domaine -->
   <div class="bi-layout" *ngIf="tabs.length">
     <aside class="tabs">
       <button
@@ -100,15 +164,33 @@
       </button>
     </aside>
     <section class="reports">
-      <h2>{{ selectedTab?.label }} - requetes KPI (sources Power BI)</h2>
+      <h2>{{ selectedTab?.label }} — sources SQL & page Power BI</h2>
       <div class="cards-grid">
         <article class="report-card" *ngFor="let card of selectedCards">
           <h3>{{ card.title }}</h3>
           <p class="card-meta">{{ card.display }} · {{ card.db }}</p>
+          <p class="card-meta" *ngIf="card.powerBiPage">
+            <span class="tag">PBI</span> {{ card.powerBiPage }}
+          </p>
           <p class="card-meta" *ngIf="card.sqlFile"><code>{{ card.sqlFile }}</code></p>
         </article>
       </div>
-      <p class="reports-lead" *ngIf="!selectedCards.length">Voir <code>bi/kpis/kpis_catalogue.md</code> pour les 23 KPIs.</p>
+      <p class="reports-lead" *ngIf="!selectedCards.length">
+        Aucune carte pour cet onglet — voir <code>bi/kpis/kpis_catalogue.md</code>.
+      </p>
     </section>
+  </div>
+
+  <div class="connection-box">
+    <button type="button" class="collapse-btn" (click)="toggleConnectionInfo()">
+      Détails techniques
+      <span>{{ showConnectionInfo ? '▲' : '▼' }}</span>
+    </button>
+    <div *ngIf="showConnectionInfo" class="connection-content">
+      <pre class="cmd" *ngIf="manifest?.talend?.etlCommand">{{ manifest.talend.etlCommand }}</pre>
+      <ul *ngIf="manifest?.powerBi?.guidePaths">
+        <li *ngFor="let g of manifest.powerBi.guidePaths"><code>{{ g }}</code></li>
+      </ul>
+    </div>
   </div>
 </section>
