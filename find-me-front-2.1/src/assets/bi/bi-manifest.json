@@ -12,7 +12,7 @@
     "powerBiUrl": "http://localhost:8077/reports",
     "talendStudioUrl": "http://localhost:6080",
     "powerBiWebUrl": "http://localhost:8077/reports",
-    "healthUrl": "http://localhost:3032/api/health"
+    "healthPath": "/api/health"
   },
   "talend": {
     "jobName": "FindMe_Load_DW",

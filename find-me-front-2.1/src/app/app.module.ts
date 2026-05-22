@@ -13,7 +13,7 @@ import { SessionLoginComponent } from './pages/session-login/session-login.compo
 import { MotDePasseOublierComponent } from './pages/mot-de-passe-oublier/mot-de-passe-oublier.component';
 import { ReinitialiserMotPasseComponent } from './pages/reinitialiser-mot-passe/reinitialiser-mot-passe.component';
 import { QuizComponent } from './components/quiz/quiz.component';
-import { HttpClientModule, provideHttpClient, withFetch } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { RegisterCandidatTunisieComponent } from './pages/register-candidat/register-candidat-tunisie.component';
 import { CreezCvComponent } from './components/creez-cv/creez-cv.component';
 import { LoginComponent } from './components/login/login.component';
@@ -173,7 +173,6 @@ import { MessengerChatComponent } from './components/messenger-chat/messenger-ch
   ],
   providers: [
     // Pas d'hydratation SSR : évite écran blanc (Docker nginx, F5, token localStorage).
-    provideHttpClient(withFetch()),
     AuthService,
     provideAnimationsAsync(),
   ],

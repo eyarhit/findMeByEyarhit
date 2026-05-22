@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import Chart, { ChartConfiguration } from 'chart.js/auto';
-import { Observable, Subscription, forkJoin, interval, of } from 'rxjs';
-import { catchError, finalize, map, switchMap, timeout } from 'rxjs/operators';
+import { Subscription, interval, of } from 'rxjs';
+import { catchError, distinctUntilChanged, finalize, map, switchMap, timeout } from 'rxjs/operators';
 
 export interface BiManifestCard {
   id: number;
@@ -54,8 +54,7 @@ export interface CardChart {
 
 interface BiHubConfig {
   port?: number;
-  healthUrl?: string;
-  dockerProxyPath?: string;
+  healthPath?: string;
 }
 
 interface HubHealth {
@@ -114,6 +113,7 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
   private refreshSub?: Subscription;
   private routeSub?: Subscription;
   private renderTimer?: ReturnType<typeof setTimeout>;
+  private currentLoadLevel = '';
 
   constructor(
     private http: HttpClient,
@@ -170,6 +170,21 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.routeSub = this.route.paramMap
+      .pipe(
+        map((pm) => (pm.get('niveau') || 'executive').toLowerCase()),
+        distinctUntilChanged()
+      )
+      .subscribe((niveau) => {
+        const allowed = ['executive', 'managerial', 'operational', 'technique'];
+        this.selectedReportLevel = allowed.includes(niveau) ? niveau : 'executive';
+        if (!this.manifest) {
+          return;
+        }
+        this.loadHeadlineKpis();
+        this.loadPageCharts();
+      });
+
     this.http
       .get<BiManifest>('/assets/bi/bi-manifest.json', { params: { t: Date.now().toString() } })
       .subscribe({
@@ -177,9 +192,7 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
           this.manifest = m;
           this.bindRouteNiveau();
           if (!this.route.snapshot.paramMap.get('niveau')) {
-            void this.router
-              .navigate(['/utilisateur/bi/executive'], { replaceUrl: true })
-              .then(() => this.refreshHubData());
+            void this.router.navigate(['/utilisateur/bi/executive'], { replaceUrl: true });
             return;
           }
           this.refreshHubData();
@@ -191,17 +204,6 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
             'Configuration BI indisponible. Relancez Docker puis actualisez la page.';
         },
       });
-
-    this.routeSub = this.route.paramMap.subscribe(() => {
-      this.bindRouteNiveau();
-      this.destroyCharts();
-      this.cardCharts = {};
-      this.cardLoading = {};
-      if (this.manifest) {
-        this.loadHeadlineKpis();
-        this.loadPageCharts();
-      }
-    });
   }
 
   ngOnDestroy(): void {
@@ -281,6 +283,7 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
   }
 
   selectReportLevel(level: string): void {
+    this.currentLoadLevel = '';
     this.router.navigate(['/utilisateur/bi', level]);
   }
 
@@ -335,11 +338,17 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
     if (!this.manifest) {
       return;
     }
+    const level = this.selectedReportLevel;
     const slugs = this.pageCards.map((c) => c.slug);
     if (!slugs.length) {
       this.chartsLoading = false;
       return;
     }
+
+    if (!background && this.currentLoadLevel === level && Object.keys(this.cardCharts).length > 0) {
+      return;
+    }
+    this.currentLoadLevel = level;
 
     const hasCharts = slugs.some((s) => {
       const k = this.cardCharts[s]?.kind;
@@ -351,6 +360,7 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
     this.chartsError = '';
     if (!background) {
       this.destroyCharts();
+      this.cardCharts = {};
     }
 
     slugs.forEach((s) => {
@@ -358,33 +368,18 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
     });
 
     this.chartsReqSub?.unsubscribe();
-    const requests: Record<string, Observable<CardChart>> = {};
-    for (const slug of slugs) {
-      requests[slug] = this.http
-        .get<CardChart>(`${this.biHubBase}/api/kpis/card/${slug}`, {
-          params: { t: Date.now().toString() },
-        })
-        .pipe(
-          timeout(15000),
-          map((ch) => ({ ...ch, slug })),
-          catchError((err) =>
-            of({
-              kind: 'error',
-              slug,
-              error:
-                err?.status === 404
-                  ? 'Hub BI obsolète — docker compose build bi-hub frontend && docker compose up -d'
-                  : 'Indisponible (Hub MySQL)',
-              points: [],
-              scalars: {},
-              scalar: null,
-            } as CardChart)
-          )
-        );
-    }
-
-    this.chartsReqSub = forkJoin(requests)
+    this.chartsReqSub = this.http
+      .get<{ charts: Record<string, CardChart> }>(
+        `${this.biHubBase}/api/kpis/page/${level}`,
+        { params: { t: Date.now().toString() } }
+      )
       .pipe(
+        timeout(20000),
+        catchError(() => {
+          this.chartsError =
+            'Hub BI indisponible — docker compose up -d mysql bi-hub puis FIX_BI_DASHBOARD.cmd';
+          return of({ charts: {} as Record<string, CardChart> });
+        }),
         finalize(() => {
           this.chartsLoading = false;
           slugs.forEach((s) => {
@@ -395,12 +390,12 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe({
-        next: (charts) => {
-          this.cardCharts = { ...this.cardCharts, ...charts };
-          const errors = Object.values(charts).filter((c) => c.kind === 'error').length;
-          if (errors === slugs.length) {
+        next: (res) => {
+          this.cardCharts = res.charts || {};
+          const errors = Object.values(this.cardCharts).filter((c) => c.kind === 'error').length;
+          if (errors > 0 && errors === slugs.length) {
             this.chartsError =
-              'Entrepôt inaccessible — docker compose up -d mysql bi-hub puis Synchroniser';
+              'Entrepôt inaccessible — docker compose run --rm talend-etl puis F5';
           }
         },
       });
@@ -565,7 +560,8 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
   }
 
   private checkBiHub(): void {
-    const url = this.manifest?.biHub?.healthUrl || `${this.biHubBase}/api/health`;
+    const path = this.manifest?.biHub?.healthPath || '/api/health';
+    const url = `${this.biHubBase}${path.startsWith('/') ? path : `/${path}`}`;
     this.http.get<HubHealth>(url).subscribe({
       next: (h) => {
         this.etlRunning = !!h.etlRunning;
@@ -625,7 +621,7 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
 
   private startEtlPolling(): void {
     this.etlPollSub?.unsubscribe();
-    this.etlPollSub = interval(12000)
+    this.etlPollSub = interval(30000)
       .pipe(switchMap(() => this.http.get<HubHealth>(`${this.biHubBase}/api/health`)))
       .subscribe({
         next: (h) => {

@@ -1,12 +1,15 @@
 @echo off
-REM Reconstruit Hub BI + frontend admin (graphiques findme_dw)
+REM Apres git pull : reconstruit front + hub (corrige page blanche / freeze admin BI)
 cd /d "%~dp0"
-echo Build bi-hub + frontend...
-docker compose build bi-hub frontend
+echo [1/3] Build frontend + bi-hub...
+docker compose build frontend bi-hub
 if errorlevel 1 exit /b 1
-echo Redemarrage...
+echo [2/3] Demarrage mysql + hub + front...
 docker compose up -d mysql bi-hub frontend
+echo [3/3] ETL (entrepot findme_dw)...
+docker compose run --rm talend-etl
 echo.
-echo Ouvrir: http://localhost:4200/utilisateur/bi/executive
-echo Admin: admin@gmail.com / admin
+echo OK : http://localhost:4200/login
+echo BI : http://localhost:4200/utilisateur/bi/executive
+echo admin@gmail.com / admin  — Ctrl+F5 si besoin
 pause
