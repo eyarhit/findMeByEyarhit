@@ -43,6 +43,7 @@ import { StatistiqueUtilisateurPageComponent } from './pages/statistique-utilisa
 import { ListUtilisateurComponent } from './components/list-utilisateur/list-utilisateur.component';
 import { RegisterFeelancerComponent } from './pages/register-freelancer/register-freelancer.component';
 import { SidebarEspaceComponent } from './components/sidebar/sidebar.component';
+import { BiDashboardComponent } from './admin/bi-dashboard/bi-dashboard.component';
 import { Etape1MissionComponent } from './components/etape1-mission/etape1-mission.component';
 import { Etape2MissionDescriptionComponent } from './components/etape2-mission-description/etape2-mission-description.component';
 import { Etape3MissionComponent } from './components/etape3-mission/etape3-mission.component';
@@ -167,18 +168,13 @@ const routes: Routes = [
     canActivate: [AuthGuard, roleGuard],
     data: { expectedRole: ['ADMIN'] },
     children: [
-      { path: '', redirectTo: 'accueil', pathMatch: 'full' },
-      { path: 'accueil', component: StatistiqueUtilisateurPageComponent },
-      {path: 'candidat', component: ListUtilisateurComponent,data: { userRole: 'CANDIDAT' }},      
-      {path: 'entreprise', component: ListUtilisateurComponent,data: { userRole: 'ENTREPRISE' }},
-      {path: 'chargerecrutement', component: ListUtilisateurComponent,data: { userRole: 'CHARGEDERECRUTEMENT' }},
-      {path: 'ingenieuraffaire', component: ListUtilisateurComponent,data: { userRole: 'INGENIEURDAFFAIRE' }},
-      {path: 'admin', component: ListUtilisateurComponent,data: { userRole: 'ADMIN' }},
-      {
-        path: 'bi',
-        redirectTo: '/admin/bi-dashboard',
-        pathMatch: 'full',
-      },
+      { path: '', redirectTo: 'bi', pathMatch: 'full' },
+      { path: 'bi', component: BiDashboardComponent },
+      { path: 'bi/:niveau', component: BiDashboardComponent },
+      { path: 'utilisateurs', component: ListUtilisateurComponent, data: { userRole: 'CANDIDAT' } },
+      { path: 'accueil', redirectTo: 'bi', pathMatch: 'full' },
+      { path: 'admin', redirectTo: 'utilisateurs', pathMatch: 'full' },
+      { path: 'candidat', redirectTo: 'utilisateurs', pathMatch: 'full' },
     ],
   },
   // Other authenticated routes (no children)

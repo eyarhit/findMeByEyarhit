@@ -7,5 +7,6 @@ import { BiDashboardComponent } from './bi-dashboard/bi-dashboard.component';
 @NgModule({
   declarations: [BiDashboardComponent],
   imports: [CommonModule, HttpClientModule, AdminRoutingModule],
+  exports: [BiDashboardComponent],
 })
 export class AdminModule {}

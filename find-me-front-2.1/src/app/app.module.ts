@@ -79,6 +79,7 @@ import { PublierContratComponent } from './components/publier_contrat/publier_co
 import { DossierCompetencesComponent } from './components/dossier-competences/dossier-competences.component';
 import { ChatComponent } from './components/chat/chat.component';
 import { HomeRedirectComponent } from './pages/home-redirect/home-redirect.component';
+import { AdminModule } from './admin/admin.module';
 import { PickerModule } from '@ctrl/ngx-emoji-mart';
 import { MessengerChatComponent } from './components/messenger-chat/messenger-chat.component';
 
@@ -164,9 +165,7 @@ import { MessengerChatComponent } from './components/messenger-chat/messenger-ch
     FontAwesomeModule,
     BrowserModule,
     PickerModule,
-
-
-    
+    AdminModule,
 ],
 
   exports: [

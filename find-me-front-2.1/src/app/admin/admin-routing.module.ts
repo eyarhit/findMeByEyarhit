@@ -1,14 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { BiDashboardComponent } from './bi-dashboard/bi-dashboard.component';
-import { AuthGuard } from '../guards/auth.guard';
-import { AdminGuard } from '../guards/admin.guard';
 
 const routes: Routes = [
+  { path: '', redirectTo: '/utilisateur/bi', pathMatch: 'full' },
   {
     path: 'bi-dashboard',
-    component: BiDashboardComponent,
-    canActivate: [AuthGuard, AdminGuard],
+    redirectTo: '/utilisateur/bi',
+    pathMatch: 'full',
   },
 ];
 

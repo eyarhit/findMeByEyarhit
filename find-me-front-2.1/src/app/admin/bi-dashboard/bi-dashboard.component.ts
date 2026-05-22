@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
@@ -10,7 +11,6 @@ export interface BiManifestCard {
   domain: string;
   display: string;
   db: string;
-  sqlFile?: string;
   powerBiPage?: string;
 }
 
@@ -24,58 +24,29 @@ export interface BiPowerBiReport {
   level: string;
   name: string;
   page?: string;
-  file?: string;
   description?: string;
-}
-
-export interface BiHubLinks {
-  port: number;
-  baseUrl: string;
-  talendUrl: string;
-  powerBiUrl: string;
-  talendStudioUrl?: string;
-  powerBiWebUrl?: string;
-  healthUrl: string;
 }
 
 export interface BiManifest {
   version: number;
-  stack?: string;
-  generatedAt: string | null;
   dwDatabase: string;
-  githubRepo?: string;
-  biHub?: BiHubLinks;
-  talend?: {
-    jobName: string;
-    dockerService: string;
-    hubService?: string;
-    etlCommand?: string;
-    studioPath?: string;
-  };
+  biHub?: { port: number; healthUrl?: string };
   powerBi?: {
     pbipProject?: string;
-    openCommandWin?: string;
-    friendCommandWin?: string;
-    fixPage04Command?: string;
     connectionHint?: string;
-    guidePaths?: string[];
     reports: BiPowerBiReport[];
   };
-  adminWorkflow?: string[];
-  friendWorkflow?: string[];
   cards: BiManifestCard[];
   tabs: BiManifestTab[];
 }
 
 interface HubHealth {
-  status: string;
   mysql: boolean;
   dw: boolean;
   dimDateRows?: number;
   etlRunning?: boolean;
   etlLastSuccess?: string | null;
   etlLastError?: string | null;
-  error?: string | null;
 }
 
 interface ExecutiveKpis {
@@ -83,6 +54,18 @@ interface ExecutiveKpis {
   total_missions?: number;
   total_candidatures?: number;
   total_cv?: number;
+}
+
+interface MoisPoint {
+  label: string;
+  value: number;
+}
+
+interface PbiConnection {
+  server: string;
+  port: number;
+  database: string;
+  user: string;
 }
 
 @Component({
@@ -95,50 +78,37 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
   manifestError = '';
   hubStatus: 'unknown' | 'ok' | 'degraded' | 'error' = 'unknown';
   hubDetail = '';
-  selectedTabKey = 'executive';
   selectedReportLevel = 'executive';
-  showConnectionInfo = false;
-  showFriendGuide = false;
-
   executiveKpis: ExecutiveKpis | null = null;
+  candidaturesMois: MoisPoint[] = [];
   dwStats: Record<string, number> = {};
+  pbiConnection: PbiConnection | null = null;
   etlRunning = false;
   etlMessage = '';
   etlPollSub?: Subscription;
+  routeSub?: Subscription;
 
-  constructor(private http: HttpClient) {}
-
-  get stackLabel(): string {
-    return this.manifest?.stack || 'Talend ETL → Power BI';
-  }
-
-  get talendJob(): string {
-    return this.manifest?.talend?.jobName || 'FindMe_Load_DW';
-  }
+  constructor(
+    private http: HttpClient,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
   get reports(): BiPowerBiReport[] {
     return this.manifest?.powerBi?.reports || [];
   }
 
   get selectedReport(): BiPowerBiReport | undefined {
-    return this.reports.find((r) => r.level === this.selectedReportLevel) || this.reports[0];
+    return (
+      this.reports.find((r) => r.level === this.selectedReportLevel) ||
+      this.reports[0]
+    );
   }
 
-  get tabs(): BiManifestTab[] {
-    return this.manifest?.tabs?.length ? this.manifest.tabs : [];
-  }
-
-  get selectedTab(): BiManifestTab {
-    return this.tabs.find((t) => t.key === this.selectedTabKey) || this.tabs[0];
-  }
-
-  get selectedCards(): BiManifestCard[] {
-    const slugs = new Set(this.selectedTab?.cardSlugs || []);
+  get pageCards(): BiManifestCard[] {
+    const tab = this.manifest?.tabs?.find((t) => t.key === this.selectedReportLevel);
+    const slugs = new Set(tab?.cardSlugs || []);
     return (this.manifest?.cards || []).filter((c) => slugs.has(c.slug));
-  }
-
-  get pbipPath(): string {
-    return this.manifest?.powerBi?.pbipProject || 'bi/powerbi/FindMe-Dashboard/FindMe-Dashboard.pbip';
   }
 
   get biHubBase(): string {
@@ -146,27 +116,31 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
     return `http://${window.location.hostname}:${port}`;
   }
 
-  get talendStudioUrl(): string {
-    const h = window.location.hostname;
-    const port = this.manifest?.biHub?.talendStudioUrl
-      ? new URL(this.manifest.biHub.talendStudioUrl).port || '6080'
-      : '6080';
-    return (
-      this.manifest?.biHub?.talendStudioUrl?.replace('localhost', h) ||
-      `http://${h}:${port}`
-    );
-  }
-
-  get powerBiWebUrl(): string {
-    const h = window.location.hostname;
-    return (
-      this.manifest?.biHub?.powerBiWebUrl?.replace('localhost', h) ||
-      `http://${h}:8077/reports`
-    );
-  }
-
-  get biHubLauncherUrl(): string {
-    return `${this.biHubBase}/?tab=talend`;
+  get headlineKpis(): { label: string; value: number | string }[] {
+    if (this.selectedReportLevel === 'executive' && this.executiveKpis) {
+      return [
+        { label: 'Utilisateurs', value: this.executiveKpis.total_utilisateurs ?? 0 },
+        { label: 'Missions', value: this.executiveKpis.total_missions ?? 0 },
+        { label: 'Candidatures', value: this.executiveKpis.total_candidatures ?? 0 },
+        { label: 'CV', value: this.executiveKpis.total_cv ?? 0 },
+      ];
+    }
+    if (this.selectedReportLevel === 'technique') {
+      const dates = this.dwStats['dim_date'] ?? 0;
+      const users = this.dwStats['dim_user'] ?? 0;
+      return [
+        { label: 'Dates DW', value: dates },
+        { label: 'Utilisateurs DW', value: users },
+        { label: 'Candidatures (fait)', value: this.dwStats['fact_candidature'] ?? 0 },
+        { label: 'CV (fait)', value: this.dwStats['fact_cv'] ?? 0 },
+      ];
+    }
+    const keys = ['fact_candidature', 'fact_mission', 'fact_user', 'fact_cv'] as const;
+    const labels = ['Candidatures', 'Missions', 'Activité users', 'CV'];
+    return keys.map((k, i) => ({
+      label: labels[i],
+      value: this.dwStats[k] ?? '—',
+    }));
   }
 
   ngOnInit(): void {
@@ -177,100 +151,80 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (m) => {
           this.manifest = m;
-          this.selectedTabKey = m.tabs?.[0]?.key || 'executive';
-          this.selectedReportLevel = m.powerBi?.reports?.[0]?.level || 'executive';
+          this.bindRouteNiveau();
           this.refreshHubData();
           this.startEtlPolling();
         },
         error: () => {
           this.manifestError =
-            'Manifest BI introuvable (assets/bi/bi-manifest.json).';
+            'Configuration BI indisponible. Relancez Docker puis actualisez la page.';
         },
       });
+
+    this.routeSub = this.route.paramMap.subscribe(() => this.bindRouteNiveau());
   }
 
   ngOnDestroy(): void {
     this.etlPollSub?.unsubscribe();
-  }
-
-  selectTab(key: string): void {
-    this.selectedTabKey = key;
+    this.routeSub?.unsubscribe();
   }
 
   selectReportLevel(level: string): void {
-    this.selectedReportLevel = level;
-  }
-
-  toggleConnectionInfo(): void {
-    this.showConnectionInfo = !this.showConnectionInfo;
-  }
-
-  toggleFriendGuide(): void {
-    this.showFriendGuide = !this.showFriendGuide;
-  }
-
-  tierLabel(level: string): string {
-    const map: Record<string, string> = {
-      executive: 'Executive',
-      managerial: 'Managerial',
-      operational: 'Operationnel',
-      technique: 'Technique',
-    };
-    return map[level] || level;
-  }
-
-  openTalendStudio(): void {
-    window.open(this.talendStudioUrl, '_blank', 'noopener,noreferrer');
-  }
-
-  openPowerBiWeb(): void {
-    window.open(this.powerBiWebUrl, '_blank', 'noopener,noreferrer');
-  }
-
-  openBiHub(): void {
-    window.open(this.biHubLauncherUrl, '_blank', 'noopener,noreferrer');
-  }
-
-  openGithub(): void {
-    const url = this.manifest?.githubRepo || 'https://github.com/eyarhit/findMeByEyarhit';
-    window.open(url, '_blank', 'noopener,noreferrer');
+    this.router.navigate(['/utilisateur/bi', level]);
   }
 
   runEtl(): void {
-    this.etlMessage = 'Démarrage ETL Talend…';
-    this.http.post<{ started: boolean }>(`${this.biHubBase}/api/etl/run`, {}).subscribe({
+    this.etlMessage = 'Actualisation de l’entrepôt…';
+    this.http.post(`${this.biHubBase}/api/etl/run`, {}).subscribe({
       next: () => {
         this.etlRunning = true;
-        this.etlMessage = 'ETL en cours (findme_dw)…';
-        this.refreshHubData();
+        this.etlMessage = 'Synchronisation findme_dw en cours…';
       },
       error: (err) => {
         this.etlMessage =
           err?.status === 409
-            ? 'ETL déjà en cours.'
-            : 'Hub BI indisponible — lancez : docker compose up -d bi-hub mysql';
+            ? 'Synchronisation déjà en cours.'
+            : 'Service BI indisponible (docker compose up -d bi-hub mysql).';
       },
     });
   }
 
   hubStatusLabel(): string {
     const map: Record<string, string> = {
-      ok: 'Entrepôt prêt · Power BI peut actualiser',
-      degraded: 'MySQL OK — lancer l’ETL Talend',
-      error: 'Hub BI / Docker indisponible (port 3032)',
+      ok: 'Données alignées avec Power BI',
+      degraded: 'Entrepôt vide — lancer la synchronisation',
+      error: 'Entrepôt inaccessible',
       unknown: 'Vérification…',
     };
     return map[this.hubStatus] || map['unknown'];
   }
 
-  dwStatsEntries(): { name: string; count: number }[] {
-    return Object.entries(this.dwStats).map(([name, count]) => ({ name, count }));
+  displayIcon(type: string): string {
+    const t = (type || '').toLowerCase();
+    if (t.includes('line')) return 'chart-line';
+    if (t.includes('bar') || t.includes('histogram')) return 'chart-bar';
+    if (t.includes('donut') || t.includes('pie')) return 'chart-pie';
+    if (t.includes('gauge') || t.includes('kpi') || t.includes('matrix')) return 'gauge';
+    if (t.includes('table')) return 'table';
+    return 'chart';
+  }
+
+  maxMoisValue(): number {
+    return Math.max(1, ...this.candidaturesMois.map((p) => p.value));
+  }
+
+  private bindRouteNiveau(): void {
+    const niveau = (this.route.snapshot.paramMap.get('niveau') || 'executive').toLowerCase();
+    const allowed = ['executive', 'managerial', 'operational', 'technique'];
+    this.selectedReportLevel = allowed.includes(niveau) ? niveau : 'executive';
   }
 
   private refreshHubData(): void {
     this.checkBiHub();
     this.loadExecutiveKpis();
     this.loadDwStats();
+    this.loadCandidaturesMois();
+    this.loadPbiConnection();
   }
 
   private checkBiHub(): void {
@@ -279,21 +233,23 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
       next: (h) => {
         this.etlRunning = !!h.etlRunning;
         if (h.etlRunning) {
-          this.etlMessage = 'ETL en cours…';
+          this.etlMessage = 'Synchronisation en cours…';
         } else if (h.etlLastSuccess) {
-          this.etlMessage = `Dernier ETL OK : ${h.etlLastSuccess}`;
+          this.etlMessage = `Dernière synchro : ${h.etlLastSuccess}`;
         } else if (h.etlLastError) {
-          this.etlMessage = `Dernière erreur ETL : ${h.etlLastError}`;
+          this.etlMessage = `Erreur : ${h.etlLastError}`;
+        } else {
+          this.etlMessage = '';
         }
         if (h.mysql && h.dw) {
           this.hubStatus = 'ok';
-          this.hubDetail = `${h.dimDateRows ?? 0} dates · findme_dw`;
+          this.hubDetail = `Entrepôt ${this.manifest?.dwDatabase || 'findme_dw'} · ${h.dimDateRows ?? 0} périodes`;
         } else if (h.mysql) {
           this.hubStatus = 'degraded';
-          this.hubDetail = 'Lancer Talend ETL';
+          this.hubDetail = 'Lancer la synchronisation des données';
         } else {
           this.hubStatus = 'error';
-          this.hubDetail = h.error || 'MySQL inaccessible';
+          this.hubDetail = 'MySQL Docker non démarré';
         }
       },
       error: () => {
@@ -319,6 +275,24 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
       });
   }
 
+  private loadCandidaturesMois(): void {
+    this.http
+      .get<MoisPoint[]>(`${this.biHubBase}/api/kpis/candidatures_par_mois`)
+      .subscribe({
+        next: (rows) => (this.candidaturesMois = rows || []),
+        error: () => (this.candidaturesMois = []),
+      });
+  }
+
+  private loadPbiConnection(): void {
+    this.http
+      .get<PbiConnection>(`${this.biHubBase}/api/powerbi/connection`)
+      .subscribe({
+        next: (c) => (this.pbiConnection = c),
+        error: () => (this.pbiConnection = null),
+      });
+  }
+
   private startEtlPolling(): void {
     this.etlPollSub?.unsubscribe();
     this.etlPollSub = interval(8000)
@@ -328,10 +302,8 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
           const was = this.etlRunning;
           this.etlRunning = !!h.etlRunning;
           if (was && !this.etlRunning && h.etlLastSuccess) {
-            this.etlMessage = `ETL terminé : ${h.etlLastSuccess}`;
-            this.loadExecutiveKpis();
-            this.loadDwStats();
-            this.checkBiHub();
+            this.etlMessage = `Synchronisation terminée : ${h.etlLastSuccess}`;
+            this.refreshHubData();
           }
         },
       });

@@ -1,6 +1,6 @@
 {
   "version": 5,
-  "stack": "Talend ETL → findme_dw → Power BI (4 pages PBIP)",
+  "stack": "findme_dw → Power BI (4 pages PBIP)",
   "generatedAt": "2026-05-22T00:00:00Z",
   "dwDatabase": "findme_dw",
   "githubRepo": "https://github.com/eyarhit/findMeByEyarhit",

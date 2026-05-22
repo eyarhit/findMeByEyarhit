@@ -26,6 +26,13 @@ export class SidebarEspaceComponent implements OnInit, OnDestroy {
   titreDeProfil: string=''
   role: string=''
 
+  readonly adminBiPages = [
+    { id: 'executive', num: '01', label: 'Executive' },
+    { id: 'managerial', num: '02', label: 'Managerial' },
+    { id: 'operational', num: '03', label: 'Opérationnel' },
+    { id: 'technique', num: '04', label: 'Technique' },
+  ];
+
   constructor(
     private apiRoutingServiceUser: ApiRoutingServiceUser,
     @Inject(PLATFORM_ID) private platformId: Object,
