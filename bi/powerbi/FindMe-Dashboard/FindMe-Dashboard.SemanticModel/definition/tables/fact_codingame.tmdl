@@ -1,6 +1,6 @@
 
 table fact_codingame
-    lineageTag: 6b5ba14e-9b62-40c7-a5d6-287e0d507856
+    lineageTag: 36f3d669-4e7f-4ba7-9a58-e768b45e4eca
 
     column codingame_key
         dataType: int64
@@ -46,7 +46,7 @@ table fact_codingame
                     otherwise try Source{[Name="fact_codingame", Kind="Table"]}[Data]
                     otherwise try Source{[Item="fact_codingame"]}[Data]
                     otherwise Value.NativeQuery(Source, "SELECT * FROM fact_codingame", null),
-                Demo = Table.FromRows({
+                Demo = Table.FromRecords({
                     [codingame_key = 1, date_key = 20260515, user_key = 1, framework_name = "React", score = 78, total_score = 100, session_count = 1],
                     [codingame_key = 2, date_key = 20260515, user_key = 1, framework_name = "Spring", score = 65, total_score = 100, session_count = 1],
                     [codingame_key = 3, date_key = 20260515, user_key = 1, framework_name = "Angular", score = 88, total_score = 100, session_count = 1]

@@ -41,7 +41,7 @@ function Get-PartitionLetBody([string]$TableName) {
     if ($TableName -eq 'fact_quiz') {
         return $load + @'
 ,
-                Demo = Table.FromRows({
+                Demo = Table.FromRecords({
                     [quiz_key = 1, date_key = 20260515, user_key = 1, score = 85, passed = 1, attempt_count = 1],
                     [quiz_key = 2, date_key = 20260515, user_key = 1, score = 60, passed = 0, attempt_count = 1],
                     [quiz_key = 3, date_key = 20260515, user_key = 1, score = 92, passed = 1, attempt_count = 1]
@@ -54,7 +54,7 @@ function Get-PartitionLetBody([string]$TableName) {
     if ($TableName -eq 'fact_codingame') {
         return $load + @'
 ,
-                Demo = Table.FromRows({
+                Demo = Table.FromRecords({
                     [codingame_key = 1, date_key = 20260515, user_key = 1, framework_name = "React", score = 78, total_score = 100, session_count = 1],
                     [codingame_key = 2, date_key = 20260515, user_key = 1, framework_name = "Spring", score = 65, total_score = 100, session_count = 1],
                     [codingame_key = 3, date_key = 20260515, user_key = 1, framework_name = "Angular", score = 88, total_score = 100, session_count = 1]

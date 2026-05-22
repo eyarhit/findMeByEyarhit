@@ -1,6 +1,6 @@
 
 table fact_quiz
-    lineageTag: 704e7f26-8183-49cd-b5cc-7b56d246b8f1
+    lineageTag: b1ba0ab7-3c64-4b92-b99e-58866fbd1516
 
     column quiz_key
         dataType: int64
@@ -41,7 +41,7 @@ table fact_quiz
                     otherwise try Source{[Name="fact_quiz", Kind="Table"]}[Data]
                     otherwise try Source{[Item="fact_quiz"]}[Data]
                     otherwise Value.NativeQuery(Source, "SELECT * FROM fact_quiz", null),
-                Demo = Table.FromRows({
+                Demo = Table.FromRecords({
                     [quiz_key = 1, date_key = 20260515, user_key = 1, score = 85, passed = 1, attempt_count = 1],
                     [quiz_key = 2, date_key = 20260515, user_key = 1, score = 60, passed = 0, attempt_count = 1],
                     [quiz_key = 3, date_key = 20260515, user_key = 1, score = 92, passed = 1, attempt_count = 1]
