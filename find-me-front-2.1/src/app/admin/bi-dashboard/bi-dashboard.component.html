@@ -1,8 +1,8 @@
 <section class="admin-bi" *ngIf="!manifestError; else biError">
   <header class="admin-bi__header">
     <div>
-      <p class="admin-bi__eyebrow">Administration Find-Me</p>
-      <h1>{{ selectedReport?.name || 'Tableaux de bord' }}</h1>
+      <p class="admin-bi__eyebrow">Pilotage Find-Me</p>
+      <h1>{{ selectedReport?.name || 'Tableau de bord' }}</h1>
       <p class="admin-bi__lead">{{ selectedReport?.description }}</p>
       <p class="admin-bi__meta" *ngIf="hubDetail">{{ hubDetail }}</p>
     </div>
@@ -14,6 +14,9 @@
         [class.err]="hubStatus === 'error'">
         {{ hubStatusLabel() }}
       </span>
+      <button type="button" class="btn-outline" (click)="openPowerBiDesktop()">
+        Ouvrir dans Power BI Desktop
+      </button>
       <button type="button" class="btn-primary" (click)="runEtl()" [disabled]="etlRunning">
         {{ etlRunning ? 'Synchronisation…' : 'Synchroniser les données' }}
       </button>
@@ -21,6 +24,7 @@
   </header>
 
   <p class="admin-bi__sync" *ngIf="etlMessage">{{ etlMessage }}</p>
+  <p class="admin-bi__sync pbi-hint" *ngIf="pbiOpenHint">{{ pbiOpenHint }}</p>
   <p class="admin-bi__sync err" *ngIf="chartsError">{{ chartsError }}</p>
 
   <nav class="admin-bi__nav" *ngIf="reports.length">
@@ -34,6 +38,18 @@
     </button>
   </nav>
 
+  <div class="filters-bar" *ngIf="filterDefs.length">
+    <label *ngFor="let f of filterDefs" class="filter-field">
+      <span>{{ f.label }}</span>
+      <select
+        [value]="activeFilters[f.id] || ''"
+        (change)="onFilterChange(f.id, $any($event.target).value)">
+        <option value="">Tous</option>
+        <option *ngFor="let o of filterOptions[f.id]" [value]="o.value">{{ o.label }}</option>
+      </select>
+    </label>
+  </div>
+
   <div class="kpi-row">
     <article class="kpi-tile" *ngFor="let k of headlineKpis">
       <span class="kpi-tile__value">{{ k.value }}</span>
@@ -42,45 +58,54 @@
   </div>
 
   <section class="indicators">
-    <h2>Indicateurs — même source que Power BI (findme_dw)</h2>
-    <p class="indicators__sub" *ngIf="chartsLoading">Chargement des données…</p>
+    <h2>Synthèse des indicateurs</h2>
+    <p class="indicators__sub" *ngIf="chartsLoading">Chargement…</p>
 
     <div class="indicator-grid" *ngIf="!chartsLoading">
       <article class="indicator-card" *ngFor="let card of pageCards">
-        <h3>{{ card.title }}</h3>
-        <p class="indicator-card__type">{{ card.display }}</p>
+        <h3>{{ cardTitle(card) }}</h3>
 
         <ng-container *ngIf="chartFor(card.slug) as ch">
-          <!-- Erreur SQL -->
-          <p class="chart-empty err" *ngIf="ch.kind === 'error'">{{ ch.error }}</p>
-          <p class="chart-empty" *ngIf="ch.kind === 'empty'">Aucune donnée — synchronisez puis réessayez.</p>
+          <p class="chart-empty err" *ngIf="ch.kind === 'error'">Donnée temporairement indisponible</p>
+          <p class="chart-empty" *ngIf="ch.kind === 'empty'">Aucune donnée pour la période sélectionnée</p>
 
-          <!-- Jauge / KPI scalaire -->
           <div class="chart-gauge" *ngIf="ch.kind === 'gauge' || ch.kind === 'kpi'">
             <span class="chart-gauge__value">{{ (ch.scalar ?? 0) | number:'1.0-1' }}</span>
             <span class="chart-gauge__unit" *ngIf="ch.kind === 'gauge'">%</span>
+            <span class="chart-gauge__caption" *ngIf="ch.gaugeLabel">{{ ch.gaugeLabel }}</span>
           </div>
 
-          <!-- Matrice KPI exécutifs -->
           <div class="chart-matrix" *ngIf="ch.kind === 'matrix'">
             <div class="chart-matrix__cell" *ngFor="let key of scalarKeys(card.slug)">
               <span class="chart-matrix__val">{{ ch.scalars[key] | number:'1.0-0' }}</span>
-              <span class="chart-matrix__lbl">{{ formatScalarKey(key) }}</span>
+              <span class="chart-matrix__lbl">{{ scalarLabel(card.slug, key) }}</span>
             </div>
           </div>
 
-          <!-- Barres / lignes -->
-          <div class="mini-chart" *ngIf="ch.kind === 'bar' || ch.kind === 'line'">
+          <div class="mini-chart" *ngIf="ch.kind === 'bar'">
             <div class="mini-chart__item" *ngFor="let p of ch.points">
+              <span class="mini-chart__val">{{ p.value | number:'1.0-0' }}</span>
               <div
                 class="mini-chart__bar"
-                [style.height.%]="(p.value / maxChartValue(card.slug)) * 100"
+                [style.height.%]="barHeight(card.slug, p.value)"
                 [title]="p.label + ' : ' + p.value"></div>
-              <span class="mini-chart__lbl">{{ p.label }}</span>
+              <span class="mini-chart__lbl" [title]="p.label">{{ p.label }}</span>
             </div>
           </div>
 
-          <!-- Donut (barres horizontales proportionnelles) -->
+          <div class="line-chart" *ngIf="ch.kind === 'line'">
+            <svg *ngIf="linePolyline(card.slug)" viewBox="0 0 200 80" preserveAspectRatio="none">
+              <polyline
+                [attr.points]="linePolyline(card.slug)"
+                fill="none"
+                stroke="#5a3fc9"
+                stroke-width="2.5" />
+            </svg>
+            <div class="line-chart__labels">
+              <span *ngFor="let p of ch.points" [title]="p.label + ' : ' + p.value">{{ p.label }}</span>
+            </div>
+          </div>
+
           <div class="chart-donut" *ngIf="ch.kind === 'donut'">
             <div class="chart-donut__row" *ngFor="let p of ch.points">
               <span class="chart-donut__lbl">{{ p.label }}</span>
@@ -100,7 +125,7 @@
   </section>
 
   <section class="dw-panel" *ngIf="selectedReportLevel === 'technique' && dwStats">
-    <h2>Volumes entrepôt</h2>
+    <h2>Qualité des données</h2>
     <div class="dw-table">
       <div class="dw-table__row" *ngFor="let row of dwStats | keyvalue">
         <span>{{ row.key }}</span>
@@ -108,13 +133,6 @@
       </div>
     </div>
   </section>
-
-  <footer class="admin-bi__footer" *ngIf="pbiConnection">
-    <p>
-      Rapport complet dans <strong>Power BI Desktop</strong> (PBIP) — après synchro :
-      Actualiser sur {{ pbiConnection.database }} ({{ pbiConnection.server }}:{{ pbiConnection.port }}).
-    </p>
-  </footer>
 </section>
 
 <ng-template #biError>

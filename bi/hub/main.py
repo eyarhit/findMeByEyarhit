@@ -16,7 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from kpi_data import run_page_queries, run_slug_query
+from kpi_data import fetch_filter_options, page_filter_meta, run_page_queries, run_slug_query
 
 MYSQL_HOST = os.environ.get("MYSQL_HOST", "mysql")
 MYSQL_PORT = int(os.environ.get("MYSQL_PORT", "3306"))
@@ -263,14 +263,33 @@ def _dw_connect():
     return _connect(DW)
 
 
-@app.get("/api/kpis/page/{level}")
-async def kpis_page(level: str):
+@app.get("/api/kpis/filters/{level}")
+async def kpis_filters(level: str):
     allowed = {"executive", "managerial", "operational", "technique"}
     if level not in allowed:
-        raise HTTPException(404, "Niveau BI inconnu")
+        raise HTTPException(404, "Niveau inconnu")
     try:
-        charts = run_page_queries(_dw_connect, level)
-        return {"level": level, "charts": charts}
+        options = fetch_filter_options(_dw_connect, level)
+        return {"level": level, "filters": page_filter_meta(level), "options": options}
+    except Exception as exc:
+        raise HTTPException(503, str(exc)) from exc
+
+
+@app.get("/api/kpis/page/{level}")
+async def kpis_page(
+    level: str,
+    year: str | None = None,
+    contract: str | None = None,
+    status: str | None = None,
+    city: str | None = None,
+):
+    allowed = {"executive", "managerial", "operational", "technique"}
+    if level not in allowed:
+        raise HTTPException(404, "Niveau inconnu")
+    filters = {k: v for k, v in {"year": year, "contract": contract, "status": status, "city": city}.items() if v}
+    try:
+        charts = run_page_queries(_dw_connect, level, filters or None)
+        return {"level": level, "filters": filters, "charts": charts}
     except Exception as exc:
         raise HTTPException(503, str(exc)) from exc
 
