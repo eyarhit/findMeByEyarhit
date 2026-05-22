@@ -276,8 +276,6 @@ services:
     ports:
       - "4200:80"
     depends_on:
-      bi-hub:
-        condition: service_started
       gateway-service:
         condition: service_started
       user-service:

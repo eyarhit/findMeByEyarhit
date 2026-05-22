@@ -140,11 +140,6 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
 
   get biHubBase(): string {
     const hub = this.manifest?.biHub;
-    const proxy = hub?.dockerProxyPath;
-    const port = window.location.port;
-    if (proxy && (port === '4200' || port === '80' || port === '')) {
-      return proxy.replace(/\/$/, '');
-    }
     const hubPort = hub?.port ?? 3032;
     return `http://${window.location.hostname}:${hubPort}`;
   }

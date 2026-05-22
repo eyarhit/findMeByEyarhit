@@ -1,6 +1,6 @@
-import { NgModule, isDevMode } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
-import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
+import { BrowserModule } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -172,8 +172,7 @@ import { MessengerChatComponent } from './components/messenger-chat/messenger-ch
     InformationCvComponent
   ],
   providers: [
-    // Hydratation désactivée en dev : évite page blanche / inaccessible au F5 (token dans localStorage).
-    ...(isDevMode() ? [] : [provideClientHydration()]),
+    // Pas d'hydratation SSR : évite écran blanc (Docker nginx, F5, token localStorage).
     provideHttpClient(withFetch()),
     AuthService,
     provideAnimationsAsync(),

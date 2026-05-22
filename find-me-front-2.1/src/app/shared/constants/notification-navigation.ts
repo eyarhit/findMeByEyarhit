@@ -20,7 +20,7 @@ export function getDefaultHomeUrl(role: string | null | undefined): string {
     case 'ESN_COMMERCIAL':
       return '/gestion-employer/esn-commercial';
     case 'ADMIN':
-      return '/utilisateur/accueil';
+      return '/utilisateur/bi/executive';
     default:
       return '/acceuil-find-me';
   }

@@ -6,7 +6,23 @@ import { getDefaultHomeUrl } from '../../shared/constants/notification-navigatio
 /** Redirection `/` selon le rôle (évite d'envoyer tout le monde vers `/cv`). */
 @Component({
   selector: 'app-home-redirect',
-  template: '',
+  template: `
+    <div class="home-redirect-loading">
+      <p>Chargement FindMe…</p>
+    </div>
+  `,
+  styles: [
+    `
+      .home-redirect-loading {
+        min-height: 40vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        font-family: Roboto, sans-serif;
+      }
+    `,
+  ],
 })
 export class HomeRedirectComponent implements OnInit {
   constructor(
