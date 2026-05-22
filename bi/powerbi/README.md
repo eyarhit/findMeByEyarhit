@@ -1,5 +1,7 @@
 # Bloc 4 — Analyse OLAP (Microsoft Power BI)
 
+**Guide complet PFE** (architecture, schéma en étoile, mesures DAX, 4 dashboards, filtres, BDD, KPI SQL) : **[GUIDE_BI_POWER_BI_COMPLET.md](./GUIDE_BI_POWER_BI_COMPLET.md)**
+
 ## Alignement cours BIS
 
 | Notion cours | Implémentation Power BI |
