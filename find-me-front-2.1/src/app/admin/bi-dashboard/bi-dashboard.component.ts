@@ -353,18 +353,18 @@ export class BiDashboardComponent implements OnInit, OnDestroy, AfterViewChecked
             labels: ['Taux', 'Reste'],
             datasets: [{ data: [rate, 100 - rate], backgroundColor: ['#5A3FC9', '#E2E8F0'], borderWidth: 0 }],
           };
-      return {
+      const doughnutCfg: ChartConfiguration<'doughnut'> = {
         type: 'doughnut',
         data: breakdown,
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          cutout: '68%',
           plugins: {
             legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
             tooltip: { enabled: true },
           },
-          cutout: '68%',
-        } as ChartConfiguration['options'],
+        },
         plugins: [
           {
             id: 'gaugeCenter',
