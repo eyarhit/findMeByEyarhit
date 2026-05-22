@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { catchError, of, timeout } from 'rxjs';
 
 export interface BiManifestCard {
   id: number;
@@ -186,14 +187,17 @@ export class BiDashboardComponent implements OnInit {
 
   private checkBiHub(): void {
     const url = this.manifest?.biHub?.healthUrl || `${this.biHubBase}/api/health`;
-    this.http.get<{ status: string; dw: boolean }>(url).subscribe({
-      next: (h) => {
-        this.hubStatus = h.dw ? 'ok' : h.status === 'degraded' ? 'degraded' : 'error';
-      },
-      error: () => {
-        this.hubStatus = 'error';
-      },
-    });
+    this.http
+      .get<{ status: string; dw: boolean }>(url)
+      .pipe(
+        timeout(4000),
+        catchError(() => of({ status: 'error', dw: false }))
+      )
+      .subscribe({
+        next: (h) => {
+          this.hubStatus = h.dw ? 'ok' : h.status === 'degraded' ? 'degraded' : 'error';
+        },
+      });
   }
 
   hubStatusLabel(): string {
