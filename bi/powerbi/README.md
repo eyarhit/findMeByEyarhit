@@ -208,6 +208,7 @@ Power BI Report Server en Docker nécessite des conteneurs Windows ; non requis 
 
 | Erreur | Cause | Action |
 |--------|-------|--------|
+| **Impossible de fusionner les objets TMDL** — `PBI_MySqlServer` en double (`/model` + `/expressions`) | Paramètres MySQL déclarés deux fois | `git pull` puis `GIT_PULL_BI.cmd` ou `ONE_COMMANDE_POWERBI.cmd` ; fermer Power BI ; supprimer le cache `.pbi` du dossier rapport si besoin ; rouvrir le `.pbip` |
 | **Triangles rouges** sur toutes les tables (vue Modèle) | Requête M ou identifiants MySQL invalides | `git pull` + `ONE_COMMANDE_POWERBI.cmd` ; **Actualiser** ; serveur `localhost:3306` ; si besoin : *Transformer les données* → *Paramètres de la source de données* → modifier identifiants `findme_bi` |
 | **Unable to connect to any of the specified MySQL hosts** | MySQL non joignable depuis Windows (port non publié ou conteneur arrêté) | `git pull`, `docker compose up -d`, vérifier `docker compose ps` → `findme-mysql` **healthy**. Le compose doit exposer `3306:3306`. |
 | Demande d’installer des composants MySQL | Connecteur MySQL manquant | Installer [MySQL Connector/NET](https://dev.mysql.com/downloads/connector/net/), redémarrer Power BI. |

@@ -1,6 +1,6 @@
 
 table fact_mission
-    lineageTag: 343ca20a-5e27-422a-bfce-83424cb00460
+    lineageTag: 30819ae5-93d4-4910-9141-963b2e6cfa10
 
     column mission_key
         dataType: int64
@@ -30,6 +30,5 @@ table fact_mission
                 Data = try Source{[Schema=PBI_MySqlDatabase, Item="fact_mission"]}[Data]
                     otherwise try Source{[Name="fact_mission", Kind="Table"]}[Data]
                     otherwise try Source{[Item="fact_mission"]}[Data]
-                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_mission", null)
-            in
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_mission", null)            in
                 Data

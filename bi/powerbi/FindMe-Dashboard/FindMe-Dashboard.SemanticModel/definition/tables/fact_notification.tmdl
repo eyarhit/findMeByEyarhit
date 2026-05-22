@@ -1,6 +1,6 @@
 
 table fact_notification
-    lineageTag: 46ea9063-381f-4275-8fd5-438d41939614
+    lineageTag: be8a3b96-d6c9-47e1-a5b1-f460d8bdd88e
 
     column notification_key
         dataType: int64
@@ -35,6 +35,5 @@ table fact_notification
                 Data = try Source{[Schema=PBI_MySqlDatabase, Item="fact_notification"]}[Data]
                     otherwise try Source{[Name="fact_notification", Kind="Table"]}[Data]
                     otherwise try Source{[Item="fact_notification"]}[Data]
-                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_notification", null)
-            in
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_notification", null)            in
                 Data

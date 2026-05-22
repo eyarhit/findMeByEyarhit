@@ -1,6 +1,6 @@
 
 table v_bi_kpi_recrutement
-    lineageTag: 15a5ccaa-7e8b-40c3-aad5-f0149cc7f8bd
+    lineageTag: 6d8b8ca9-0e17-4182-9cdf-fc6b15702673
 
     column year_num
         dataType: int64
@@ -40,6 +40,5 @@ table v_bi_kpi_recrutement
                 Data = try Source{[Schema=PBI_MySqlDatabase, Item="v_bi_kpi_recrutement"]}[Data]
                     otherwise try Source{[Name="v_bi_kpi_recrutement", Kind="Table"]}[Data]
                     otherwise try Source{[Item="v_bi_kpi_recrutement"]}[Data]
-                    otherwise Value.NativeQuery(Source, "SELECT * FROM v_bi_kpi_recrutement", null)
-            in
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM v_bi_kpi_recrutement", null)            in
                 Data

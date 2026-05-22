@@ -1,6 +1,6 @@
 
 table fact_mission_favori
-    lineageTag: 52d63290-706a-4d5e-8c41-e9536fc8f934
+    lineageTag: fc77f54d-15a6-45b4-b4ad-b456aa80eeb6
 
     column favori_key
         dataType: int64
@@ -35,6 +35,5 @@ table fact_mission_favori
                 Data = try Source{[Schema=PBI_MySqlDatabase, Item="fact_mission_favori"]}[Data]
                     otherwise try Source{[Name="fact_mission_favori", Kind="Table"]}[Data]
                     otherwise try Source{[Item="fact_mission_favori"]}[Data]
-                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_mission_favori", null)
-            in
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_mission_favori", null)            in
                 Data

@@ -1,6 +1,6 @@
 
 table fact_candidature
-    lineageTag: 616378d1-6c52-4856-80ec-d0e875c5c40e
+    lineageTag: 6938f217-c51c-407c-b8bb-25a4f8067490
 
     column candidature_key
         dataType: int64
@@ -55,6 +55,5 @@ table fact_candidature
                 Data = try Source{[Schema=PBI_MySqlDatabase, Item="fact_candidature"]}[Data]
                     otherwise try Source{[Name="fact_candidature", Kind="Table"]}[Data]
                     otherwise try Source{[Item="fact_candidature"]}[Data]
-                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_candidature", null)
-            in
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_candidature", null)            in
                 Data

@@ -1,6 +1,6 @@
 
 table fact_user
-    lineageTag: d28d0097-40e5-4ddd-a797-366d07fd761d
+    lineageTag: acbdcf4c-3b6f-4d26-bf70-002e299d64e6
 
     column user_key
         dataType: int64
@@ -20,6 +20,5 @@ table fact_user
                 Data = try Source{[Schema=PBI_MySqlDatabase, Item="fact_user"]}[Data]
                     otherwise try Source{[Name="fact_user", Kind="Table"]}[Data]
                     otherwise try Source{[Item="fact_user"]}[Data]
-                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_user", null)
-            in
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_user", null)            in
                 Data

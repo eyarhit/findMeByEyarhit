@@ -1,6 +1,6 @@
 
 table dim_date
-    lineageTag: a27baed4-702b-4282-9366-c03f283f13db
+    lineageTag: b04bcb27-8d1d-409d-9b19-2a93f6898304
 
     column date_key
         dataType: int64
@@ -55,6 +55,5 @@ table dim_date
                 Data = try Source{[Schema=PBI_MySqlDatabase, Item="dim_date"]}[Data]
                     otherwise try Source{[Name="dim_date", Kind="Table"]}[Data]
                     otherwise try Source{[Item="dim_date"]}[Data]
-                    otherwise Value.NativeQuery(Source, "SELECT * FROM dim_date", null)
-            in
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM dim_date", null)            in
                 Data
