@@ -74,6 +74,8 @@ FIX_PAGE04_TECHNIQUE.cmd
 
 Puis fermer Power BI, rouvrir le `.pbip`, **Actualiser**. Attendu : tentatives quiz **3**, sessions CodinGame **3**, graphiques remplis.
 
+Si MySQL est vide, le modele charge **3 lignes demo** dans `fact_quiz` / `fact_codingame` au refresh (Power Query).
+
 ### Erreur tableau `queryName` (tableEx)
 
 Regenerer le rapport (`GIT_PULL_BI.cmd`) : les tableaux n’incluent plus la propriete `active` invalide.

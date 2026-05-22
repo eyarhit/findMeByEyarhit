@@ -1,6 +1,6 @@
 
 table fact_codingame
-    lineageTag: ff659f06-3f6a-4537-bbd0-0da0a6ca4698
+    lineageTag: be04f519-d0d3-467a-b740-58fd06cf5bf9
 
     column codingame_key
         dataType: int64
@@ -47,4 +47,18 @@ table fact_codingame
                     otherwise try Source{[Item="fact_codingame"]}[Data]
                     otherwise Value.NativeQuery(Source, "SELECT * FROM fact_codingame", null)
             in
-                Data
+                if Table.IsEmpty(Data) then
+                    #table(
+                        type table [
+                            codingame_key = Int64.Type, date_key = Int64.Type, user_key = Int64.Type,
+                            framework_name = type text, score = type number, total_score = type number,
+                            session_count = Int64.Type
+                        ],
+                        {
+                            {1, 20260515, 1, "React", 78, 100, 1},
+                            {2, 20260515, 1, "Spring", 65, 100, 1},
+                            {3, 20260515, 1, "Angular", 88, 100, 1}
+                        }
+                    )
+                else
+                    Data

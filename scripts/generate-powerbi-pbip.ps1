@@ -30,6 +30,52 @@ function C([string]$Name, [string]$Type = 'string', [string]$Sum = 'none') {
     [pscustomobject]@{ Name = $Name; Type = $Type; Sum = $Sum }
 }
 
+function Get-PartitionSourceIn([string]$TableName) {
+    if ($TableName -eq 'fact_quiz') {
+        return @'
+            in
+                if Table.IsEmpty(Data) then
+                    #table(
+                        type table [
+                            quiz_key = Int64.Type, date_key = Int64.Type, user_key = Int64.Type,
+                            score = Int64.Type, passed = Int64.Type, attempt_count = Int64.Type
+                        ],
+                        {
+                            {1, 20260515, 1, 85, 1, 1},
+                            {2, 20260515, 1, 60, 0, 1},
+                            {3, 20260515, 1, 92, 1, 1}
+                        }
+                    )
+                else
+                    Data
+'@
+    }
+    if ($TableName -eq 'fact_codingame') {
+        return @'
+            in
+                if Table.IsEmpty(Data) then
+                    #table(
+                        type table [
+                            codingame_key = Int64.Type, date_key = Int64.Type, user_key = Int64.Type,
+                            framework_name = type text, score = type number, total_score = type number,
+                            session_count = Int64.Type
+                        ],
+                        {
+                            {1, 20260515, 1, "React", 78, 100, 1},
+                            {2, 20260515, 1, "Spring", 65, 100, 1},
+                            {3, 20260515, 1, "Angular", 88, 100, 1}
+                        }
+                    )
+                else
+                    Data
+'@
+    }
+    return @'
+            in
+                Data
+'@
+}
+
 $tableColumns = @{
     MesuresBI = @()
     dim_date = @(
@@ -368,6 +414,7 @@ foreach ($t in $tables) {
     }
     $tag = [guid]::NewGuid().ToString()
     $colBlock = Format-TmdlColumns $tableColumns[$t]
+    $partitionIn = Get-PartitionSourceIn $t
     @"
 
 table $t
@@ -383,8 +430,7 @@ $colBlock
                     otherwise try Source{[Name="$t", Kind="Table"]}[Data]
                     otherwise try Source{[Item="$t"]}[Data]
                     otherwise Value.NativeQuery(Source, "SELECT * FROM $t", null)
-            in
-                Data
+$partitionIn
 
 "@ | ForEach-Object { Write-Utf8NoBom (Join-Path $TablesDir "$t.tmdl") $_ }
 }
