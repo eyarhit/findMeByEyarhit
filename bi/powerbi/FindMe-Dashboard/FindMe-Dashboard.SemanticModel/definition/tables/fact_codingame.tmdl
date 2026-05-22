@@ -1,6 +1,6 @@
 
 table fact_codingame
-    lineageTag: 36f3d669-4e7f-4ba7-9a58-e768b45e4eca
+    lineageTag: 174382a2-af2e-4851-8824-497d792900dc
 
     column codingame_key
         dataType: int64
@@ -46,11 +46,20 @@ table fact_codingame
                     otherwise try Source{[Name="fact_codingame", Kind="Table"]}[Data]
                     otherwise try Source{[Item="fact_codingame"]}[Data]
                     otherwise Value.NativeQuery(Source, "SELECT * FROM fact_codingame", null),
-                Demo = Table.FromRecords({
-                    [codingame_key = 1, date_key = 20260515, user_key = 1, framework_name = "React", score = 78, total_score = 100, session_count = 1],
-                    [codingame_key = 2, date_key = 20260515, user_key = 1, framework_name = "Spring", score = 65, total_score = 100, session_count = 1],
-                    [codingame_key = 3, date_key = 20260515, user_key = 1, framework_name = "Angular", score = 88, total_score = 100, session_count = 1]
-                }),
-                Result = if Table.IsEmpty(Data) then Demo else Data
+                Typed = {
+                    {"codingame_key", Int64.Type}, {"date_key", Int64.Type}, {"user_key", Int64.Type},
+                    {"framework_name", type text}, {"score", type number}, {"total_score", type number},
+                    {"session_count", Int64.Type}
+                },
+                Demo = Table.TransformColumnTypes(
+                    Table.FromRecords({
+                        [codingame_key = 1, date_key = 20260515, user_key = 1, framework_name = "React", score = 78, total_score = 100, session_count = 1],
+                        [codingame_key = 2, date_key = 20260515, user_key = 1, framework_name = "Spring", score = 65, total_score = 100, session_count = 1],
+                        [codingame_key = 3, date_key = 20260515, user_key = 1, framework_name = "Angular", score = 88, total_score = 100, session_count = 1]
+                    }),
+                    Typed
+                ),
+                Loaded = if Table.IsEmpty(Data) then Demo else Table.TransformColumnTypes(Data, Typed),
+                Result = Loaded
             in
                 Result

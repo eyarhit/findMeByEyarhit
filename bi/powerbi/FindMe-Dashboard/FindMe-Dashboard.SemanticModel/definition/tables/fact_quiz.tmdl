@@ -1,6 +1,6 @@
 
 table fact_quiz
-    lineageTag: b1ba0ab7-3c64-4b92-b99e-58866fbd1516
+    lineageTag: 79b3b401-9ff4-48af-a174-0998700faf0b
 
     column quiz_key
         dataType: int64
@@ -41,11 +41,19 @@ table fact_quiz
                     otherwise try Source{[Name="fact_quiz", Kind="Table"]}[Data]
                     otherwise try Source{[Item="fact_quiz"]}[Data]
                     otherwise Value.NativeQuery(Source, "SELECT * FROM fact_quiz", null),
-                Demo = Table.FromRecords({
-                    [quiz_key = 1, date_key = 20260515, user_key = 1, score = 85, passed = 1, attempt_count = 1],
-                    [quiz_key = 2, date_key = 20260515, user_key = 1, score = 60, passed = 0, attempt_count = 1],
-                    [quiz_key = 3, date_key = 20260515, user_key = 1, score = 92, passed = 1, attempt_count = 1]
-                }),
-                Result = if Table.IsEmpty(Data) then Demo else Data
+                Typed = {
+                    {"quiz_key", Int64.Type}, {"date_key", Int64.Type}, {"user_key", Int64.Type},
+                    {"score", Int64.Type}, {"passed", Int64.Type}, {"attempt_count", Int64.Type}
+                },
+                Demo = Table.TransformColumnTypes(
+                    Table.FromRecords({
+                        [quiz_key = 1, date_key = 20260515, user_key = 1, score = 85, passed = 1, attempt_count = 1],
+                        [quiz_key = 2, date_key = 20260515, user_key = 1, score = 60, passed = 0, attempt_count = 1],
+                        [quiz_key = 3, date_key = 20260515, user_key = 1, score = 92, passed = 1, attempt_count = 1]
+                    }),
+                    Typed
+                ),
+                Loaded = if Table.IsEmpty(Data) then Demo else Table.TransformColumnTypes(Data, Typed),
+                Result = Loaded
             in
                 Result

@@ -41,12 +41,20 @@ function Get-PartitionLetBody([string]$TableName) {
     if ($TableName -eq 'fact_quiz') {
         return $load + @'
 ,
-                Demo = Table.FromRecords({
-                    [quiz_key = 1, date_key = 20260515, user_key = 1, score = 85, passed = 1, attempt_count = 1],
-                    [quiz_key = 2, date_key = 20260515, user_key = 1, score = 60, passed = 0, attempt_count = 1],
-                    [quiz_key = 3, date_key = 20260515, user_key = 1, score = 92, passed = 1, attempt_count = 1]
-                }),
-                Result = if Table.IsEmpty(Data) then Demo else Data
+                Typed = {
+                    {"quiz_key", Int64.Type}, {"date_key", Int64.Type}, {"user_key", Int64.Type},
+                    {"score", Int64.Type}, {"passed", Int64.Type}, {"attempt_count", Int64.Type}
+                },
+                Demo = Table.TransformColumnTypes(
+                    Table.FromRecords({
+                        [quiz_key = 1, date_key = 20260515, user_key = 1, score = 85, passed = 1, attempt_count = 1],
+                        [quiz_key = 2, date_key = 20260515, user_key = 1, score = 60, passed = 0, attempt_count = 1],
+                        [quiz_key = 3, date_key = 20260515, user_key = 1, score = 92, passed = 1, attempt_count = 1]
+                    }),
+                    Typed
+                ),
+                Loaded = if Table.IsEmpty(Data) then Demo else Table.TransformColumnTypes(Data, Typed),
+                Result = Loaded
             in
                 Result
 '@
@@ -54,12 +62,21 @@ function Get-PartitionLetBody([string]$TableName) {
     if ($TableName -eq 'fact_codingame') {
         return $load + @'
 ,
-                Demo = Table.FromRecords({
-                    [codingame_key = 1, date_key = 20260515, user_key = 1, framework_name = "React", score = 78, total_score = 100, session_count = 1],
-                    [codingame_key = 2, date_key = 20260515, user_key = 1, framework_name = "Spring", score = 65, total_score = 100, session_count = 1],
-                    [codingame_key = 3, date_key = 20260515, user_key = 1, framework_name = "Angular", score = 88, total_score = 100, session_count = 1]
-                }),
-                Result = if Table.IsEmpty(Data) then Demo else Data
+                Typed = {
+                    {"codingame_key", Int64.Type}, {"date_key", Int64.Type}, {"user_key", Int64.Type},
+                    {"framework_name", type text}, {"score", type number}, {"total_score", type number},
+                    {"session_count", Int64.Type}
+                },
+                Demo = Table.TransformColumnTypes(
+                    Table.FromRecords({
+                        [codingame_key = 1, date_key = 20260515, user_key = 1, framework_name = "React", score = 78, total_score = 100, session_count = 1],
+                        [codingame_key = 2, date_key = 20260515, user_key = 1, framework_name = "Spring", score = 65, total_score = 100, session_count = 1],
+                        [codingame_key = 3, date_key = 20260515, user_key = 1, framework_name = "Angular", score = 88, total_score = 100, session_count = 1]
+                    }),
+                    Typed
+                ),
+                Loaded = if Table.IsEmpty(Data) then Demo else Table.TransformColumnTypes(Data, Typed),
+                Result = Loaded
             in
                 Result
 '@
@@ -370,7 +387,7 @@ table MesuresBI
     measure 'Total usages' = SUM(dim_skill[usage_count])
     measure 'Total favoris' = SUM(fact_mission_favori[favori_count])
     measure 'Tentatives quiz' = COALESCE(SUM(fact_quiz[attempt_count]), 0)
-    measure 'Score moyen quiz' = COALESCE(AVERAGE(fact_quiz[score]), 0)
+    measure 'Score moyen quiz' = COALESCE(AVERAGEX(fact_quiz, 0 + fact_quiz[score]), 0)
     measure 'Taux reussite quiz %' =
         DIVIDE(
             CALCULATE(COALESCE(SUM(fact_quiz[attempt_count]), 0), fact_quiz[passed] = 1),
@@ -378,9 +395,9 @@ table MesuresBI
             0
         ) * 100
     measure 'Sessions codingame' = COALESCE(SUM(fact_codingame[session_count]), 0)
-    measure 'Score moyen CDG' = COALESCE(AVERAGE(fact_codingame[score]), 0)
+    measure 'Score moyen CDG' = COALESCE(AVERAGEX(fact_codingame, 0 + fact_codingame[score]), 0)
     measure 'Score CDG %' =
-        DIVIDE(AVERAGE(fact_codingame[score]), AVERAGE(fact_codingame[total_score]), 0) * 100
+        DIVIDE([Score moyen CDG], COALESCE(AVERAGEX(fact_codingame, 0 + fact_codingame[total_score]), 0), 0) * 100
     measure 'Runs ETL OK' =
         COALESCE(
             CALCULATE(COUNTROWS(etl_run_log), etl_run_log[status] IN { "OK", "SUCCESS" }),
