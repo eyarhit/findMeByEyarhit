@@ -245,6 +245,9 @@ services:
       - ./bi/powerbi/reports:/app/reports:ro
       - ./bi/kpis/sql:/app/kpis/sql:ro
       - ./find-me-front-2.1/src/assets/bi/bi-manifest.json:/app/bi-manifest.json:ro
+      - ./bi/powerbi/FindMe-Dashboard/FindMe-Dashboard.Report/definition:/app/pbi-report:ro
+      - ./bi/powerbi/FindMe-Dashboard/FindMe-Dashboard.pbip:/app/pbip/FindMe-Dashboard.pbip:ro
+      - .:/app/repo:ro
     depends_on:
       mysql:
         condition: service_healthy

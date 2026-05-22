@@ -334,16 +334,6 @@ $dataTables = $tables | Where-Object { $_ -ne 'MesuresBI' }
 $queryOrder = (@('PBI_MySqlServer', 'PBI_MySqlDatabase') + $dataTables) | ForEach-Object { "`"$_`"" }
 $queryOrderJson = $queryOrder -join ','
 $relRefs = Write-ModelRelationships $Def
-
-# Parametres MySQL : fichiers expressions/ uniquement (evite doublon model + expressions dans Power BI Desktop)
-$ExprDir = Join-Path $Def 'expressions'
-New-Dir $ExprDir
-@'
-expression PBI_MySqlServer = "localhost:3306" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
-'@ | ForEach-Object { Write-Utf8NoBom (Join-Path $ExprDir 'PBI_MySqlServer.tmdl') $_ }
-@'
-expression PBI_MySqlDatabase = "findme_dw" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
-'@ | ForEach-Object { Write-Utf8NoBom (Join-Path $ExprDir 'PBI_MySqlDatabase.tmdl') $_ }
 function Format-TmdlTableRef([string]$tableName) {
     if ($tableName -match '\s') { "ref table '$tableName'" } else { "ref table $tableName" }
 }
@@ -357,8 +347,8 @@ model Model
 
     annotation PBI_QueryOrder = [$queryOrderJson]
 
-ref expression PBI_MySqlServer
-ref expression PBI_MySqlDatabase
+expression PBI_MySqlServer = "localhost:3306" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+expression PBI_MySqlDatabase = "findme_dw" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
 
 $refs
 

@@ -16,7 +16,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from kpi_data import fetch_filter_options, page_filter_meta, run_page_queries, run_slug_query
+from kpi_data import run_page_queries, run_slug_query
+from pbi_layout import parse_page_layout
+from pbi_measures import build_page_dashboard, fetch_filter_options
 
 MYSQL_HOST = os.environ.get("MYSQL_HOST", "mysql")
 MYSQL_PORT = int(os.environ.get("MYSQL_PORT", "3306"))
@@ -263,33 +265,14 @@ def _dw_connect():
     return _connect(DW)
 
 
-@app.get("/api/kpis/filters/{level}")
-async def kpis_filters(level: str):
-    allowed = {"executive", "managerial", "operational", "technique"}
-    if level not in allowed:
-        raise HTTPException(404, "Niveau inconnu")
-    try:
-        options = fetch_filter_options(_dw_connect, level)
-        return {"level": level, "filters": page_filter_meta(level), "options": options}
-    except Exception as exc:
-        raise HTTPException(503, str(exc)) from exc
-
-
 @app.get("/api/kpis/page/{level}")
-async def kpis_page(
-    level: str,
-    year: str | None = None,
-    contract: str | None = None,
-    status: str | None = None,
-    city: str | None = None,
-):
+async def kpis_page(level: str):
     allowed = {"executive", "managerial", "operational", "technique"}
     if level not in allowed:
-        raise HTTPException(404, "Niveau inconnu")
-    filters = {k: v for k, v in {"year": year, "contract": contract, "status": status, "city": city}.items() if v}
+        raise HTTPException(404, "Niveau BI inconnu")
     try:
-        charts = run_page_queries(_dw_connect, level, filters or None)
-        return {"level": level, "filters": filters, "charts": charts}
+        charts = run_page_queries(_dw_connect, level)
+        return {"level": level, "charts": charts}
     except Exception as exc:
         raise HTTPException(503, str(exc)) from exc
 
@@ -328,6 +311,53 @@ async def kpis_candidatures_mois():
         ]
     except Exception as exc:
         raise HTTPException(503, str(exc)) from exc
+
+
+@app.get("/api/powerbi/layout/{level}")
+async def powerbi_layout(level: str):
+    try:
+        return parse_page_layout(level)
+    except Exception as exc:
+        raise HTTPException(503, str(exc)) from exc
+
+
+@app.get("/api/powerbi/filters")
+async def powerbi_filters():
+    try:
+        return fetch_filter_options(_dw_connect)
+    except Exception as exc:
+        raise HTTPException(503, str(exc)) from exc
+
+
+@app.get("/api/powerbi/page/{level}")
+async def powerbi_page_data(
+    level: str,
+    year: int | None = None,
+    contract: str | None = None,
+    role: str | None = None,
+    country: str | None = None,
+):
+    allowed = {"executive", "managerial", "operational", "technique"}
+    if level not in allowed:
+        raise HTTPException(404, "Niveau inconnu")
+    try:
+        return build_page_dashboard(_dw_connect, level, year, contract, role, country)
+    except Exception as exc:
+        raise HTTPException(503, str(exc)) from exc
+
+
+@app.get("/api/powerbi/desktop")
+async def powerbi_desktop():
+    pbip = Path(os.environ.get("PBI_PBIP_PATH", "/app/pbip/FindMe-Dashboard.pbip"))
+    repo_root = Path(os.environ.get("REPO_ROOT", "/app/repo"))
+    return {
+        "pbipRelative": "bi/powerbi/FindMe-Dashboard/FindMe-Dashboard.pbip",
+        "pbipInContainer": str(pbip),
+        "openScript": "ONE_COMMANDE_POWERBI.cmd",
+        "openScriptAlt": "bi/powerbi/OUVRIR_POWER_BI.cmd",
+        "powerBiDesktopHint": "Double-cliquez ONE_COMMANDE_POWERBI.cmd à la racine du projet (Windows).",
+        "downloadCmdUrl": "/static/LANCER_POWER_BI.cmd",
+    }
 
 
 @app.get("/api/powerbi/connection")

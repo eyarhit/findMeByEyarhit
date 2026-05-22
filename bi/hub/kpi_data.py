@@ -80,48 +80,11 @@ def _manifest_data() -> dict[str, Any]:
     return {}
 
 
-SCALAR_LABELS_FR: dict[str, str] = {
-    "total_utilisateurs": "Utilisateurs",
-    "candidats": "Candidats",
-    "recruteurs_esn": "Recruteurs ESN",
-    "total_missions": "Missions",
-    "total_candidatures": "Candidatures",
-    "total_cv": "CV déposés",
-    "tentatives_quiz": "Quiz réalisés",
-    "sessions_codingame": "Sessions CodinGame",
-}
-
-PAGE_FILTER_META: dict[str, list[dict[str, str]]] = {
-    "executive": [
-        {"id": "year", "label": "Année"},
-        {"id": "contract", "label": "Type de contrat"},
-    ],
-    "managerial": [
-        {"id": "year", "label": "Année"},
-        {"id": "status", "label": "Statut mission"},
-        {"id": "city", "label": "Ville"},
-    ],
-    "operational": [{"id": "year", "label": "Année"}],
-    "technique": [{"id": "year", "label": "Année"}],
-}
-
-
 def card_display(slug: str) -> str:
     for c in _manifest_data().get("cards") or []:
         if c.get("slug") == slug:
             return str(c.get("display") or "")
     return ""
-
-
-def card_commercial_title(slug: str) -> str:
-    for c in _manifest_data().get("cards") or []:
-        if c.get("slug") == slug:
-            return str(c.get("commercialTitle") or c.get("title") or slug)
-    return slug
-
-
-def page_filter_meta(level: str) -> list[dict[str, str]]:
-    return PAGE_FILTER_META.get(level, [])
 
 
 def page_slugs(level: str) -> list[str]:
@@ -159,63 +122,14 @@ def _to_number(v: Any) -> float:
         return 0.0
 
 
-def _pick_value_column(columns: list[str]) -> str:
-    if len(columns) < 2:
-        return columns[0] if columns else ""
-    value_col = columns[1]
-    for c in columns[1:]:
-        cl = c.lower()
-        if any(
-            x in cl
-            for x in (
-                "nombre",
-                "total",
-                "count",
-                "candidat",
-                "mission",
-                "score",
-                "session",
-                "tentative",
-                "crees",
-                "cree",
-                "cv_",
-                "notif",
-                "moyen",
-                "volume",
-                "pourcent",
-            )
-        ):
-            value_col = c
-            break
-    return value_col
-
-
-def shape_result(
-    rows: list[dict[str, Any]],
-    columns: list[str],
-    display: str = "",
-    slug: str = "",
-) -> dict[str, Any]:
+def shape_result(rows: list[dict[str, Any]], columns: list[str], display: str = "") -> dict[str, Any]:
     if not rows:
         return {"kind": "empty", "points": [], "scalars": {}, "scalar": None}
 
     disp = (display or "").lower()
     if len(rows) == 1 and len(columns) > 2:
         scalars = {str(k): _to_number(rows[0].get(k)) for k in columns}
-        labels = {k: SCALAR_LABELS_FR.get(k, k.replace("_", " ").title()) for k in scalars}
-        return {"kind": "matrix", "points": [], "scalars": scalars, "scalarLabels": labels, "scalar": None}
-
-    if slug == "application_conversion_rate" or ("gauge" in disp and "conversion" in disp):
-        total = 0.0
-        accepted = 0.0
-        for r in rows:
-            n = _to_number(r.get("nombre") or r.get("NOMBRE") or 0)
-            total += n
-            statut = str(r.get("statut") or r.get("STATUT") or "").upper()
-            if "ACCEPT" in statut or "VALID" in statut or "RETEN" in statut:
-                accepted += n
-        rate = round(100.0 * accepted / total, 1) if total else 0.0
-        return {"kind": "gauge", "points": [], "scalars": {}, "scalar": rate, "gaugeLabel": "Taux d'acceptation"}
+        return {"kind": "matrix", "points": [], "scalars": scalars, "scalar": None}
 
     if "gauge" in disp and len(columns) >= 2:
         pct_col = next((c for c in columns if "pourcent" in c.lower()), None)
@@ -233,17 +147,31 @@ def shape_result(
 
     if len(columns) >= 2:
         label_col = columns[0]
-        value_col = _pick_value_column(columns)
+        value_col = columns[1]
+        for c in columns[1:]:
+            cl = c.lower()
+            if any(
+                x in cl
+                for x in (
+                    "nombre",
+                    "total",
+                    "count",
+                    "candidat",
+                    "mission",
+                    "score",
+                    "session",
+                    "tentative",
+                    "cv",
+                    "notif",
+                    "moyen",
+                )
+            ):
+                value_col = c
+                break
         points = [
             {"label": str(r.get(label_col) or ""), "value": _to_number(r.get(value_col))}
             for r in rows
-            if _to_number(r.get(value_col)) > 0 or len(rows) <= 12
         ]
-        if not points and rows:
-            points = [
-                {"label": str(r.get(label_col) or ""), "value": _to_number(r.get(value_col))}
-                for r in rows
-            ]
         kind = "line" if "line" in disp else "bar"
         if "donut" in disp or "pie" in disp:
             kind = "donut"
@@ -252,37 +180,17 @@ def shape_result(
     return {"kind": "table", "points": [], "scalars": {}, "scalar": None, "rows": rows[:20]}
 
 
-def _inject_year_filter(sql: str, year: str | None) -> str:
-    if not year or not year.isdigit():
-        return sql
-    y = int(year)
-    low = sql.lower()
-    if "dim_date d" in low or "join dim_date d" in low:
-        if " d.year_num " in low or "d.year_num=" in low:
-            return sql
-        if " where " in low:
-            return sql.replace(" WHERE ", f" WHERE d.year_num = {y} AND ", 1).replace(" where ", f" where d.year_num = {y} and ", 1)
-        return sql + f" AND d.year_num = {y}"
-    return sql
-
-
-def run_slug_query(
-    connect_fn: Callable[[], Any],
-    slug: str,
-    filters: dict[str, str] | None = None,
-) -> dict[str, Any]:
+def run_slug_query(connect_fn: Callable[[], Any], slug: str) -> dict[str, Any]:
     display = card_display(slug)
     fname = slug_sql_file(slug)
     if not fname:
-        return {"kind": "error", "error": "Données indisponibles", "points": [], "scalars": {}, "scalar": None}
+        return {"kind": "error", "error": "SQL inconnu", "points": [], "scalars": {}, "scalar": None}
     path = KPI_SQL_DIR / fname
     if not path.is_file():
-        return {"kind": "error", "error": "Source indisponible", "points": [], "scalars": {}, "scalar": None}
+        return {"kind": "error", "error": f"Fichier absent: {fname}", "points": [], "scalars": {}, "scalar": None}
     sql = _strip_sql_comments(path.read_text(encoding="utf-8"))
     if not sql:
-        return {"kind": "error", "error": "Requête vide", "points": [], "scalars": {}, "scalar": None}
-    f = filters or {}
-    sql = _inject_year_filter(sql, f.get("year"))
+        return {"kind": "error", "error": "SQL vide", "points": [], "scalars": {}, "scalar": None}
     try:
         with connect_fn() as conn:
             with conn.cursor() as cur:
@@ -291,9 +199,8 @@ def run_slug_query(
                 cols = [d[0] for d in (cur.description or [])]
         if not cols and rows:
             cols = list(rows[0].keys())
-        out = shape_result(rows, cols, display, slug)
+        out = shape_result(rows, cols, display)
         out["slug"] = slug
-        out["title"] = card_commercial_title(slug)
         return out
     except Exception as exc:
         return {
@@ -306,40 +213,8 @@ def run_slug_query(
         }
 
 
-def run_page_queries(
-    connect_fn: Callable[[], Any],
-    level: str,
-    filters: dict[str, str] | None = None,
-) -> dict[str, dict[str, Any]]:
+def run_page_queries(connect_fn: Callable[[], Any], level: str) -> dict[str, dict[str, Any]]:
     charts: dict[str, dict[str, Any]] = {}
     for slug in page_slugs(level):
-        charts[slug] = run_slug_query(connect_fn, slug, filters)
+        charts[slug] = run_slug_query(connect_fn, slug)
     return charts
-
-
-def fetch_filter_options(connect_fn: Callable[[], Any], level: str) -> dict[str, list[dict[str, Any]]]:
-    out: dict[str, list[dict[str, Any]]] = {"year": [], "contract": [], "status": [], "city": []}
-    try:
-        with connect_fn() as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    "SELECT DISTINCT year_num AS y FROM dim_date WHERE year_num >= 2020 ORDER BY y DESC LIMIT 10"
-                )
-                out["year"] = [{"value": str(r.get("y")), "label": str(r.get("y"))} for r in cur.fetchall()]
-                if level in ("executive", "managerial"):
-                    cur.execute(
-                        "SELECT DISTINCT type_contrat AS v FROM dim_mission WHERE type_contrat IS NOT NULL AND type_contrat != '' ORDER BY v"
-                    )
-                    out["contract"] = [{"value": str(r.get("v")), "label": str(r.get("v"))} for r in cur.fetchall()]
-                if level == "managerial":
-                    cur.execute(
-                        "SELECT DISTINCT status_mission AS v FROM dim_mission WHERE status_mission IS NOT NULL ORDER BY v"
-                    )
-                    out["status"] = [{"value": str(r.get("v")), "label": str(r.get("v"))} for r in cur.fetchall()]
-                    cur.execute(
-                        "SELECT DISTINCT ville AS v FROM dim_mission WHERE ville IS NOT NULL AND ville != '' ORDER BY v LIMIT 30"
-                    )
-                    out["city"] = [{"value": str(r.get("v")), "label": str(r.get("v"))} for r in cur.fetchall()]
-    except Exception:
-        pass
-    return out

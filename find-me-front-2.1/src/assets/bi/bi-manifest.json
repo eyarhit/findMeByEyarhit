@@ -23,7 +23,6 @@
   "powerBi": {
     "pbipProject": "bi/powerbi/FindMe-Dashboard/FindMe-Dashboard.pbip",
     "openCommandWin": "ONE_COMMANDE_POWERBI.cmd",
-    "openDesktopAsset": "assets/bi/Ouvrir-PowerBI-Desktop.cmd",
     "friendCommandWin": "DOCKER_TEST_AMI.cmd",
     "friendCommandPowerBi": "GIT_PULL_BI.cmd",
     "fixPage04Command": "FIX_PAGE04_TECHNIQUE.cmd",
@@ -39,25 +38,25 @@
         "level": "executive",
         "name": "01 - Executive",
         "page": "01 - Executive",
-        "description": "Vue direction — performance recrutement et activité globale"
+        "description": "KPI direction : candidatures, acceptation, missions, top missions"
       },
       {
         "level": "managerial",
         "name": "02 - Managerial",
         "page": "02 - Managerial",
-        "description": "Pilotage RH — missions, candidatures et répartition géographique"
+        "description": "Pilotage RH : statuts, contrats, villes, tableau détail missions"
       },
       {
         "level": "operational",
         "name": "03 - Operationnel",
         "page": "03 - Operationnel",
-        "description": "Suivi opérationnel — CV, compétences et engagement candidats"
+        "description": "Activité : utilisateurs, notifications, CV, compétences"
       },
       {
         "level": "technique",
         "name": "04 - Technique",
         "page": "04 - Technique",
-        "description": "Indicateurs formation — quiz, CodinGame et qualité des données"
+        "description": "Quiz, CodinGame, fraîcheur ETL (logs)"
       }
     ]
   },
@@ -128,12 +127,12 @@
     }
   ],
   "cards": [
-    { "id": 1, "slug": "executive_kpis", "title": "KPI exécutifs (matrice)", "commercialTitle": "Synthèse direction", "domain": "executive", "display": "Matrix", "db": "findme_dw", "sqlFile": "bi/kpis/sql/05_kpi_executif.sql", "powerBiPage": "01 - Executive" },
+    { "id": 1, "slug": "executive_kpis", "title": "KPI exécutifs (matrice)", "domain": "executive", "display": "Matrix", "db": "findme_dw", "sqlFile": "bi/kpis/sql/05_kpi_executif.sql", "powerBiPage": "01 - Executive" },
     { "id": 2, "slug": "users_by_role", "title": "Utilisateurs par rôle", "domain": "executive", "display": "Bar chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/01_utilisateurs_par_role.sql", "powerBiPage": "01 - Executive" },
     { "id": 3, "slug": "applications_by_month", "title": "Candidatures par mois", "domain": "executive", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/12_candidatures_par_mois.sql", "powerBiPage": "01 - Executive" },
     { "id": 4, "slug": "application_conversion_rate", "title": "Taux conversion candidatures", "domain": "executive", "display": "Gauge", "db": "findme_dw", "sqlFile": "bi/kpis/sql/13_taux_conversion_candidatures.sql", "powerBiPage": "01 - Executive" },
     { "id": 5, "slug": "missions_by_month", "title": "Missions par mois", "domain": "executive", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/07_missions_par_mois.sql", "powerBiPage": "01 - Executive" },
-    { "id": 6, "slug": "cvs_by_month", "title": "CV par mois", "commercialTitle": "CV déposés par mois", "domain": "executive", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/16_cv_par_mois.sql", "powerBiPage": "01 - Executive" },
+    { "id": 6, "slug": "cvs_by_month", "title": "CV par mois", "domain": "executive", "display": "Line chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/16_cv_par_mois.sql", "powerBiPage": "01 - Executive" },
     { "id": 7, "slug": "users_by_status", "title": "Utilisateurs par statut", "domain": "managerial", "display": "Donut", "db": "findme_dw", "sqlFile": "bi/kpis/sql/02_utilisateurs_par_statut.sql", "powerBiPage": "02 - Managerial" },
     { "id": 8, "slug": "users_by_country", "title": "Utilisateurs par pays", "domain": "managerial", "display": "Bar chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/03_utilisateurs_par_pays.sql", "powerBiPage": "02 - Managerial" },
     { "id": 9, "slug": "missions_by_status", "title": "Missions par statut", "domain": "managerial", "display": "Bar chart", "db": "findme_dw", "sqlFile": "bi/kpis/sql/06_missions_par_statut.sql", "powerBiPage": "02 - Managerial" },

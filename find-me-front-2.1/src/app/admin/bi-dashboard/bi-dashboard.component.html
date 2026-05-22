@@ -1,142 +1,151 @@
-<section class="admin-bi" *ngIf="!manifestError; else biError">
-  <header class="admin-bi__header">
-    <div>
-      <p class="admin-bi__eyebrow">Pilotage Find-Me</p>
-      <h1>{{ selectedReport?.name || 'Tableau de bord' }}</h1>
-      <p class="admin-bi__lead">{{ selectedReport?.description }}</p>
-      <p class="admin-bi__meta" *ngIf="hubDetail">{{ hubDetail }}</p>
+<section class="pbi-admin">
+  <header class="pbi-admin__toolbar">
+    <div class="pbi-admin__toolbar-left">
+      <h1>{{ pageData?.layout?.displayName || 'Tableau de bord' }}</h1>
+      <span class="pbi-admin__status" [class.ok]="hubStatus === 'ok'">{{ hubStatusLabel() }}</span>
+      <span class="pbi-admin__meta" *ngIf="hubDetail">{{ hubDetail }}</span>
     </div>
-    <div class="admin-bi__actions">
-      <span
-        class="status-pill"
-        [class.ok]="hubStatus === 'ok'"
-        [class.warn]="hubStatus === 'degraded' || hubStatus === 'unknown'"
-        [class.err]="hubStatus === 'error'">
-        {{ hubStatusLabel() }}
-      </span>
-      <button type="button" class="btn-outline" (click)="openPowerBiDesktop()">
+    <div class="pbi-admin__toolbar-right">
+      <button type="button" class="btn-pbi" (click)="openPowerBiDesktop()">
         Ouvrir dans Power BI Desktop
       </button>
-      <button type="button" class="btn-primary" (click)="runEtl()" [disabled]="etlRunning">
+      <button type="button" class="btn-sync" (click)="runEtl()" [disabled]="etlRunning">
         {{ etlRunning ? 'Synchronisation…' : 'Synchroniser les données' }}
       </button>
     </div>
   </header>
 
-  <p class="admin-bi__sync" *ngIf="etlMessage">{{ etlMessage }}</p>
-  <p class="admin-bi__sync pbi-hint" *ngIf="pbiOpenHint">{{ pbiOpenHint }}</p>
-  <p class="admin-bi__sync err" *ngIf="chartsError">{{ chartsError }}</p>
+  <p class="pbi-admin__hint" *ngIf="pbipHint">{{ pbipHint }}</p>
+  <p class="pbi-admin__sync" *ngIf="etlMessage">{{ etlMessage }}</p>
+  <p class="pbi-admin__err" *ngIf="dataError">{{ dataError }}</p>
 
-  <nav class="admin-bi__nav" *ngIf="reports.length">
+  <nav class="pbi-admin__tabs">
     <button
-      *ngFor="let r of reports"
+      *ngFor="let lv of levelsNav"
       type="button"
-      class="nav-pill"
-      [class.active]="selectedReportLevel === r.level"
-      (click)="selectReportLevel(r.level)">
-      {{ r.name }}
+      [class.active]="selectedReportLevel === lv.id"
+      (click)="selectReportLevel(lv.id)">
+      {{ lv.label }}
     </button>
   </nav>
 
-  <div class="filters-bar" *ngIf="filterDefs.length">
-    <label *ngFor="let f of filterDefs" class="filter-field">
-      <span>{{ f.label }}</span>
-      <select
-        [value]="activeFilters[f.id] || ''"
-        (change)="onFilterChange(f.id, $any($event.target).value)">
-        <option value="">Tous</option>
-        <option *ngFor="let o of filterOptions[f.id]" [value]="o.value">{{ o.label }}</option>
+  <div class="pbi-admin__filters" *ngIf="biFilters.years?.length">
+    <label>
+      Année
+      <select [(ngModel)]="filterYear" (ngModelChange)="onFilterChange()">
+        <option [ngValue]="null">Toutes</option>
+        <option *ngFor="let y of biFilters.years" [ngValue]="y">{{ y }}</option>
+      </select>
+    </label>
+    <label *ngIf="biFilters.contracts?.length">
+      Type de contrat
+      <select [(ngModel)]="filterContract" (ngModelChange)="onFilterChange()">
+        <option *ngFor="let c of biFilters.contracts" [value]="c">{{ c }}</option>
+      </select>
+    </label>
+    <label *ngIf="selectedReportLevel === 'operational' && biFilters.roles?.length">
+      Profil
+      <select [(ngModel)]="filterRole" (ngModelChange)="onFilterChange()">
+        <option *ngFor="let r of biFilters.roles" [value]="r">{{ r }}</option>
+      </select>
+    </label>
+    <label *ngIf="selectedReportLevel === 'operational' && biFilters.countries?.length">
+      Pays
+      <select [(ngModel)]="filterCountry" (ngModelChange)="onFilterChange()">
+        <option *ngFor="let p of biFilters.countries" [value]="p">{{ p }}</option>
       </select>
     </label>
   </div>
 
-  <div class="kpi-row">
-    <article class="kpi-tile" *ngFor="let k of headlineKpis">
-      <span class="kpi-tile__value">{{ k.value }}</span>
-      <span class="kpi-tile__label">{{ k.label }}</span>
+  <div class="pbi-admin__kpis" *ngIf="headlineKpis.length">
+    <article *ngFor="let k of headlineKpis" class="pbi-kpi">
+      <span class="pbi-kpi__val">{{ k.value }}</span>
+      <span class="pbi-kpi__lbl">{{ k.label }}</span>
     </article>
   </div>
 
-  <section class="indicators">
-    <h2>Synthèse des indicateurs</h2>
-    <p class="indicators__sub" *ngIf="chartsLoading">Chargement…</p>
+  <p class="pbi-admin__loading" *ngIf="dataLoading">Chargement du tableau de bord…</p>
 
-    <div class="indicator-grid" *ngIf="!chartsLoading">
-      <article class="indicator-card" *ngFor="let card of pageCards">
-        <h3>{{ cardTitle(card) }}</h3>
-
-        <ng-container *ngIf="chartFor(card.slug) as ch">
-          <p class="chart-empty err" *ngIf="ch.kind === 'error'">Donnée temporairement indisponible</p>
-          <p class="chart-empty" *ngIf="ch.kind === 'empty'">Aucune donnée pour la période sélectionnée</p>
-
-          <div class="chart-gauge" *ngIf="ch.kind === 'gauge' || ch.kind === 'kpi'">
-            <span class="chart-gauge__value">{{ (ch.scalar ?? 0) | number:'1.0-1' }}</span>
-            <span class="chart-gauge__unit" *ngIf="ch.kind === 'gauge'">%</span>
-            <span class="chart-gauge__caption" *ngIf="ch.gaugeLabel">{{ ch.gaugeLabel }}</span>
-          </div>
-
-          <div class="chart-matrix" *ngIf="ch.kind === 'matrix'">
-            <div class="chart-matrix__cell" *ngFor="let key of scalarKeys(card.slug)">
-              <span class="chart-matrix__val">{{ ch.scalars[key] | number:'1.0-0' }}</span>
-              <span class="chart-matrix__lbl">{{ scalarLabel(card.slug, key) }}</span>
+  <div class="pbi-canvas-wrap" *ngIf="!dataLoading && pageData">
+    <div
+      class="pbi-canvas"
+      [style.aspect-ratio]="canvasWidth + ' / ' + canvasHeight">
+      <div
+        *ngFor="let vis of layoutVisuals"
+        class="pbi-visual"
+        [ngClass]="'pbi-visual--' + vis.visualType"
+        [style]="canvasStyle(vis)"
+        [class.pbi-visual--slicer-hidden]="isSlicer(vis)">
+        <ng-container *ngIf="!isSlicer(vis)">
+          <h3 class="pbi-visual__title">{{ vis.title }}</h3>
+          <ng-container *ngIf="visualData(vis.id) as ch">
+            <div class="pbi-card-value" *ngIf="ch.kind === 'card' || ch.kind === 'kpi'">
+              <span>{{ (ch.scalar ?? 0) | number:'1.0-1' }}{{ ch.suffix || '' }}</span>
             </div>
-          </div>
-
-          <div class="mini-chart" *ngIf="ch.kind === 'bar'">
-            <div class="mini-chart__item" *ngFor="let p of ch.points">
-              <span class="mini-chart__val">{{ p.value | number:'1.0-0' }}</span>
-              <div
-                class="mini-chart__bar"
-                [style.height.%]="barHeight(card.slug, p.value)"
-                [title]="p.label + ' : ' + p.value"></div>
-              <span class="mini-chart__lbl" [title]="p.label">{{ p.label }}</span>
-            </div>
-          </div>
-
-          <div class="line-chart" *ngIf="ch.kind === 'line'">
-            <svg *ngIf="linePolyline(card.slug)" viewBox="0 0 200 80" preserveAspectRatio="none">
-              <polyline
-                [attr.points]="linePolyline(card.slug)"
-                fill="none"
-                stroke="#5a3fc9"
-                stroke-width="2.5" />
-            </svg>
-            <div class="line-chart__labels">
-              <span *ngFor="let p of ch.points" [title]="p.label + ' : ' + p.value">{{ p.label }}</span>
-            </div>
-          </div>
-
-          <div class="chart-donut" *ngIf="ch.kind === 'donut'">
-            <div class="chart-donut__row" *ngFor="let p of ch.points">
-              <span class="chart-donut__lbl">{{ p.label }}</span>
-              <div class="chart-donut__track">
+            <div class="pbi-bars" *ngIf="ch.kind === 'bar' || ch.kind === 'line'">
+              <div class="pbi-bars__item" *ngFor="let p of ch.points">
                 <div
-                  class="chart-donut__fill"
-                  [style.width.%]="(p.value / donutTotal(card.slug)) * 100"></div>
+                  class="pbi-bars__col"
+                  [style.height.%]="(p.value / maxBar(vis.id)) * 100"
+                  [title]="p.label + ': ' + p.value"></div>
+                <span class="pbi-bars__lbl">{{ p.label }}</span>
               </div>
-              <span class="chart-donut__val">{{ p.value | number:'1.0-0' }}</span>
+              <p class="pbi-empty" *ngIf="!ch.points?.length">Aucune donnée sur la période</p>
+            </div>
+            <div class="pbi-donut" *ngIf="ch.kind === 'donut'">
+              <div class="pbi-donut__row" *ngFor="let p of ch.points">
+                <span>{{ p.label }}</span>
+                <div class="pbi-donut__track">
+                  <div class="pbi-donut__fill" [style.width.%]="(p.value / donutTotal(vis.id)) * 100"></div>
+                </div>
+                <strong>{{ p.value | number:'1.0-0' }}</strong>
+              </div>
+              <p class="pbi-empty" *ngIf="!ch.points?.length">Aucune donnée</p>
+            </div>
+            <table class="pbi-table" *ngIf="ch.kind === 'table' && ch.rows?.length">
+              <tr *ngFor="let row of ch.rows">
+                <td>{{ row.indicateur || row.label }}</td>
+                <td>{{ (row.valeur ?? row.value) | number:'1.0-1' }}</td>
+              </tr>
+            </table>
+            <div class="pbi-matrix" *ngIf="ch.kind === 'matrix' && ch.scalars">
+              <div *ngFor="let key of (ch.scalars | keyvalue)" class="pbi-matrix__cell">
+                <span>{{ key.key }}</span>
+                <strong>{{ key.value | number:'1.0-0' }}</strong>
+              </div>
+            </div>
+            <p class="pbi-empty" *ngIf="ch.kind === 'empty'">Synchronisez les données</p>
+            <p class="pbi-empty err" *ngIf="ch.kind === 'error'">{{ ch.error }}</p>
+          </ng-container>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <section class="pbi-extra" *ngIf="pageData?.extraCards?.length">
+    <h2>Indicateurs complémentaires</h2>
+    <div class="pbi-extra__grid">
+      <article *ngFor="let ex of pageData.extraCards" class="pbi-extra__card">
+        <h3>{{ ex.title }}</h3>
+        <ng-container *ngIf="ex.data as ch">
+          <div class="pbi-bars" *ngIf="ch.points?.length">
+            <div class="pbi-bars__item" *ngFor="let p of ch.points">
+              <div
+                class="pbi-bars__col"
+                [style.height.%]="(p.value / maxExtraBar(ex)) * 100"
+                [title]="p.label + ': ' + p.value"></div>
+              <span class="pbi-bars__lbl">{{ p.label }}</span>
             </div>
           </div>
+          <p class="pbi-card-value" *ngIf="ch.scalar != null">{{ ch.scalar | number:'1.0-1' }}{{ ch.suffix || '' }}</p>
+          <p class="pbi-empty" *ngIf="!ch.points?.length && ch.scalar == null">Aucune donnée sur la période</p>
         </ng-container>
-
-        <p class="chart-empty" *ngIf="!chartFor(card.slug) && !chartsLoading">—</p>
       </article>
     </div>
   </section>
 
-  <section class="dw-panel" *ngIf="selectedReportLevel === 'technique' && dwStats">
-    <h2>Qualité des données</h2>
-    <div class="dw-table">
-      <div class="dw-table__row" *ngFor="let row of dwStats | keyvalue">
-        <span>{{ row.key }}</span>
-        <strong>{{ row.value }}</strong>
-      </div>
-    </div>
-  </section>
+  <footer class="pbi-admin__footer">
+    Aperçu web aligné sur le projet <strong>FindMe-Dashboard.pbip</strong>.
+    Filtres, mise en page et rapports complets : bouton <strong>Ouvrir dans Power BI Desktop</strong>.
+  </footer>
 </section>
-
-<ng-template #biError>
-  <div class="admin-bi admin-bi--error">
-    <p>{{ manifestError }}</p>
-  </div>
-</ng-template>
