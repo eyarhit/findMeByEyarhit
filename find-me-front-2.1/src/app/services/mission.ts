@@ -57,10 +57,10 @@ export class MissionService {
   // Add this new method for updating a mission
   updateMission(id: number, missionData: any): Observable<any> {
     const url = `${this.apiUrl}/update/${id}`;
-    return this.http.patch<any>(url, missionData).pipe(
-      catchError(error => {
+    return this.http.put<any>(url, missionData).pipe(
+      catchError((error) => {
         console.error('Error updating mission:', error);
-        return throwError(() => new Error('Failed to update mission'));
+        return throwError(() => error);
       })
     );
   }

@@ -7,7 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import Swal from 'sweetalert2';
 import { ActivatedRoute } from '@angular/router';
 import { NotificationService } from '../../services/notificationService';
-import { catchError, forkJoin, of } from 'rxjs';
+import { catchError, finalize, forkJoin, of, timeout } from 'rxjs';
 import { isRecruiterRole } from '../../shared/constants/role-utils';
 
 @Component({
@@ -317,16 +317,59 @@ isStepInvalid(): boolean {
     this.confirmationChecked = target.checked;
   }
 
+  private showLoadingSwal(): void {
+    Swal.fire({
+      title: 'Traitement en cours',
+      html: 'Veuillez patienter ...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+  }
+
+  private closeLoadingSwal(): void {
+    if (Swal.isLoading()) {
+      Swal.close();
+    }
+  }
+
+  private showHttpError(title: string, err: unknown): void {
+    const e = err as { error?: unknown; message?: string; status?: number };
+    const body = e?.error;
+    const serverText =
+      typeof body === 'string'
+        ? body
+        : (body as { message?: string })?.message ||
+          (body as { detail?: string })?.detail ||
+          (Array.isArray((body as { errors?: string[] })?.errors)
+            ? (body as { errors: string[] }).errors.join('\n')
+            : null) ||
+          (body ? JSON.stringify(body) : null);
+    Swal.fire({
+      title,
+      text:
+        serverText ||
+        e?.message ||
+        (e?.status === 0
+          ? 'Service mission indisponible (vérifiez Docker : findme-mission port 9055).'
+          : 'Une erreur est survenue.'),
+      icon: 'error',
+      confirmButtonText: 'OK',
+    });
+  }
+
+  private resolveMissionId(): number | null {
+    const job = this.jobs?.[0];
+    const raw = job?.id ?? job?.idMission;
+    if (raw == null || raw === '') {
+      return null;
+    }
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
+
   submitForm(): void {
     if (this.missionForm.valid && this.confirmationChecked) {
-      Swal.fire({
-        title: 'Traitement en cours',
-        html: 'Veuillez patienter ...',
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
-      });
+      this.showLoadingSwal();
       const formatDateForBackend = (dateString: string): string => {
         if (!dateString) return '';
         if (String(dateString).includes('T')) return String(dateString);
@@ -356,29 +399,45 @@ isStepInvalid(): boolean {
       };
       
       //console.log('Form submitted:', formData);
-      if(this.action==="modifier"){
-            this.missionService.updateMission(this.jobs[0].id, formData).subscribe({
-      next: (response) => {
-        // //console.log('Mission updated successfully:', response);
-         Swal.fire({
-         title: 'Mise à jour réussie !',
-         text: 'Le contrat a été modifié avec succès.',
-         icon: 'success',
-         confirmButtonText: 'OK',
-        confirmButtonColor: '#3085d6',
-});
-this.authServiceUser.notifyDataUpdate()
-this.isEditing.emit(false);
-      },
-      error: (error) => {
-        console.error('Failed to update mission:', error);
-        // Handle error (show error message)
-      }
-    });
-  
-      }
-      else{
-      this.missionService.createMission(formData, this.accountId!).subscribe({
+      if (this.action === 'modifier') {
+        const missionId = this.resolveMissionId();
+        if (!missionId) {
+          this.closeLoadingSwal();
+          Swal.fire({
+            title: 'Erreur',
+            text: 'Identifiant de l’offre introuvable.',
+            icon: 'error',
+          });
+          return;
+        }
+        this.missionService
+          .updateMission(missionId, formData)
+          .pipe(
+            timeout(90000),
+            finalize(() => this.closeLoadingSwal())
+          )
+          .subscribe({
+            next: () => {
+              Swal.fire({
+                title: 'Mise à jour réussie !',
+                text: 'Le contrat a été modifié avec succès.',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#3085d6',
+              });
+              this.authServiceUser.notifyDataUpdate();
+              this.isEditing.emit(false);
+            },
+            error: (error) => {
+              console.error('Failed to update mission:', error);
+              this.showHttpError('Échec de la modification', error);
+            },
+          });
+      } else {
+      this.missionService.createMission(formData, this.accountId!).pipe(
+        timeout(90000),
+        finalize(() => this.closeLoadingSwal())
+      ).subscribe({
         next: (response) => {
           this.notifyCandidatesOnNewPublication(response, formData);
           Swal.fire({
@@ -411,25 +470,10 @@ this.isEditing.emit(false);
         },
         error: (err) => {
           console.error('Error creating mission:', err);
-          const body = err?.error;
-          const serverText =
-            typeof body === 'string'
-              ? body
-              : body?.message ||
-                body?.detail ||
-                (Array.isArray(body?.errors) ? body.errors.join('\n') : null) ||
-                (body ? JSON.stringify(body) : null);
-          Swal.fire({
-            title: 'Erreur',
-            text:
-              serverText ||
-              err?.message ||
-              "Une erreur est survenue lors de la création du contrat.",
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
+          this.showHttpError('Erreur', err);
         }
-      });}
+      });
+      }
     } else {
       //console.log('Form is invalid or confirmation not checked');
       this.markAllFieldsAsTouched();

@@ -154,10 +154,13 @@ public class MissionService implements IMissionService {
             profil.setAnnees_experiences(newProfil.getAnnees_experiences());
         }
 
-        //  Mise à jour de ville si besoin
         if (mission.getVille() != null) {
             existing.setVille(mission.getVille());
         }
+        if (mission.getPays() != null) {
+            existing.setPays(mission.getPays());
+        }
+        resolveGeographyForPersistence(existing);
 
         return missionRepository.save(existing);
     }
