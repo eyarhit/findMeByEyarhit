@@ -485,15 +485,15 @@ def _default_bi_date_key() -> int:
 
 def seed_technical_facts_if_empty(cur, user_map: dict[int, int]) -> None:
     """Données démo page 04 si quiz_bd / codingame_bd sont vides (PFE, autre PC)."""
-    if not user_map:
-        return
-    uk = next((v for v in user_map.values() if v), 0)
-    if uk == 0:
-        return
+    user_keys = [v for v in user_map.values() if v]
+    if not user_keys:
+        ensure_unknown_user(cur)
+        user_keys = [0]
     dk = _default_bi_date_key()
     cur.execute("SELECT COUNT(*) AS c FROM fact_quiz")
     if cur.fetchone()["c"] == 0:
-        for score, passed in ((85, 1), (60, 0), (92, 1)):
+        for i, (score, passed) in enumerate(((85, 1), (60, 0), (92, 1))):
+            uk = user_keys[i % len(user_keys)]
             cur.execute(
                 """
                 INSERT INTO fact_quiz (date_key, user_key, score, passed, attempt_count)
@@ -504,7 +504,8 @@ def seed_technical_facts_if_empty(cur, user_map: dict[int, int]) -> None:
         print("fact_quiz : donnees demo PFE (3 lignes)")
     cur.execute("SELECT COUNT(*) AS c FROM fact_codingame")
     if cur.fetchone()["c"] == 0:
-        for fw, score in (("React", 78.0), ("Spring", 65.0), ("Angular", 88.0)):
+        for i, (fw, score) in enumerate((("React", 78.0), ("Spring", 65.0), ("Angular", 88.0))):
+            uk = user_keys[i % len(user_keys)]
             cur.execute(
                 """
                 INSERT INTO fact_codingame
@@ -518,21 +519,24 @@ def seed_technical_facts_if_empty(cur, user_map: dict[int, int]) -> None:
 
 def load_fact_quiz(cur, src, user_map: dict[int, int]) -> None:
     cur.execute("DELETE FROM fact_quiz")
-    src.execute("SELECT user_id, score, passed FROM quiz_bd.user_quiz_results")
     n = 0
     dk_default = _default_bi_date_key()
-    for row in src.fetchall():
-        uk = user_map.get(int(row["user_id"]), 0)
-        if uk == 0:
-            continue
-        cur.execute(
-            """
-            INSERT INTO fact_quiz (date_key, user_key, score, passed, attempt_count)
-            VALUES (%s,%s,%s,%s,1)
-            """,
-            (dk_default, uk, row["score"] or 0, 1 if row["passed"] else 0),
-        )
-        n += 1
+    try:
+        src.execute("SELECT user_id, score, passed FROM quiz_bd.user_quiz_results")
+        for row in src.fetchall():
+            uk = user_map.get(int(row["user_id"]), 0)
+            if uk == 0:
+                continue
+            cur.execute(
+                """
+                INSERT INTO fact_quiz (date_key, user_key, score, passed, attempt_count)
+                VALUES (%s,%s,%s,%s,1)
+                """,
+                (dk_default, uk, row["score"] or 0, 1 if row["passed"] else 0),
+            )
+            n += 1
+    except Exception as exc:
+        print(f"fact_quiz : source quiz_bd indisponible ({exc})")
     print(f"fact_quiz : {n} lignes")
 
 

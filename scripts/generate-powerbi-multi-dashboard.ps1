@@ -318,10 +318,8 @@ Write-KpiRow $pageTech @(
     @{ Id = 'kpi_etl'; Measure = 'Runs ETL OK' }
 ) $script:KpiY $script:KpiH
 
-# Pas de segment year_num ici : 1900 (date inconnue) vide les KPI quiz/CodinGame
-Write-Slicer $pageTech 'slicer_fw' 24 'fact_codingame' 'framework_name' 3000 5000
-Write-Slicer $pageTech 'slicer_passed' 232 'fact_quiz' 'passed' 3001 5100
-Write-Slicer $pageTech 'slicer_etl' 440 'etl_run_log' 'status' 3002 5200
+# Segments minimaux (passed/framework vides bloquaient parfois les visuels)
+Write-Slicer $pageTech 'slicer_etl' 24 'etl_run_log' 'status' 3000 5000
 
 Write-Vis $pageTech 'bar_fw' 24 $script:MidY 400 $script:MidH 1001 3000 'clusteredBarChart' @{
     Category = @{ projections = @(New-ColumnProjection 'fact_codingame' 'framework_name' $true) }

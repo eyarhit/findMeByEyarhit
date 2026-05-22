@@ -1,6 +1,6 @@
 
 table fact_quiz
-    lineageTag: d717e96b-4a4d-42de-a41c-b1cedeb51e28
+    lineageTag: 121973dc-60df-4fcb-8815-4667dbec6f52
 
     column quiz_key
         dataType: int64

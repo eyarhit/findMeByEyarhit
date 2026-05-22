@@ -64,13 +64,15 @@ FIX_POWERBI_REFRESH.cmd
 
 Si erreur `model.bim` manquant : `git pull` puis `ONE_COMMANDE_POWERBI.cmd` (TMDL, `definition.pbism` version **4.0**).
 
-### Page 04 Technique : cartes « (Vide) »
+### Page 04 Technique : cartes « (Vide) » ou graphiques vides
 
-1. Relancer l’ETL : `docker compose run --rm talend-etl` (remplit quiz/CodinGame + démo si bases vides).
-2. **Actualiser** dans Power BI.
-3. Pas de segment année sur la page 04 (évite le filtre **1900** qui vide les cartes quiz).
-4. Relancer `docker compose run --rm talend-etl` si les cartes restent vides.
-5. Carte ETL : mesure **Runs ETL OK** (compte les runs `SUCCESS`).
+Le tableau `etl_run_log` OK mais quiz/CodinGame vides = **pas de lignes** dans `fact_quiz` / `fact_codingame`.
+
+```cmd
+FIX_PAGE04_TECHNIQUE.cmd
+```
+
+Puis fermer Power BI, rouvrir le `.pbip`, **Actualiser**. Attendu : tentatives quiz **3**, sessions CodinGame **3**, graphiques remplis.
 
 ### Erreur tableau `queryName` (tableEx)
 

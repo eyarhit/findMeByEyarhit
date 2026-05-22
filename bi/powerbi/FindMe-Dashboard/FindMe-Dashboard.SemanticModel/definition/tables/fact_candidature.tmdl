@@ -1,6 +1,6 @@
 
 table fact_candidature
-    lineageTag: 23fc935a-a21b-476a-8a40-50d3f589c641
+    lineageTag: 616378d1-6c52-4856-80ec-d0e875c5c40e
 
     column candidature_key
         dataType: int64

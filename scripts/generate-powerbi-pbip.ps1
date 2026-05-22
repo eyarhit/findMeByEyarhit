@@ -329,16 +329,23 @@ table MesuresBI
     measure 'Etapes moyennes' = AVERAGE(fact_cv[steps_completed])
     measure 'Total usages' = SUM(dim_skill[usage_count])
     measure 'Total favoris' = SUM(fact_mission_favori[favori_count])
-    measure 'Tentatives quiz' = SUM(fact_quiz[attempt_count])
-    measure 'Score moyen quiz' = AVERAGE(fact_quiz[score])
+    measure 'Tentatives quiz' = COALESCE(SUM(fact_quiz[attempt_count]), 0)
+    measure 'Score moyen quiz' = COALESCE(AVERAGE(fact_quiz[score]), 0)
     measure 'Taux reussite quiz %' =
-        DIVIDE(CALCULATE([Tentatives quiz], fact_quiz[passed] = 1), [Tentatives quiz], 0) * 100
-    measure 'Sessions codingame' = SUM(fact_codingame[session_count])
-    measure 'Score moyen CDG' = AVERAGE(fact_codingame[score])
+        DIVIDE(
+            CALCULATE(COALESCE(SUM(fact_quiz[attempt_count]), 0), fact_quiz[passed] = 1),
+            COALESCE(SUM(fact_quiz[attempt_count]), 0),
+            0
+        ) * 100
+    measure 'Sessions codingame' = COALESCE(SUM(fact_codingame[session_count]), 0)
+    measure 'Score moyen CDG' = COALESCE(AVERAGE(fact_codingame[score]), 0)
     measure 'Score CDG %' =
         DIVIDE(AVERAGE(fact_codingame[score]), AVERAGE(fact_codingame[total_score]), 0) * 100
     measure 'Runs ETL OK' =
-        CALCULATE(COUNTROWS(etl_run_log), etl_run_log[status] IN { "OK", "SUCCESS" })
+        COALESCE(
+            CALCULATE(COUNTROWS(etl_run_log), etl_run_log[status] IN { "OK", "SUCCESS" }),
+            0
+        )
     measure 'Dernier refresh OK' =
         CALCULATE(MAX(etl_run_log[finished_at]), etl_run_log[status] IN { "OK", "SUCCESS" })
 
