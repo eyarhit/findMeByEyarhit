@@ -64,8 +64,21 @@ $script:AppStack = @(
     "codingame-service", "python-service", "frontend"
 )
 
+function Invoke-MySqlRoot {
+    param([Parameter(Mandatory)][string]$Query)
+    # MySQL ecrit un warning sur stderr ; avec $ErrorActionPreference Stop, PowerShell le traite comme erreur fatale
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = "SilentlyContinue"
+    $null = docker exec findme-mysql mysql -uroot -proot -e $Query 2>&1
+    $exit = $LASTEXITCODE
+    $ErrorActionPreference = $prevEap
+    if ($exit -ne 0) {
+        throw "mysql exec a echoue (code $exit)"
+    }
+}
+
 function Ensure-MySqlGrants {
-    docker exec findme-mysql mysql -uroot -proot -e "GRANT SELECT ON findme_dw.* TO 'findme_bi'@'%'; FLUSH PRIVILEGES;" 2>$null
+    Invoke-MySqlRoot "GRANT SELECT ON findme_dw.* TO 'findme_bi'@'%'; FLUSH PRIVILEGES;"
 }
 
 function Install-PowerBiDesktop {
@@ -132,8 +145,12 @@ if ($AppOnly) {
 } else {
     Ensure-MySqlGrants
     if (-not $SkipEtl) {
+        $prevEap = $ErrorActionPreference
+        $ErrorActionPreference = "Continue"
         docker compose run --rm talend-etl
-        if ($LASTEXITCODE -ne 0) { throw "talend-etl a echoue" }
+        $etlExit = $LASTEXITCODE
+        $ErrorActionPreference = $prevEap
+        if ($etlExit -ne 0) { throw "talend-etl a echoue (code $etlExit)" }
     }
 }
 

@@ -181,6 +181,8 @@ Page 04 vide → `FIX_PAGE04_TECHNIQUE.cmd` puis **Actualiser**.
 
 | Problème | Action |
 |----------|--------|
+| `bi-start.ps1` / `DOCKER_TEST_AMI.cmd` échoue à l’étape GRANT (warning MySQL rouge) | `git pull` puis relancer — correctif PowerShell dans `scripts/bi-start.ps1` |
+| Page admin affiche encore « Power BI portail » / `.pbix` | Image front ancienne : `docker compose build frontend` puis `docker compose up -d --force-recreate frontend` |
 | Port 4200 occupé | Arrêter l’autre app ou changer le port dans `docker-compose.yml` |
 | Page 4200 sans CSS | `docker compose build --no-cache frontend` puis `--force-recreate frontend` |
 | ETL exit 1 | `docker compose logs talend-etl` puis `docs/GUIDE_AMI_DOCKER.md` §9 |
