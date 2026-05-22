@@ -122,9 +122,37 @@ def _to_number(v: Any) -> float:
         return 0.0
 
 
-def shape_result(rows: list[dict[str, Any]], columns: list[str], display: str = "") -> dict[str, Any]:
+def _conversion_gauge(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    total = sum(_to_number(r.get("nombre") or r.get("NOMBRE")) for r in rows)
+    accepted = 0.0
+    for r in rows:
+        statut = str(r.get("statut") or r.get("STATUT") or "").upper()
+        if "ACCEP" in statut or "VALID" in statut or "RETENU" in statut:
+            accepted += _to_number(r.get("nombre") or r.get("NOMBRE"))
+    rate = round(100.0 * accepted / total, 1) if total else 0.0
+    points = [
+        {
+            "label": str(r.get("statut") or r.get("STATUT") or "?"),
+            "value": _to_number(r.get("nombre") or r.get("NOMBRE")),
+        }
+        for r in rows
+    ]
+    return {
+        "kind": "gauge",
+        "points": points,
+        "scalars": {},
+        "scalar": rate,
+    }
+
+
+def shape_result(
+    rows: list[dict[str, Any]], columns: list[str], display: str = "", slug: str = ""
+) -> dict[str, Any]:
     if not rows:
         return {"kind": "empty", "points": [], "scalars": {}, "scalar": None}
+
+    if slug == "application_conversion_rate":
+        return _conversion_gauge(rows)
 
     disp = (display or "").lower()
     if len(rows) == 1 and len(columns) > 2:
@@ -132,10 +160,7 @@ def shape_result(rows: list[dict[str, Any]], columns: list[str], display: str = 
         return {"kind": "matrix", "points": [], "scalars": scalars, "scalar": None}
 
     if "gauge" in disp and len(columns) >= 2:
-        pct_col = next((c for c in columns if "pourcent" in c.lower()), None)
-        if pct_col:
-            vals = [_to_number(r.get(pct_col)) for r in rows]
-            return {"kind": "gauge", "points": [], "scalars": {}, "scalar": max(vals) if vals else 0}
+        return _conversion_gauge(rows)
 
     if len(columns) == 1 and len(rows) == 1:
         return {
@@ -199,7 +224,7 @@ def run_slug_query(connect_fn: Callable[[], Any], slug: str) -> dict[str, Any]:
                 cols = [d[0] for d in (cur.description or [])]
         if not cols and rows:
             cols = list(rows[0].keys())
-        out = shape_result(rows, cols, display)
+        out = shape_result(rows, cols, display, slug)
         out["slug"] = slug
         return out
     except Exception as exc:
