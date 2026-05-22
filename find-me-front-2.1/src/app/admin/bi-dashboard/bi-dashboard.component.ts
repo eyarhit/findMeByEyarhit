@@ -123,6 +123,10 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
     return this.pageData?.layout?.visuals || [];
   }
 
+  get extraCards(): ExtraCard[] {
+    return this.pageData?.extraCards ?? [];
+  }
+
   get headlineKpis(): { label: string; value: number | string }[] {
     const m = this.pageData?.measures || {};
     if (this.selectedReportLevel === 'executive' && Object.keys(m).length) {

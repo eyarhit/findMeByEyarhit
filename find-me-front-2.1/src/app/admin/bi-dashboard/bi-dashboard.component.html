@@ -125,7 +125,7 @@
   <section class="pbi-extra" *ngIf="pageData?.extraCards?.length">
     <h2>Indicateurs complémentaires</h2>
     <div class="pbi-extra__grid">
-      <article *ngFor="let ex of pageData.extraCards" class="pbi-extra__card">
+      <article *ngFor="let ex of extraCards" class="pbi-extra__card">
         <h3>{{ ex.title }}</h3>
         <ng-container *ngIf="ex.data as ch">
           <div class="pbi-bars" *ngIf="ch.points?.length">
