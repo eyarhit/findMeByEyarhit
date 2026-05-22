@@ -1,137 +1,198 @@
-# Guide — faire tester un ami après `git pull`
+# Guide ami — tester après `git pull` (100 % Docker)
 
-Ce guide est pour **eyarh** et ses amis qui récupèrent le dépôt après un push sur `main`.
+Pour un ami qui **ne compile pas** Node/Java en local : tout passe par **Docker Desktop**.
 
 Dépôt : https://github.com/eyarhit/findMeByEyarhit
 
----
-
-## 1. Prérequis (une fois par machine)
-
-| Outil | Version / note |
-|--------|----------------|
-| **Git** | clone + pull |
-| **Docker Desktop** | MySQL + ETL + Hub BI |
-| **Power BI Desktop** | Options → **PBIR** + **projet .pbip** activés |
-| **Node.js** (optionnel) | uniquement pour l’app Angular en local |
+Guide plateforme complète : [docs/GUIDE_AMI_DOCKER.md](../docs/GUIDE_AMI_DOCKER.md)  
+Checklist BI détaillée : [docs/CHECKLIST_VALIDATION_BI_AMI.md](../docs/CHECKLIST_VALIDATION_BI_AMI.md)
 
 ---
 
-## 2. Récupérer le code (ami)
+## Prérequis
+
+| Outil | Obligatoire |
+|--------|-------------|
+| **Docker Desktop** | Oui (icône verte) |
+| **Git** | Oui |
+| **Power BI Desktop** | Oui pour les 4 pages PBIP (sur Windows, hors conteneur) |
+| Node.js / Java / MySQL local | **Non** |
+
+---
+
+## 1. Récupérer le code
+
+**Première fois :**
 
 ```cmd
 git clone https://github.com/eyarhit/findMeByEyarhit.git
 cd findMeByEyarhit
 ```
 
-À chaque mise à jour :
+**Mise à jour :**
 
 ```cmd
 cd findMeByEyarhit
 git pull
+```
+
+Option Power BI (Windows, régénère le PBIP) :
+
+```cmd
 GIT_PULL_BI.cmd
 ```
 
-`GIT_PULL_BI.cmd` régénère le projet Power BI, nettoie le cache `.pbi` et ouvre le PBIP si Desktop est installé.
-
 ---
 
-## 3. Démarrer la stack BI
+## 2. Démarrer toute la plateforme (Docker)
 
-À la racine du repo :
+### Méthode recommandée — une commande
 
 ```cmd
-docker compose up -d mysql
+scripts\docker-compose-up.cmd
+```
+
+*(équivalent à `scripts\bi-start.cmd` : build si besoin, `docker compose up -d`, ETL, services BI)*
+
+### Méthode manuelle (si la commande ci-dessus échoue)
+
+```cmd
+scripts\docker-build-backend.cmd
+docker compose build frontend python-service talend-etl bi-hub
+docker compose up -d
 docker compose run --rm talend-etl
-docker compose up -d bi-hub
 ```
 
-Vérifier le Hub : http://localhost:3032/api/health  
-→ `mysql: true`, `dw: true` après ETL.
+Attendre 2–5 min la première fois. Vérifier :
 
-Mot de passe lecture BI MySQL : voir `docker/mysql-init/02-findme-bi-readonly.sql` (utilisateur `findme_bi`).
+```cmd
+docker compose ps
+```
+
+| Conteneur | État attendu |
+|-----------|----------------|
+| `findme-mysql` | healthy |
+| `findme-frontend` | Up |
+| `findme-bi-hub` | Up |
 
 ---
 
-## 4. Power BI Desktop (4 pages)
-
-1. Fermer Power BI s’il était ouvert.
-2. Lancer `ONE_COMMANDE_POWERBI.cmd` **ou** ouvrir  
-   `bi/powerbi/FindMe-Dashboard/FindMe-Dashboard.pbip`
-3. **Actualiser** le modèle.
-4. Connexion : `localhost:3306`, base **`findme_dw`**, utilisateur **`findme_bi`** (pas `root` / `admin`).
-
-Onglets attendus :
-
-| Page | Contenu |
-|------|---------|
-| 01 - Executive | KPI direction |
-| 02 - Managerial | RH / missions |
-| 03 - Operationnel | Utilisateurs, CV, notifs |
-| 04 - Technique | Quiz, CodinGame, logs ETL |
-
-Si la page **04** est vide ou avec des 0 :
+## 3. Vérifier l’entrepôt BI (findme_dw)
 
 ```cmd
-FIX_PAGE04_TECHNIQUE.cmd
+docker compose exec mysql mysql -ufindme_bi -pfindme_bi_readonly -e "SELECT COUNT(*) AS dates FROM findme_dw.dim_date;"
 ```
 
-Puis **Actualiser** à nouveau.
+Nombre **> 0** → ETL OK.
 
-Doc détaillée : `bi/powerbi/GUIDE_AUTRE_PC.md`, `bi/powerbi/POWERBI_TABLES_ET_MESURES.md`.
+Relancer l’ETL si besoin :
+
+```cmd
+docker compose run --rm talend-etl
+```
+
+Hub BI (console + bouton ETL) : http://localhost:3032  
+Santé : http://localhost:3032/api/health → `"dw": true`
 
 ---
 
-## 5. Application Find-Me — session admin BI
+## 4. Application Find-Me (admin BI) — Docker
 
-### Lancer le front (dev)
+| Élément | Valeur |
+|---------|--------|
+| **URL** | http://localhost:4200 |
+| **Email admin** | `admin@gmail.com` |
+| **Mot de passe** | `admin` |
 
-```cmd
-cd find-me-front-2.1
-npm install
-ng serve
-```
-
-Ouvrir : http://localhost:4200
-
-### Compte admin (démo)
-
-| Champ | Valeur |
-|--------|--------|
-| Email | `admin@gmail.com` |
-| Mot de passe | `admin` |
-| Rôle | ADMIN (table `user_bd`) |
-
-Menu admin → **Tableaux de bord BI** (`/admin/bi-dashboard`).
+1. Ouvrir http://localhost:4200 (Ctrl+Shift+R si page sans style).
+2. Se connecter en **ADMIN**.
+3. Menu → **Tableaux de bord BI** (`/admin/bi-dashboard`).
 
 ### Ce que l’ami doit voir
 
-- Bandeau **statut Hub** (vert si DW alimenté).
-- **KPI live** (utilisateurs, missions, candidatures, CV) depuis `findme_dw`.
-- Bouton **Lancer ETL Talend** (nécessite `bi-hub` sur le port 3032).
-- Onglets **Executive / Managerial / Operationnel / Technique** (catalogue SQL + pages PBI).
-- Section repliable **Guide ami après git pull**.
+- Bandeau **vert** : entrepôt prêt (Hub sur port 3032).
+- **KPI live** (utilisateurs, missions, candidatures, CV).
+- Bouton **Lancer ETL Talend** (appelle le Hub Docker).
+- Onglets **Executive / Managerial / Operationnel / Technique** (liés aux 4 pages Power BI).
 
-Si le statut est rouge : `docker compose up -d mysql bi-hub` puis relancer l’ETL.
+Si bandeau rouge :
+
+```cmd
+docker compose up -d mysql bi-hub
+docker compose run --rm talend-etl
+```
+
+Puis F5 sur la page BI.
+
+**Pas de `npm install` ni `ng serve`** — le front est le conteneur `findme-frontend` (port 4200 → nginx).
+
+Rebuild front après un gros `git pull` :
+
+```cmd
+docker compose build frontend
+docker compose up -d --force-recreate frontend
+```
 
 ---
 
-## 6. Checklist de validation (5 min)
+## 5. Power BI Desktop (hôte Windows)
 
-- [ ] `git pull` + `GIT_PULL_BI.cmd` sans erreur
-- [ ] Power BI : 4 onglets visibles, **Actualiser** OK
-- [ ] Page 04 : tableau `etl_run_log` + carte **Runs ETL OK** > 0
-- [ ] App : login admin → page BI → KPI non vides après ETL
-- [ ] Hub http://localhost:3032 → health `dw: true`
+Power BI tourne **sur la machine**, pas dans Docker (connexion vers MySQL exposé par Docker).
 
-Problèmes connus : `bi/powerbi/README.md` (section dépannage).
+1. `ONE_COMMANDE_POWERBI.cmd` ou ouvrir  
+   `bi/powerbi/FindMe-Dashboard/FindMe-Dashboard.pbip`
+2. **Actualiser**
+3. Connexion : `localhost:3306`, base **`findme_dw`**, utilisateur **`findme_bi`**
+
+| Onglet | Contenu |
+|--------|---------|
+| 01 - Executive | KPI direction |
+| 02 - Managerial | RH / missions |
+| 03 - Operationnel | Activité |
+| 04 - Technique | Quiz, CDG, logs ETL |
+
+Page 04 vide → `FIX_PAGE04_TECHNIQUE.cmd` puis **Actualiser**.
 
 ---
 
-## 7. Contacter eyarh
+## 6. URLs utiles (tout Docker)
 
-En cas de blocage, envoyer :
+| Service | URL |
+|---------|-----|
+| Application + admin BI | http://localhost:4200 |
+| Hub BI | http://localhost:3032 |
+| Talend Studio (VNC, optionnel) | http://localhost:6080 (mdp `findme`) |
+| Gateway API | http://localhost:9082 |
 
-1. Capture Power BI (onglet + message d’erreur).
-2. Sortie de `docker compose ps`.
-3. JSON de http://localhost:3032/api/health
+---
+
+## 7. Checklist rapide (5–10 min)
+
+- [ ] `git pull` OK
+- [ ] `docker compose ps` → mysql healthy, frontend + bi-hub Up
+- [ ] `talend-etl` terminé sans erreur
+- [ ] http://localhost:3032/api/health → `"dw": true`
+- [ ] http://localhost:4200 → login admin → page BI avec KPI
+- [ ] Power BI : 4 onglets + Actualiser OK
+
+---
+
+## 8. Dépannage Docker
+
+| Problème | Action |
+|----------|--------|
+| Port 4200 occupé | Arrêter l’autre app ou changer le port dans `docker-compose.yml` |
+| Page 4200 sans CSS | `docker compose build --no-cache frontend` puis `--force-recreate frontend` |
+| ETL exit 1 | `docker compose logs talend-etl` puis `docs/GUIDE_AMI_DOCKER.md` §9 |
+| Hub BI inaccessible | `docker compose up -d bi-hub` |
+| Front pas à jour | `git pull` + rebuild `frontend` (§4) |
+
+---
+
+## 9. En cas de blocage
+
+Envoyer à eyarh :
+
+1. `docker compose ps`
+2. JSON http://localhost:3032/api/health
+3. Capture page admin BI + Power BI (si testé)

@@ -23,7 +23,8 @@
   "powerBi": {
     "pbipProject": "bi/powerbi/FindMe-Dashboard/FindMe-Dashboard.pbip",
     "openCommandWin": "ONE_COMMANDE_POWERBI.cmd",
-    "friendCommandWin": "GIT_PULL_BI.cmd",
+    "friendCommandWin": "DOCKER_TEST_AMI.cmd",
+    "friendCommandPowerBi": "GIT_PULL_BI.cmd",
     "fixPage04Command": "FIX_PAGE04_TECHNIQUE.cmd",
     "connectionHint": "localhost:3306 · findme_dw · utilisateur findme_bi (mot de passe dans docker/mysql-init/02-findme-bi-readonly.sql)",
     "guidePaths": [
@@ -66,11 +67,12 @@
     "Dans Power BI Desktop : Actualiser — serveur localhost:3306, base findme_dw, compte findme_bi"
   ],
   "friendWorkflow": [
-    "git clone https://github.com/eyarhit/findMeByEyarhit.git",
-    "cd findMeByEyarhit",
-    "GIT_PULL_BI.cmd",
-    "Compte admin app : admin@gmail.com / admin (voir docs/CHECKLIST_VALIDATION_BI_AMI.md)",
-    "Menu Tableaux de bord BI dans l'application"
+    "git clone https://github.com/eyarhit/findMeByEyarhit.git puis git pull",
+    "Docker Desktop demarre — scripts\\docker-compose-up.cmd (ou docker compose up -d)",
+    "ETL : docker compose run --rm talend-etl — Hub : http://localhost:3032",
+    "App Docker : http://localhost:4200 — admin@gmail.com / admin — menu Tableaux de bord BI",
+    "Power BI Desktop (Windows) : GIT_PULL_BI.cmd puis Actualiser localhost:3306 / findme_dw / findme_bi",
+    "Guide : bi/GUIDE_TEST_AMI_APRES_PULL.md et docs/GUIDE_AMI_DOCKER.md"
   ],
   "tabs": [
     {

@@ -101,7 +101,12 @@
       <p class="cmd-block" *ngIf="manifest.powerBi?.friendCommandWin">
         Commande unique : <code>{{ manifest.powerBi.friendCommandWin }}</code>
       </p>
-      <p class="hint">Doc : <code>bi/powerbi/GUIDE_AUTRE_PC.md</code> · <code>bi/GUIDE_TEST_AMI_APRES_PULL.md</code></p>
+      <p class="hint">
+        <strong>Docker uniquement</strong> (pas de npm) :
+        <code>scripts\docker-compose-up.cmd</code> puis
+        <code>http://localhost:4200</code> (admin / admin@gmail.com).
+      </p>
+      <p class="hint">Doc : <code>bi/GUIDE_TEST_AMI_APRES_PULL.md</code> · <code>docs/GUIDE_AMI_DOCKER.md</code></p>
     </div>
   </article>
 
