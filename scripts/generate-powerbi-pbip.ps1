@@ -30,47 +30,41 @@ function C([string]$Name, [string]$Type = 'string', [string]$Sum = 'none') {
     [pscustomobject]@{ Name = $Name; Type = $Type; Sum = $Sum }
 }
 
-function Get-PartitionSourceIn([string]$TableName) {
+function Get-PartitionLetBody([string]$TableName) {
+    $load = @"
+                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
+                Data = try Source{[Schema=PBI_MySqlDatabase, Item="$TableName"]}[Data]
+                    otherwise try Source{[Name="$TableName", Kind="Table"]}[Data]
+                    otherwise try Source{[Item="$TableName"]}[Data]
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM $TableName", null)
+"@
     if ($TableName -eq 'fact_quiz') {
-        return @'
+        return $load + @'
+,
+                Demo = Table.FromRows({
+                    [quiz_key = 1, date_key = 20260515, user_key = 1, score = 85, passed = 1, attempt_count = 1],
+                    [quiz_key = 2, date_key = 20260515, user_key = 1, score = 60, passed = 0, attempt_count = 1],
+                    [quiz_key = 3, date_key = 20260515, user_key = 1, score = 92, passed = 1, attempt_count = 1]
+                }),
+                Result = if Table.IsEmpty(Data) then Demo else Data
             in
-                if Table.IsEmpty(Data) then
-                    #table(
-                        type table [
-                            quiz_key = Int64.Type, date_key = Int64.Type, user_key = Int64.Type,
-                            score = Int64.Type, passed = Int64.Type, attempt_count = Int64.Type
-                        ],
-                        {
-                            {1, 20260515, 1, 85, 1, 1},
-                            {2, 20260515, 1, 60, 0, 1},
-                            {3, 20260515, 1, 92, 1, 1}
-                        }
-                    )
-                else
-                    Data
+                Result
 '@
     }
     if ($TableName -eq 'fact_codingame') {
-        return @'
+        return $load + @'
+,
+                Demo = Table.FromRows({
+                    [codingame_key = 1, date_key = 20260515, user_key = 1, framework_name = "React", score = 78, total_score = 100, session_count = 1],
+                    [codingame_key = 2, date_key = 20260515, user_key = 1, framework_name = "Spring", score = 65, total_score = 100, session_count = 1],
+                    [codingame_key = 3, date_key = 20260515, user_key = 1, framework_name = "Angular", score = 88, total_score = 100, session_count = 1]
+                }),
+                Result = if Table.IsEmpty(Data) then Demo else Data
             in
-                if Table.IsEmpty(Data) then
-                    #table(
-                        type table [
-                            codingame_key = Int64.Type, date_key = Int64.Type, user_key = Int64.Type,
-                            framework_name = type text, score = type number, total_score = type number,
-                            session_count = Int64.Type
-                        ],
-                        {
-                            {1, 20260515, 1, "React", 78, 100, 1},
-                            {2, 20260515, 1, "Spring", 65, 100, 1},
-                            {3, 20260515, 1, "Angular", 88, 100, 1}
-                        }
-                    )
-                else
-                    Data
+                Result
 '@
     }
-    return @'
+    return $load + @'
             in
                 Data
 '@
@@ -414,7 +408,7 @@ foreach ($t in $tables) {
     }
     $tag = [guid]::NewGuid().ToString()
     $colBlock = Format-TmdlColumns $tableColumns[$t]
-    $partitionIn = Get-PartitionSourceIn $t
+    $partitionLet = Get-PartitionLetBody $t
     @"
 
 table $t
@@ -425,12 +419,7 @@ $colBlock
         mode: import
         source =
             let
-                Source = MySQL.Database(PBI_MySqlServer, PBI_MySqlDatabase),
-                Data = try Source{[Schema=PBI_MySqlDatabase, Item="$t"]}[Data]
-                    otherwise try Source{[Name="$t", Kind="Table"]}[Data]
-                    otherwise try Source{[Item="$t"]}[Data]
-                    otherwise Value.NativeQuery(Source, "SELECT * FROM $t", null)
-$partitionIn
+$partitionLet
 
 "@ | ForEach-Object { Write-Utf8NoBom (Join-Path $TablesDir "$t.tmdl") $_ }
 }

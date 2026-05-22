@@ -1,6 +1,6 @@
 
 table fact_quiz
-    lineageTag: 9410d77e-5bdb-4432-a0fe-335887a5d6e1
+    lineageTag: 704e7f26-8183-49cd-b5cc-7b56d246b8f1
 
     column quiz_key
         dataType: int64
@@ -40,19 +40,12 @@ table fact_quiz
                 Data = try Source{[Schema=PBI_MySqlDatabase, Item="fact_quiz"]}[Data]
                     otherwise try Source{[Name="fact_quiz", Kind="Table"]}[Data]
                     otherwise try Source{[Item="fact_quiz"]}[Data]
-                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_quiz", null)
+                    otherwise Value.NativeQuery(Source, "SELECT * FROM fact_quiz", null),
+                Demo = Table.FromRows({
+                    [quiz_key = 1, date_key = 20260515, user_key = 1, score = 85, passed = 1, attempt_count = 1],
+                    [quiz_key = 2, date_key = 20260515, user_key = 1, score = 60, passed = 0, attempt_count = 1],
+                    [quiz_key = 3, date_key = 20260515, user_key = 1, score = 92, passed = 1, attempt_count = 1]
+                }),
+                Result = if Table.IsEmpty(Data) then Demo else Data
             in
-                if Table.IsEmpty(Data) then
-                    #table(
-                        type table [
-                            quiz_key = Int64.Type, date_key = Int64.Type, user_key = Int64.Type,
-                            score = Int64.Type, passed = Int64.Type, attempt_count = Int64.Type
-                        ],
-                        {
-                            {1, 20260515, 1, 85, 1, 1},
-                            {2, 20260515, 1, 60, 0, 1},
-                            {3, 20260515, 1, 92, 1, 1}
-                        }
-                    )
-                else
-                    Data
+                Result
