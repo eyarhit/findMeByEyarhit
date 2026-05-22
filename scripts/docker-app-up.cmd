@@ -1,9 +1,9 @@
 @echo off
-REM Demarrage application Find-Me SANS Talend Studio (evite build apt / 1h de build)
-REM Premiere fois : scripts\docker-build-backend.cmd puis relancer ce script.
+REM Tout en Docker (front nginx). Pour front LOCAL : scripts\docker-back-only.cmd + run-front-local.cmd
 cd /d "%~dp0.."
 echo.
-echo === Find-Me : app uniquement (pas de Talend Studio) ===
+echo === Find-Me : app complete en Docker ===
+echo Astuce dev : scripts\docker-back-only.cmd puis scripts\run-front-local.cmd
 echo.
 
 echo [1/2] Build frontend...
@@ -16,6 +16,7 @@ if errorlevel 1 goto :failed
 
 echo.
 echo OK : http://localhost:4200  (Ctrl+Shift+R apres git pull)
+echo Front local + back Docker : voir docs\DEV_FRONT_LOCAL.md
 echo Backends manquants ? Lancez une fois : scripts\docker-build-backend.cmd
 goto :eof
 
