@@ -51,7 +51,6 @@ import { StatistiqueUtilisateurPageComponent } from './pages/statistique-utilisa
 import { NotificationBellComponent } from './components/NotificationBell/NotificationBell.component';
 import { RegisterFeelancerComponent } from './pages/register-freelancer/register-freelancer.component';
 import { SidebarEspaceComponent } from './components/sidebar/sidebar.component';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { Etape1MissionComponent } from './components/etape1-mission/etape1-mission.component';
 import { Etape2MissionDescriptionComponent } from './components/etape2-mission-description/etape2-mission-description.component';
 import { Etape3MissionComponent } from './components/etape3-mission/etape3-mission.component';
@@ -79,7 +78,6 @@ import { PublierContratComponent } from './components/publier_contrat/publier_co
 import { DossierCompetencesComponent } from './components/dossier-competences/dossier-competences.component';
 import { ChatComponent } from './components/chat/chat.component';
 import { HomeRedirectComponent } from './pages/home-redirect/home-redirect.component';
-import { AdminModule } from './admin/admin.module';
 import { PickerModule } from '@ctrl/ngx-emoji-mart';
 import { MessengerChatComponent } from './components/messenger-chat/messenger-chat.component';
 
@@ -165,16 +163,14 @@ import { MessengerChatComponent } from './components/messenger-chat/messenger-ch
     FontAwesomeModule,
     BrowserModule,
     PickerModule,
-    AdminModule,
 ],
 
   exports: [
     InformationCvComponent
   ],
   providers: [
-    // Pas d'hydratation SSR : évite écran blanc (Docker nginx, F5, token localStorage).
+    // Pas d'hydratation SSR ni provideAnimationsAsync (doublon avec BrowserAnimationsModule = page blanche).
     AuthService,
-    provideAnimationsAsync(),
   ],
   bootstrap: [AppComponent]
 })

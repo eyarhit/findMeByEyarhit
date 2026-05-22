@@ -26,7 +26,7 @@ RUN set -e; \
   echo "ERREUR: npm install apres 3 tentatives"; exit 1
 
 COPY . .
-RUN npm run build
+RUN npm run build -- --ssr=false
 
 # Fail early if Tailwind did not generate a real global stylesheet
 RUN sh -c '\
