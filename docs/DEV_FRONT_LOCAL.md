@@ -64,7 +64,19 @@ docker compose stop frontend
 
 Sinon `ng serve` et le conteneur se battent pour le port **4200**.
 
-## 5. Power BI
+## 5. Après un `git pull` (toi ou ton ami)
+
+| Changement | Action |
+|------------|--------|
+| **Front seulement** | `git pull` puis relancer `scripts\run-front-local.cmd` (ou `Ctrl+C` + `npm run dev`) |
+| **Back Java / API** | `git pull` puis `docker compose build user-service cv-service mission-service` (services touchés) puis `docker compose up -d --force-recreate` ces services |
+| **MySQL / données** | Pas de rebuild — conteneur `mysql` inchangé |
+| **Power BI / DW** | `scripts\refresh-dw-for-powerbi.cmd` puis **Actualiser** dans Power BI |
+
+**Ton ami (tout Docker)** : `git pull` → `docker compose build frontend` → `docker compose up -d --force-recreate frontend`  
+**Toi (front local)** : `git pull` → `npm run dev` (back Docker déjà up avec `docker-back-only.cmd`).
+
+## 6. Power BI
 
 Toujours sur **Windows** (Desktop), pas dans le conteneur front :
 

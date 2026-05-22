@@ -10,6 +10,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { StepTrackerService } from '../../services/step-tracker.service';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import { buildFindMeCvFileName, resolveCvDisplayName } from '../../shared/utils/cv-file-name.util';
 
 @Component({
   selector: 'app-dossier-competence',
@@ -377,11 +378,8 @@ popupTitle: string = '';
 
       element.classList.add('pdf-export-mode');
 
-      let userName = await this.authService.getUserFullName();
-      //console.log('User name:', userName);
-      
-      const fileName = `FIND ME-${userName || 'CV'}`.replace(/\s+/g, '.');
-      //console.log('Final file name:', fileName);
+      const userName = await this.authService.getUserFullName();
+      const fileName = buildFindMeCvFileName(resolveCvDisplayName(null, userName));
 
       await this.pdfService.generateMultiPagePdf(element, fileName);
       

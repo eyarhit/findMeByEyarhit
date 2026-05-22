@@ -20,6 +20,13 @@ import {
   normalizeLanguageLevel,
   normalizeLanguageName,
 } from '../../shared/constants/form-options';
+import {
+  buildFindMeCvFileName,
+  displayNameFromStoredFileName,
+  persistCvDisplayName,
+  getSavedCvDisplayName,
+  resolveCvDisplayName,
+} from '../../shared/utils/cv-file-name.util';
 @Component({
   selector: 'app-information-cv', 
   templateUrl: './information-cv.component.html',
@@ -109,24 +116,30 @@ popupTitle: string = '';
     this.restoreCvFileName();
   }
 
-  private static readonly CV_FILE_NAME_KEY = 'cv_findme_display_name';
-
-  /** Réaffiche le dernier nom saisi (persisté après sauvegarde réussie). */
+  /** Réaffiche le dernier nom saisi (session ou dernier CV CvFindMe en base). */
   private restoreCvFileName(): void {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
-    const saved = sessionStorage.getItem(InformationCvComponent.CV_FILE_NAME_KEY);
+    const saved = getSavedCvDisplayName();
     if (saved) {
       this.fileNameControl.setValue(saved);
-    }
-  }
-
-  private persistCvFileName(displayName: string): void {
-    if (!isPlatformBrowser(this.platformId)) {
       return;
     }
-    sessionStorage.setItem(InformationCvComponent.CV_FILE_NAME_KEY, displayName);
+    if (!this.userId) {
+      return;
+    }
+    this.documentService.getDocumentsByUserAndFolder(this.userId, 'CvFindMe').subscribe({
+      next: (res) => {
+        const doc = res?.document ?? res;
+        const stored = doc?.fileName as string | undefined;
+        if (stored) {
+          const display = displayNameFromStoredFileName(stored);
+          this.fileNameControl.setValue(display);
+          persistCvDisplayName(display);
+        }
+      },
+    });
   }
 
   private loadCompletedSteps(): void {
@@ -577,11 +590,9 @@ popupTitle: string = '';
 
       element.classList.add('pdf-export-mode');
 
-      let userName = await this.authService.getUserFullName();
-      //console.log('User name:', userName);
-      
-      const fileName = `FIND ME-${userName || 'CV'}`.replace(/\s+/g, '.');
-      //console.log('Final file name:', fileName);
+      const userName = await this.authService.getUserFullName();
+      const displayName = resolveCvDisplayName(this.fileNameControl.value, userName);
+      const fileName = buildFindMeCvFileName(displayName);
 
       await this.pdfService.generateMultiPagePdf(element, fileName);
       
@@ -618,16 +629,14 @@ async SauvegarderCV(): Promise<void> {
     }
 
     element.classList.add('pdf-export-mode');
-    const displayName = String(this.fileNameControl.value ?? '').trim();
-    const fileName = `FIND ME-${displayName}`.replace(/\s+/g, '.');
+    const displayName = resolveCvDisplayName(this.fileNameControl.value, null);
+    const fileName = buildFindMeCvFileName(displayName);
 
-    // Generate PDF
     const pdfBlob = await this.pdfService.SauvegarderMultiPagePdf(element, fileName);
-    
-    // Upload document
+
     await this.uploadDocument(pdfBlob, fileName);
-    
-    this.persistCvFileName(displayName);
+
+    persistCvDisplayName(displayName);
     this.showNotification('CV généré et sauvegardé avec succès!', 'success');
     
   } catch (error) {
