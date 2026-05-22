@@ -28,6 +28,7 @@
     "fixPage04Command": "FIX_PAGE04_TECHNIQUE.cmd",
     "connectionHint": "localhost:3306 · findme_dw · utilisateur findme_bi (mot de passe dans docker/mysql-init/02-findme-bi-readonly.sql)",
     "guidePaths": [
+      "bi/powerbi/GUIDE_BI_POWER_BI_COMPLET.md",
       "bi/GUIDE_TEST_AMI_APRES_PULL.md",
       "bi/powerbi/README.md",
       "bi/powerbi/GUIDE_AUTRE_PC.md",

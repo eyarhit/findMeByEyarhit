@@ -35,5 +35,7 @@ scripts\bi-start.cmd
 
 ## Documentation
 
+- **[Guide BI + Power BI complet](powerbi/GUIDE_BI_POWER_BI_COMPLET.md)** — étoile, mesures DAX, dashboards, filtres, BDD
+- [POWERBI_TABLES_ET_MESURES.md](powerbi/POWERBI_TABLES_ET_MESURES.md) — référence colonnes
 - [BI_POWERBI.md](../BI_POWERBI.md)
 - [docs/BI_PFE_TALEND_POWERBI.md](../docs/BI_PFE_TALEND_POWERBI.md)
