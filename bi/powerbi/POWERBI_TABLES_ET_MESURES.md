@@ -1,8 +1,6 @@
 # Find-Me — Tables `findme_dw` et guide des mesures Power BI
 
-Référence **colonnes + DAX** pour chaque table.  
-Pour le **guide complet** (architecture, 4 dashboards, filtres, étoile, KPI) : **[GUIDE_BI_POWER_BI_COMPLET.md](./GUIDE_BI_POWER_BI_COMPLET.md)**.
-
+Référence pour créer des **mesures DAX**, des visuels et des filtres dans Power BI Desktop.  
 Source : entrepôt MySQL `findme_dw` (schéma en étoile Kimball), alimenté par l’ETL Talend.
 
 **Connexion** : `localhost:3306` / base `findme_dw` / `findme_bi` / `findme_bi_readonly`

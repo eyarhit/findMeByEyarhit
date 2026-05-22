@@ -2,7 +2,6 @@
 """Console BI Find-Me — Talend ETL + aperçu Power BI (navigateur), sans config manuelle."""
 from __future__ import annotations
 
-import asyncio
 import os
 import subprocess
 import threading
@@ -16,8 +15,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-
-from kpi_data import run_page_queries, run_slug_query
 
 MYSQL_HOST = os.environ.get("MYSQL_HOST", "mysql")
 MYSQL_PORT = int(os.environ.get("MYSQL_PORT", "3306"))
@@ -260,58 +257,14 @@ async def kpis_executive():
         raise HTTPException(503, str(exc)) from exc
 
 
-def _dw_connect():
-    return _connect(DW)
-
-
-@app.get("/api/kpis/page/{level}")
-async def kpis_page(level: str):
-    allowed = {"executive", "managerial", "operational", "technique"}
-    if level not in allowed:
-        raise HTTPException(404, "Niveau BI inconnu")
-    loop = asyncio.get_event_loop()
-    try:
-        charts = await asyncio.wait_for(
-            loop.run_in_executor(None, lambda: run_page_queries(_dw_connect, level)),
-            timeout=60.0,
-        )
-        return {"level": level, "charts": charts}
-    except asyncio.TimeoutError:
-        raise HTTPException(504, "Chargement KPI trop long (timeout 60s)") from None
-    except Exception as exc:
-        raise HTTPException(503, str(exc)) from exc
-
-
-@app.get("/api/kpis/card/{slug}")
-async def kpis_card(slug: str):
-    loop = asyncio.get_event_loop()
-    try:
-        return await asyncio.wait_for(
-            loop.run_in_executor(None, lambda: run_slug_query(_dw_connect, slug)),
-            timeout=20.0,
-        )
-    except asyncio.TimeoutError:
-        return {
-            "kind": "error",
-            "error": "Requête SQL trop longue (20s)",
-            "points": [],
-            "scalars": {},
-            "scalar": None,
-            "slug": slug,
-        }
-    except Exception as exc:
-        raise HTTPException(503, str(exc)) from exc
-
-
 @app.get("/api/kpis/candidatures_par_mois")
 async def kpis_candidatures_mois():
     sql = """
-    SELECT d.year_num AS y, d.month_num AS m,
+    SELECT d.year_number AS y, d.month_number AS m,
            SUM(f.candidature_count) AS total
     FROM fact_candidature f
     JOIN dim_date d ON d.date_key = f.date_key
-    WHERE f.date_key > 19000101
-    GROUP BY d.year_num, d.month_num
+    GROUP BY d.year_number, d.month_number
     ORDER BY y, m
     LIMIT 24
     """
