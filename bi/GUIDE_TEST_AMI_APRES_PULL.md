@@ -106,7 +106,7 @@ Santé : http://localhost:3032/api/health → `"dw": true`
 
 1. Ouvrir http://localhost:4200 (Ctrl+Shift+R si page sans style).
 2. Se connecter en **ADMIN**.
-3. Menu **Pilotage BI** → Executive, ou URL : `/utilisateur/bi/executive`
+3. Menu → **Tableaux de bord BI** (`/admin/bi-dashboard`).
 
 ### Ce que l’ami doit voir
 
@@ -126,21 +126,23 @@ Puis F5 sur la page BI.
 
 **Pas de `npm install` ni `ng serve`** — le front est le conteneur `findme-frontend` (port 4200 → nginx).
 
-Rebuild front + hub après un gros `git pull` (obligatoire si page blanche ou « ne répond pas ») :
+Rebuild front après un gros `git pull` :
 
 ```cmd
-FIX_BI_DASHBOARD.cmd
+scripts\docker-build-frontend.cmd
+docker compose up -d --force-recreate frontend
 ```
 
-ou :
+Si `npm error ECONNRESET` pendant le build : relancer le script (3 essais) ou installer d’abord en local :
 
 ```cmd
-docker compose build frontend bi-hub
-docker compose up -d --force-recreate mysql bi-hub frontend
-docker compose run --rm talend-etl
+cd find-me-front-2.1
+npm install --legacy-peer-deps
+cd ..
+docker compose build frontend
 ```
 
-Puis **Ctrl+F5** sur http://localhost:4200/login
+Ne pas lancer `docker compose build` sans nom de service (rebuild tout le backend + front = long et fragile).
 
 ---
 
