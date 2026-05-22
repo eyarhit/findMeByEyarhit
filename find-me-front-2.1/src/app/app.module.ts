@@ -169,7 +169,6 @@ import { MessengerChatComponent } from './components/messenger-chat/messenger-ch
     InformationCvComponent
   ],
   providers: [
-    // Pas d'hydratation SSR ni provideAnimationsAsync (doublon avec BrowserAnimationsModule = page blanche).
     AuthService,
   ],
   bootstrap: [AppComponent]

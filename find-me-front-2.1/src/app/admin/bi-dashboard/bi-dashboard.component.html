@@ -2,113 +2,34 @@
   <header class="bi-header">
     <div>
       <h1>Business Intelligence Find-Me</h1>
-      <p>
-        <strong>{{ stackLabel }}</strong> — entrepôt <strong>findme_dw</strong> (schéma en étoile).
-        Alimentation <strong>Talend</strong> (ETL) puis analyse <strong>OLAP Power BI</strong>.
-      </p>
-    </div>
-    <div class="bi-actions">
-      <span class="status-badge" [class.connected]="hubStatus === 'ok'" [class.warn]="hubStatus === 'degraded' || hubStatus === 'unknown'" [class.error]="hubStatus === 'error'">
-        <span class="dot"></span>
-        {{ hubStatusLabel() }}
-      </span>
-      <button type="button" class="open-btn primary" (click)="openTalendStudio()">Talend Open Studio</button>
-      <button type="button" class="open-btn primary" (click)="openPowerBiWeb()">Power BI (portail)</button>
-      <button type="button" class="open-btn ghost" (click)="openBiHub()">Console BI</button>
+      <p>Talend ETL → <strong>findme_dw</strong> → Power BI Desktop (4 pages PBIP).</p>
     </div>
   </header>
 
-  <div class="alert warn" *ngIf="manifestError">{{ manifestError }}</div>
-
-  <div class="kpi-strip" *ngIf="manifest">
-    <div class="kpi">
-      <span class="kpi-value">{{ talendJob }}</span>
-      <span class="kpi-label">job Talend</span>
-    </div>
-    <div class="kpi">
-      <span class="kpi-value">{{ reports.length }}</span>
-      <span class="kpi-label">rapports Power BI</span>
-    </div>
-    <div class="kpi">
-      <span class="kpi-value">{{ manifest.cards?.length || 0 }}</span>
-      <span class="kpi-label">indicateurs SQL</span>
-    </div>
-    <div class="kpi">
-      <span class="kpi-value kpi-small">{{ manifest.dwDatabase }}</span>
-      <span class="kpi-label">base DW</span>
-    </div>
-  </div>
-
-  <div class="hub-banner" *ngIf="manifest">
-    <p>
-      <strong>Stack conteneurisée (cours BIS) :</strong>
-      <a [href]="talendStudioUrl" target="_blank" rel="noopener">Talend Studio</a> (6080) ·
-      <a [href]="powerBiWebUrl" target="_blank" rel="noopener">Power BI</a> (8077) ·
-      <a [href]="biHubBase" target="_blank" rel="noopener">Hub BI</a> (3032)
-    </p>
-  </div>
-
-  <div class="connection-box">
-    <button type="button" class="collapse-btn" (click)="toggleConnectionInfo()">
-      Détails techniques (optionnel)
-      <span>{{ showConnectionInfo ? '▲' : '▼' }}</span>
-    </button>
-    <div *ngIf="showConnectionInfo" class="connection-content">
-      <h3>Console Docker (recommandé)</h3>
-      <p>Talend Studio : <a [href]="talendStudioUrl" target="_blank" rel="noopener">{{ talendStudioUrl }}</a> (VNC : <code>findme</code>)</p>
-      <p>Power BI RS : <a [href]="powerBiWebUrl" target="_blank" rel="noopener">{{ powerBiWebUrl }}</a></p>
-      <h3>ETL manuel (ligne de commande)</h3>
-      <pre class="cmd">docker compose run --rm talend-etl</pre>
-      <h3>Power BI Desktop (Windows)</h3>
-      <p *ngIf="connection">
-        {{ connection.server }}:{{ connection.port }} · {{ connection.database }} · {{ connection.user }}
-      </p>
-    </div>
-  </div>
-
-  <article class="dashboard-wrapper">
-    <h2>Rapports Power BI (3 niveaux — OLAP)</h2>
-    <div class="tier-buttons" *ngIf="reports.length">
-      <button
-        *ngFor="let r of reports"
-        type="button"
-        class="tier-btn"
-        [class.active]="selectedReportLevel === r.level"
-        (click)="selectReportLevel(r.level)">
-        {{ tierLabel(r.level) }}
-      </button>
-    </div>
-    <div class="metabase-link-panel" *ngIf="selectedReport">
-      <p class="panel-lead">{{ selectedReport.description || selectedReport.name }}</p>
-      <p><strong>Fichier :</strong> <code>bi/powerbi/reports/{{ selectedReport.file }}</code></p>
-      <p class="hint">
-        Utilisez <strong>Ouvrir Power BI (console)</strong> pour l’aperçu navigateur, ou téléchargez le
-        <code>.pbix</code> depuis la console si présent dans <code>bi/powerbi/reports/</code>.
-      </p>
-    </div>
+  <article class="bi-card">
+    <h2>Power BI (recommandé)</h2>
+    <p>À la racine du projet :</p>
+    <pre class="cmd">ONE_COMMANDE_POWERBI.cmd</pre>
+    <p>Fichier projet : <code>{{ pbipPath }}</code></p>
+    <p>Connexion : <code>{{ mysqlDw }}</code></p>
+    <button type="button" class="btn" (click)="openPbipHelp()">Documentation Power BI</button>
   </article>
 
-  <div class="bi-layout" *ngIf="tabs.length">
-    <aside class="tabs">
-      <button
-        *ngFor="let tab of tabs"
-        type="button"
-        class="tab-btn"
-        [class.active]="selectedTabKey === tab.key"
-        (click)="selectTab(tab.key)">
-        {{ tab.label }}
-      </button>
-    </aside>
-    <section class="reports">
-      <h2>{{ selectedTab?.label }} - requetes KPI (sources Power BI)</h2>
-      <div class="cards-grid">
-        <article class="report-card" *ngFor="let card of selectedCards">
-          <h3>{{ card.title }}</h3>
-          <p class="card-meta">{{ card.display }} · {{ card.db }}</p>
-          <p class="card-meta" *ngIf="card.sqlFile"><code>{{ card.sqlFile }}</code></p>
-        </article>
-      </div>
-      <p class="reports-lead" *ngIf="!selectedCards.length">Voir <code>bi/kpis/kpis_catalogue.md</code> pour les 23 KPIs.</p>
-    </section>
-  </div>
+  <article class="bi-card">
+    <h2>Docker (back + base)</h2>
+    <pre class="cmd">scripts\docker-back-only.cmd</pre>
+    <pre class="cmd">docker compose run --rm talend-etl</pre>
+    <p>Hub BI (optionnel) : <a [href]="hubUrl" target="_blank" rel="noopener">{{ hubUrl }}</a>
+      <button type="button" class="btn ghost" (click)="openHub()">Ouvrir</button>
+    </p>
+    <p>Talend Studio : <a [href]="talendUrl" target="_blank" rel="noopener">{{ talendUrl }}</a>
+      <button type="button" class="btn ghost" (click)="openTalend()">Ouvrir</button>
+    </p>
+  </article>
+
+  <article class="bi-card">
+    <h2>Application admin</h2>
+    <p>Gestion des membres : menu <strong>Espace Admin</strong> (pas cette page).</p>
+    <a routerLink="/utilisateur/admin" class="btn">Aller à Espace Admin</a>
+  </article>
 </section>

@@ -200,8 +200,9 @@ const routes: Routes = [
  { path: 'OffrePublierDetails/:jobId', component: MissionDetailsComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['ESN_ADMIN','ESN_COMMERCIAL','CHARGEDERECRUTEMENT'] , espace: 'Offres publier' } },
 
 
-  // Racine : accueil métier selon le rôle (pas toujours /cv)
-  { path: '', component: HomeRedirectComponent, canActivate: [AuthGuard] },
+  // Racine publique (évite écran blanc si token invalide bloque AuthGuard)
+  { path: '', redirectTo: 'acceuil-find-me', pathMatch: 'full' },
+  { path: 'app', component: HomeRedirectComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '/login' },
 ];
 
