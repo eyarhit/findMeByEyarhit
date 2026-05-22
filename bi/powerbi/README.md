@@ -143,6 +143,15 @@ Fait : MySQL → ETL Talend → ouverture Power BI.
 docker compose run --rm talend-etl
 ```
 
+**Après un nouvel inscrit / candidat dans l’app** : l’**Actualiser** de Power BI ne lit que `findme_dw`.  
+Relancez d’abord l’ETL, puis **Actualiser** dans Power BI :
+
+```cmd
+scripts\refresh-dw-for-powerbi.cmd
+```
+
+Sans ETL, les graphiques (ex. page **03 - Operationnel**, anneau `CANDIDAT`) restent **figés** même si `user_bd` a plus d’utilisateurs.
+
 2. **Power BI Desktop** (Windows) installé — [téléchargement Microsoft](https://www.microsoft.com/power-platform/products/power-bi/desktop).
 
 3. MySQL accessible sur `localhost:3306` (Docker `findme-mysql` — le port **3306** doit être publié dans `docker-compose.yml`).
