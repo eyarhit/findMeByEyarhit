@@ -4,10 +4,13 @@ from __future__ import annotations
 from typing import Any, Callable
 
 
-def _year_clause(year: int | None, alias: str = "d") -> str:
+def _year_clause(year: int | None, alias: str | None = "d") -> str:
     if year is None:
         return ""
-    return f" AND {alias}.year_num = {int(year)}"
+    y = int(year)
+    if alias:
+        return f" AND {alias}.year_num = {y}"
+    return f" AND year_num = {y}"
 
 
 def _contract_clause(contract: str | None, column: str = "type_contrat") -> str:
@@ -27,7 +30,11 @@ def fetch_filter_options(connect_fn: Callable[[], Any]) -> dict[str, list]:
                 WHERE year_num > 1900 ORDER BY y DESC LIMIT 15
                 """
             )
-            out["years"] = [int(r.get("y") or r.get("Y") or 0) for r in cur.fetchall()]
+            out["years"] = [
+                int(r.get("y") or r.get("Y") or 0)
+                for r in cur.fetchall()
+                if 2000 <= int(r.get("y") or r.get("Y") or 0) <= 2030
+            ]
             cur.execute(
                 """
                 SELECT DISTINCT type_contrat AS c FROM dim_mission
@@ -60,7 +67,8 @@ def fetch_executive_measures(
     year: int | None = None,
     contract: str | None = None,
 ) -> dict[str, float]:
-    yk = _year_clause(year)
+    yk_view = _year_clause(year, None)
+    yk = _year_clause(year, "d")
     ck = _contract_clause(contract)
     sql = f"""
     SELECT
@@ -68,15 +76,8 @@ def fetch_executive_measures(
       COALESCE(SUM(acceptees), 0) AS kpi_acceptees,
       COALESCE(SUM(refusees), 0) AS kpi_refusees,
       COALESCE(ROUND(100.0 * SUM(acceptees) / NULLIF(SUM(candidatures), 0), 1), 0) AS kpi_taux_pct
-    FROM v_bi_kpi_recrutement WHERE 1=1 {yk}
+    FROM v_bi_kpi_recrutement WHERE 1=1 {yk_view}
     """
-    sql_missions = f"""
-    SELECT
-      COALESCE(SUM(mission_count), 0) AS missions_vue,
-      COALESCE(SUM(CASE WHEN status_mission = 'OPEN' THEN mission_count ELSE 0 END), 0) AS missions_ouvertes
-    FROM v_bi_mission WHERE 1=1 {yk.replace('d.', '') if yk else ''}
-    """
-    # v_bi_mission uses year_num directly
     if year:
         sql_missions = f"""
         SELECT
@@ -201,7 +202,7 @@ def fetch_top_missions(connect_fn: Callable[[], Any], year: int | None, limit: i
     JOIN dim_mission dm ON dm.mission_key = fc.mission_key
     JOIN dim_date d ON d.date_key = fc.date_key
     WHERE fc.date_key > 19000101 {yk}
-    GROUP BY dm.titre ORDER BY value DESC LIMIT {int(limit)}
+    GROUP BY dm.mission_name ORDER BY value DESC LIMIT {int(limit)}
     """
     with connect_fn() as conn:
         with conn.cursor() as cur:
@@ -254,6 +255,10 @@ def visual_data_for_executive(
     return {"kind": "empty", "points": [], "scalar": None}
 
 
+def _empty_chart() -> dict[str, Any]:
+    return {"kind": "empty", "points": [], "scalars": {}, "scalar": None}
+
+
 def build_page_dashboard(
     connect_fn: Callable[[], Any],
     level: str,
@@ -263,33 +268,56 @@ def build_page_dashboard(
     country: str | None = None,
 ) -> dict[str, Any]:
     from kpi_data import page_slugs, run_page_queries, run_slug_query
-
-    measures = {}
-    if level == "executive":
-        measures = fetch_executive_measures(connect_fn, year, contract)
-    charts_legacy = run_page_queries(connect_fn, level)
-    # Enrichir avec layout PBI
     from pbi_layout import parse_page_layout
 
-    layout = parse_page_layout(level)
+    measures: dict[str, float] = {}
+    if level == "executive":
+        try:
+            measures = fetch_executive_measures(connect_fn, year, contract)
+        except Exception as exc:
+            measures = {"_error": str(exc)[:200]}
+
+    try:
+        charts_legacy = run_page_queries(connect_fn, level)
+    except Exception:
+        charts_legacy = {}
+
+    try:
+        layout = parse_page_layout(level)
+    except Exception:
+        layout = {
+            "level": level,
+            "displayName": level,
+            "width": 1280,
+            "height": 720,
+            "visuals": [],
+        }
+
     visual_data: dict[str, Any] = {}
     for vis in layout.get("visuals") or []:
         vid = vis["id"]
-        if level == "executive":
-            visual_data[vid] = visual_data_for_executive(
-                connect_fn, vid, year, contract, measures
-            )
-        elif vid in charts_legacy:
-            visual_data[vid] = charts_legacy[vid]
-        else:
-            # mapper slug depuis nom visuel
-            slug_guess = vid.replace("kpi_", "").replace("line_", "").replace("bar_", "")
-            for slug in charts_legacy:
-                if slug in vid or vid in slug:
-                    visual_data[vid] = charts_legacy[slug]
-                    break
-            if vid not in visual_data:
-                visual_data[vid] = {"kind": "empty", "points": [], "scalar": None}
+        try:
+            if level == "executive":
+                visual_data[vid] = visual_data_for_executive(
+                    connect_fn, vid, year, contract, measures
+                )
+            elif vid in charts_legacy:
+                visual_data[vid] = charts_legacy[vid]
+            else:
+                for slug in charts_legacy:
+                    if slug in vid or vid in slug:
+                        visual_data[vid] = charts_legacy[slug]
+                        break
+                if vid not in visual_data:
+                    visual_data[vid] = _empty_chart()
+        except Exception as exc:
+            visual_data[vid] = {
+                "kind": "error",
+                "error": str(exc)[:200],
+                "points": [],
+                "scalars": {},
+                "scalar": None,
+            }
     layout_ids = {v["id"] for v in layout.get("visuals") or []}
     extra_cards: list[dict[str, Any]] = []
     manifest = _manifest_cards()

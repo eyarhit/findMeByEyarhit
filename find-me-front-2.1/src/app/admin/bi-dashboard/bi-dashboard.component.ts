@@ -250,8 +250,14 @@ export class BiDashboardComponent implements OnInit, OnDestroy {
     this.http.get<BiFilters>(`${this.biHubBase}/api/powerbi/filters`).subscribe({
       next: (f) => {
         this.biFilters = f;
-        if (f.years?.length && this.filterYear == null) {
-          this.filterYear = f.years[0];
+        if (f.years?.length) {
+          const valid = f.years.filter((y) => y >= 2000 && y <= 2030);
+          if (valid.length && this.filterYear == null) {
+            this.filterYear = valid[0];
+          } else if (this.filterYear != null && !valid.includes(this.filterYear)) {
+            this.filterYear = valid[0] ?? null;
+            this.loadPageData();
+          }
         }
       },
     });
