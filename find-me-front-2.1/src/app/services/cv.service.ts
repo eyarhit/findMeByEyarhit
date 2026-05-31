@@ -18,6 +18,10 @@ export class CvService {
 
   public cvUpdated = new Subject<Cv>();
 
+  /** Données formulaire / API pour la prévisualisation (étape 2). */
+  private previewCvSubject = new BehaviorSubject<Cv | null>(null);
+  previewCv$ = this.previewCvSubject.asObservable();
+
   public titreProfilSubject= new BehaviorSubject<string | null>(null)
 
 
@@ -50,6 +54,10 @@ export class CvService {
   // Ajout partiel (on peut ajouter seuelment un attribut, pas essentillement tous le cv)
   saveCv(userId: number,cvData: Cv): Observable<Cv> {
     return this.http.post<Cv>(`${this.apiUrl}/save`, cvData);
+  }
+
+  publishPreviewCv(cv: Cv | null): void {
+    this.previewCvSubject.next(cv);
   }
 
 

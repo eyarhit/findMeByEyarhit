@@ -260,6 +260,9 @@ popupTitle: string = '';
       }
     });
     this.cdr.detectChanges();
+    if (this.activeStep === 2) {
+      this.publishCvPreview();
+    }
   }
 
   // Academic Formations
@@ -360,6 +363,39 @@ popupTitle: string = '';
       ),
       langues: this.filterFilledLanguages(this.form.value.languages || []),
     };
+  }
+
+  /** Fusionne la réponse API avec le formulaire (évite d’effacer les compétences extraites). */
+  private mergeCvResponse(api: Cv, local: Cv): Cv {
+    return {
+      ...api,
+      titreDeProfil: api.titreDeProfil ?? local.titreDeProfil,
+      competences: this.hasCompetenceData(api.competences) ? api.competences : local.competences,
+      educations: api.educations?.length ? api.educations : local.educations,
+      experiences: api.experiences?.length ? api.experiences : local.experiences,
+      langues: api.langues?.length ? api.langues : local.langues,
+    };
+  }
+
+  private hasCompetenceData(competences: Cv['competences'] | undefined): boolean {
+    if (!competences?.length) {
+      return false;
+    }
+    const c = competences[0];
+    return !!(
+      c.langageBallsage ||
+      c.languageProgrammation ||
+      c.framework ||
+      c.bibliotheque ||
+      c.api ||
+      c.db ||
+      c.systemExploitation ||
+      c.conception ||
+      c.methodologie ||
+      c.designPattern ||
+      c.architechture ||
+      c.outils
+    );
   }
 
   private filterFilledAcademicFormations(items: unknown[]): Education[] {
@@ -532,6 +568,23 @@ popupTitle: string = '';
 
     this.activeStep = stepNumber;
     this.currentPage = 1;
+
+    if (stepNumber === 2) {
+      this.publishCvPreview();
+    }
+  }
+
+  /** Alimente la prévisualisation avec le formulaire (données extraites du CV). */
+  publishCvPreview(): void {
+    if (!this.userId) {
+      return;
+    }
+    const payload = this.buildCvPayload();
+    const titre = (this.titreDeProfilControl.value ?? '').toString().trim();
+    if (titre) {
+      payload.titreDeProfil = titre;
+    }
+    this.cvService.publishPreviewCv(payload);
   }
 
   goToNextPage(): void {
@@ -559,9 +612,15 @@ popupTitle: string = '';
         if (response.id_cv && !this.idCv) {
           this.idCv = response.id_cv;
         }
+        const merged = this.mergeCvResponse(response, cvData);
+        this.cvService.publishPreviewCv(merged);
+        this.cvService.cvUpdated.next(merged);
       },
       error: () => {
         /* navigation autorisée même si l’API échoue */
+        if (this.activeStep === 2) {
+          this.publishCvPreview();
+        }
       },
     });
   }
@@ -699,10 +758,9 @@ private async uploadDocument(pdfBlob: Blob, fileName: string): Promise<void> {
         
         if (res.titreDeProfil) {
           this.titreDeProfilControl.setValue(res.titreDeProfil);
-          this.cvService.cvUpdated.next({
-            ...res,
-            titreDeProfil: res.titreDeProfil
-          });
+          const merged = this.mergeCvResponse(res, this.buildCvPayload());
+          this.cvService.publishPreviewCv(merged);
+          this.cvService.cvUpdated.next(merged);
         }
         
         if (res.id_cv && !this.idCv) {

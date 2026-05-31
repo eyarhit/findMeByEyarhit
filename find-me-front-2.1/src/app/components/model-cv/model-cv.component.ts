@@ -108,11 +108,18 @@ export class ModelCvComponent implements OnInit {
     
     if (this.userId) {
       this.loadCv(this.userId);
-      
+
+      this.cvService.previewCv$.subscribe((preview) => {
+        if (preview && preview.userId === this.userId) {
+          this.cvData = this.mergeCvData(this.cvData, preview);
+          this.updateCvDataWithUserInfo();
+        }
+      });
+
       // S'abonner aux mises à jour du CV
       this.cvService.cvUpdated.subscribe(updatedCv => {
         if (updatedCv.userId === this.userId) {
-          this.cvData = updatedCv;
+          this.cvData = this.mergeCvData(this.cvData, updatedCv);
           this.updateCvDataWithUserInfo();
         }
       });
@@ -143,11 +150,57 @@ export class ModelCvComponent implements OnInit {
   private loadCv(userId: number): void {
     this.cvService.getCvByUserId(userId).subscribe({
       next: (response) => {
-       // console.log('CV loaded:', response);
-        this.cvData = response;
-        this.updateCvDataWithUserInfo(); 
+        this.cvData = this.mergeCvData(this.cvData, response);
+        this.updateCvDataWithUserInfo();
       },
       error: (error) => console.error('Error loading CV:', error)
+    });
+  }
+
+  private mergeCvData(existing: any, incoming: any): any {
+    if (!incoming) {
+      return existing ?? null;
+    }
+    if (!existing) {
+      return incoming;
+    }
+    return {
+      ...existing,
+      ...incoming,
+      titreDeProfil: incoming.titreDeProfil || existing.titreDeProfil,
+      competences: this.pickCompetences(incoming.competences, existing.competences),
+      educations: incoming.educations?.length ? incoming.educations : existing.educations,
+      experiences: incoming.experiences?.length ? incoming.experiences : existing.experiences,
+      langues: incoming.langues?.length ? incoming.langues : existing.langues,
+    };
+  }
+
+  private pickCompetences(incoming: any, existing: any): any {
+    if (this.competenceRecordHasData(incoming)) {
+      return incoming;
+    }
+    if (this.competenceRecordHasData(existing)) {
+      return existing;
+    }
+    return incoming ?? existing;
+  }
+
+  private competenceRecordHasData(competences: any): boolean {
+    const source = Array.isArray(competences) ? competences[0] : competences;
+    if (!source || typeof source !== 'object') {
+      return false;
+    }
+    const fields = [
+      'langageBallsage', 'languageProgrammation', 'framework', 'bibliotheque',
+      'api', 'db', 'systemExploitation', 'conception', 'methodologie',
+      'designPattern', 'architechture', 'outils',
+    ];
+    return fields.some((key) => {
+      const value = source[key];
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+      return typeof value === 'string' && value.trim().length > 0;
     });
   }
 
@@ -161,16 +214,15 @@ export class ModelCvComponent implements OnInit {
     return startYear ? `${startYear} - ${endYear}` : endYear.toString();
   }
 
-  private splitCompetences(input: string | string[] | undefined): string[] {
+  private splitCompetences(input: string | string[] | undefined | null): string[] {
     if (!input) return [];
-    
-    // If it's already an array, return it
-    if (Array.isArray(input)) return input;
-    
-    // Split by comma first, then flatten any splits from spaces
-    return input.split(',')
-      .map(item => item.trim())
-      .filter(item => item.length > 0);
+    if (Array.isArray(input)) {
+      return input.map((item) => String(item).trim()).filter((item) => item.length > 0);
+    }
+    return String(input)
+      .split(/[,;|/•\n]+/)
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
   }
   private formatExperiencePeriod(dateDebut: string, dateFin: string): string {
     if (!dateDebut && !dateFin) return '';
@@ -221,7 +273,7 @@ export class ModelCvComponent implements OnInit {
       ? this.cvData.competences[0]
       : this.cvData?.competences;
 
-    if (competenceSource) {
+    if (competenceSource && this.competenceRecordHasData([competenceSource])) {
       this.cvDataDevOps.competences = {
         langages_balisage: this.splitCompetences(competenceSource.langageBallsage),
         programmation: this.splitCompetences(competenceSource.languageProgrammation),

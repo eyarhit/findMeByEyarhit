@@ -24,7 +24,28 @@ export class VisualisationCvComponent {
   }
 
   getCurrentData(): any {
-    // console.log("aziiiiiiz",this.selectedTemplate?.cvData)
     return this.selectedTemplate?.cvData;
+  }
+
+  hasTechnicalSkills(): boolean {
+    const comp = this.getCurrentData()?.competences;
+    if (!comp) {
+      return false;
+    }
+    const groups = [
+      'langages_balisage',
+      'programmation',
+      'frameworks',
+      'bibliotheques',
+      'api',
+      'base_donnees',
+      'systeme_exploitation',
+      'conception',
+      'methodologies',
+      'design_patterns',
+      'architectures',
+      'outils',
+    ];
+    return groups.some((key) => Array.isArray(comp[key]) && comp[key].length > 0);
   }
 }

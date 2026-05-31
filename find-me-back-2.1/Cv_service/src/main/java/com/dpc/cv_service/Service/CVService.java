@@ -45,6 +45,7 @@ public class CVService implements ICVService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Cv getCVsByUserId(Long userId) {
         return cvRepo.findByUserId(userId);
     }
