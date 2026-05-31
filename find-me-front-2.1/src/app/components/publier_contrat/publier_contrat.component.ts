@@ -392,8 +392,8 @@ isStepInvalid(): boolean {
           competencesRequises: this.competences
         },
         ville: {
-          ...raw.ville,
-          pays: country ? { id: country.id, nom: country.nom } : raw.ville?.pays
+          nomdeville: raw.ville?.nomdeville ?? '',
+          pays: country ? { nom: country.nom } : { nom: raw.ville?.pays?.nom ?? '' },
         },
         statusMission: 'OPEN',
       };

@@ -11,6 +11,7 @@ import com.dpc.mission_service.model.StatusMission;
 import com.dpc.mission_service.model.TypeContrat;
 import com.dpc.mission_service.model.Ville;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
 import java.util.List;
@@ -36,6 +37,7 @@ public class MissionService implements IMissionService {
     }
 
     @Override
+    @Transactional
     public Mission creer(Mission mission) {
         resolveGeographyForPersistence(mission);
         sanitizeDescripMissionForMysql(mission);
@@ -87,6 +89,9 @@ public class MissionService implements IMissionService {
     }
 
     private Pays resolveOrCreatePays(Pays p) {
+        if (p == null) {
+            return null;
+        }
         if (p.getId() != null && p.getId() > 0) {
             Optional<Pays> byId = paysRepository.findById(p.getId());
             if (byId.isPresent()) {
@@ -95,12 +100,13 @@ public class MissionService implements IMissionService {
         }
         if (p.getNom() != null && !p.getNom().isBlank()) {
             String nom = p.getNom().trim();
-            return paysRepository.findFirstByNomIgnoreCase(nom)
-                    .orElseGet(() -> {
-                        Pays created = new Pays();
-                        created.setNom(nom);
-                        return paysRepository.save(created);
-                    });
+            Optional<Pays> existing = paysRepository.findFirstByNomIgnoreCase(nom);
+            if (existing.isPresent()) {
+                return existing.get();
+            }
+            Pays created = new Pays();
+            created.setNom(nom);
+            return paysRepository.saveAndFlush(created);
         }
         return null;
     }
@@ -111,7 +117,7 @@ public class MissionService implements IMissionService {
             return;
         }
         if (v.getIdVille() != null && v.getIdVille() > 0) {
-            mission.setVille(villeRepository.findById(v.getIdVille()).orElse(null));
+            villeRepository.findById(v.getIdVille()).ifPresentOrElse(mission::setVille, () -> mission.setVille(null));
             return;
         }
         String nom = v.getNomdeville();
@@ -128,15 +134,16 @@ public class MissionService implements IMissionService {
         mission.setPays(pays);
 
         String cityName = nom.trim();
-        Ville resolved = villeRepository
-                .findFirstByNomdevilleIgnoreCaseAndPays_Id(cityName, pays.getId())
-                .orElseGet(() -> {
-                    Ville created = new Ville();
-                    created.setNomdeville(cityName);
-                    created.setPays(pays);
-                    return villeRepository.save(created);
-                });
-        mission.setVille(resolved);
+        Optional<Ville> existingCity = villeRepository
+                .findFirstByNomdevilleIgnoreCaseAndPays_Id(cityName, pays.getId());
+        if (existingCity.isPresent()) {
+            mission.setVille(existingCity.get());
+            return;
+        }
+        Ville created = new Ville();
+        created.setNomdeville(cityName);
+        created.setPays(pays);
+        mission.setVille(villeRepository.saveAndFlush(created));
     }
 
     private Pays resolvePaysForVille(Ville ville, Pays missionPays) {
@@ -153,6 +160,7 @@ public class MissionService implements IMissionService {
         return null;
     }
     @Override
+    @Transactional
     public Mission modifier(Long id, Mission mission) {
         Mission existing = missionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Mission non trouvée !"));
@@ -181,6 +189,9 @@ public class MissionService implements IMissionService {
             desc.setSalaire(newDesc.getSalaire());
             desc.setStatut(newDesc.getStatut() == Statut.NONE ? null : newDesc.getStatut());
             desc.setTypeContrat(newDesc.getTypeContrat());
+            if (newDesc.getCompetencesRequises() != null) {
+                desc.setCompetencesRequises(newDesc.getCompetencesRequises());
+            }
         }
 
         //  Mise à jour de profilDemande
@@ -192,13 +203,13 @@ public class MissionService implements IMissionService {
             profil.setAnnees_experiences(newProfil.getAnnees_experiences());
         }
 
-        if (mission.getVille() != null) {
-            existing.setVille(mission.getVille());
-        }
-        if (mission.getPays() != null) {
-            existing.setPays(mission.getPays());
-        }
-        resolveGeographyForPersistence(existing);
+        // Ne pas attacher d'entités transientes JSON directement à l'entité managée
+        Mission geoScratch = new Mission();
+        geoScratch.setVille(mission.getVille());
+        geoScratch.setPays(mission.getPays());
+        resolveGeographyForPersistence(geoScratch);
+        existing.setVille(geoScratch.getVille());
+        existing.setPays(geoScratch.getPays());
 
         return missionRepository.save(existing);
     }
