@@ -60,11 +60,21 @@ public class MissionService implements IMissionService {
     /**
      * Le JSON peut contenir des objets {@code ville}/{@code pays} sans id (entités transitoires).
      * Hibernate refuse de persister une {@link Mission} qui référence une entité non managée → 500.
-     * On ne conserve que des références résolues en base ; sinon on met {@code null}.
+     * Les pays/villes inconnus sont créés en base pour conserver le lieu saisi par le RH.
      */
     private void resolveGeographyForPersistence(Mission mission) {
+        if (mission.getPays() == null
+                && mission.getVille() != null
+                && mission.getVille().getPays() != null) {
+            mission.setPays(mission.getVille().getPays());
+        }
         resolveMissionPays(mission);
         resolveMissionVille(mission);
+        if (mission.getPays() == null
+                && mission.getVille() != null
+                && mission.getVille().getPays() != null) {
+            mission.setPays(mission.getVille().getPays());
+        }
     }
 
     private void resolveMissionPays(Mission mission) {
@@ -72,16 +82,27 @@ public class MissionService implements IMissionService {
         if (p == null) {
             return;
         }
+        Pays resolved = resolveOrCreatePays(p);
+        mission.setPays(resolved);
+    }
+
+    private Pays resolveOrCreatePays(Pays p) {
         if (p.getId() != null && p.getId() > 0) {
-            mission.setPays(paysRepository.findById(p.getId()).orElse(null));
-            return;
+            Optional<Pays> byId = paysRepository.findById(p.getId());
+            if (byId.isPresent()) {
+                return byId.get();
+            }
         }
         if (p.getNom() != null && !p.getNom().isBlank()) {
-            paysRepository.findFirstByNomIgnoreCase(p.getNom().trim())
-                    .ifPresentOrElse(mission::setPays, () -> mission.setPays(null));
-            return;
+            String nom = p.getNom().trim();
+            return paysRepository.findFirstByNomIgnoreCase(nom)
+                    .orElseGet(() -> {
+                        Pays created = new Pays();
+                        created.setNom(nom);
+                        return paysRepository.save(created);
+                    });
         }
-        mission.setPays(null);
+        return null;
     }
 
     private void resolveMissionVille(Mission mission) {
@@ -90,29 +111,46 @@ public class MissionService implements IMissionService {
             return;
         }
         if (v.getIdVille() != null && v.getIdVille() > 0) {
-            // L'id peut venir d'une autre base ou être obsolète : ne pas bloquer la création d'offre.
             mission.setVille(villeRepository.findById(v.getIdVille()).orElse(null));
             return;
         }
         String nom = v.getNomdeville();
-        if (nom != null && !nom.isBlank()) {
-            Pays nested = v.getPays();
-            Long paysId = nested != null && nested.getId() != null && nested.getId() > 0
-                    ? nested.getId()
-                    : null;
-            if (paysId == null && nested != null && nested.getNom() != null && !nested.getNom().isBlank()) {
-                paysId = paysRepository.findFirstByNomIgnoreCase(nested.getNom().trim())
-                        .map(Pays::getId)
-                        .orElse(null);
-            }
-            if (paysId != null) {
-                villeRepository
-                        .findFirstByNomdevilleIgnoreCaseAndPays_Id(nom.trim(), paysId)
-                        .ifPresentOrElse(mission::setVille, () -> mission.setVille(null));
-                return;
+        if (nom == null || nom.isBlank()) {
+            mission.setVille(null);
+            return;
+        }
+
+        Pays pays = resolvePaysForVille(v, mission.getPays());
+        if (pays == null) {
+            mission.setVille(null);
+            return;
+        }
+        mission.setPays(pays);
+
+        String cityName = nom.trim();
+        Ville resolved = villeRepository
+                .findFirstByNomdevilleIgnoreCaseAndPays_Id(cityName, pays.getId())
+                .orElseGet(() -> {
+                    Ville created = new Ville();
+                    created.setNomdeville(cityName);
+                    created.setPays(pays);
+                    return villeRepository.save(created);
+                });
+        mission.setVille(resolved);
+    }
+
+    private Pays resolvePaysForVille(Ville ville, Pays missionPays) {
+        if (missionPays != null) {
+            Pays resolved = resolveOrCreatePays(missionPays);
+            if (resolved != null) {
+                return resolved;
             }
         }
-        mission.setVille(null);
+        Pays nested = ville.getPays();
+        if (nested != null) {
+            return resolveOrCreatePays(nested);
+        }
+        return null;
     }
     @Override
     public Mission modifier(Long id, Mission mission) {

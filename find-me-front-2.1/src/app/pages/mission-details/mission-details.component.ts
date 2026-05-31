@@ -202,7 +202,13 @@ if(this.storedtargetmarket === 'Tunisien'){this.currency=' TND'}else  {this.curr
           ownerId: societeId,
           title: response.descrip_mission?.mission_name,
           company: response.descrip_mission?.poste,
-          location: `${response.ville?.pays?.nom ?? ''} ${response.ville?.nomdeville ?? ''}`.trim(),
+          location: [
+            response.ville?.pays?.nom ?? response.pays?.nom ?? '',
+            response.ville?.nomdeville ?? '',
+          ]
+            .filter((part) => !!part && String(part).trim().length > 0)
+            .join(' ')
+            .trim(),
           salary: response.descrip_mission?.salaire,
           ref: response.reference_code,
           type: response.descrip_mission?.typeContrat,

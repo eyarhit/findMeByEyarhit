@@ -354,7 +354,7 @@ private loadRecommendedMissions(userId: number): void {
       title: item.descrip_mission?.mission_name || '',
       poste: item.descrip_mission?.poste || '',
       ville: item.ville?.nomdeville || '',
-      pays: item.ville?.pays?.nom || '',
+      pays: item.ville?.pays?.nom || item.pays?.nom || '',
       salary: item.descrip_mission?.salaire || '',
       ref: item.reference_code || '',
       type: item.descrip_mission?.typeContrat || '',

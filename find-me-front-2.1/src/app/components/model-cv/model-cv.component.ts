@@ -34,6 +34,23 @@ interface Competences {
   architectures: string[];
   outils: string[];
 }
+
+function createEmptyCompetences(): Competences {
+  return {
+    langages_balisage: [],
+    programmation: [],
+    frameworks: [],
+    bibliotheques: [],
+    api: [],
+    base_donnees: [],
+    systeme_exploitation: [],
+    conception: [],
+    methodologies: [],
+    design_patterns: [],
+    architectures: [],
+    outils: [],
+  };
+}
 @Component({
   selector: 'app-model-cv',
   templateUrl: './model-cv.component.html',
@@ -83,9 +100,8 @@ export class ModelCvComponent implements OnInit {
   ngOnInit(): void {
     const decoded = this.authService.getDecodedToken();
     this.userId = decoded?.userId ?? null;
-    this.email = decoded?.email ?? null;    
-    console.error("email",this.email);
-    
+    this.email = decoded?.email ?? null;
+
     if (this.email) {
       this.loadUser(this.email);
     }   
@@ -181,231 +197,148 @@ export class ModelCvComponent implements OnInit {
   }
   private updateCvDataWithUserInfo(): void {
     if (this.userData) {
-      if (this.cvData?.titreDeProfil) {
-      this.cvDataDevOps.title=this.cvData.titreDeProfil;
-    }
-      // console.log("bile",this.cvDataDevOps.title)
       this.cvDataDevOps.user = {
-        firstname: this.userData.firstName,
-        lastname: this.userData.lastName,
-        address: this.cvDataDevOps.user.address, // Keep existing address
-        phone: this.userData.phone,     // Keep existing phone
-        email: this.email|| this.cvDataDevOps.user.email, // Use API email or fallback
-        linkedin: this.cvDataDevOps.user.linkedin, // Keep existing linkedin
-        github: this.cvDataDevOps.user.github    // Keep existing github
+        firstname: this.userData.firstName ?? '',
+        lastname: this.userData.lastName ?? '',
+        address: this.userData.address ?? '',
+        phone: this.userData.phone ?? '',
+        email: this.email || this.userData.email || '',
+        linkedin: this.userData.linkedinUrl ?? '',
+        github: this.userData.githubUrl ?? '',
       };
-
-      
-            
-      if (this.cvData?.educations) {
-        const educations: Education[] = this.cvData.educations.map((edu: any) => ({
-          diploma: edu.diplome,
-          institution: edu.university,
-          year: this.formatEducationYear(edu.dateDebut, edu.dateFin),
-          dateDebut: edu.dateDebut,
-          dateFin: edu.dateFin
-        }));
-        this.cvDataDev.educations = [...educations];
-        this.cvDataDevOps.educations = [...educations];
-      }
-      if (this.cvData?.langues) {
-        const languages: Language[] = this.cvData.langues.map((lang: any) => ({
-          name: lang.name,
-          level: lang.niveau
-        }));
-        this.cvDataDevOps.languages = [...languages];  
-      }
-
-      if (this.cvData?.competences && this.cvData?.competences.length > 0) {
-        const transformedCompetences: Competences = {
-          langages_balisage: this.splitCompetences(this.cvData.competences[0].langageBallsage),
-          programmation: this.splitCompetences(this.cvData.competences[0].languageProgrammation),
-          frameworks: this.splitCompetences(this.cvData.competences[0].framework),
-          bibliotheques: this.splitCompetences(this.cvData.competences[0].bibliotheque),
-          api: this.splitCompetences(this.cvData.competences[0].api),
-          base_donnees: this.splitCompetences(this.cvData.competences[0].db),
-          systeme_exploitation: this.splitCompetences(this.cvData.competences[0].systemExploitation),
-          conception: this.splitCompetences(this.cvData.competences[0].conception),
-          methodologies: this.splitCompetences(this.cvData.competences[0].methodologie),
-          design_patterns: this.splitCompetences(this.cvData.competences[0].designPattern),
-          architectures: this.splitCompetences(this.cvData.competences[0].architechture),
-          outils: this.splitCompetences(this.cvData.competences[0].outils)
-        };
-      
-        this.cvDataDevOps.competences = transformedCompetences;
-      }      
-      if (this.cvData?.experiences) {
-        const experiences = (this.cvData.experiences || []).map((exp: any) => ({
-          company: exp.entreprise || '',
-          client: exp.client || '',
-          period: this.formatExperiencePeriod(exp.dateDebut, exp.dateFin),
-          projects: [
-            {
-              name: exp.nomProjet || '',
-              description: exp.description || '',
-              workDone: exp.travailRealise || '',
-              environment: exp.environnement || '',
-              technologies: exp.technologies || '' ,
-              equipe:exp.equipe || '',// Add if available in your data
-            }
-          ]
-        }));
-    
-        this.cvDataDev.experiences = [...experiences];
-        this.cvDataDevOps.experiences = [...experiences];
-    
-      }
+      this.cvDataDev.user = {
+        firstname: this.userData.firstName ?? '',
+        lastname: this.userData.lastName ?? '',
+      };
     }
+
+    if (this.cvData?.titreDeProfil) {
+      this.cvDataDevOps.title = this.cvData.titreDeProfil;
+      this.cvDataDev.title = this.cvData.titreDeProfil;
+    }
+
+    const competenceSource = Array.isArray(this.cvData?.competences)
+      ? this.cvData.competences[0]
+      : this.cvData?.competences;
+
+    if (competenceSource) {
+      this.cvDataDevOps.competences = {
+        langages_balisage: this.splitCompetences(competenceSource.langageBallsage),
+        programmation: this.splitCompetences(competenceSource.languageProgrammation),
+        frameworks: this.splitCompetences(competenceSource.framework),
+        bibliotheques: this.splitCompetences(competenceSource.bibliotheque),
+        api: this.splitCompetences(competenceSource.api),
+        base_donnees: this.splitCompetences(competenceSource.db),
+        systeme_exploitation: this.splitCompetences(competenceSource.systemExploitation),
+        conception: this.splitCompetences(competenceSource.conception),
+        methodologies: this.splitCompetences(competenceSource.methodologie),
+        design_patterns: this.splitCompetences(competenceSource.designPattern),
+        architectures: this.splitCompetences(competenceSource.architechture),
+        outils: this.splitCompetences(competenceSource.outils),
+      };
+    } else {
+      this.cvDataDevOps.competences = createEmptyCompetences();
+    }
+
+    if (this.cvData?.educations?.length) {
+      const educations: Education[] = this.cvData.educations.map((edu: any) => ({
+        diploma: edu.diplome,
+        institution: edu.university,
+        year: this.formatEducationYear(edu.dateDebut, edu.dateFin),
+        dateDebut: edu.dateDebut,
+        dateFin: edu.dateFin,
+      }));
+      this.cvDataDev.educations = [...educations];
+      this.cvDataDevOps.educations = [...educations];
+    } else {
+      this.cvDataDev.educations = [];
+      this.cvDataDevOps.educations = [];
+    }
+
+    if (this.cvData?.langues?.length) {
+      const languages: Language[] = this.cvData.langues.map((lang: any) => ({
+        name: lang.name,
+        level: lang.niveau,
+      }));
+      this.cvDataDevOps.languages = [...languages];
+    } else {
+      this.cvDataDevOps.languages = [];
+    }
+
+    if (this.cvData?.experiences?.length) {
+      const experiences = this.cvData.experiences.map((exp: any) => ({
+        company: exp.entreprise || '',
+        client: exp.client || '',
+        period: this.formatExperiencePeriod(exp.dateDebut, exp.dateFin),
+        projects: [
+          {
+            name: exp.nomProjet || '',
+            description: exp.description || '',
+            workDone: exp.travailRealise || '',
+            environment: exp.environnement || '',
+            technologies: exp.technologies || '',
+            equipe: exp.equipe || '',
+          },
+        ],
+      }));
+      this.cvDataDev.experiences = [...experiences];
+      this.cvDataDevOps.experiences = [...experiences];
+    } else {
+      this.cvDataDev.experiences = [];
+      this.cvDataDevOps.experiences = [];
+    }
+
+    this.syncSelectedTemplateCvData();
   }
 
-  // CV Data
+  private syncSelectedTemplateCvData(): void {
+    if (!this.selectedTemplate) {
+      return;
+    }
+    this.selectedTemplate.cvData =
+      this.selectedTemplate.thumbnail === 'developpeur'
+        ? this.cvDataDev
+        : this.cvDataDevOps;
+    this.templateService.setSelectedTemplate(this.selectedTemplate);
+  }
+
+  // CV Data — valeurs vides par défaut ; remplies depuis l'API dans updateCvDataWithUserInfo()
   cvDataDev = {
     user: {
       firstname: '',
-      lastname: ''
+      lastname: '',
     },
-    title: 'Développeur Java, JEE',
-    experienceYears: 3,
+    title: '',
+    experienceYears: 0,
     competences: {
-      developpement: ['Java', 'JEE', 'HTML', 'CSS', 'Typescript', 'Spring boot', 'Spring Security', 'API REST', 'SOAP'],
-      bdd: ['MySQL', 'PostgreSQL'],
-      integration: ['GIT', 'GITLAB', 'GITHUB'],
-      methodes: ['Agile', 'Scrum'],
-      outils: ['VS Code', 'Postman', 'Eclipse', 'IntelliJ', 'Swagger']
+      developpement: [] as string[],
+      bdd: [] as string[],
+      integration: [] as string[],
+      methodes: [] as string[],
+      outils: [] as string[],
     },
-    projets: [
-      {
-        name: 'CVThèque',
-        description: 'Développement d\'une plateforme en ligne permettant aux candidats de déposer facilement leur CV'
-      },
-      {
-        name: 'SMARTSCHOOL',
-        description: 'Application web pour gérer des établissements primaires pédagogiques et administratifs'
-      }
-    ],
-    experiences: [
-      {
-        position: 'Ingénieur Full Stack',
-        company: 'Digital Power Consulting',
-        period: 'Déc. 2021 - présent',
-        description: 'Développement d\'applications web full stack',
-        projects: [
-          {
-            name: 'CVThèque',
-            description: 'Plateforme de gestion de CV en ligne',
-            technologies: 'Angular, Spring Boot, MySQL'
-          }
-        ]
-      }
-    ],
-    educations: [
-      {
-        diploma: 'Diplôme d\'ingénieur en Informatique',
-        institution: 'Ecole Supérieure d\'Ingénierie et de Technologies Tunis',
-        year: 'Depuis 2022'
-      },
-      {
-        diploma: 'Licence Fondamentale en science de L\'informatique',
-        institution: 'ISTIC',
-        year: '2022'
-      },
-      {
-        diploma: 'Etude préparatoires à l\'ingénierie en mathématique et en physique',
-        institution: 'IPEIN',
-        year: '2019'
-      }
-    ],
-    languages: [] as Language[] // Initialize as empty array
+    projets: [] as { name: string; description: string }[],
+    experiences: [] as any[],
+    educations: [] as Education[],
+    languages: [] as Language[],
   };
 
   cvDataDevOps = {
     user: {
-      firstname: 'Nom',
-      lastname: 'Prénom',
-      email: 'Champ Email',
-      phone: 'Champ Numéro',
+      firstname: '',
+      lastname: '',
+      email: '',
+      phone: '',
       address: '',
       linkedin: '',
-      github: ''
+      github: '',
     },
     title: '',
-    profil: ``,
-    competences: {
-      langages_balisage: ['HTML5', 'XML'],
-      programmation: ['PHP5', 'PHP7', 'PHP8', 'JavaScript', 'Java', 'Node.js'],
-      frameworks: [
-        'Laravel',
-        'PHPUnit',
-        'REST API',
-        'AUTH',
-        'Symfony',
-        'API Platform',
-        'Bootstrap',
-        'CSS3',
-        'Angular',
-        'Zend'
-      ],
-      bibliotheques: ['ReactJs', 'PDFJs', 'Ajax', 'jQuery', 'FullCalendar', 'Axios'],
-      api: [
-        'REST (Google, Facebook, Firebase, Tableau, Payment Gateway, SMS, CloudConvert, Monetico)',
-        'GRAPH (SharePoint API)',
-        'SOAP'
-      ],
-      base_donnees: ['MySQL', 'SQLite', 'PostgreSQL', 'MongoDB', 'Firebase'],
-      systeme_exploitation: ['Windows', 'Ubuntu', 'macOS'],
-      conception: ['UML'],
-      methodologies: ['Agile Scrum'],
-      design_patterns: ['MVC', 'SOLID'],
-      architectures: ['MVC', 'Microservice'],
-      outils: [
-        'Git',
-        'GitHub',
-        'Bitbucket',
-        'SVN',
-        'CodeCommit AWS',
-        'JIRA',
-        'MySQL Workbench',
-        'Composer',
-        'NPM',
-        'VSCode',
-        'PHPStorm',
-        'MAMP',
-        'XAMPP',
-        'FileZilla',
-        'Docker'
-      ]
-    },
-    languages: [
-      { name: "Anglais", level: "Technique" }
-    ],
-    educations: [
-      {
-        diploma: "Licence développement des systèmes d'Informations",
-        institution: "Institut Supérieur des études Technologiques",
-        year: "2018"
-      }
-    ],
-    experiences: [
-      {
-        company: "Nostatik Media",
-        period: "Décembre 2021 - Présent",
-        projects: [
-          {
-            name: "Migration de la plateforme web Symmetryk de Javascript vers React",
-            description:
-              `- Découpage des interfaces en composants indépendants.
-               - Migration des interfaces utilisateurs (Authentification, Création fichier PDF, …).
-               - Migration du module Digital Assets utilisant Tree-React.
-               - Amélioration de l'expérience utilisateur avec mises à jour dynamiques.
-               - Implémentation du rendu virtuel et du chargement progressif.`,
-            environment:
-              "Laravel 9, Javascript, Axios, React 18, Tailwind CSS, Docker, GIT, JIRA, PHPStorme, Redux",
-            equipe:""
-          },
-         
-        ]
-      }]
-    
+    profil: '',
+    competences: createEmptyCompetences(),
+    languages: [] as Language[],
+    educations: [] as Education[],
+    experiences: [] as any[],
   };
   
   selectTemplate(template: any): void {
@@ -414,11 +347,8 @@ export class ModelCvComponent implements OnInit {
     this.selectedTemplate = template;
     this.currentStep = 'preview';
     
-    this.selectedTemplate.cvData = template.thumbnail === 'developpeur' 
-      ? this.cvDataDev 
-      : this.cvDataDevOps;
-      
-    this.templateService.setSelectedTemplate(template);
+    this.syncSelectedTemplateCvData();
+    this.templateService.setSelectedTemplate(this.selectedTemplate);
   }
 
   prevStep(): void {

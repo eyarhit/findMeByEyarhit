@@ -446,6 +446,7 @@ isStepInvalid(): boolean {
             icon: 'success',
             confirmButtonText: 'oui'
           });
+          this.authServiceUser.notifyDataUpdate();
           // Reset form and go back to step 1
           this.missionForm.reset();
           this.currentStep = 1;
