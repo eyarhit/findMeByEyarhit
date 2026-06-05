@@ -36,15 +36,8 @@ export class AdminPanelComponent implements OnInit {
   editingUser: AdminUser | null = null;
   userForm: AdminUserForm = this.emptyUserForm();
 
-  readonly roles = [
-    'CANDIDAT',
-    'CHARGEDERECRUTEMENT',
-    'ESN_ADMIN',
-    'ESN_COMMERCIAL',
-    'FREELANCER',
-    'INTERCONTRAT',
-    'ADMIN',
-  ];
+  /** Rôles utilisés dans l'application : Candidat, RH, Admin */
+  readonly roles = ['CANDIDAT', 'ESN_ADMIN', 'ADMIN'];
 
   readonly userStatuses = ['ACTIVE', 'INACTIVE', 'PENDING'];
   readonly offreStatuses = ['OPEN', 'CLOSED'];
@@ -301,13 +294,9 @@ export class AdminPanelComponent implements OnInit {
 
   roleLabel(role: string): string {
     const map: Record<string, string> = {
-      ESN_ADMIN: 'RH (ESN Admin)',
-      ESN_COMMERCIAL: 'ESN Commercial',
-      CHARGEDERECRUTEMENT: 'Chargé recrutement',
+      ESN_ADMIN: 'RH',
       CANDIDAT: 'Candidat',
-      FREELANCER: 'Freelancer',
-      INTERCONTRAT: 'Inter-contrat',
-      ADMIN: 'Administrateur',
+      ADMIN: 'Admin',
     };
     return map[role] ?? role;
   }

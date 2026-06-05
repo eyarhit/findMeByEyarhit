@@ -28,10 +28,8 @@ export class AdminStatsComponent implements OnInit {
   allCvs: any[] = [];
   allCandidatures: any[] = [];
 
-  readonly roles = [
-    'CANDIDAT', 'CHARGEDERECRUTEMENT', 'ESN_ADMIN', 'ESN_COMMERCIAL',
-    'FREELANCER', 'INTERCONTRAT', 'ADMIN',
-  ];
+  /** Rôles utilisés : Candidat, RH, Admin */
+  readonly roles = ['CANDIDAT', 'ESN_ADMIN', 'ADMIN'];
   readonly userStatuses = ['ACTIVE', 'INACTIVE', 'PENDING'];
   readonly cvTypes = ['Complet', 'En cours', 'Minimal'];
   readonly candidatureStatuses = ['ENCOURS', 'ACCEPTER', 'REFUSER'];
@@ -112,11 +110,7 @@ export class AdminStatsComponent implements OnInit {
   roleLabel(role: string): string {
     const map: Record<string, string> = {
       ESN_ADMIN: 'RH',
-      ESN_COMMERCIAL: 'ESN Commercial',
-      CHARGEDERECRUTEMENT: 'Chargé recrutement',
       CANDIDAT: 'Candidat',
-      FREELANCER: 'Freelancer',
-      INTERCONTRAT: 'Inter-contrat',
       ADMIN: 'Admin',
       ENCOURS: 'En cours',
       ACCEPTER: 'Acceptée',
