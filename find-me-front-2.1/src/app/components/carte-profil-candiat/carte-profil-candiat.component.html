@@ -22,8 +22,7 @@
     </div>
     <div class="profile-name">
       <h2>{{ profilePrenom }} {{ profileName }}</h2>
-      <p *ngIf="role!='ESN_ADMIN'">{{ formatExperience(totalYears) }}</p>
-      <p *ngIf="role==='ESN_ADMIN'">{{profileSocieter}}</p>
+      <p *ngIf="getProfileSubtitle() as subtitle">{{ subtitle }}</p>
     </div>
   </div>
 

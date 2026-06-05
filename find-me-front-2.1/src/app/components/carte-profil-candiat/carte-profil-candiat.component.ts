@@ -217,6 +217,39 @@ export class CarteProfilCandiatComponent implements OnInit {
     }
   }
 
+  /** Sous-titre profil : âge réel si date de naissance renseignée. */
+  getProfileSubtitle(): string {
+    const age = this.computeAge(this.profileBirthDate);
+    if (age != null) {
+      return age === 1 ? '1 an' : `${age} ans`;
+    }
+    if (this.role === 'ESN_ADMIN' && this.profileSocieter) {
+      return this.profileSocieter;
+    }
+    if (this.role !== 'ESN_ADMIN') {
+      return this.formatExperience(this.totalYears);
+    }
+    return '';
+  }
+
+  private computeAge(birthDateStr: string): number | null {
+    const iso = this.toInputDateValue(birthDateStr);
+    if (!iso) {
+      return null;
+    }
+    const birth = new Date(iso + 'T12:00:00');
+    if (isNaN(birth.getTime())) {
+      return null;
+    }
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age >= 0 ? age : null;
+  }
+
   
   updateProfile(): void {
     if (!this.userData) {
