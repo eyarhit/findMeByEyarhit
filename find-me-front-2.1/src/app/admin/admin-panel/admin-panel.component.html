@@ -1,0 +1,231 @@
+<div class="admin-panel">
+  <header class="admin-header">
+    <div>
+      <h1>Panneau d'administration</h1>
+      <p>Gestion centralisée des utilisateurs, CV, offres et candidatures</p>
+    </div>
+    <button class="btn-refresh" (click)="loadTabData(activeTab)" [disabled]="loading">
+      Actualiser
+    </button>
+  </header>
+
+  <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+  <div class="alert success" *ngIf="successMsg">{{ successMsg }}</div>
+
+  <nav class="tabs">
+    <button [class.active]="activeTab === 'users'" (click)="setTab('users')">Utilisateurs</button>
+    <button [class.active]="activeTab === 'cvs'" (click)="setTab('cvs')">CV</button>
+    <button [class.active]="activeTab === 'offres'" (click)="setTab('offres')">Offres</button>
+    <button [class.active]="activeTab === 'candidatures'" (click)="setTab('candidatures')">Candidatures</button>
+  </nav>
+
+  <div class="loading" *ngIf="loading">Chargement...</div>
+
+  <!-- Utilisateurs -->
+  <section *ngIf="!loading && activeTab === 'users'" class="tab-content">
+    <div class="toolbar">
+      <input type="search" placeholder="Rechercher (nom, email, société)..." [(ngModel)]="userSearch" />
+      <select [(ngModel)]="userRoleFilter">
+        <option value="">Tous les rôles</option>
+        <option *ngFor="let r of roles" [value]="r">{{ roleLabel(r) }}</option>
+      </select>
+      <select [(ngModel)]="userStatusFilter">
+        <option value="">Tous les statuts</option>
+        <option *ngFor="let s of userStatuses" [value]="s">{{ s }}</option>
+      </select>
+      <button class="btn-primary" (click)="openCreateUser()">+ Ajouter utilisateur</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Rôle</th>
+            <th>Statut</th>
+            <th>Société</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of filteredUsers">
+            <td>{{ u.userId }}</td>
+            <td>{{ u.firstName }} {{ u.lastName }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.phone || '—' }}</td>
+            <td><span class="badge">{{ roleLabel(u.roleName) }}</span></td>
+            <td><span class="badge status-{{ u.status }}">{{ u.status }}</span></td>
+            <td>{{ u.nomSociete || '—' }}</td>
+            <td class="actions">
+              <button class="btn-sm" (click)="openEditUser(u)">Modifier</button>
+              <button class="btn-sm danger" (click)="deleteUser(u)">Supprimer</button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredUsers.length === 0">
+            <td colspan="8" class="empty">Aucun utilisateur trouvé</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="count">{{ filteredUsers.length }} utilisateur(s)</p>
+  </section>
+
+  <!-- CV -->
+  <section *ngIf="!loading && activeTab === 'cvs'" class="tab-content">
+    <div class="toolbar">
+      <input type="search" placeholder="Rechercher (userId, titre, id cv)..." [(ngModel)]="cvSearch" />
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID CV</th>
+            <th>User ID</th>
+            <th>Titre de profil</th>
+            <th>Étapes complétées</th>
+            <th>Compétences</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cv of filteredCvs">
+            <td>{{ cv.id_cv || '—' }}</td>
+            <td>{{ cv.userId }}</td>
+            <td>{{ cv.titreDeProfil || '—' }}</td>
+            <td>{{ (cv.completedSteps || []).join(', ') || '—' }}</td>
+            <td>{{ (cv.competences || []).length }}</td>
+          </tr>
+          <tr *ngIf="filteredCvs.length === 0">
+            <td colspan="5" class="empty">Aucun CV trouvé</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="count">{{ filteredCvs.length }} CV(s)</p>
+  </section>
+
+  <!-- Offres -->
+  <section *ngIf="!loading && activeTab === 'offres'" class="tab-content">
+    <div class="toolbar">
+      <input type="search" placeholder="Rechercher (id, titre, ville, publisher)..." [(ngModel)]="offreSearch" />
+      <select [(ngModel)]="offreStatusFilter">
+        <option value="">Tous les statuts</option>
+        <option *ngFor="let s of offreStatuses" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Titre</th>
+            <th>Publisher ID</th>
+            <th>Ville</th>
+            <th>Statut</th>
+            <th>Date création</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of filteredOffres">
+            <td>{{ o.idMission }}</td>
+            <td>{{ o.descrip_mission?.mission_name || '—' }}</td>
+            <td>{{ o.user_id || '—' }}</td>
+            <td>{{ o.ville?.nom || '—' }}</td>
+            <td><span class="badge status-{{ o.statusMission }}">{{ o.statusMission }}</span></td>
+            <td>{{ o.createdAt | date:'dd/MM/yyyy' }}</td>
+            <td class="actions">
+              <select [ngModel]="o.statusMission" (ngModelChange)="updateOffreStatus(o, $event)">
+                <option *ngFor="let s of offreStatuses" [value]="s">{{ s }}</option>
+              </select>
+            </td>
+          </tr>
+          <tr *ngIf="filteredOffres.length === 0">
+            <td colspan="7" class="empty">Aucune offre trouvée</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="count">{{ filteredOffres.length }} offre(s)</p>
+  </section>
+
+  <!-- Candidatures -->
+  <section *ngIf="!loading && activeTab === 'candidatures'" class="tab-content">
+    <div class="toolbar">
+      <input type="search" placeholder="Rechercher (id, candidat, mission)..." [(ngModel)]="candidatureSearch" />
+      <select [(ngModel)]="candidatureStatusFilter">
+        <option value="">Tous les statuts</option>
+        <option *ngFor="let s of candidatureStatuses" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Candidat ID</th>
+            <th>Mission ID</th>
+            <th>Titre offre</th>
+            <th>Statut</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of filteredCandidatures">
+            <td>{{ c.idCandidature }}</td>
+            <td>{{ c.candidatId }}</td>
+            <td>{{ c.mission?.idMission || '—' }}</td>
+            <td>{{ c.mission?.descrip_mission?.mission_name || '—' }}</td>
+            <td><span class="badge">{{ c.statutCandidature }}</span></td>
+            <td>{{ c.datePostulation | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td class="actions">
+              <select [ngModel]="c.statutCandidature" (ngModelChange)="updateCandidatureStatus(c, $event)">
+                <option *ngFor="let s of candidatureStatuses" [value]="s">{{ s }}</option>
+              </select>
+              <button class="btn-sm danger" (click)="deleteCandidature(c)">Supprimer</button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredCandidatures.length === 0">
+            <td colspan="7" class="empty">Aucune candidature trouvée</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="count">{{ filteredCandidatures.length }} candidature(s)</p>
+  </section>
+</div>
+
+<!-- Modal utilisateur -->
+<div class="modal-overlay" *ngIf="showUserModal" (click)="closeUserModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h2>{{ editingUser ? 'Modifier utilisateur' : 'Ajouter utilisateur' }}</h2>
+    <div class="form-grid">
+      <label>Prénom <input [(ngModel)]="userForm.firstName" /></label>
+      <label>Nom <input [(ngModel)]="userForm.lastName" /></label>
+      <label>Email <input type="email" [(ngModel)]="userForm.email" /></label>
+      <label>Téléphone <input [(ngModel)]="userForm.phone" /></label>
+      <label>Rôle
+        <select [(ngModel)]="userForm.role">
+          <option *ngFor="let r of roles" [value]="r">{{ roleLabel(r) }}</option>
+        </select>
+      </label>
+      <label>Statut
+        <select [(ngModel)]="userForm.status">
+          <option *ngFor="let s of userStatuses" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+      <label>Société <input [(ngModel)]="userForm.nomSociete" /></label>
+      <label>Pays <input [(ngModel)]="userForm.country" /></label>
+      <label>Mot de passe
+        <input type="password" [(ngModel)]="userForm.password" [placeholder]="editingUser ? 'Laisser vide pour ne pas changer' : 'Optionnel (auto-généré si vide)'" />
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="closeUserModal()">Annuler</button>
+      <button class="btn-primary" (click)="saveUser()">{{ editingUser ? 'Enregistrer' : 'Créer' }}</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,283 @@
+.admin-panel {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+  min-height: calc(100vh - 80px);
+  background: #f5f7fc;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  h1 {
+    margin: 0 0 0.25rem;
+    font-size: 1.75rem;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0;
+    color: #6b7280;
+  }
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+
+  button {
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #374151;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+
+    &.active,
+    &:hover {
+      background: #5a3fc9;
+      border-color: #5a3fc9;
+      color: #fff;
+    }
+  }
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  input,
+  select {
+    padding: 0.55rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    min-width: 180px;
+    background: #fff;
+  }
+
+  input[type='search'] {
+    flex: 1;
+    min-width: 240px;
+  }
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+  }
+
+  tr:hover td {
+    background: #fafafa;
+  }
+}
+
+.empty {
+  text-align: center;
+  color: #9ca3af;
+  padding: 2rem !important;
+}
+
+.count {
+  margin-top: 0.75rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #5a3fc9;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge.status-ACTIVE,
+.badge.status-OPEN {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge.status-INACTIVE,
+.badge.status-CLOSED,
+.badge.status-REFUSER {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badge.status-PENDING,
+.badge.status-ENCOURS {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-sm,
+.btn-refresh {
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-primary {
+  background: #5a3fc9;
+  color: #fff;
+  padding: 0.55rem 1rem;
+
+  &:hover {
+    background: #3c1da5;
+  }
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #374151;
+  padding: 0.55rem 1rem;
+}
+
+.btn-sm {
+  background: #ede9fe;
+  color: #5a3fc9;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+
+  &.danger {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+}
+
+.btn-refresh {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 0.5rem 1rem;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+
+  &.error {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  &.success {
+    background: #d1fae5;
+    color: #065f46;
+  }
+}
+
+.loading {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+
+  h2 {
+    margin: 0 0 1rem;
+    color: #1f2937;
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: #374151;
+    font-weight: 500;
+  }
+
+  input,
+  select {
+    padding: 0.5rem 0.65rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}

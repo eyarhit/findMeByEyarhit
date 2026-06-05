@@ -93,14 +93,21 @@ getUsersByRole(role: string,accountId:number ): Observable<any[]> {
   requestPutApi(endpoint: string, status: string): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}${endpoint}?status=${status}`, {});
   }
-deleteUser(deletedUserId: number, userId: number): Observable<any> {
-  return this.http.delete(
-    `${this.apiUrl}/${deletedUserId}?userId=${userId}`,
-    {
-      responseType: 'text' as 'json'
-    }
-  );
+deleteUser(deletedUserId: number, _userId?: number): Observable<any> {
+  return this.http.delete(`${this.apiUrl}/${deletedUserId}`);
 }
+
+  getAllUsersForAdmin(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/admin/all`);
+  }
+
+  adminCreateUser(payload: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/admin/create`, payload);
+  }
+
+  adminUpdateUser(userId: number, payload: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${userId}/admin`, payload);
+  }
   getUsersBySocieteId(idSociete: number): Observable<any> {
     return this.http.get<any[]>(`${this.apiUrl}/by-societe/${idSociete}`);
   }

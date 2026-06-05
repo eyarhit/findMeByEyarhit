@@ -39,7 +39,6 @@ import { roleGuard } from './guards/role.guard';
 import { AlreadyAuthGuard } from './guards/AlreadyAuthGuard';
 import { UploadCvComponent } from './components/upload-cv/upload-cv.component';
 import { CreezCvComponent } from './components/creez-cv/creez-cv.component';
-import { StatistiqueUtilisateurPageComponent } from './pages/statistique-utilisateur/statistique-utilisateur-page.component';
 import { ListUtilisateurComponent } from './components/list-utilisateur/list-utilisateur.component';
 import { RegisterFeelancerComponent } from './pages/register-freelancer/register-freelancer.component';
 import { SidebarEspaceComponent } from './components/sidebar/sidebar.component';
@@ -101,7 +100,7 @@ const routes: Routes = [
     path: 'cv',
     component: SidebarEspaceComponent,
     canActivate: [AuthGuard, roleGuard],
-    data: { expectedRole: ['CANDIDAT','PORTAGE_SALARIAL','FREELANCER', 'ADMIN'] },
+    data: { expectedRole: ['CANDIDAT','PORTAGE_SALARIAL','FREELANCER'] },
     children: [
       { path: '', redirectTo: 'accueil', pathMatch: 'full' },
       { path: 'accueil', component: CreezCvComponent },
@@ -126,7 +125,7 @@ const routes: Routes = [
     path: 'Missions',
     component: SidebarEspaceComponent,
     canActivate: [AuthGuard, roleGuard],
-    data: { expectedRole: ['PORTAGE_SALARIAL','FREELANCER', 'ADMIN','ESN_ADMIN','ESN_COMMERCIAL'] },
+    data: { expectedRole: ['PORTAGE_SALARIAL','FREELANCER', 'ESN_ADMIN','ESN_COMMERCIAL'] },
     children: [
       { path: '', redirectTo: 'Liste', pathMatch: 'full' },
       { path: 'Liste', component: MissionsPageComponent,data: { espace: 'Liste Mission' } },
@@ -141,7 +140,7 @@ const routes: Routes = [
     path: 'Offres',
     component: SidebarEspaceComponent,
     canActivate: [AuthGuard, roleGuard],
-    data: { expectedRole: ['CANDIDAT', 'ADMIN','ESN_ADMIN','ESN_COMMERCIAL','CHARGEDERECRUTEMENT'] },
+    data: { expectedRole: ['CANDIDAT', 'ESN_ADMIN','ESN_COMMERCIAL','CHARGEDERECRUTEMENT'] },
     children: [
       { path: '', redirectTo: 'Liste', pathMatch: 'full' },
       { path: 'Liste', component: MissionsPageComponent,data: { espace: 'Liste Offres' } },
@@ -161,26 +160,7 @@ const routes: Routes = [
       { path: '', component: ProfilComponent },
     ],
   },
-  {
-    path: 'utilisateur',
-    component: SidebarEspaceComponent,
-    canActivate: [AuthGuard, roleGuard],
-    data: { expectedRole: ['ADMIN'] },
-    children: [
-      { path: '', redirectTo: 'accueil', pathMatch: 'full' },
-      { path: 'accueil', component: StatistiqueUtilisateurPageComponent },
-      {path: 'candidat', component: ListUtilisateurComponent,data: { userRole: 'CANDIDAT' }},      
-      {path: 'entreprise', component: ListUtilisateurComponent,data: { userRole: 'ENTREPRISE' }},
-      {path: 'chargerecrutement', component: ListUtilisateurComponent,data: { userRole: 'CHARGEDERECRUTEMENT' }},
-      {path: 'ingenieuraffaire', component: ListUtilisateurComponent,data: { userRole: 'INGENIEURDAFFAIRE' }},
-      {path: 'admin', component: ListUtilisateurComponent,data: { userRole: 'ADMIN' }},
-      {
-        path: 'bi',
-        redirectTo: '/admin/bi-dashboard',
-        pathMatch: 'full',
-      },
-    ],
-  },
+  { path: 'utilisateur', redirectTo: 'admin/panel', pathMatch: 'prefix' },
   // Other authenticated routes (no children)
   { path: 'sidebar-header-pages', component: CvInformationPersonnellesComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT','PORTAGE_SALARIAL','FREELANCER'] } },
   { path: 'upload-cv', component: UploadCvPdfComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT','PORTAGE_SALARIAL','FREELANCER'] } },
@@ -189,7 +169,7 @@ const routes: Routes = [
   { path: 'certif-diplome', component: CertifDiplomeComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT','PORTAGE_SALARIAL','FREELANCER'] } },
   { path: 'model-cv', component: ModelCvComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT','PORTAGE_SALARIAL','FREELANCER'] } },
   { path: 'carte-profil-candidat', component: CarteProfilCandiatComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT'] } },
-  { path: 'popup-cv', component: PopupCvComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT','PORTAGE_SALARIAL','FREELANCER', 'ADMIN'] } },
+  { path: 'popup-cv', component: PopupCvComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT','PORTAGE_SALARIAL','FREELANCER'] } },
   { path: 'ListDocuments', component: ListDocumentComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT','PORTAGE_SALARIAL','FREELANCER'] } },
   { path: 'information-cv', component: InformationCvComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT','PORTAGE_SALARIAL','FREELANCER'] } },
   { path: 'cv-manuelle', component: CvManuelleComponent, canActivate: [AuthGuard, roleGuard], data: { expectedRole: ['CANDIDAT','PORTAGE_SALARIAL','FREELANCER'] } },

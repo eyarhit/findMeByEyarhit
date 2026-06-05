@@ -1,5 +1,7 @@
 package com.dpc.user_service.services;
 
+import com.dpc.user_service.DTO.AdminUserDTO;
+import com.dpc.user_service.DTO.AdminUserUpdateDTO;
 import com.dpc.user_service.DTO.UserBasicDTO;
 import com.dpc.user_service.DTO.UserInfoDTO;
 import com.dpc.user_service.DTO.UserProfileDTO;
@@ -280,6 +282,113 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         user.setStatus(newStatus);
         userRepository.save(user);  // Save the updated user
+    }
+
+    public List<AdminUserDTO> getAllUsersForAdmin() {
+        return userRepository.findAll().stream()
+                .map(this::mapToAdminUserDto)
+                .collect(Collectors.toList());
+    }
+
+    public User adminCreateUser(UserRegistrationDTO dto) throws Exception {
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new Exception("Email déjà utilisé");
+        }
+        ERole roleEnum = parseRoleString(dto.getRole());
+        Role userRole = roleRepository.findByRole(roleEnum)
+                .orElseGet(() -> roleRepository.save(new Role(roleEnum)));
+
+        User user = new User();
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setEmail(dto.getEmail().trim().toLowerCase());
+        user.setPhone(dto.getPhone());
+        user.setNomSociete(dto.getNomSociete());
+        user.setCountry(dto.getCountry());
+        user.setTargetmarket(dto.getTargetmarket());
+        user.setResidencetype(dto.getResidencetype());
+        user.setAddress(dto.getAddress() != null ? dto.getAddress() : "");
+        String rawPassword = (dto.getPassword() != null && !dto.getPassword().isBlank())
+                ? dto.getPassword()
+                : "FindMe@" + System.currentTimeMillis() % 10000;
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setStatus(Status.ACTIVE);
+        user.setRole(userRole);
+        return userRepository.save(user);
+    }
+
+    public AdminUserDTO adminUpdateUser(Long userId, AdminUserUpdateDTO dto) throws Exception {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        if (dto.getFirstName() != null) {
+            user.setFirstName(dto.getFirstName());
+        }
+        if (dto.getLastName() != null) {
+            user.setLastName(dto.getLastName());
+        }
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            String email = dto.getEmail().trim().toLowerCase();
+            if (!email.equals(user.getEmail()) && userRepository.existsByEmail(email)) {
+                throw new Exception("Email déjà utilisé");
+            }
+            user.setEmail(email);
+        }
+        if (dto.getPhone() != null) {
+            user.setPhone(dto.getPhone());
+        }
+        if (dto.getNomSociete() != null) {
+            user.setNomSociete(dto.getNomSociete());
+        }
+        if (dto.getCountry() != null) {
+            user.setCountry(dto.getCountry());
+        }
+        if (dto.getStatus() != null) {
+            user.setStatus(dto.getStatus());
+        }
+        if (dto.getRole() != null && !dto.getRole().isBlank()) {
+            ERole roleEnum = parseRoleString(dto.getRole());
+            Role userRole = roleRepository.findByRole(roleEnum)
+                    .orElseGet(() -> roleRepository.save(new Role(roleEnum)));
+            user.setRole(userRole);
+        }
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+        return mapToAdminUserDto(userRepository.save(user));
+    }
+
+    public void deleteUserById(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("Utilisateur introuvable");
+        }
+        userRepository.deleteById(userId);
+    }
+
+    private AdminUserDTO mapToAdminUserDto(User user) {
+        List<Document> documents = documentRepository.findAllByUserId(user.getUserId());
+        String objectName = documents.stream()
+                .filter(doc -> doc.getFilePath() != null && doc.getFilePath().startsWith("ProfileImage"))
+                .findFirst()
+                .map(Document::getFilePath)
+                .orElse(null);
+        String presignedUrl = objectName != null ? fileStorageService.getPresignedUrl(objectName) : null;
+        String roleName = user.getRole() != null ? user.getRole().getRole().name() : "INCONNU";
+        if ("ESN_COMMARCIAL".equals(roleName)) {
+            roleName = "ESN_COMMERCIAL";
+        }
+        return new AdminUserDTO(
+                user.getUserId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getPhone(),
+                roleName,
+                user.getStatus(),
+                user.getNomSociete(),
+                user.getCountry(),
+                presignedUrl
+        );
     }
 
 }

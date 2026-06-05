@@ -20,7 +20,7 @@ export function getDefaultHomeUrl(role: string | null | undefined): string {
     case 'ESN_COMMERCIAL':
       return '/gestion-employer/esn-commercial';
     case 'ADMIN':
-      return '/utilisateur/bi/executive';
+      return '/admin/panel';
     default:
       return '/acceuil-find-me';
   }
@@ -46,7 +46,7 @@ export function isNonBusinessHomePath(path: string): boolean {
   if (p === '/Offres/Liste' || p === '/Missions/Liste' || p === '/Offres/publier' || p === '/Missions/publier') {
     return true;
   }
-  if (p === '/utilisateur/accueil' || p.startsWith('/gestion-employer')) {
+  if (p === '/utilisateur/accueil' || p.startsWith('/gestion-employer') || p.startsWith('/admin/panel')) {
     return true;
   }
   return false;

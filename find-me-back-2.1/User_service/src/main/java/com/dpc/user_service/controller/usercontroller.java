@@ -329,6 +329,55 @@ public class usercontroller {
         }
     }
 
+    @GetMapping("/admin/all")
+    @Operation(summary = "Liste tous les utilisateurs (admin)")
+    public ResponseEntity<?> getAllUsersForAdmin() {
+        try {
+            return ResponseEntity.ok(userService.getAllUsersForAdmin());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Erreur lors de la récupération des utilisateurs"));
+        }
+    }
+
+    @PostMapping("/admin/create")
+    @Operation(summary = "Créer un utilisateur (admin, sans OTP)")
+    public ResponseEntity<?> adminCreateUser(@RequestBody UserRegistrationDTO dto) {
+        try {
+            User created = userService.adminCreateUser(dto);
+            return ResponseEntity.ok(new UserResponseDTO(created));
+        } catch (Exception e) {
+            return badRequestJson(e.getMessage() != null ? e.getMessage() : "Création impossible");
+        }
+    }
+
+    @PutMapping("/{userId}/admin")
+    @Operation(summary = "Modifier un utilisateur (admin)")
+    public ResponseEntity<?> adminUpdateUser(
+            @PathVariable Long userId,
+            @RequestBody AdminUserUpdateDTO dto) {
+        try {
+            return ResponseEntity.ok(userService.adminUpdateUser(userId, dto));
+        } catch (Exception e) {
+            return badRequestJson(e.getMessage() != null ? e.getMessage() : "Mise à jour impossible");
+        }
+    }
+
+    @DeleteMapping("/{userId}")
+    @Operation(summary = "Supprimer un utilisateur (admin)")
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+        try {
+            userService.deleteUserById(userId);
+            return ResponseEntity.ok(Map.of("message", "Utilisateur supprimé"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Erreur lors de la suppression"));
+        }
+    }
+
 
 }
 
