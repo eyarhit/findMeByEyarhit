@@ -12,50 +12,6 @@
 
   <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
 
-  <section class="filters-card">
-    <h2>Filtres</h2>
-    <div class="filters-grid">
-      <label>
-        Période — du
-        <input type="date" [(ngModel)]="dateFrom" (change)="applyFilters()" />
-      </label>
-      <label>
-        au
-        <input type="date" [(ngModel)]="dateTo" (change)="applyFilters()" />
-      </label>
-      <label *ngIf="section === 'all' || section === 'users'">
-        Rôle utilisateur
-        <select [(ngModel)]="userRoleFilter" (change)="applyFilters()">
-          <option value="">Tous</option>
-          <option *ngFor="let r of roles" [value]="r">{{ roleLabel(r) }}</option>
-        </select>
-      </label>
-      <label *ngIf="section === 'all' || section === 'users'">
-        Statut compte
-        <select [(ngModel)]="userStatusFilter" (change)="applyFilters()">
-          <option value="">Tous</option>
-          <option *ngFor="let s of userStatuses" [value]="s">{{ roleLabel(s) }}</option>
-        </select>
-      </label>
-      <label *ngIf="section === 'all' || section === 'cvs'">
-        Type CV
-        <select [(ngModel)]="cvTypeFilter" (change)="applyFilters()">
-          <option value="">Tous</option>
-          <option *ngFor="let t of cvTypes" [value]="t">{{ t }}</option>
-        </select>
-      </label>
-      <label *ngIf="section === 'all' || section === 'candidatures'">
-        Statut candidature
-        <select [(ngModel)]="candidatureStatusFilter" (change)="applyFilters()">
-          <option value="">Tous</option>
-          <option *ngFor="let s of candidatureStatuses" [value]="s">{{ roleLabel(s) }}</option>
-        </select>
-      </label>
-      <button class="btn-reset" (click)="resetFilters()">Réinitialiser</button>
-    </div>
-    <p class="filter-hint">La période s'applique aux CV et candidatures uniquement.</p>
-  </section>
-
   <nav class="section-tabs">
     <button [class.active]="section === 'all'" (click)="setSection('all')">Vue globale</button>
     <button [class.active]="section === 'users'" (click)="setSection('users')">Comptes</button>
@@ -117,35 +73,35 @@
       </div>
     </section>
 
-    <!-- CV -->
+    <!-- CV : types CDI / CDD -->
     <section class="charts-section" *ngIf="showSection('cvs')">
       <h2>Statistiques des CV</h2>
+      <p class="section-hint">{{ totalCvs }} CV enregistrés — répartition des candidatures par type de contrat</p>
       <div class="charts-grid">
         <div class="chart-card">
-          <h3>Par type (complétion)</h3>
+          <h3>Par type (CDI / CDD)</h3>
           <div class="pie-row">
-            <div class="pie-chart" [style.background]="getConicGradient(cvsByType)"></div>
+            <div class="pie-chart" [style.background]="getConicGradient(cvsByContrat)"></div>
             <div class="legend">
-              <div class="legend-item" *ngFor="let key of objectKeys(cvsByType); let i = index">
+              <div class="legend-item" *ngFor="let key of objectKeys(cvsByContrat); let i = index">
                 <span class="dot" [style.background]="legendColor(i)"></span>
-                <span>{{ key }} : <strong>{{ cvsByType[key] }}</strong> ({{ piePercent(cvsByType[key], cvsByType) }}%)</span>
+                <span>{{ roleLabel(key) }} : <strong>{{ cvsByContrat[key] }}</strong> ({{ piePercent(cvsByContrat[key], cvsByContrat) }}%)</span>
               </div>
             </div>
           </div>
         </div>
         <div class="chart-card">
-          <h3>Répartition</h3>
+          <h3>CDI vs CDD</h3>
           <div class="bar-list">
-            <div class="bar-item" *ngFor="let key of objectKeys(cvsByType); let i = index">
+            <div class="bar-item" *ngFor="let key of objectKeys(cvsByContrat); let i = index">
               <div class="bar-header">
-                <span>{{ key }}</span>
-                <span>{{ cvsByType[key] }}</span>
+                <span>{{ roleLabel(key) }}</span>
+                <span>{{ cvsByContrat[key] }}</span>
               </div>
               <div class="bar-track">
-                <div class="bar-fill" [style.width.%]="barPercent(cvsByType[key], cvsByType)" [style.background]="legendColor(i)"></div>
+                <div class="bar-fill" [style.width.%]="barPercent(cvsByContrat[key], cvsByContrat)" [style.background]="legendColor(i)"></div>
               </div>
             </div>
-            <p class="empty" *ngIf="objectKeys(cvsByType).length === 0">Aucun CV</p>
           </div>
         </div>
       </div>

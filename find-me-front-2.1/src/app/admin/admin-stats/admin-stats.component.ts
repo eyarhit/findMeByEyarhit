@@ -16,35 +16,19 @@ export class AdminStatsComponent implements OnInit {
   errorMsg = '';
 
   section: StatsSection = 'all';
-  dateFrom = '';
-  dateTo = '';
-
-  userRoleFilter = '';
-  userStatusFilter = '';
-  cvTypeFilter = '';
-  candidatureStatusFilter = '';
 
   allUsers: AdminUser[] = [];
   allCvs: any[] = [];
   allCandidatures: any[] = [];
 
-  /** Rôles utilisés : Candidat, RH, Admin */
-  readonly roles = ['CANDIDAT', 'ESN_ADMIN', 'ADMIN'];
-  readonly userStatuses = ['ACTIVE', 'INACTIVE', 'PENDING'];
-  readonly cvTypes = ['Complet', 'En cours', 'Minimal'];
-  readonly candidatureStatuses = ['ENCOURS', 'ACCEPTER', 'REFUSER'];
-
   readonly chartColors = [
     '#5a3fc9', '#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6', '#06b6d4',
   ];
 
-  usersFiltered: AdminUser[] = [];
-  cvsFiltered: any[] = [];
-  candidaturesFiltered: any[] = [];
-
   usersByRole: Record<string, number> = {};
   usersByStatus: Record<string, number> = {};
-  cvsByType: Record<string, number> = {};
+  /** CDI / CDD — dérivé des candidatures liées aux offres */
+  cvsByContrat: Record<string, number> = { CDI: 0, CDD: 0 };
   candidaturesByStatus: Record<string, number> = {};
 
   totalUsers = 0;
@@ -89,20 +73,6 @@ export class AdminStatsComponent implements OnInit {
     this.section = section;
   }
 
-  applyFilters(): void {
-    this.recomputeStats();
-  }
-
-  resetFilters(): void {
-    this.dateFrom = '';
-    this.dateTo = '';
-    this.userRoleFilter = '';
-    this.userStatusFilter = '';
-    this.cvTypeFilter = '';
-    this.candidatureStatusFilter = '';
-    this.recomputeStats();
-  }
-
   showSection(s: StatsSection): boolean {
     return this.section === 'all' || this.section === s;
   }
@@ -118,6 +88,8 @@ export class AdminStatsComponent implements OnInit {
       ACTIVE: 'Actif',
       INACTIVE: 'Inactif',
       PENDING: 'En attente',
+      CDI: 'CDI',
+      CDD: 'CDD',
     };
     return map[role] ?? role;
   }
@@ -161,52 +133,29 @@ export class AdminStatsComponent implements OnInit {
   }
 
   private recomputeStats(): void {
-    this.usersFiltered = this.allUsers.filter((u) => {
-      const matchRole = !this.userRoleFilter || u.roleName === this.userRoleFilter;
-      const matchStatus = !this.userStatusFilter || u.status === this.userStatusFilter;
-      return matchRole && matchStatus;
+    this.usersByRole = this.countByKey(this.allUsers, (u) => u.roleName);
+    this.usersByStatus = this.countByKey(this.allUsers, (u) => u.status);
+
+    this.cvsByContrat = { CDI: 0, CDD: 0 };
+    this.allCandidatures.forEach((c) => {
+      const type = c?.mission?.descrip_mission?.typeContrat;
+      if (type === 'CDI' || type === 'CDD') {
+        this.cvsByContrat[type] = (this.cvsByContrat[type] || 0) + 1;
+      }
     });
 
-    this.cvsFiltered = this.allCvs.filter((cv) => {
-      const matchType = !this.cvTypeFilter || this.getCvType(cv) === this.cvTypeFilter;
-      const matchDate = this.inDateRange(cv.createdAt);
-      return matchType && matchDate;
-    });
-
-    this.candidaturesFiltered = this.allCandidatures.filter((c) => {
-      const status = c?.statutCandidature ?? '';
-      const matchStatus = !this.candidatureStatusFilter || status === this.candidatureStatusFilter;
-      const matchDate = this.inDateRange(c.datePostulation);
-      return matchStatus && matchDate;
-    });
-
-    this.usersByRole = this.countByKey(this.usersFiltered, (u) => u.roleName);
-    this.usersByStatus = this.countByKey(this.usersFiltered, (u) => u.status);
-    this.cvsByType = this.countByKey(this.cvsFiltered, (cv) => this.getCvType(cv));
     this.candidaturesByStatus = this.countByKey(
-      this.candidaturesFiltered,
+      this.allCandidatures,
       (c) => c.statutCandidature ?? 'INCONNU'
     );
 
-    this.totalUsers = this.usersFiltered.length;
-    this.activeUsers = this.usersFiltered.filter((u) => u.status === 'ACTIVE').length;
-    this.totalCvs = this.cvsFiltered.length;
-    this.totalCandidatures = this.candidaturesFiltered.length;
-    this.acceptedCandidatures = this.candidaturesFiltered.filter(
+    this.totalUsers = this.allUsers.length;
+    this.activeUsers = this.allUsers.filter((u) => u.status === 'ACTIVE').length;
+    this.totalCvs = this.allCvs.length;
+    this.totalCandidatures = this.allCandidatures.length;
+    this.acceptedCandidatures = this.allCandidatures.filter(
       (c) => c.statutCandidature === 'ACCEPTER'
     ).length;
-  }
-
-  private getCvType(cv: any): string {
-    const steps = cv.completedSteps?.length ?? 0;
-    const hasContent =
-      (cv.competences?.length > 0) ||
-      (cv.experiences?.length > 0) ||
-      (cv.educations?.length > 0) ||
-      !!cv.titreDeProfil;
-    if (steps >= 5 || (hasContent && steps >= 3)) return 'Complet';
-    if (hasContent || steps > 0) return 'En cours';
-    return 'Minimal';
   }
 
   private countByKey<T>(items: T[], keyFn: (item: T) => string): Record<string, number> {
@@ -216,19 +165,5 @@ export class AdminStatsComponent implements OnInit {
       counts[key] = (counts[key] || 0) + 1;
     });
     return counts;
-  }
-
-  private inDateRange(dateStr: string | null | undefined): boolean {
-    if (!this.dateFrom && !this.dateTo) return true;
-    if (!dateStr) return false;
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return false;
-    if (this.dateFrom && d < new Date(this.dateFrom)) return false;
-    if (this.dateTo) {
-      const to = new Date(this.dateTo);
-      to.setHours(23, 59, 59, 999);
-      if (d > to) return false;
-    }
-    return true;
   }
 }
