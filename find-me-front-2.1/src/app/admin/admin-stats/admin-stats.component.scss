@@ -166,69 +166,6 @@
   }
 }
 
-.gauges-section {
-  margin-bottom: 1.5rem;
-
-  h2 {
-    font-size: 1.1rem;
-    color: #374151;
-    margin: 0 0 1rem;
-  }
-}
-
-.gauges-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1rem;
-}
-
-.gauge-card {
-  background: #fff;
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  text-align: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.gauge-ring {
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
-  margin: 0 auto 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.gauge-inner {
-  width: 78px;
-  height: 78px;
-  border-radius: 50%;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.gauge-pct {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1f2937;
-}
-
-.gauge-label {
-  margin: 0;
-  font-weight: 600;
-  color: #374151;
-  font-size: 0.9rem;
-}
-
-.gauge-detail {
-  margin: 0.25rem 0 0;
-  font-size: 0.8rem;
-  color: #9ca3af;
-}
-
 .charts-section {
   margin-bottom: 1.5rem;
 
@@ -252,20 +189,88 @@
 .chart-card {
   background: #fff;
   border-radius: 0.75rem;
-  padding: 1rem;
+  padding: 1.25rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  height: 320px;
-  position: relative;
 
-  canvas {
-    width: 100% !important;
-    height: 100% !important;
+  h3 {
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+    color: #374151;
+    font-weight: 600;
   }
+}
 
-  &.chart-wide {
-    grid-column: 1 / -1;
-    height: 280px;
+.pie-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.pie-chart {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend {
+  flex: 1;
+  min-width: 180px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bar-item {
+  .bar-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #374151;
+    margin-bottom: 0.3rem;
   }
+}
+
+.bar-track {
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+  min-width: 2px;
+}
+
+.empty {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  text-align: center;
+  padding: 1rem 0;
+  margin: 0;
 }
 
 .btn-refresh {
