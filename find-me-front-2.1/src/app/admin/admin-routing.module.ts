@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { BiDashboardComponent } from './bi-dashboard/bi-dashboard.component';
 import { AdminPanelComponent } from './admin-panel/admin-panel.component';
+import { AdminStatsComponent } from './admin-stats/admin-stats.component';
 import { AuthGuard } from '../guards/auth.guard';
 import { AdminGuard } from '../guards/admin.guard';
 
@@ -9,6 +10,11 @@ const routes: Routes = [
   {
     path: 'panel',
     component: AdminPanelComponent,
+    canActivate: [AuthGuard, AdminGuard],
+  },
+  {
+    path: 'statistiques',
+    component: AdminStatsComponent,
     canActivate: [AuthGuard, AdminGuard],
   },
   {

@@ -1,0 +1,162 @@
+<div class="admin-stats">
+  <header class="stats-header">
+    <div>
+      <h1>Statistiques administrateur</h1>
+      <p>Vue analytique : utilisateurs, CV, offres et candidatures</p>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/admin/panel" class="btn-link">← Panneau admin</a>
+      <button class="btn-refresh" (click)="loadData()" [disabled]="loading">Actualiser</button>
+    </div>
+  </header>
+
+  <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <!-- Filtres globaux -->
+  <section class="filters-card">
+    <h2>Filtres</h2>
+    <div class="filters-grid">
+      <label>
+        Période — du
+        <input type="date" [(ngModel)]="dateFrom" (change)="applyFilters()" />
+      </label>
+      <label>
+        au
+        <input type="date" [(ngModel)]="dateTo" (change)="applyFilters()" />
+      </label>
+      <label *ngIf="section === 'all' || section === 'users'">
+        Rôle utilisateur
+        <select [(ngModel)]="userRoleFilter" (change)="applyFilters()">
+          <option value="">Tous</option>
+          <option *ngFor="let r of roles" [value]="r">{{ roleLabel(r) }}</option>
+        </select>
+      </label>
+      <label *ngIf="section === 'all' || section === 'users'">
+        Statut compte
+        <select [(ngModel)]="userStatusFilter" (change)="applyFilters()">
+          <option value="">Tous</option>
+          <option *ngFor="let s of userStatuses" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+      <label *ngIf="section === 'all' || section === 'cvs'">
+        Type CV
+        <select [(ngModel)]="cvTypeFilter" (change)="applyFilters()">
+          <option value="">Tous</option>
+          <option *ngFor="let t of cvTypes" [value]="t">{{ t }}</option>
+        </select>
+      </label>
+      <label *ngIf="section === 'all' || section === 'offres'">
+        Statut offre
+        <select [(ngModel)]="offreStatusFilter" (change)="applyFilters()">
+          <option value="">Tous</option>
+          <option *ngFor="let s of offreStatuses" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+      <label *ngIf="section === 'all' || section === 'offres'">
+        Type contrat
+        <select [(ngModel)]="offreTypeFilter" (change)="applyFilters()">
+          <option value="">Tous</option>
+          <option *ngFor="let t of offreTypes" [value]="t">{{ t }}</option>
+        </select>
+      </label>
+      <label *ngIf="section === 'all' || section === 'candidatures'">
+        Statut candidature
+        <select [(ngModel)]="candidatureStatusFilter" (change)="applyFilters()">
+          <option value="">Tous</option>
+          <option *ngFor="let s of candidatureStatuses" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+      <button class="btn-reset" (click)="resetFilters()">Réinitialiser</button>
+    </div>
+    <p class="filter-hint">La période s'applique aux CV, offres et candidatures (pas aux comptes utilisateurs).</p>
+  </section>
+
+  <nav class="section-tabs">
+    <button [class.active]="section === 'all'" (click)="setSection('all')">Vue globale</button>
+    <button [class.active]="section === 'users'" (click)="setSection('users')">Comptes</button>
+    <button [class.active]="section === 'cvs'" (click)="setSection('cvs')">CV</button>
+    <button [class.active]="section === 'offres'" (click)="setSection('offres')">Offres</button>
+    <button [class.active]="section === 'candidatures'" (click)="setSection('candidatures')">Candidatures</button>
+  </nav>
+
+  <div class="loading" *ngIf="loading">Chargement des statistiques...</div>
+
+  <ng-container *ngIf="!loading">
+    <!-- KPIs -->
+    <section class="kpi-row">
+      <div class="kpi-card">
+        <span class="kpi-label">Utilisateurs</span>
+        <span class="kpi-value">{{ kpis.totalUsers }}</span>
+        <span class="kpi-sub">{{ kpis.activeUsers }} actifs</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">CV</span>
+        <span class="kpi-value">{{ kpis.totalCvs }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Offres</span>
+        <span class="kpi-value">{{ kpis.totalOffres }}</span>
+        <span class="kpi-sub">{{ kpis.openOffres }} ouvertes</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Candidatures</span>
+        <span class="kpi-value">{{ kpis.totalCandidatures }}</span>
+        <span class="kpi-sub">{{ kpis.acceptedCandidatures }} acceptées</span>
+      </div>
+    </section>
+
+    <!-- Jauges -->
+    <section class="gauges-section" *ngIf="section === 'all'">
+      <h2>Indicateurs clés</h2>
+      <div class="gauges-grid">
+        <div class="gauge-card" *ngFor="let g of gauges">
+          <div class="gauge-ring" [style.background]="gaugeGradient(g)">
+            <div class="gauge-inner">
+              <span class="gauge-pct">{{ gaugePercent(g) }}%</span>
+            </div>
+          </div>
+          <p class="gauge-label">{{ g.label }}</p>
+          <p class="gauge-detail">{{ g.value }} / {{ g.max }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Graphiques Utilisateurs -->
+    <section class="charts-section" *ngIf="showSection('users')">
+      <h2>Statistiques des comptes</h2>
+      <div class="charts-grid">
+        <div class="chart-card"><canvas id="chartUsersRole"></canvas></div>
+        <div class="chart-card"><canvas id="chartUsersStatus"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Graphiques CV -->
+    <section class="charts-section" *ngIf="showSection('cvs')">
+      <h2>Statistiques des CV</h2>
+      <div class="charts-grid">
+        <div class="chart-card"><canvas id="chartCvTypes"></canvas></div>
+        <div class="chart-card"><canvas id="chartCvSteps"></canvas></div>
+        <div class="chart-card chart-wide"><canvas id="chartCvMonth"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Graphiques Offres -->
+    <section class="charts-section" *ngIf="showSection('offres')">
+      <h2>Statistiques des offres</h2>
+      <div class="charts-grid">
+        <div class="chart-card"><canvas id="chartOffreStatus"></canvas></div>
+        <div class="chart-card"><canvas id="chartOffreType"></canvas></div>
+        <div class="chart-card chart-wide"><canvas id="chartOffreMonth"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Graphiques Candidatures -->
+    <section class="charts-section" *ngIf="showSection('candidatures')">
+      <h2>Statistiques des candidatures</h2>
+      <div class="charts-grid">
+        <div class="chart-card"><canvas id="chartCandStatus"></canvas></div>
+        <div class="chart-card chart-wide"><canvas id="chartCandMonth"></canvas></div>
+      </div>
+    </section>
+  </ng-container>
+</div>

@@ -16,9 +16,15 @@
         </a>
 
         <a *ngIf="showSessionNav && roleFromToken==='ADMIN'" routerLink="/admin/panel" class="nav-link" routerLinkActive="active" 
-            [routerLinkActiveOptions]="{ exact: false }">
+            [routerLinkActiveOptions]="{ exact: true }">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
           <span>Administration</span>
+        </a>
+
+        <a *ngIf="showSessionNav && roleFromToken==='ADMIN'" routerLink="/admin/statistiques" class="nav-link" routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }">
+          <i class="fas fa-chart-pie nav-icon"></i>
+          <span>Statistiques</span>
         </a>
 
         <a *ngIf="showOffresNav" routerLink="/Offres/Liste" class="nav-link" routerLinkActive="active" 
@@ -194,6 +200,11 @@
         <a *ngIf="showSessionNav && roleFromToken==='ADMIN'" routerLink="/admin/panel" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
           <i class="fas fa-cog sidebar-icon"></i>
           <span>Administration</span>
+        </a>
+
+        <a *ngIf="showSessionNav && roleFromToken==='ADMIN'" routerLink="/admin/statistiques" (click)="toggleSideBar()" class="sidebar-link" routerLinkActive="active">
+          <i class="fas fa-chart-pie sidebar-icon"></i>
+          <span>Statistiques</span>
         </a>
 
       </nav>

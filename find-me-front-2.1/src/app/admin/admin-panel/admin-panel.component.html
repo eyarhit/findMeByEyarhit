@@ -4,9 +4,12 @@
       <h1>Panneau d'administration</h1>
       <p>Gestion centralisée des utilisateurs, CV, offres et candidatures</p>
     </div>
-    <button class="btn-refresh" (click)="loadTabData(activeTab)" [disabled]="loading">
-      Actualiser
-    </button>
+    <div class="header-actions">
+      <a routerLink="/admin/statistiques" class="btn-link">Statistiques</a>
+      <button class="btn-refresh" (click)="loadTabData(activeTab)" [disabled]="loading">
+        Actualiser
+      </button>
+    </div>
   </header>
 
   <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>

@@ -46,7 +46,7 @@ export function isNonBusinessHomePath(path: string): boolean {
   if (p === '/Offres/Liste' || p === '/Missions/Liste' || p === '/Offres/publier' || p === '/Missions/publier') {
     return true;
   }
-  if (p === '/utilisateur/accueil' || p.startsWith('/gestion-employer') || p.startsWith('/admin/panel')) {
+  if (p === '/utilisateur/accueil' || p.startsWith('/gestion-employer') || p.startsWith('/admin/panel') || p.startsWith('/admin/statistiques')) {
     return true;
   }
   return false;

@@ -5,9 +5,10 @@ import { RouterModule } from '@angular/router';
 import { AdminRoutingModule } from './admin-routing.module';
 import { BiDashboardComponent } from './bi-dashboard/bi-dashboard.component';
 import { AdminPanelComponent } from './admin-panel/admin-panel.component';
+import { AdminStatsComponent } from './admin-stats/admin-stats.component';
 
 @NgModule({
-  declarations: [BiDashboardComponent, AdminPanelComponent],
+  declarations: [BiDashboardComponent, AdminPanelComponent, AdminStatsComponent],
   imports: [CommonModule, FormsModule, RouterModule, AdminRoutingModule],
 })
 export class AdminModule {}
