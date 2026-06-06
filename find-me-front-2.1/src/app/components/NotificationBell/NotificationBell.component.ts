@@ -129,10 +129,4 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   private getClientY(event: MouseEvent | TouchEvent): number {
     return event instanceof MouseEvent ? event.clientY : event.touches[0].clientY;
   }
-
-  /** Admin et RH : masquer la date (souvent incorrecte côté affichage). */
-  get showNotificationDate(): boolean {
-    const role = this.authService.getRole();
-    return role !== 'ADMIN' && role !== 'ESN_ADMIN';
-  }
 }
