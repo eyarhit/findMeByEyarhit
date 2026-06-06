@@ -58,7 +58,7 @@
           </a> -->
     </nav>
 
-    <app-notification-bell *ngIf="this.userId"></app-notification-bell>
+    <app-notification-bell *ngIf="this.userId && roleFromToken !== 'ADMIN'"></app-notification-bell>
 
     <!-- Auth Buttons (Desktop) — basé sur le token valide, pas seulement le claim role -->
     <div *ngIf="authResolved && !isLoggedIn" class="navbar-auth">
