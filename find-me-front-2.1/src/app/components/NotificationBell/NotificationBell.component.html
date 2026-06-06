@@ -32,7 +32,7 @@
           style="cursor: pointer;">
         <div class="notification-content">
           <div class="notification-message">{{ notification.message }}</div>
-          <div class="notification-time">
+          <div *ngIf="showNotificationDate" class="notification-time">
             {{ notification.timestamp | date:'dd/MM/yyyy HH:mm' }}
           </div>
         </div>
