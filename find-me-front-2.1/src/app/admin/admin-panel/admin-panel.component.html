@@ -88,8 +88,6 @@
             <th>ID CV</th>
             <th>User ID</th>
             <th>Titre de profil</th>
-            <th>Étapes complétées</th>
-            <th>Compétences</th>
           </tr>
         </thead>
         <tbody>
@@ -97,11 +95,9 @@
             <td>{{ cv.id_cv || '—' }}</td>
             <td>{{ cv.userId }}</td>
             <td>{{ cv.titreDeProfil || '—' }}</td>
-            <td>{{ (cv.completedSteps || []).join(', ') || '—' }}</td>
-            <td>{{ (cv.competences || []).length }}</td>
           </tr>
           <tr *ngIf="filteredCvs.length === 0">
-            <td colspan="5" class="empty">Aucun CV trouvé</td>
+            <td colspan="3" class="empty">Aucun CV trouvé</td>
           </tr>
         </tbody>
       </table>
