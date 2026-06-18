@@ -26,7 +26,6 @@ export class AdminPanelComponent implements OnInit {
 
   userSearch = '';
   userRoleFilter = '';
-  userStatusFilter = '';
 
   cvSearch = '';
   offreSearch = '';
@@ -41,7 +40,6 @@ export class AdminPanelComponent implements OnInit {
   /** Rôles utilisés dans l'application : Candidat, RH, Admin */
   readonly roles = ['CANDIDAT', 'ESN_ADMIN', 'ADMIN'];
 
-  readonly userStatuses = ['ACTIVE', 'INACTIVE', 'PENDING'];
   readonly offreStatuses = ['OPEN', 'CLOSED'];
   readonly candidatureStatuses = ['ENCOURS', 'ACCEPTER', 'REFUSER'];
 
@@ -132,8 +130,7 @@ export class AdminPanelComponent implements OnInit {
           .toLowerCase()
           .includes(q);
       const matchRole = !this.userRoleFilter || u.roleName === this.userRoleFilter;
-      const matchStatus = !this.userStatusFilter || u.status === this.userStatusFilter;
-      return matchSearch && matchRole && matchStatus;
+      return matchSearch && matchRole;
     });
   }
 
@@ -191,7 +188,6 @@ export class AdminPanelComponent implements OnInit {
       email: user.email,
       phone: user.phone ?? '',
       role: user.roleName,
-      status: user.status,
       nomSociete: user.nomSociete ?? '',
       country: user.country ?? '',
       password: '',
@@ -359,7 +355,6 @@ export class AdminPanelComponent implements OnInit {
     email?: string;
     phone?: string;
     role?: string;
-    status?: string;
     nomSociete?: string;
     country?: string;
     password?: string;
@@ -370,7 +365,6 @@ export class AdminPanelComponent implements OnInit {
       email: [values?.email ?? '', [Validators.required, AppValidators.email]],
       phone: [values?.phone ?? '', [AppValidators.phoneOptional]],
       role: [values?.role ?? 'CANDIDAT', [Validators.required, AppValidators.adminRole]],
-      status: [values?.status ?? 'ACTIVE', [Validators.required, AppValidators.userStatus]],
       nomSociete: [values?.nomSociete ?? '', [AppValidators.companyNameOptional]],
       country: [values?.country ?? '', [AppValidators.countryOptional]],
       password: [values?.password ?? '', [AppValidators.passwordOptional]],

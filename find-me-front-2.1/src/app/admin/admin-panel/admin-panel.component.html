@@ -32,10 +32,6 @@
         <option value="">Tous les rôles</option>
         <option *ngFor="let r of roles" [value]="r">{{ roleLabel(r) }}</option>
       </select>
-      <select [(ngModel)]="userStatusFilter">
-        <option value="">Tous les statuts</option>
-        <option *ngFor="let s of userStatuses" [value]="s">{{ s }}</option>
-      </select>
       <button class="btn-primary" (click)="openCreateUser()">+ Ajouter utilisateur</button>
     </div>
 
@@ -48,7 +44,6 @@
             <th>Email</th>
             <th>Téléphone</th>
             <th>Rôle</th>
-            <th>Statut</th>
             <th>Société</th>
             <th>Actions</th>
           </tr>
@@ -60,7 +55,6 @@
             <td>{{ u.email }}</td>
             <td>{{ u.phone || '—' }}</td>
             <td><span class="badge">{{ roleLabel(u.roleName) }}</span></td>
-            <td><span class="badge status-{{ u.status }}">{{ u.status }}</span></td>
             <td>{{ u.nomSociete || '—' }}</td>
             <td class="actions">
               <button class="btn-sm" (click)="openEditUser(u)">Modifier</button>
@@ -68,7 +62,7 @@
             </td>
           </tr>
           <tr *ngIf="filteredUsers.length === 0">
-            <td colspan="8" class="empty">Aucun utilisateur trouvé</td>
+            <td colspan="7" class="empty">Aucun utilisateur trouvé</td>
           </tr>
         </tbody>
       </table>
@@ -224,13 +218,6 @@
           <option *ngFor="let r of roles" [value]="r">{{ roleLabel(r) }}</option>
         </select>
         <span class="field-error" *ngIf="controlError('role')">{{ controlError('role') }}</span>
-      </label>
-      <label [class.invalid]="isInvalid('status')">
-        Statut
-        <select formControlName="status">
-          <option *ngFor="let s of userStatuses" [value]="s">{{ s }}</option>
-        </select>
-        <span class="field-error" *ngIf="controlError('status')">{{ controlError('status') }}</span>
       </label>
       <label [class.invalid]="isInvalid('nomSociete')">
         Société
