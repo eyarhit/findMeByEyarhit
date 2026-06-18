@@ -29,9 +29,7 @@ export class AdminPanelComponent implements OnInit {
 
   cvSearch = '';
   offreSearch = '';
-  offreStatusFilter = '';
   candidatureSearch = '';
-  candidatureStatusFilter = '';
 
   showUserModal = false;
   editingUser: AdminUser | null = null;
@@ -39,9 +37,6 @@ export class AdminPanelComponent implements OnInit {
 
   /** Rôles utilisés dans l'application : Candidat, RH, Admin */
   readonly roles = ['CANDIDAT', 'ESN_ADMIN', 'ADMIN'];
-
-  readonly offreStatuses = ['OPEN', 'CLOSED'];
-  readonly candidatureStatuses = ['ENCOURS', 'ACCEPTER', 'REFUSER'];
 
   constructor(
     private adminService: AdminService,
@@ -152,9 +147,7 @@ export class AdminPanelComponent implements OnInit {
       const matchSearch =
         !q ||
         `${o.idMission} ${name} ${ville} ${o.user_id ?? ''}`.toLowerCase().includes(q);
-      const status = o?.statusMission ?? '';
-      const matchStatus = !this.offreStatusFilter || status === this.offreStatusFilter;
-      return matchSearch && matchStatus;
+      return matchSearch;
     });
   }
 
@@ -167,10 +160,7 @@ export class AdminPanelComponent implements OnInit {
         `${c.idCandidature} ${c.candidatId} ${c.mission?.idMission ?? ''} ${missionName}`
           .toLowerCase()
           .includes(q);
-      const status = c?.statutCandidature ?? '';
-      const matchStatus =
-        !this.candidatureStatusFilter || status === this.candidatureStatusFilter;
-      return matchSearch && matchStatus;
+      return matchSearch;
     });
   }
 
@@ -288,39 +278,6 @@ export class AdminPanelComponent implements OnInit {
       },
       error: () => {
         this.errorMsg = 'Erreur lors de la suppression.';
-      },
-    });
-  }
-
-  updateOffreStatus(offre: any, status: string): void {
-    if (!this.offreStatuses.includes(status)) {
-      this.errorMsg = 'Statut offre invalide.';
-      return;
-    }
-    const payload = { ...offre, statusMission: status };
-    this.missionService.updateMission(offre.idMission, payload).subscribe({
-      next: () => {
-        this.successMsg = 'Statut offre mis à jour.';
-        this.loadTabData('offres');
-      },
-      error: () => {
-        this.errorMsg = 'Erreur mise à jour statut offre.';
-      },
-    });
-  }
-
-  updateCandidatureStatus(candidature: any, status: string): void {
-    if (!this.candidatureStatuses.includes(status)) {
-      this.errorMsg = 'Statut candidature invalide.';
-      return;
-    }
-    this.candidatureService.updateCandidatureStatus(candidature.idCandidature, status).subscribe({
-      next: () => {
-        this.successMsg = 'Statut candidature mis à jour.';
-        this.loadTabData('candidatures');
-      },
-      error: () => {
-        this.errorMsg = 'Erreur mise à jour candidature.';
       },
     });
   }
