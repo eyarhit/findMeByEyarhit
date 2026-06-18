@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { AdminService, AdminUser, AdminUserForm } from '../../services/admin.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AdminService, AdminUser } from '../../services/admin.service';
 import { CvService } from '../../services/cv.service';
 import { MissionService } from '../../services/mission';
 import { CandidatureService } from '../../services/candidature';
+import { AppValidators } from '../../shared/validators/app-validators';
 
 type AdminTab = 'users' | 'cvs' | 'offres' | 'candidatures';
 
@@ -34,7 +36,7 @@ export class AdminPanelComponent implements OnInit {
 
   showUserModal = false;
   editingUser: AdminUser | null = null;
-  userForm: AdminUserForm = this.emptyUserForm();
+  userFormGroup!: FormGroup;
 
   /** Rôles utilisés dans l'application : Candidat, RH, Admin */
   readonly roles = ['CANDIDAT', 'ESN_ADMIN', 'ADMIN'];
@@ -47,8 +49,11 @@ export class AdminPanelComponent implements OnInit {
     private adminService: AdminService,
     private cvService: CvService,
     private missionService: MissionService,
-    private candidatureService: CandidatureService
-  ) {}
+    private candidatureService: CandidatureService,
+    private fb: FormBuilder
+  ) {
+    this.userFormGroup = this.buildUserForm();
+  }
 
   ngOnInit(): void {
     this.loadTabData('users');
@@ -174,13 +179,13 @@ export class AdminPanelComponent implements OnInit {
 
   openCreateUser(): void {
     this.editingUser = null;
-    this.userForm = this.emptyUserForm();
+    this.userFormGroup = this.buildUserForm();
     this.showUserModal = true;
   }
 
   openEditUser(user: AdminUser): void {
     this.editingUser = user;
-    this.userForm = {
+    this.userFormGroup = this.buildUserForm({
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
@@ -190,28 +195,42 @@ export class AdminPanelComponent implements OnInit {
       nomSociete: user.nomSociete ?? '',
       country: user.country ?? '',
       password: '',
-    };
+    });
     this.showUserModal = true;
   }
 
   closeUserModal(): void {
     this.showUserModal = false;
     this.editingUser = null;
+    this.userFormGroup.reset();
   }
 
   saveUser(): void {
     this.clearMessages();
-    if (!this.userForm.firstName?.trim() || !this.userForm.lastName?.trim() || !this.userForm.email?.trim()) {
-      this.errorMsg = 'Prénom, nom et email sont obligatoires.';
+    this.userFormGroup.markAllAsTouched();
+    if (this.userFormGroup.invalid) {
+      this.errorMsg = 'Veuillez corriger les champs en rouge avant d’enregistrer.';
       return;
     }
 
+    const formValue = this.userFormGroup.getRawValue();
+    const payload = {
+      ...formValue,
+      firstName: String(formValue.firstName).trim(),
+      lastName: String(formValue.lastName).trim(),
+      email: String(formValue.email).trim(),
+      phone: String(formValue.phone ?? '').trim(),
+      nomSociete: String(formValue.nomSociete ?? '').trim(),
+      country: String(formValue.country ?? '').trim(),
+      password: String(formValue.password ?? '').trim(),
+    };
+
     if (this.editingUser) {
-      const payload: Partial<AdminUserForm> = { ...this.userForm };
-      if (!payload.password) {
-        delete payload.password;
+      const updatePayload = { ...payload };
+      if (!updatePayload.password) {
+        delete (updatePayload as { password?: string }).password;
       }
-      this.adminService.updateUser(this.editingUser.userId, payload).subscribe({
+      this.adminService.updateUser(this.editingUser.userId, updatePayload).subscribe({
         next: () => {
           this.successMsg = 'Utilisateur mis à jour.';
           this.closeUserModal();
@@ -224,7 +243,11 @@ export class AdminPanelComponent implements OnInit {
       return;
     }
 
-    this.adminService.createUser(this.userForm).subscribe({
+    const createPayload = { ...payload };
+    if (!createPayload.password) {
+      delete (createPayload as { password?: string }).password;
+    }
+    this.adminService.createUser(createPayload).subscribe({
       next: () => {
         this.successMsg = 'Utilisateur créé.';
         this.closeUserModal();
@@ -234,6 +257,27 @@ export class AdminPanelComponent implements OnInit {
         this.errorMsg = err?.error?.error ?? 'Erreur lors de la création.';
       },
     });
+  }
+
+  controlError(controlName: string): string | null {
+    const control = this.userFormGroup.get(controlName);
+    if (!control || !(control.touched || control.dirty) || !control.errors) {
+      return null;
+    }
+    const firstKey = Object.keys(control.errors)[0];
+    const err = control.errors[firstKey];
+    if (err?.message) {
+      return err.message;
+    }
+    if (firstKey === 'required') {
+      return 'Ce champ est obligatoire.';
+    }
+    return 'Valeur invalide.';
+  }
+
+  isInvalid(controlName: string): boolean {
+    const control = this.userFormGroup.get(controlName);
+    return !!control && control.invalid && (control.touched || control.dirty);
   }
 
   deleteUser(user: AdminUser): void {
@@ -253,6 +297,10 @@ export class AdminPanelComponent implements OnInit {
   }
 
   updateOffreStatus(offre: any, status: string): void {
+    if (!this.offreStatuses.includes(status)) {
+      this.errorMsg = 'Statut offre invalide.';
+      return;
+    }
     const payload = { ...offre, statusMission: status };
     this.missionService.updateMission(offre.idMission, payload).subscribe({
       next: () => {
@@ -266,6 +314,10 @@ export class AdminPanelComponent implements OnInit {
   }
 
   updateCandidatureStatus(candidature: any, status: string): void {
+    if (!this.candidatureStatuses.includes(status)) {
+      this.errorMsg = 'Statut candidature invalide.';
+      return;
+    }
     this.candidatureService.updateCandidatureStatus(candidature.idCandidature, status).subscribe({
       next: () => {
         this.successMsg = 'Statut candidature mis à jour.';
@@ -301,18 +353,28 @@ export class AdminPanelComponent implements OnInit {
     return map[role] ?? role;
   }
 
-  private emptyUserForm(): AdminUserForm {
-    return {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      role: 'CANDIDAT',
-      status: 'ACTIVE',
-      nomSociete: '',
-      country: '',
-      password: '',
-    };
+  private buildUserForm(values?: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    role?: string;
+    status?: string;
+    nomSociete?: string;
+    country?: string;
+    password?: string;
+  }): FormGroup {
+    return this.fb.group({
+      firstName: [values?.firstName ?? '', [Validators.required, AppValidators.personName]],
+      lastName: [values?.lastName ?? '', [Validators.required, AppValidators.personName]],
+      email: [values?.email ?? '', [Validators.required, AppValidators.email]],
+      phone: [values?.phone ?? '', [AppValidators.phoneOptional]],
+      role: [values?.role ?? 'CANDIDAT', [Validators.required, AppValidators.adminRole]],
+      status: [values?.status ?? 'ACTIVE', [Validators.required, AppValidators.userStatus]],
+      nomSociete: [values?.nomSociete ?? '', [AppValidators.companyNameOptional]],
+      country: [values?.country ?? '', [AppValidators.countryOptional]],
+      password: [values?.password ?? '', [AppValidators.passwordOptional]],
+    });
   }
 
   private clearMessages(): void {

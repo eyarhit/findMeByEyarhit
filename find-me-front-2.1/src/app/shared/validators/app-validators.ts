@@ -4,6 +4,9 @@ const PERSON_NAME_PATTERN = /^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s'\-]{1,48}$/;
 const PHONE_PATTERN = /^(\+216[259]\d{7}|\+33[1-9]\d{8}|[259]\d{7}|0[1-9]\d{8})$/;
 const LINKEDIN_PATTERN = /^(https?:\/\/)?(www\.)?linkedin\.com\/.+/i;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{4,}$/;
+const ADMIN_ROLES = ['CANDIDAT', 'ESN_ADMIN', 'ADMIN'] as const;
+const USER_STATUSES = ['ACTIVE', 'INACTIVE', 'PENDING'] as const;
 
 export class AppValidators {
   static personName: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
@@ -127,6 +130,81 @@ export class AppValidators {
   static validateGender(value: unknown): string | null {
     if (value == null || String(value).trim() === '') {
       return 'Veuillez sélectionner un genre.';
+    }
+    return null;
+  }
+
+  static passwordOptional: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const err = AppValidators.validatePasswordOptional(control.value);
+    return err ? { password: { message: err } } : null;
+  };
+
+  static adminRole: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const err = AppValidators.validateAdminRole(control.value);
+    return err ? { adminRole: { message: err } } : null;
+  };
+
+  static userStatus: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const err = AppValidators.validateUserStatus(control.value);
+    return err ? { userStatus: { message: err } } : null;
+  };
+
+  static companyNameOptional: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const err = AppValidators.validateCompanyName(control.value);
+    return err ? { companyName: { message: err } } : null;
+  };
+
+  static countryOptional: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const err = AppValidators.validateCountry(control.value);
+    return err ? { country: { message: err } } : null;
+  };
+
+  static validatePasswordOptional(value: unknown): string | null {
+    if (value == null || String(value).trim() === '') {
+      return null;
+    }
+    if (!PASSWORD_PATTERN.test(String(value))) {
+      return 'Mot de passe invalide : au moins 4 caractères, une majuscule, une minuscule et un chiffre.';
+    }
+    return null;
+  }
+
+  static validateAdminRole(value: unknown): string | null {
+    if (value == null || String(value).trim() === '') {
+      return 'Le rôle est obligatoire.';
+    }
+    if (!ADMIN_ROLES.includes(String(value).trim().toUpperCase() as (typeof ADMIN_ROLES)[number])) {
+      return 'Rôle invalide (Candidat, RH ou Admin).';
+    }
+    return null;
+  }
+
+  static validateUserStatus(value: unknown): string | null {
+    if (value == null || String(value).trim() === '') {
+      return 'Le statut est obligatoire.';
+    }
+    if (!USER_STATUSES.includes(String(value).trim().toUpperCase() as (typeof USER_STATUSES)[number])) {
+      return 'Statut invalide.';
+    }
+    return null;
+  }
+
+  static validateCompanyName(value: unknown): string | null {
+    if (value == null || String(value).trim() === '') {
+      return null;
+    }
+    if (String(value).trim().length > 100) {
+      return 'Nom de société trop long (100 caractères maximum).';
+    }
+    return null;
+  }
+
+  static validateCountry(value: unknown): string | null {
+    if (value == null || String(value).trim() === '') {
+      return null;
+    }
+    if (String(value).trim().length > 80) {
+      return 'Pays trop long (80 caractères maximum).';
     }
     return null;
   }

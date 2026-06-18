@@ -201,30 +201,64 @@
 <div class="modal-overlay" *ngIf="showUserModal" (click)="closeUserModal()">
   <div class="modal" (click)="$event.stopPropagation()">
     <h2>{{ editingUser ? 'Modifier utilisateur' : 'Ajouter utilisateur' }}</h2>
-    <div class="form-grid">
-      <label>Prénom <input [(ngModel)]="userForm.firstName" /></label>
-      <label>Nom <input [(ngModel)]="userForm.lastName" /></label>
-      <label>Email <input type="email" [(ngModel)]="userForm.email" /></label>
-      <label>Téléphone <input [(ngModel)]="userForm.phone" /></label>
-      <label>Rôle
-        <select [(ngModel)]="userForm.role">
+    <form class="form-grid" [formGroup]="userFormGroup" (ngSubmit)="saveUser()">
+      <label [class.invalid]="isInvalid('firstName')">
+        Prénom
+        <input formControlName="firstName" autocomplete="given-name" />
+        <span class="field-error" *ngIf="controlError('firstName')">{{ controlError('firstName') }}</span>
+      </label>
+      <label [class.invalid]="isInvalid('lastName')">
+        Nom
+        <input formControlName="lastName" autocomplete="family-name" />
+        <span class="field-error" *ngIf="controlError('lastName')">{{ controlError('lastName') }}</span>
+      </label>
+      <label [class.invalid]="isInvalid('email')">
+        Email
+        <input type="email" formControlName="email" autocomplete="email" />
+        <span class="field-error" *ngIf="controlError('email')">{{ controlError('email') }}</span>
+      </label>
+      <label [class.invalid]="isInvalid('phone')">
+        Téléphone
+        <input formControlName="phone" autocomplete="tel" placeholder="+216... ou +33..." />
+        <span class="field-error" *ngIf="controlError('phone')">{{ controlError('phone') }}</span>
+      </label>
+      <label [class.invalid]="isInvalid('role')">
+        Rôle
+        <select formControlName="role">
           <option *ngFor="let r of roles" [value]="r">{{ roleLabel(r) }}</option>
         </select>
+        <span class="field-error" *ngIf="controlError('role')">{{ controlError('role') }}</span>
       </label>
-      <label>Statut
-        <select [(ngModel)]="userForm.status">
+      <label [class.invalid]="isInvalid('status')">
+        Statut
+        <select formControlName="status">
           <option *ngFor="let s of userStatuses" [value]="s">{{ s }}</option>
         </select>
+        <span class="field-error" *ngIf="controlError('status')">{{ controlError('status') }}</span>
       </label>
-      <label>Société <input [(ngModel)]="userForm.nomSociete" /></label>
-      <label>Pays <input [(ngModel)]="userForm.country" /></label>
-      <label>Mot de passe
-        <input type="password" [(ngModel)]="userForm.password" [placeholder]="editingUser ? 'Laisser vide pour ne pas changer' : 'Optionnel (auto-généré si vide)'" />
+      <label [class.invalid]="isInvalid('nomSociete')">
+        Société
+        <input formControlName="nomSociete" />
+        <span class="field-error" *ngIf="controlError('nomSociete')">{{ controlError('nomSociete') }}</span>
       </label>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-secondary" (click)="closeUserModal()">Annuler</button>
-      <button class="btn-primary" (click)="saveUser()">{{ editingUser ? 'Enregistrer' : 'Créer' }}</button>
-    </div>
+      <label [class.invalid]="isInvalid('country')">
+        Pays
+        <input formControlName="country" />
+        <span class="field-error" *ngIf="controlError('country')">{{ controlError('country') }}</span>
+      </label>
+      <label [class.invalid]="isInvalid('password')">
+        Mot de passe
+        <input
+          type="password"
+          formControlName="password"
+          [placeholder]="editingUser ? 'Laisser vide pour ne pas changer' : 'Optionnel (auto-généré si vide)'"
+        />
+        <span class="field-error" *ngIf="controlError('password')">{{ controlError('password') }}</span>
+      </label>
+      <div class="modal-actions full-width">
+        <button type="button" class="btn-secondary" (click)="closeUserModal()">Annuler</button>
+        <button type="submit" class="btn-primary">{{ editingUser ? 'Enregistrer' : 'Créer' }}</button>
+      </div>
+    </form>
   </div>
 </div>

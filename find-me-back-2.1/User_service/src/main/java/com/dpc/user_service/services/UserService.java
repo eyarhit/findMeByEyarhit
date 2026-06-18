@@ -14,6 +14,7 @@ import com.dpc.user_service.Repository.OtpRepository;
 import com.dpc.user_service.Repository.RoleRepository;
 import com.dpc.user_service.Repository.UserRepository;
 import com.dpc.user_service.file.FileUtils;
+import com.dpc.user_service.validator.AdminInputValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -291,7 +292,8 @@ public class UserService {
     }
 
     public User adminCreateUser(UserRegistrationDTO dto) throws Exception {
-        if (userRepository.existsByEmail(dto.getEmail())) {
+        AdminInputValidator.validateCreate(dto);
+        if (userRepository.existsByEmail(dto.getEmail().trim().toLowerCase())) {
             throw new Exception("Email déjà utilisé");
         }
         ERole roleEnum = parseRoleString(dto.getRole());
@@ -312,12 +314,17 @@ public class UserService {
                 ? dto.getPassword()
                 : "FindMe@" + System.currentTimeMillis() % 10000;
         user.setPassword(passwordEncoder.encode(rawPassword));
-        user.setStatus(Status.ACTIVE);
+        if (dto.getStatus() != null && !dto.getStatus().isBlank()) {
+            user.setStatus(Status.valueOf(dto.getStatus().trim().toUpperCase()));
+        } else {
+            user.setStatus(Status.ACTIVE);
+        }
         user.setRole(userRole);
         return userRepository.save(user);
     }
 
     public AdminUserDTO adminUpdateUser(Long userId, AdminUserUpdateDTO dto) throws Exception {
+        AdminInputValidator.validateUpdate(dto);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 

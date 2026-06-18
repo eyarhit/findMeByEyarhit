@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AdminRoutingModule } from './admin-routing.module';
 import { BiDashboardComponent } from './bi-dashboard/bi-dashboard.component';
@@ -9,6 +9,6 @@ import { AdminStatsComponent } from './admin-stats/admin-stats.component';
 
 @NgModule({
   declarations: [BiDashboardComponent, AdminPanelComponent, AdminStatsComponent],
-  imports: [CommonModule, FormsModule, RouterModule, AdminRoutingModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, AdminRoutingModule],
 })
 export class AdminModule {}

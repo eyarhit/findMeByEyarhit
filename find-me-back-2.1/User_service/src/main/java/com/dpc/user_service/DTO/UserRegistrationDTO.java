@@ -21,5 +21,6 @@ public class UserRegistrationDTO {
     private String country;
     private String targetmarket;
     private String residencetype;
+    private String status;
 
 }
