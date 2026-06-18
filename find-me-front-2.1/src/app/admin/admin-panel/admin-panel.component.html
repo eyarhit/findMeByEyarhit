@@ -141,7 +141,6 @@
             <th>Candidat ID</th>
             <th>Mission ID</th>
             <th>Titre offre</th>
-            <th>Date</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -151,13 +150,12 @@
             <td>{{ c.candidatId }}</td>
             <td>{{ c.mission?.idMission || '—' }}</td>
             <td>{{ c.mission?.descrip_mission?.mission_name || '—' }}</td>
-            <td>{{ c.datePostulation | date:'dd/MM/yyyy HH:mm' }}</td>
             <td class="actions">
               <button class="btn-sm danger" (click)="deleteCandidature(c)">Supprimer</button>
             </td>
           </tr>
           <tr *ngIf="filteredCandidatures.length === 0">
-            <td colspan="6" class="empty">Aucune candidature trouvée</td>
+            <td colspan="5" class="empty">Aucune candidature trouvée</td>
           </tr>
         </tbody>
       </table>
