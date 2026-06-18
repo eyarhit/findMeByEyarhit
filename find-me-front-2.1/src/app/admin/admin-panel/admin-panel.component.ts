@@ -30,6 +30,7 @@ export class AdminPanelComponent implements OnInit {
   cvSearch = '';
   offreSearch = '';
   candidatureSearch = '';
+  candidatureStatusFilter = '';
 
   showUserModal = false;
   editingUser: AdminUser | null = null;
@@ -37,6 +38,7 @@ export class AdminPanelComponent implements OnInit {
 
   /** Rôles utilisés dans l'application : Candidat, RH, Admin */
   readonly roles = ['CANDIDAT', 'ESN_ADMIN', 'ADMIN'];
+  readonly candidatureStatuses = ['ENCOURS', 'ACCEPTER', 'REFUSER'];
 
   constructor(
     private adminService: AdminService,
@@ -160,7 +162,10 @@ export class AdminPanelComponent implements OnInit {
         `${c.idCandidature} ${c.candidatId} ${c.mission?.idMission ?? ''} ${missionName}`
           .toLowerCase()
           .includes(q);
-      return matchSearch;
+      const status = c?.statutCandidature ?? '';
+      const matchStatus =
+        !this.candidatureStatusFilter || status === this.candidatureStatusFilter;
+      return matchSearch && matchStatus;
     });
   }
 
@@ -278,6 +283,22 @@ export class AdminPanelComponent implements OnInit {
       },
       error: () => {
         this.errorMsg = 'Erreur lors de la suppression.';
+      },
+    });
+  }
+
+  updateCandidatureStatus(candidature: any, status: string): void {
+    if (!this.candidatureStatuses.includes(status)) {
+      this.errorMsg = 'Statut candidature invalide.';
+      return;
+    }
+    this.candidatureService.updateCandidatureStatus(candidature.idCandidature, status).subscribe({
+      next: () => {
+        this.successMsg = 'Statut candidature mis à jour.';
+        this.loadTabData('candidatures');
+      },
+      error: () => {
+        this.errorMsg = 'Erreur mise à jour candidature.';
       },
     });
   }

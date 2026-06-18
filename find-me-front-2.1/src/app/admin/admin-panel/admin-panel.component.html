@@ -132,6 +132,10 @@
   <section *ngIf="!loading && activeTab === 'candidatures'" class="tab-content">
     <div class="toolbar">
       <input type="search" placeholder="Rechercher (id, candidat, mission)..." [(ngModel)]="candidatureSearch" />
+      <select [(ngModel)]="candidatureStatusFilter">
+        <option value="">Tous les statuts</option>
+        <option *ngFor="let s of candidatureStatuses" [value]="s">{{ s }}</option>
+      </select>
     </div>
     <div class="table-wrap">
       <table>
@@ -141,6 +145,7 @@
             <th>Candidat ID</th>
             <th>Mission ID</th>
             <th>Titre offre</th>
+            <th>Statut</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -150,12 +155,16 @@
             <td>{{ c.candidatId }}</td>
             <td>{{ c.mission?.idMission || '—' }}</td>
             <td>{{ c.mission?.descrip_mission?.mission_name || '—' }}</td>
+            <td><span class="badge">{{ c.statutCandidature }}</span></td>
             <td class="actions">
+              <select [ngModel]="c.statutCandidature" (ngModelChange)="updateCandidatureStatus(c, $event)">
+                <option *ngFor="let s of candidatureStatuses" [value]="s">{{ s }}</option>
+              </select>
               <button class="btn-sm danger" (click)="deleteCandidature(c)">Supprimer</button>
             </td>
           </tr>
           <tr *ngIf="filteredCandidatures.length === 0">
-            <td colspan="5" class="empty">Aucune candidature trouvée</td>
+            <td colspan="6" class="empty">Aucune candidature trouvée</td>
           </tr>
         </tbody>
       </table>
