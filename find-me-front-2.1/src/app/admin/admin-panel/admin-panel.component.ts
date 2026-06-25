@@ -42,6 +42,12 @@ export class AdminPanelComponent implements OnInit {
   cvDetailsLoading = false;
   selectedCv: Cv | null = null;
   selectedCvCandidate: AdminUser | null = null;
+
+  showOffreModal = false;
+  offreDetailsLoading = false;
+  selectedOffre: any | null = null;
+  selectedOffrePublisher: AdminUser | null = null;
+
   private userById = new Map<number, AdminUser>();
 
   /** Rôles utilisés dans l'application : Candidat, RH, Admin */
@@ -108,9 +114,16 @@ export class AdminPanelComponent implements OnInit {
     }
 
     if (tab === 'offres') {
-      this.missionService.getAllMissions().subscribe({
-        next: (data) => {
-          this.offres = data ?? [];
+      forkJoin({
+        offres: this.missionService.getAllMissions(),
+        users: this.adminService.getAllUsers(),
+      }).subscribe({
+        next: ({ offres, users }) => {
+          this.offres = offres ?? [];
+          this.users = users ?? [];
+          this.userById = new Map(
+            this.users.map((u) => [u.userId, u])
+          );
           this.loading = false;
         },
         error: () => {
@@ -246,13 +259,98 @@ export class AdminPanelComponent implements OnInit {
   get filteredOffres(): any[] {
     const q = this.offreSearch.trim().toLowerCase();
     return this.offres.filter((o) => {
-      const name = o?.descrip_mission?.mission_name ?? '';
-      const ville = o?.ville?.nom ?? '';
       const matchSearch =
         !q ||
-        `${o.idMission} ${name} ${ville} ${o.user_id ?? ''}`.toLowerCase().includes(q);
+        `${this.getOffreName(o)} ${this.getPublisherName(o)} ${this.getOffreSummary(o)}`
+          .toLowerCase()
+          .includes(q);
       return matchSearch;
     });
+  }
+
+  getOffreName(offre: any): string {
+    const name = (offre?.descrip_mission?.mission_name ?? '').trim();
+    return name || 'Offre sans titre';
+  }
+
+  getPublisherName(offre: any): string {
+    const user = this.userById.get(Number(offre?.user_id));
+    if (!user) {
+      return 'Éditeur inconnu';
+    }
+    return `${user.firstName} ${user.lastName}`.trim();
+  }
+
+  getPublisherCompany(offre: any): string {
+    return this.userById.get(Number(offre?.user_id))?.nomSociete ?? '—';
+  }
+
+  getPublisherEmail(offre: any): string {
+    return this.userById.get(Number(offre?.user_id))?.email ?? '—';
+  }
+
+  getOffreSummary(offre: any): string {
+    const poste = offre?.descrip_mission?.poste ?? '';
+    const ville = offre?.ville?.nom ?? '';
+    const pays = offre?.pays?.nom ?? '';
+    const lieu = [ville, pays].filter(Boolean).join(', ');
+    return [poste, lieu].filter(Boolean).join(' · ');
+  }
+
+  openOffreDetails(offre: any): void {
+    const missionId = Number(offre?.idMission);
+    if (!Number.isFinite(missionId)) {
+      this.errorMsg = 'Impossible de charger cette offre.';
+      return;
+    }
+    this.clearMessages();
+    this.showOffreModal = true;
+    this.offreDetailsLoading = true;
+    this.selectedOffre = null;
+    this.selectedOffrePublisher = this.userById.get(Number(offre?.user_id)) ?? null;
+
+    this.missionService.getMissionByMissionId(missionId).subscribe({
+      next: (fullOffre) => {
+        this.selectedOffre = fullOffre;
+        this.offreDetailsLoading = false;
+      },
+      error: () => {
+        this.offreDetailsLoading = false;
+        this.showOffreModal = false;
+        this.errorMsg = 'Impossible de charger les détails de l’offre.';
+      },
+    });
+  }
+
+  closeOffreDetails(): void {
+    this.showOffreModal = false;
+    this.selectedOffre = null;
+    this.selectedOffrePublisher = null;
+    this.offreDetailsLoading = false;
+  }
+
+  formatOffreDate(value: string | Date | null | undefined): string {
+    if (!value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return String(value);
+    }
+    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+
+  offreStatusLabel(status: string | null | undefined): string {
+    const map: Record<string, string> = {
+      OPEN: 'Ouverte',
+      CLOSED: 'Fermée',
+      DRAFT: 'Brouillon',
+    };
+    return status ? (map[status] ?? status) : '—';
+  }
+
+  remoteLabel(isRemote: boolean | null | undefined): string {
+    if (isRemote === true) return 'Télétravail';
+    if (isRemote === false) return 'Sur site';
+    return '—';
   }
 
   get filteredCandidatures(): any[] {

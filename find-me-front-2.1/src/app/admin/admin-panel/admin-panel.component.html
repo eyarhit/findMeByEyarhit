@@ -119,25 +119,29 @@
   <!-- Offres -->
   <section *ngIf="!loading && activeTab === 'offres'" class="tab-content">
     <div class="toolbar">
-      <input type="search" placeholder="Rechercher (id, titre, publisher)..." [(ngModel)]="offreSearch" />
+      <input type="search" placeholder="Rechercher (offre, éditeur, poste, lieu)..." [(ngModel)]="offreSearch" />
     </div>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Titre</th>
-            <th>Publisher ID</th>
+            <th>Nom de l'offre</th>
+            <th>Publié par</th>
+            <th>Poste &amp; localisation</th>
+            <th>Détails</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let o of filteredOffres">
-            <td>{{ o.idMission }}</td>
-            <td>{{ o.descrip_mission?.mission_name || '—' }}</td>
-            <td>{{ o.user_id || '—' }}</td>
+            <td class="cv-name">{{ getOffreName(o) }}</td>
+            <td>{{ getPublisherName(o) }}</td>
+            <td class="cv-title">{{ getOffreSummary(o) || '—' }}</td>
+            <td class="actions">
+              <button class="btn-sm" (click)="openOffreDetails(o)">Voir l'offre</button>
+            </td>
           </tr>
           <tr *ngIf="filteredOffres.length === 0">
-            <td colspan="3" class="empty">Aucune offre trouvée</td>
+            <td colspan="4" class="empty">Aucune offre trouvée</td>
           </tr>
         </tbody>
       </table>
@@ -188,6 +192,122 @@
     </div>
     <p class="count">{{ filteredCandidatures.length }} candidature(s)</p>
   </section>
+</div>
+
+<!-- Modal détails offre -->
+<div class="modal-overlay" *ngIf="showOffreModal" (click)="closeOffreDetails()">
+  <div class="modal modal-cv" (click)="$event.stopPropagation()">
+    <div class="cv-modal-header">
+      <div>
+        <h2>Détails de l'offre</h2>
+        <p *ngIf="selectedOffrePublisher">
+          Publié par {{ selectedOffrePublisher.firstName }} {{ selectedOffrePublisher.lastName }}
+          · {{ selectedOffrePublisher.email }}
+        </p>
+      </div>
+      <button type="button" class="btn-secondary" (click)="closeOffreDetails()">Fermer</button>
+    </div>
+
+    <div class="cv-modal-loading" *ngIf="offreDetailsLoading">Chargement de l'offre...</div>
+
+    <div class="cv-modal-body" *ngIf="!offreDetailsLoading && selectedOffre">
+      <section class="cv-detail-section cv-detail-hero">
+        <h3>{{ getOffreName(selectedOffre) }}</h3>
+        <p class="cv-detail-meta">
+          Publié par <strong>{{ getPublisherName(selectedOffre) }}</strong>
+          · Société : {{ getPublisherCompany(selectedOffre) }}
+          · Référence : {{ selectedOffre.reference_code || '—' }}
+        </p>
+        <div class="cv-detail-tags">
+          <span class="cv-tag">{{ offreStatusLabel(selectedOffre.statusMission) }}</span>
+          <span class="cv-tag" *ngIf="selectedOffre.descrip_mission?.typeContrat">
+            {{ selectedOffre.descrip_mission.typeContrat }}
+          </span>
+          <span class="cv-tag">{{ remoteLabel(selectedOffre.descrip_mission?.isRemote) }}</span>
+        </div>
+      </section>
+
+      <section class="cv-detail-section">
+        <h4>Informations générales</h4>
+        <div class="cv-detail-card">
+          <div class="cv-skill-row">
+            <span class="cv-skill-label">Poste</span>
+            <span>{{ selectedOffre.descrip_mission?.poste || '—' }}</span>
+          </div>
+          <div class="cv-skill-row">
+            <span class="cv-skill-label">Localisation</span>
+            <span>
+              {{ selectedOffre.ville?.nom || '—' }}
+              <span *ngIf="selectedOffre.pays?.nom">, {{ selectedOffre.pays.nom }}</span>
+            </span>
+          </div>
+          <div class="cv-skill-row">
+            <span class="cv-skill-label">Période</span>
+            <span>
+              {{ formatOffreDate(selectedOffre.descrip_mission?.date_debut) }}
+              –
+              {{ formatOffreDate(selectedOffre.descrip_mission?.date_fin) }}
+            </span>
+          </div>
+          <div class="cv-skill-row" *ngIf="selectedOffre.descrip_mission?.salaire">
+            <span class="cv-skill-label">Salaire</span>
+            <span>{{ selectedOffre.descrip_mission.salaire }} €</span>
+          </div>
+          <div class="cv-skill-row" *ngIf="selectedOffre.descrip_mission?.langue">
+            <span class="cv-skill-label">Langue</span>
+            <span>{{ selectedOffre.descrip_mission.langue }}</span>
+          </div>
+          <div class="cv-skill-row" *ngIf="selectedOffre.descrip_mission?.nbre_recruteurs != null">
+            <span class="cv-skill-label">Recruteurs</span>
+            <span>{{ selectedOffre.descrip_mission.nbre_recruteurs }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="cv-detail-section" *ngIf="selectedOffre.descrip_mission?.description">
+        <h4>Description</h4>
+        <div class="cv-detail-card">
+          <p class="cv-detail-text">{{ selectedOffre.descrip_mission.description }}</p>
+        </div>
+      </section>
+
+      <section class="cv-detail-section" *ngIf="selectedOffre.descrip_mission?.futures_taches">
+        <h4>Missions &amp; responsabilités</h4>
+        <div class="cv-detail-card">
+          <p class="cv-detail-text">{{ selectedOffre.descrip_mission.futures_taches }}</p>
+        </div>
+      </section>
+
+      <section class="cv-detail-section" *ngIf="selectedOffre.descrip_mission?.avantages">
+        <h4>Avantages</h4>
+        <div class="cv-detail-card">
+          <p class="cv-detail-text">{{ selectedOffre.descrip_mission.avantages }}</p>
+        </div>
+      </section>
+
+      <section class="cv-detail-section" *ngIf="selectedOffre.descrip_mission?.competencesRequises?.length">
+        <h4>Compétences requises</h4>
+        <div class="cv-detail-tags">
+          <span class="cv-tag" *ngFor="let skill of selectedOffre.descrip_mission.competencesRequises">
+            {{ skill }}
+          </span>
+        </div>
+      </section>
+
+      <section class="cv-detail-section" *ngIf="selectedOffre.profilDemande">
+        <h4>Profil recherché</h4>
+        <div class="cv-detail-card">
+          <div class="cv-skill-row" *ngIf="selectedOffre.profilDemande.annees_experiences != null">
+            <span class="cv-skill-label">Expérience</span>
+            <span>{{ selectedOffre.profilDemande.annees_experiences }} an(s)</span>
+          </div>
+          <p *ngIf="selectedOffre.profilDemande.exigences" class="cv-detail-text">
+            {{ selectedOffre.profilDemande.exigences }}
+          </p>
+        </div>
+      </section>
+    </div>
+  </div>
 </div>
 
 <!-- Modal détails CV -->

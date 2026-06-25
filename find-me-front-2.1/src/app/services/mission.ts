@@ -16,6 +16,15 @@ export class MissionService {
       return this.http.get<any[]>(`${this.apiUrl}/mission/getMissionId/${userId}`); 
     }
 
+  getMissionByMissionId(missionId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/mission/getMissionId/${missionId}`).pipe(
+      catchError((error) => {
+        console.error('Error fetching mission:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
   /** Catalogue global (toutes sociétés) — à utiliser pour la liste publique des offres d’emploi. */
   getAllMissions(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/mission/all`).pipe(
