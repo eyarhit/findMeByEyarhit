@@ -152,46 +152,158 @@
   <!-- Candidatures -->
   <section *ngIf="!loading && activeTab === 'candidatures'" class="tab-content">
     <div class="toolbar">
-      <input type="search" placeholder="Rechercher (id, candidat, mission)..." [(ngModel)]="candidatureSearch" />
+      <input type="search" placeholder="Rechercher (candidat, mission)..." [(ngModel)]="candidatureSearch" />
       <select [(ngModel)]="candidatureStatusFilter">
         <option value="">Tous les statuts</option>
-        <option *ngFor="let s of candidatureStatuses" [value]="s">{{ s }}</option>
+        <option *ngFor="let s of candidatureFilterStatuses" [value]="s">{{ candidatureStatusLabel(s) }}</option>
       </select>
     </div>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Candidat ID</th>
-            <th>Mission ID</th>
-            <th>Titre offre</th>
+            <th>Nom candidat</th>
+            <th>Nom mission</th>
             <th>Statut</th>
+            <th>Détails</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let c of filteredCandidatures">
-            <td>{{ c.idCandidature }}</td>
-            <td>{{ c.candidatId }}</td>
-            <td>{{ c.mission?.idMission || '—' }}</td>
-            <td>{{ c.mission?.descrip_mission?.mission_name || '—' }}</td>
-            <td><span class="badge">{{ c.statutCandidature }}</span></td>
+            <td>{{ getCandidatureCandidateName(c) }}</td>
+            <td class="cv-name">{{ getCandidatureMissionName(c) }}</td>
+            <td>
+              <span class="badge" [ngClass]="'status-' + (c.statutCandidature || 'ENCOURS')">
+                {{ candidatureStatusLabel(c.statutCandidature) }}
+              </span>
+            </td>
             <td class="actions">
-              <select [ngModel]="c.statutCandidature" (ngModelChange)="updateCandidatureStatus(c, $event)">
-                <option *ngFor="let s of candidatureStatuses" [value]="s">{{ s }}</option>
+              <button class="btn-sm" (click)="openCandidatureDetails(c)">Voir détails</button>
+            </td>
+            <td class="actions">
+              <select
+                [ngModel]="candidatureActionValue(c)"
+                (ngModelChange)="updateCandidatureStatus(c, $event)"
+              >
+                <option value="" disabled hidden>Décider</option>
+                <option *ngFor="let s of candidatureActionStatuses" [value]="s">
+                  {{ candidatureStatusLabel(s) }}
+                </option>
               </select>
-              <button class="btn-sm danger" (click)="deleteCandidature(c)">Supprimer</button>
             </td>
           </tr>
           <tr *ngIf="filteredCandidatures.length === 0">
-            <td colspan="6" class="empty">Aucune candidature trouvée</td>
+            <td colspan="5" class="empty">Aucune candidature trouvée</td>
           </tr>
         </tbody>
       </table>
     </div>
     <p class="count">{{ filteredCandidatures.length }} candidature(s)</p>
   </section>
+</div>
+
+<!-- Modal détails candidature -->
+<div class="modal-overlay" *ngIf="showCandidatureModal" (click)="closeCandidatureDetails()">
+  <div class="modal modal-cv" (click)="$event.stopPropagation()">
+    <div class="cv-modal-header">
+      <div>
+        <h2>Détails de la candidature</h2>
+        <p *ngIf="selectedCandidatureCandidate">
+          {{ selectedCandidatureCandidate.firstName }} {{ selectedCandidatureCandidate.lastName }}
+          · {{ selectedCandidatureCandidate.email }}
+        </p>
+      </div>
+      <button type="button" class="btn-secondary" (click)="closeCandidatureDetails()">Fermer</button>
+    </div>
+
+    <div class="cv-modal-loading" *ngIf="candidatureDetailsLoading">Chargement...</div>
+
+    <div class="cv-modal-body" *ngIf="!candidatureDetailsLoading && selectedCandidature">
+      <section class="cv-detail-section cv-detail-hero">
+        <h3>{{ getCandidatureMissionName(selectedCandidature) }}</h3>
+        <p class="cv-detail-meta">
+          Candidat : <strong>{{ getCandidatureCandidateName(selectedCandidature) }}</strong>
+          · Statut :
+          <strong>{{ candidatureStatusLabel(selectedCandidature.statutCandidature) }}</strong>
+        </p>
+        <div class="cv-detail-tags">
+          <span class="cv-tag" [ngClass]="'status-' + (selectedCandidature.statutCandidature || 'ENCOURS')">
+            {{ candidatureStatusLabel(selectedCandidature.statutCandidature) }}
+          </span>
+        </div>
+      </section>
+
+      <section class="cv-detail-section" *ngIf="selectedCandidatureCandidate">
+        <h4>Informations candidat</h4>
+        <div class="cv-detail-card">
+          <div class="cv-skill-row">
+            <span class="cv-skill-label">Nom complet</span>
+            <span>
+              {{ selectedCandidatureCandidate.firstName }} {{ selectedCandidatureCandidate.lastName }}
+            </span>
+          </div>
+          <div class="cv-skill-row">
+            <span class="cv-skill-label">Email</span>
+            <span>{{ selectedCandidatureCandidate.email || '—' }}</span>
+          </div>
+          <div class="cv-skill-row">
+            <span class="cv-skill-label">Téléphone</span>
+            <span>{{ selectedCandidatureCandidate.phone || '—' }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="cv-detail-section" *ngIf="selectedCandidatureCv">
+        <h4>Profil CV</h4>
+        <div class="cv-detail-card">
+          <div class="cv-detail-card-title">{{ selectedCandidatureCv.titreDeProfil || 'Sans titre' }}</div>
+          <div class="cv-detail-muted">
+            {{ selectedCandidatureCv.experiences?.length || 0 }} expérience(s) ·
+            {{ selectedCandidatureCv.educations?.length || 0 }} formation(s) ·
+            {{ selectedCandidatureCv.langues?.length || 0 }} langue(s)
+          </div>
+        </div>
+      </section>
+
+      <section class="cv-detail-section" *ngIf="selectedCandidatureMission">
+        <h4>Offre / Mission</h4>
+        <div class="cv-detail-card">
+          <div class="cv-skill-row">
+            <span class="cv-skill-label">Poste</span>
+            <span>{{ selectedCandidatureMission.descrip_mission?.poste || '—' }}</span>
+          </div>
+          <div class="cv-skill-row">
+            <span class="cv-skill-label">Localisation</span>
+            <span>
+              {{ selectedCandidatureMission.ville?.nom || '—' }}
+              <span *ngIf="selectedCandidatureMission.pays?.nom">, {{ selectedCandidatureMission.pays.nom }}</span>
+            </span>
+          </div>
+          <div class="cv-skill-row">
+            <span class="cv-skill-label">Type de contrat</span>
+            <span>{{ selectedCandidatureMission.descrip_mission?.typeContrat || '—' }}</span>
+          </div>
+          <div class="cv-skill-row">
+            <span class="cv-skill-label">Mode</span>
+            <span>{{ remoteLabel(selectedCandidatureMission.descrip_mission?.isRemote) }}</span>
+          </div>
+          <p *ngIf="selectedCandidatureMission.descrip_mission?.description" class="cv-detail-text">
+            {{ selectedCandidatureMission.descrip_mission.description }}
+          </p>
+        </div>
+      </section>
+
+      <section class="cv-detail-section" *ngIf="selectedCandidatureMission?.descrip_mission?.competencesRequises?.length">
+        <h4>Compétences requises</h4>
+        <div class="cv-detail-tags">
+          <span class="cv-tag" *ngFor="let skill of selectedCandidatureMission.descrip_mission.competencesRequises">
+            {{ skill }}
+          </span>
+        </div>
+      </section>
+    </div>
+  </div>
 </div>
 
 <!-- Modal détails offre -->

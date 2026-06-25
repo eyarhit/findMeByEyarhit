@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import { AdminService, AdminUser } from '../../services/admin.service';
 import { CvService } from '../../services/cv.service';
 import { MissionService } from '../../services/mission';
@@ -48,11 +48,19 @@ export class AdminPanelComponent implements OnInit {
   selectedOffre: any | null = null;
   selectedOffrePublisher: AdminUser | null = null;
 
+  showCandidatureModal = false;
+  candidatureDetailsLoading = false;
+  selectedCandidature: any | null = null;
+  selectedCandidatureCandidate: AdminUser | null = null;
+  selectedCandidatureMission: any | null = null;
+  selectedCandidatureCv: Cv | null = null;
+
   private userById = new Map<number, AdminUser>();
 
   /** Rôles utilisés dans l'application : Candidat, RH, Admin */
   readonly roles = ['CANDIDAT', 'ESN_ADMIN', 'ADMIN'];
-  readonly candidatureStatuses = ['ENCOURS', 'ACCEPTER', 'REFUSER'];
+  readonly candidatureFilterStatuses = ['ENCOURS', 'ACCEPTER', 'REFUSER'];
+  readonly candidatureActionStatuses = ['ACCEPTER', 'REFUSER'];
 
   constructor(
     private adminService: AdminService,
@@ -134,9 +142,16 @@ export class AdminPanelComponent implements OnInit {
       return;
     }
 
-    this.candidatureService.getAllCandidatures().subscribe({
-      next: (data) => {
-        this.candidatures = data ?? [];
+    forkJoin({
+      candidatures: this.candidatureService.getAllCandidatures(),
+      users: this.adminService.getAllUsers(),
+    }).subscribe({
+      next: ({ candidatures, users }) => {
+        this.candidatures = candidatures ?? [];
+        this.users = users ?? [];
+        this.userById = new Map(
+          this.users.map((u) => [u.userId, u])
+        );
         this.loading = false;
       },
       error: () => {
@@ -356,10 +371,9 @@ export class AdminPanelComponent implements OnInit {
   get filteredCandidatures(): any[] {
     const q = this.candidatureSearch.trim().toLowerCase();
     return this.candidatures.filter((c) => {
-      const missionName = c?.mission?.descrip_mission?.mission_name ?? '';
       const matchSearch =
         !q ||
-        `${c.idCandidature} ${c.candidatId} ${c.mission?.idMission ?? ''} ${missionName}`
+        `${this.getCandidatureCandidateName(c)} ${this.getCandidatureMissionName(c)}`
           .toLowerCase()
           .includes(q);
       const status = c?.statutCandidature ?? '';
@@ -367,6 +381,74 @@ export class AdminPanelComponent implements OnInit {
         !this.candidatureStatusFilter || status === this.candidatureStatusFilter;
       return matchSearch && matchStatus;
     });
+  }
+
+  getCandidatureCandidateName(candidature: any): string {
+    const user = this.userById.get(Number(candidature?.candidatId));
+    if (!user) {
+      return 'Candidat inconnu';
+    }
+    return `${user.firstName} ${user.lastName}`.trim();
+  }
+
+  getCandidatureMissionName(candidature: any): string {
+    const name = (candidature?.mission?.descrip_mission?.mission_name ?? '').trim();
+    return name || 'Mission inconnue';
+  }
+
+  candidatureStatusLabel(status: string | null | undefined): string {
+    const map: Record<string, string> = {
+      ENCOURS: 'En cours',
+      ACCEPTER: 'Acceptée',
+      REFUSER: 'Refusée',
+    };
+    return status ? (map[status] ?? status) : '—';
+  }
+
+  candidatureActionValue(candidature: any): string {
+    const status = candidature?.statutCandidature;
+    return this.candidatureActionStatuses.includes(status) ? status : '';
+  }
+
+  openCandidatureDetails(candidature: any): void {
+    this.clearMessages();
+    this.showCandidatureModal = true;
+    this.candidatureDetailsLoading = true;
+    this.selectedCandidature = candidature;
+    this.selectedCandidatureCandidate =
+      this.userById.get(Number(candidature?.candidatId)) ?? null;
+    this.selectedCandidatureMission = null;
+    this.selectedCandidatureCv = null;
+
+    const candidatId = Number(candidature?.candidatId);
+    const missionId = Number(candidature?.mission?.idMission);
+
+    forkJoin({
+      mission: Number.isFinite(missionId)
+        ? this.missionService.getMissionByMissionId(missionId)
+        : of(null),
+      cv: Number.isFinite(candidatId)
+        ? this.cvService.getCvByUserId(candidatId)
+        : of(null),
+    }).subscribe({
+      next: ({ mission, cv }) => {
+        this.selectedCandidatureMission = mission;
+        this.selectedCandidatureCv = cv;
+        this.candidatureDetailsLoading = false;
+      },
+      error: () => {
+        this.candidatureDetailsLoading = false;
+      },
+    });
+  }
+
+  closeCandidatureDetails(): void {
+    this.showCandidatureModal = false;
+    this.selectedCandidature = null;
+    this.selectedCandidatureCandidate = null;
+    this.selectedCandidatureMission = null;
+    this.selectedCandidatureCv = null;
+    this.candidatureDetailsLoading = false;
   }
 
   openCreateUser(): void {
@@ -503,32 +585,17 @@ export class AdminPanelComponent implements OnInit {
   }
 
   updateCandidatureStatus(candidature: any, status: string): void {
-    if (!this.candidatureStatuses.includes(status)) {
-      this.errorMsg = 'Statut candidature invalide.';
+    if (!this.candidatureActionStatuses.includes(status)) {
+      this.errorMsg = 'Seuls les statuts Accepter et Refuser sont autorisés.';
       return;
     }
     this.candidatureService.updateCandidatureStatus(candidature.idCandidature, status).subscribe({
       next: () => {
-        this.successMsg = 'Statut candidature mis à jour.';
+        this.successMsg = `Candidature ${status === 'ACCEPTER' ? 'acceptée' : 'refusée'}.`;
         this.loadTabData('candidatures');
       },
       error: () => {
         this.errorMsg = 'Erreur mise à jour candidature.';
-      },
-    });
-  }
-
-  deleteCandidature(candidature: any): void {
-    if (!confirm('Supprimer cette candidature ?')) {
-      return;
-    }
-    this.candidatureService.deleteCandidature(candidature.idCandidature).subscribe({
-      next: () => {
-        this.successMsg = 'Candidature supprimée.';
-        this.loadTabData('candidatures');
-      },
-      error: () => {
-        this.errorMsg = 'Erreur suppression candidature.';
       },
     });
   }

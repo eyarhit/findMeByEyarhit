@@ -142,7 +142,9 @@ table {
 }
 
 .badge.status-ACTIVE,
-.badge.status-OPEN {
+.badge.status-OPEN,
+.badge.status-ACCEPTER,
+.cv-tag.status-ACCEPTER {
   background: #d1fae5;
   color: #065f46;
 }
