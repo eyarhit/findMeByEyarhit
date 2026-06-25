@@ -271,20 +271,35 @@ export class AdminPanelComponent implements OnInit {
     return !!control && control.invalid && (control.touched || control.dirty);
   }
 
-  deleteUser(user: AdminUser): void {
-    if (!confirm(`Supprimer ${user.firstName} ${user.lastName} ?`)) {
+  isUserActive(user: AdminUser): boolean {
+    return user.status === 'ACTIVE';
+  }
+
+  toggleUserStatus(user: AdminUser): void {
+    const newStatus = this.isUserActive(user) ? 'INACTIVE' : 'ACTIVE';
+    const actionLabel = newStatus === 'ACTIVE' ? 'activer' : 'désactiver';
+    if (!confirm(`${actionLabel.charAt(0).toUpperCase()}${actionLabel.slice(1)} le compte de ${user.firstName} ${user.lastName} ?`)) {
       return;
     }
     this.clearMessages();
-    this.adminService.deleteUser(user.userId).subscribe({
+    this.adminService.updateUserStatus(user.userId, newStatus).subscribe({
       next: () => {
-        this.successMsg = 'Utilisateur supprimé.';
+        this.successMsg = newStatus === 'ACTIVE' ? 'Compte activé.' : 'Compte désactivé.';
         this.loadTabData('users');
       },
       error: () => {
-        this.errorMsg = 'Erreur lors de la suppression.';
+        this.errorMsg = `Erreur lors de la ${actionLabel} du compte.`;
       },
     });
+  }
+
+  statusLabel(status: string): string {
+    const map: Record<string, string> = {
+      ACTIVE: 'Actif',
+      INACTIVE: 'Inactif',
+      PENDING: 'En attente',
+    };
+    return map[status] ?? status;
   }
 
   updateCandidatureStatus(candidature: any, status: string): void {

@@ -45,6 +45,7 @@
             <th>Téléphone</th>
             <th>Rôle</th>
             <th>Société</th>
+            <th>Statut</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -56,13 +57,25 @@
             <td>{{ u.phone || '—' }}</td>
             <td><span class="badge">{{ roleLabel(u.roleName) }}</span></td>
             <td>{{ u.nomSociete || '—' }}</td>
+            <td>
+              <span class="badge" [ngClass]="'status-' + (u.status || 'PENDING')">
+                {{ statusLabel(u.status) }}
+              </span>
+            </td>
             <td class="actions">
               <button class="btn-sm" (click)="openEditUser(u)">Modifier</button>
-              <button class="btn-sm danger" (click)="deleteUser(u)">Supprimer</button>
+              <button
+                class="btn-sm"
+                [class.danger]="isUserActive(u)"
+                [class.success]="!isUserActive(u)"
+                (click)="toggleUserStatus(u)"
+              >
+                {{ isUserActive(u) ? 'Désactiver' : 'Activer' }}
+              </button>
             </td>
           </tr>
           <tr *ngIf="filteredUsers.length === 0">
-            <td colspan="7" class="empty">Aucun utilisateur trouvé</td>
+            <td colspan="8" class="empty">Aucun utilisateur trouvé</td>
           </tr>
         </tbody>
       </table>

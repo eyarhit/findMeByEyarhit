@@ -204,6 +204,11 @@ table {
     background: #fee2e2;
     color: #b91c1c;
   }
+
+  &.success {
+    background: #d1fae5;
+    color: #065f46;
+  }
 }
 
 .btn-refresh {
