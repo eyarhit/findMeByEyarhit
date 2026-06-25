@@ -57,6 +57,11 @@ public class CVController {
         return icvService.lire();
     }
 
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Cv> update(@PathVariable Long id, @RequestBody Cv cv) {
+        return ResponseEntity.ok(icvService.modifier(id, cv));
+    }
+
 
 
 //    @GetMapping("/profiles/{userId}")

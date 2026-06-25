@@ -86,25 +86,29 @@
   <!-- CV -->
   <section *ngIf="!loading && activeTab === 'cvs'" class="tab-content">
     <div class="toolbar">
-      <input type="search" placeholder="Rechercher (userId, titre, id cv)..." [(ngModel)]="cvSearch" />
+      <input type="search" placeholder="Rechercher (nom CV, candidat, titre)..." [(ngModel)]="cvSearch" />
     </div>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>ID CV</th>
-            <th>User ID</th>
+            <th>Nom CV</th>
+            <th>Nom Candidat</th>
             <th>Titre de profil</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let cv of filteredCvs">
-            <td>{{ cv.id_cv || '—' }}</td>
-            <td>{{ cv.userId }}</td>
+            <td>{{ getCvName(cv) }}</td>
+            <td>{{ getCandidateName(cv) }}</td>
             <td>{{ cv.titreDeProfil || '—' }}</td>
+            <td class="actions">
+              <button class="btn-sm" (click)="openEditCv(cv)">Modifier</button>
+            </td>
           </tr>
           <tr *ngIf="filteredCvs.length === 0">
-            <td colspan="3" class="empty">Aucun CV trouvé</td>
+            <td colspan="4" class="empty">Aucun CV trouvé</td>
           </tr>
         </tbody>
       </table>
@@ -240,6 +244,30 @@
       <div class="modal-actions full-width">
         <button type="button" class="btn-secondary" (click)="closeUserModal()">Annuler</button>
         <button type="submit" class="btn-primary">{{ editingUser ? 'Enregistrer' : 'Créer' }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal CV -->
+<div class="modal-overlay" *ngIf="showCvModal" (click)="closeCvModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h2>Modifier le CV</h2>
+    <form class="form-grid" [formGroup]="cvFormGroup" (ngSubmit)="saveCv()">
+      <label class="full-width">
+        Nom Candidat
+        <input formControlName="candidateName" readonly />
+      </label>
+      <label class="full-width" [class.invalid]="isCvInvalid('titreDeProfil')">
+        Nom CV / Titre de profil
+        <input formControlName="titreDeProfil" />
+        <span class="field-error" *ngIf="cvControlError('titreDeProfil')">{{ cvControlError('titreDeProfil') }}</span>
+      </label>
+      <div class="modal-actions full-width">
+        <button type="button" class="btn-secondary" (click)="closeCvModal()" [disabled]="cvSaving">Annuler</button>
+        <button type="submit" class="btn-primary" [disabled]="cvSaving">
+          {{ cvSaving ? 'Enregistrement...' : 'Enregistrer' }}
+        </button>
       </div>
     </form>
   </div>

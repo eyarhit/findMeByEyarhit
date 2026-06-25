@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { AdminService, AdminUser } from '../../services/admin.service';
 import { CvService } from '../../services/cv.service';
 import { MissionService } from '../../services/mission';
 import { CandidatureService } from '../../services/candidature';
 import { AppValidators } from '../../shared/validators/app-validators';
+import { Cv } from '../../_model/Cv';
 
 type AdminTab = 'users' | 'cvs' | 'offres' | 'candidatures';
 
@@ -36,6 +38,11 @@ export class AdminPanelComponent implements OnInit {
   editingUser: AdminUser | null = null;
   userFormGroup!: FormGroup;
 
+  showCvModal = false;
+  editingCv: Cv | null = null;
+  cvFormGroup!: FormGroup;
+  cvSaving = false;
+
   /** Rôles utilisés dans l'application : Candidat, RH, Admin */
   readonly roles = ['CANDIDAT', 'ESN_ADMIN', 'ADMIN'];
   readonly candidatureStatuses = ['ENCOURS', 'ACCEPTER', 'REFUSER'];
@@ -48,6 +55,7 @@ export class AdminPanelComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.userFormGroup = this.buildUserForm();
+    this.cvFormGroup = this.buildCvForm();
   }
 
   ngOnInit(): void {
@@ -79,9 +87,13 @@ export class AdminPanelComponent implements OnInit {
     }
 
     if (tab === 'cvs') {
-      this.cvService.getAllCvs().subscribe({
-        next: (data) => {
-          this.cvs = data ?? [];
+      forkJoin({
+        cvs: this.cvService.getAllCvs(),
+        users: this.adminService.getAllUsers(),
+      }).subscribe({
+        next: ({ cvs, users }) => {
+          this.cvs = cvs ?? [];
+          this.users = users ?? [];
           this.loading = false;
         },
         error: () => {
@@ -135,10 +147,106 @@ export class AdminPanelComponent implements OnInit {
     const q = this.cvSearch.trim().toLowerCase();
     return this.cvs.filter((cv) => {
       if (!q) return true;
-      return `${cv.userId} ${cv.titreDeProfil ?? ''} ${cv.id_cv ?? ''}`
+      return `${this.getCvName(cv)} ${this.getCandidateName(cv)} ${cv.titreDeProfil ?? ''}`
         .toLowerCase()
         .includes(q);
     });
+  }
+
+  getCvName(cv: { titreDeProfil?: string }): string {
+    const title = cv.titreDeProfil?.trim();
+    return title || '—';
+  }
+
+  getCandidateName(cv: { userId?: number }): string {
+    const user = this.users.find((u) => u.userId === cv.userId);
+    if (!user) {
+      return '—';
+    }
+    return `${user.firstName} ${user.lastName}`.trim();
+  }
+
+  openEditCv(cv: { id_cv?: number; userId?: number; titreDeProfil?: string }): void {
+    if (!cv.userId) {
+      this.errorMsg = 'Candidat introuvable pour ce CV.';
+      return;
+    }
+    this.clearMessages();
+    this.cvService.getCvByUserId(cv.userId).subscribe({
+      next: (fullCv) => {
+        if (!fullCv) {
+          this.errorMsg = 'CV introuvable.';
+          return;
+        }
+        this.editingCv = fullCv;
+        this.cvFormGroup = this.buildCvForm({
+          titreDeProfil: fullCv.titreDeProfil ?? '',
+          candidateName: this.getCandidateName(fullCv),
+        });
+        this.showCvModal = true;
+      },
+      error: () => {
+        this.errorMsg = 'Impossible de charger le CV.';
+      },
+    });
+  }
+
+  closeCvModal(): void {
+    this.showCvModal = false;
+    this.editingCv = null;
+    this.cvFormGroup.reset();
+  }
+
+  saveCv(): void {
+    if (!this.editingCv?.id_cv || !this.editingCv.userId) {
+      return;
+    }
+    this.clearMessages();
+    this.cvFormGroup.markAllAsTouched();
+    if (this.cvFormGroup.invalid) {
+      this.errorMsg = 'Veuillez corriger les champs en rouge avant d’enregistrer.';
+      return;
+    }
+
+    const titreDeProfil = String(this.cvFormGroup.getRawValue().titreDeProfil ?? '').trim();
+    const payload: Cv = {
+      ...this.editingCv,
+      titreDeProfil,
+      competences: this.editingCv.competences ?? [],
+      educations: this.editingCv.educations ?? [],
+      experiences: this.editingCv.experiences ?? [],
+      langues: this.editingCv.langues ?? [],
+    };
+
+    this.cvSaving = true;
+    this.cvService.updateCV(this.editingCv.id_cv, payload).subscribe({
+      next: () => {
+        this.cvSaving = false;
+        this.successMsg = 'CV mis à jour.';
+        this.closeCvModal();
+        this.loadTabData('cvs');
+      },
+      error: (err) => {
+        this.cvSaving = false;
+        this.errorMsg = err?.error?.error ?? 'Erreur lors de la mise à jour du CV.';
+      },
+    });
+  }
+
+  cvControlError(controlName: string): string | null {
+    const control = this.cvFormGroup.get(controlName);
+    if (!control || !(control.touched || control.dirty) || !control.errors) {
+      return null;
+    }
+    if (control.errors['required']) {
+      return 'Ce champ est obligatoire.';
+    }
+    return 'Valeur invalide.';
+  }
+
+  isCvInvalid(controlName: string): boolean {
+    const control = this.cvFormGroup.get(controlName);
+    return !!control && control.invalid && (control.touched || control.dirty);
   }
 
   get filteredOffres(): any[] {
@@ -340,6 +448,16 @@ export class AdminPanelComponent implements OnInit {
       ADMIN: 'Admin',
     };
     return map[role] ?? role;
+  }
+
+  private buildCvForm(values?: {
+    titreDeProfil?: string;
+    candidateName?: string;
+  }): FormGroup {
+    return this.fb.group({
+      candidateName: [{ value: values?.candidateName ?? '', disabled: true }],
+      titreDeProfil: [values?.titreDeProfil ?? '', [Validators.required]],
+    });
   }
 
   private buildUserForm(values?: {
