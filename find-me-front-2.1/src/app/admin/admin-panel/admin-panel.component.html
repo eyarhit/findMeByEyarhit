@@ -93,18 +93,18 @@
         <thead>
           <tr>
             <th>Nom CV</th>
-            <th>Nom Candidat</th>
+            <th>Nom candidat</th>
             <th>Titre de profil</th>
-            <th>Actions</th>
+            <th>Détails</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let cv of filteredCvs">
-            <td>{{ getCvName(cv) }}</td>
+            <td class="cv-name">{{ getCvName(cv) }}</td>
             <td>{{ getCandidateName(cv) }}</td>
-            <td>{{ cv.titreDeProfil || '—' }}</td>
+            <td class="cv-title">{{ cv.titreDeProfil || '—' }}</td>
             <td class="actions">
-              <button class="btn-sm" (click)="openEditCv(cv)">Modifier</button>
+              <button class="btn-sm" (click)="openCvDetails(cv)">Voir le CV</button>
             </td>
           </tr>
           <tr *ngIf="filteredCvs.length === 0">
@@ -190,6 +190,85 @@
   </section>
 </div>
 
+<!-- Modal détails CV -->
+<div class="modal-overlay" *ngIf="showCvModal" (click)="closeCvDetails()">
+  <div class="modal modal-cv" (click)="$event.stopPropagation()">
+    <div class="cv-modal-header">
+      <div>
+        <h2>Détails du CV</h2>
+        <p *ngIf="selectedCvCandidate">
+          {{ selectedCvCandidate.firstName }} {{ selectedCvCandidate.lastName }}
+          · {{ selectedCvCandidate.email }}
+        </p>
+      </div>
+      <button type="button" class="btn-secondary" (click)="closeCvDetails()">Fermer</button>
+    </div>
+
+    <div class="cv-modal-loading" *ngIf="cvDetailsLoading">Chargement du CV...</div>
+
+    <div class="cv-modal-body" *ngIf="!cvDetailsLoading && selectedCv">
+      <section class="cv-detail-section cv-detail-hero">
+        <h3>{{ selectedCv.titreDeProfil || 'Sans titre de profil' }}</h3>
+        <p class="cv-detail-meta">
+          Candidat : <strong>{{ getCandidateName(selectedCv) }}</strong>
+          · Email : {{ getCandidateEmail(selectedCv) }}
+        </p>
+      </section>
+
+      <section class="cv-detail-section" *ngIf="selectedCv.educations?.length">
+        <h4>Formations</h4>
+        <div class="cv-detail-card" *ngFor="let edu of selectedCv.educations">
+          <div class="cv-detail-card-title">{{ edu.diplome || 'Diplôme' }}</div>
+          <div>{{ edu.university || '—' }}</div>
+          <div class="cv-detail-muted">
+            {{ formatCvDate(edu.dateDebut) }} – {{ formatCvDate(edu.dateFin) }}
+          </div>
+        </div>
+      </section>
+
+      <section class="cv-detail-section" *ngIf="selectedCv.competences?.length">
+        <h4>Compétences</h4>
+        <div class="cv-detail-card" *ngFor="let comp of selectedCv.competences">
+          <div class="cv-skill-row" *ngFor="let field of competenceFields(comp)">
+            <span class="cv-skill-label">{{ field.label }}</span>
+            <span>{{ field.value }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="cv-detail-section" *ngIf="selectedCv.langues?.length">
+        <h4>Langues</h4>
+        <div class="cv-detail-tags">
+          <span class="cv-tag" *ngFor="let lang of selectedCv.langues">
+            {{ lang.name }} · {{ lang.niveau }}
+          </span>
+        </div>
+      </section>
+
+      <section class="cv-detail-section" *ngIf="selectedCv.experiences?.length">
+        <h4>Expériences professionnelles</h4>
+        <div class="cv-detail-card" *ngFor="let exp of selectedCv.experiences">
+          <div class="cv-detail-card-title">{{ exp.poste || 'Poste' }}</div>
+          <div>{{ exp.entreprise || '—' }}<span *ngIf="exp.client"> · Client : {{ exp.client }}</span></div>
+          <div class="cv-detail-muted">{{ formatExperiencePeriod(exp) }}</div>
+          <div *ngIf="exp.nomProjet"><strong>Projet :</strong> {{ exp.nomProjet }}</div>
+          <div *ngIf="exp.equipe"><strong>Équipe :</strong> {{ exp.equipe }}</div>
+          <p *ngIf="exp.description" class="cv-detail-text">{{ exp.description }}</p>
+          <p *ngIf="exp.travailRealise" class="cv-detail-text"><strong>Travail réalisé :</strong> {{ exp.travailRealise }}</p>
+          <div *ngIf="exp.environnement"><strong>Environnement :</strong> {{ exp.environnement }}</div>
+        </div>
+      </section>
+
+      <p
+        class="cv-detail-empty"
+        *ngIf="!selectedCv.educations?.length && !selectedCv.competences?.length && !selectedCv.langues?.length && !selectedCv.experiences?.length"
+      >
+        Aucune information détaillée n’a encore été renseignée pour ce CV.
+      </p>
+    </div>
+  </div>
+</div>
+
 <!-- Modal utilisateur -->
 <div class="modal-overlay" *ngIf="showUserModal" (click)="closeUserModal()">
   <div class="modal" (click)="$event.stopPropagation()">
@@ -244,30 +323,6 @@
       <div class="modal-actions full-width">
         <button type="button" class="btn-secondary" (click)="closeUserModal()">Annuler</button>
         <button type="submit" class="btn-primary">{{ editingUser ? 'Enregistrer' : 'Créer' }}</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Modal CV -->
-<div class="modal-overlay" *ngIf="showCvModal" (click)="closeCvModal()">
-  <div class="modal" (click)="$event.stopPropagation()">
-    <h2>Modifier le CV</h2>
-    <form class="form-grid" [formGroup]="cvFormGroup" (ngSubmit)="saveCv()">
-      <label class="full-width">
-        Nom Candidat
-        <input formControlName="candidateName" readonly />
-      </label>
-      <label class="full-width" [class.invalid]="isCvInvalid('titreDeProfil')">
-        Nom CV / Titre de profil
-        <input formControlName="titreDeProfil" />
-        <span class="field-error" *ngIf="cvControlError('titreDeProfil')">{{ cvControlError('titreDeProfil') }}</span>
-      </label>
-      <div class="modal-actions full-width">
-        <button type="button" class="btn-secondary" (click)="closeCvModal()" [disabled]="cvSaving">Annuler</button>
-        <button type="submit" class="btn-primary" [disabled]="cvSaving">
-          {{ cvSaving ? 'Enregistrement...' : 'Enregistrer' }}
-        </button>
       </div>
     </form>
   </div>

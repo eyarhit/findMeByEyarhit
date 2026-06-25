@@ -320,3 +320,147 @@ table {
   gap: 0.75rem;
   margin-top: 1.25rem;
 }
+
+.cv-name {
+  font-weight: 600;
+  color: #1f2937;
+  max-width: 220px;
+}
+
+.cv-title {
+  max-width: 420px;
+  color: #4b5563;
+  line-height: 1.45;
+}
+
+.modal-cv {
+  max-width: 900px;
+}
+
+.cv-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0 0 0.35rem;
+  }
+
+  p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+}
+
+.cv-modal-loading {
+  padding: 2rem 0;
+  text-align: center;
+  color: #6b7280;
+}
+
+.cv-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cv-detail-section {
+  h3,
+  h4 {
+    margin: 0 0 0.75rem;
+    color: #1f2937;
+  }
+
+  h4 {
+    font-size: 1rem;
+    border-bottom: 2px solid #ede9fe;
+    padding-bottom: 0.35rem;
+  }
+}
+
+.cv-detail-hero {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1rem;
+
+  h3 {
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+  }
+}
+
+.cv-detail-meta {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.cv-detail-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.65rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.65rem;
+}
+
+.cv-detail-card-title {
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.cv-detail-muted {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.cv-detail-text {
+  margin: 0.5rem 0 0;
+  color: #374151;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.cv-skill-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #f3f4f6;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.cv-skill-label {
+  font-weight: 600;
+  color: #5a3fc9;
+  font-size: 0.85rem;
+}
+
+.cv-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cv-tag {
+  background: #ede9fe;
+  color: #5a3fc9;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.cv-detail-empty {
+  text-align: center;
+  color: #9ca3af;
+  padding: 1.5rem 0;
+}

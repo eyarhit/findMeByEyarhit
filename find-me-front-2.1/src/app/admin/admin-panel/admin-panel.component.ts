@@ -39,9 +39,10 @@ export class AdminPanelComponent implements OnInit {
   userFormGroup!: FormGroup;
 
   showCvModal = false;
-  editingCv: Cv | null = null;
-  cvFormGroup!: FormGroup;
-  cvSaving = false;
+  cvDetailsLoading = false;
+  selectedCv: Cv | null = null;
+  selectedCvCandidate: AdminUser | null = null;
+  private userById = new Map<number, AdminUser>();
 
   /** Rôles utilisés dans l'application : Candidat, RH, Admin */
   readonly roles = ['CANDIDAT', 'ESN_ADMIN', 'ADMIN'];
@@ -55,7 +56,6 @@ export class AdminPanelComponent implements OnInit {
     private fb: FormBuilder
   ) {
     this.userFormGroup = this.buildUserForm();
-    this.cvFormGroup = this.buildCvForm();
   }
 
   ngOnInit(): void {
@@ -94,6 +94,9 @@ export class AdminPanelComponent implements OnInit {
         next: ({ cvs, users }) => {
           this.cvs = cvs ?? [];
           this.users = users ?? [];
+          this.userById = new Map(
+            this.users.map((u) => [u.userId, u])
+          );
           this.loading = false;
         },
         error: () => {
@@ -153,100 +156,91 @@ export class AdminPanelComponent implements OnInit {
     });
   }
 
-  getCvName(cv: { titreDeProfil?: string }): string {
-    const title = cv.titreDeProfil?.trim();
-    return title || '—';
+  getCvName(cv: any): string {
+    const titre = (cv?.titreDeProfil ?? '').trim();
+    if (!titre) {
+      return 'CV sans titre';
+    }
+    return titre.length > 70 ? `${titre.slice(0, 67)}...` : titre;
   }
 
-  getCandidateName(cv: { userId?: number }): string {
-    const user = this.users.find((u) => u.userId === cv.userId);
+  getCandidateName(cv: any): string {
+    const user = this.userById.get(Number(cv?.userId));
     if (!user) {
-      return '—';
+      return 'Candidat inconnu';
     }
     return `${user.firstName} ${user.lastName}`.trim();
   }
 
-  openEditCv(cv: { id_cv?: number; userId?: number; titreDeProfil?: string }): void {
-    if (!cv.userId) {
-      this.errorMsg = 'Candidat introuvable pour ce CV.';
+  getCandidateEmail(cv: any): string {
+    return this.userById.get(Number(cv?.userId))?.email ?? '—';
+  }
+
+  openCvDetails(cv: any): void {
+    const userId = Number(cv?.userId);
+    if (!Number.isFinite(userId)) {
+      this.errorMsg = 'Impossible de charger ce CV.';
       return;
     }
     this.clearMessages();
-    this.cvService.getCvByUserId(cv.userId).subscribe({
+    this.showCvModal = true;
+    this.cvDetailsLoading = true;
+    this.selectedCv = null;
+    this.selectedCvCandidate = this.userById.get(userId) ?? null;
+
+    this.cvService.getCvByUserId(userId).subscribe({
       next: (fullCv) => {
-        if (!fullCv) {
-          this.errorMsg = 'CV introuvable.';
-          return;
-        }
-        this.editingCv = fullCv;
-        this.cvFormGroup = this.buildCvForm({
-          titreDeProfil: fullCv.titreDeProfil ?? '',
-          candidateName: this.getCandidateName(fullCv),
-        });
-        this.showCvModal = true;
+        this.selectedCv = fullCv;
+        this.cvDetailsLoading = false;
       },
       error: () => {
-        this.errorMsg = 'Impossible de charger le CV.';
+        this.cvDetailsLoading = false;
+        this.showCvModal = false;
+        this.errorMsg = 'Impossible de charger les détails du CV.';
       },
     });
   }
 
-  closeCvModal(): void {
+  closeCvDetails(): void {
     this.showCvModal = false;
-    this.editingCv = null;
-    this.cvFormGroup.reset();
+    this.selectedCv = null;
+    this.selectedCvCandidate = null;
+    this.cvDetailsLoading = false;
   }
 
-  saveCv(): void {
-    if (!this.editingCv?.id_cv || !this.editingCv.userId) {
-      return;
+  formatCvDate(value: string | null | undefined): string {
+    if (!value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
     }
-    this.clearMessages();
-    this.cvFormGroup.markAllAsTouched();
-    if (this.cvFormGroup.invalid) {
-      this.errorMsg = 'Veuillez corriger les champs en rouge avant d’enregistrer.';
-      return;
-    }
-
-    const titreDeProfil = String(this.cvFormGroup.getRawValue().titreDeProfil ?? '').trim();
-    const payload: Cv = {
-      ...this.editingCv,
-      titreDeProfil,
-      competences: this.editingCv.competences ?? [],
-      educations: this.editingCv.educations ?? [],
-      experiences: this.editingCv.experiences ?? [],
-      langues: this.editingCv.langues ?? [],
-    };
-
-    this.cvSaving = true;
-    this.cvService.updateCV(this.editingCv.id_cv, payload).subscribe({
-      next: () => {
-        this.cvSaving = false;
-        this.successMsg = 'CV mis à jour.';
-        this.closeCvModal();
-        this.loadTabData('cvs');
-      },
-      error: (err) => {
-        this.cvSaving = false;
-        this.errorMsg = err?.error?.error ?? 'Erreur lors de la mise à jour du CV.';
-      },
-    });
+    return date.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
   }
 
-  cvControlError(controlName: string): string | null {
-    const control = this.cvFormGroup.get(controlName);
-    if (!control || !(control.touched || control.dirty) || !control.errors) {
-      return null;
-    }
-    if (control.errors['required']) {
-      return 'Ce champ est obligatoire.';
-    }
-    return 'Valeur invalide.';
+  formatExperiencePeriod(exp: any): string {
+    const start = this.formatCvDate(exp?.dateDebut);
+    const end = exp?.dateFin ? this.formatCvDate(exp.dateFin) : 'Présent';
+    return `${start} – ${end}`;
   }
 
-  isCvInvalid(controlName: string): boolean {
-    const control = this.cvFormGroup.get(controlName);
-    return !!control && control.invalid && (control.touched || control.dirty);
+  competenceFields(comp: any): { label: string; value: string }[] {
+    const fields: { key: string; label: string }[] = [
+      { key: 'langageBallsage', label: 'Langages de balisage' },
+      { key: 'languageProgrammation', label: 'Langages de programmation' },
+      { key: 'framework', label: 'Frameworks' },
+      { key: 'bibliotheque', label: 'Bibliothèques' },
+      { key: 'api', label: 'API' },
+      { key: 'db', label: 'Bases de données' },
+      { key: 'systemExploitation', label: 'Systèmes d’exploitation' },
+      { key: 'conception', label: 'Conception' },
+      { key: 'methodologie', label: 'Méthodologies' },
+      { key: 'designPattern', label: 'Design patterns' },
+      { key: 'architechture', label: 'Architectures' },
+      { key: 'outils', label: 'Outils' },
+    ];
+    return fields
+      .map(({ key, label }) => ({ label, value: String(comp?.[key] ?? '').trim() }))
+      .filter((item) => item.value.length > 0);
   }
 
   get filteredOffres(): any[] {
@@ -448,16 +442,6 @@ export class AdminPanelComponent implements OnInit {
       ADMIN: 'Admin',
     };
     return map[role] ?? role;
-  }
-
-  private buildCvForm(values?: {
-    titreDeProfil?: string;
-    candidateName?: string;
-  }): FormGroup {
-    return this.fb.group({
-      candidateName: [{ value: values?.candidateName ?? '', disabled: true }],
-      titreDeProfil: [values?.titreDeProfil ?? '', [Validators.required]],
-    });
   }
 
   private buildUserForm(values?: {
