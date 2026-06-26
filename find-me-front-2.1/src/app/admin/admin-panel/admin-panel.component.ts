@@ -405,11 +405,6 @@ export class AdminPanelComponent implements OnInit {
     return status ? (map[status] ?? status) : '—';
   }
 
-  candidatureActionValue(candidature: any): string {
-    const status = candidature?.statutCandidature;
-    return this.candidatureActionStatuses.includes(status) ? status : '';
-  }
-
   openCandidatureDetails(candidature: any): void {
     this.clearMessages();
     this.showCandidatureModal = true;

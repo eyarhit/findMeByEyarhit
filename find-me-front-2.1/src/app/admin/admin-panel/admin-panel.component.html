@@ -172,7 +172,7 @@
         <tbody>
           <tr *ngFor="let c of filteredCandidatures">
             <td>{{ getCandidatureCandidateName(c) }}</td>
-            <td class="cv-name">{{ getCandidatureMissionName(c) }}</td>
+            <td class="cell-plain">{{ getCandidatureMissionName(c) }}</td>
             <td>
               <span class="badge" [ngClass]="'status-' + (c.statutCandidature || 'ENCOURS')">
                 {{ candidatureStatusLabel(c.statutCandidature) }}
@@ -181,16 +181,21 @@
             <td class="actions">
               <button class="btn-sm" (click)="openCandidatureDetails(c)">Voir détails</button>
             </td>
-            <td class="actions">
-              <select
-                [ngModel]="candidatureActionValue(c)"
-                (ngModelChange)="updateCandidatureStatus(c, $event)"
+            <td class="actions actions-candidature">
+              <button
+                class="btn-sm success"
+                [disabled]="c.statutCandidature === 'ACCEPTER'"
+                (click)="updateCandidatureStatus(c, 'ACCEPTER')"
               >
-                <option value="" disabled hidden>Décider</option>
-                <option *ngFor="let s of candidatureActionStatuses" [value]="s">
-                  {{ candidatureStatusLabel(s) }}
-                </option>
-              </select>
+                Accepter
+              </button>
+              <button
+                class="btn-sm danger"
+                [disabled]="c.statutCandidature === 'REFUSER'"
+                (click)="updateCandidatureStatus(c, 'REFUSER')"
+              >
+                Refuser
+              </button>
             </td>
           </tr>
           <tr *ngIf="filteredCandidatures.length === 0">

@@ -329,6 +329,16 @@ table {
   max-width: 220px;
 }
 
+.cell-plain {
+  color: #374151;
+  font-weight: 400;
+}
+
+.actions-candidature {
+  justify-content: flex-end;
+  min-width: 180px;
+}
+
 .cv-title {
   max-width: 420px;
   color: #4b5563;
