@@ -47,7 +47,7 @@
             <th>Société</th>
             <th>Statut</th>
             <th>Actions</th>
-            <th>Gestion du compte</th>
+            <th class="col-account">Gestion du compte</th>
           </tr>
         </thead>
         <tbody>
@@ -66,8 +66,9 @@
             <td class="actions">
               <button class="btn-sm" (click)="openEditUser(u)">Modifier</button>
             </td>
-            <td class="actions actions-select">
+            <td class="account-management">
               <select
+                class="account-status-select"
                 [ngModel]="userAccountActionValue(u)"
                 (ngModelChange)="updateUserAccountStatus(u, $event)"
               >
@@ -184,8 +185,9 @@
             <td class="actions">
               <button class="btn-sm" (click)="openCandidatureDetails(c)">Voir détails</button>
             </td>
-            <td class="actions actions-select">
+            <td class="decision-cell">
               <select
+                class="decision-select"
                 [ngModel]="candidatureActionValue(c)"
                 (ngModelChange)="updateCandidatureStatus(c, $event)"
               >

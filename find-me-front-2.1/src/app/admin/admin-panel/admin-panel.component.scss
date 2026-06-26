@@ -163,10 +163,35 @@ table {
 }
 
 .actions {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-  align-items: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+th.col-account,
+.account-management {
+  min-width: 170px;
+  width: 170px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.account-management .account-status-select,
+.decision-cell .decision-select {
+  width: 100%;
+  min-width: 140px;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background: #fff;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+.decision-cell {
+  min-width: 170px;
+  width: 170px;
+  text-align: right;
+  vertical-align: middle;
 }
 
 .btn-primary,
@@ -333,26 +358,6 @@ table {
   color: #374151;
   font-weight: 400;
 }
-
-.actions-candidature {
-  justify-content: flex-end;
-  min-width: 180px;
-}
-
-.actions-select {
-  min-width: 150px;
-
-  select {
-    width: 100%;
-    padding: 0.4rem 0.55rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    background: #fff;
-    font-size: 0.85rem;
-    color: #374151;
-  }
-}
-
 .cv-title {
   max-width: 420px;
   color: #4b5563;
