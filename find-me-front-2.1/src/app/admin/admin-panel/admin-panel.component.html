@@ -36,7 +36,18 @@
     </div>
 
     <div class="table-wrap">
-      <table>
+      <table class="admin-table admin-table-users">
+        <colgroup>
+          <col />
+          <col />
+          <col />
+          <col />
+          <col />
+          <col />
+          <col />
+          <col class="col-actions" />
+          <col class="col-account" />
+        </colgroup>
         <thead>
           <tr>
             <th>ID</th>
@@ -63,7 +74,7 @@
                 {{ statusLabel(u.status) }}
               </span>
             </td>
-            <td class="actions">
+            <td class="cell-action">
               <button class="btn-sm" (click)="openEditUser(u)">Modifier</button>
             </td>
             <td class="account-management">
@@ -107,7 +118,7 @@
             <td class="cell-plain">{{ getCvName(cv) }}</td>
             <td>{{ getCandidateName(cv) }}</td>
             <td class="cv-title">{{ cv.titreDeProfil || '—' }}</td>
-            <td class="actions">
+            <td class="cell-action">
               <button class="btn-sm" (click)="openCvDetails(cv)">Voir le CV</button>
             </td>
           </tr>
@@ -140,7 +151,7 @@
             <td class="cell-plain">{{ getOffreName(o) }}</td>
             <td>{{ getPublisherName(o) }}</td>
             <td class="cv-title">{{ getOffreSummary(o) || '—' }}</td>
-            <td class="actions">
+            <td class="cell-action">
               <button class="btn-sm" (click)="openOffreDetails(o)">Voir l'offre</button>
             </td>
           </tr>
@@ -163,14 +174,21 @@
       </select>
     </div>
     <div class="table-wrap">
-      <table>
+      <table class="admin-table admin-table-candidatures">
+        <colgroup>
+          <col class="col-name" />
+          <col class="col-mission" />
+          <col class="col-status" />
+          <col class="col-details" />
+          <col class="col-decision" />
+        </colgroup>
         <thead>
           <tr>
             <th>Nom candidat</th>
             <th>Nom mission</th>
             <th>Statut</th>
             <th>Détails</th>
-            <th>Décision</th>
+            <th class="col-decision">Décision</th>
           </tr>
         </thead>
         <tbody>
@@ -182,7 +200,7 @@
                 {{ candidatureStatusLabel(c.statutCandidature) }}
               </span>
             </td>
-            <td class="actions">
+            <td class="cell-action">
               <button class="btn-sm" (click)="openCandidatureDetails(c)">Voir détails</button>
             </td>
             <td class="decision-cell">

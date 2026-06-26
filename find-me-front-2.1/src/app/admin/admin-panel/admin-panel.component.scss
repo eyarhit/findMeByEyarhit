@@ -99,12 +99,14 @@ table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9rem;
+  table-layout: fixed;
 
   th,
   td {
     padding: 0.75rem 1rem;
     text-align: left;
     border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
   }
 
   th {
@@ -117,6 +119,35 @@ table {
   tr:hover td {
     background: #fafafa;
   }
+}
+
+.admin-table-users {
+  col.col-actions {
+    width: 110px;
+  }
+
+  col.col-account {
+    width: 170px;
+  }
+}
+
+.admin-table-candidatures {
+  col.col-details {
+    width: 130px;
+  }
+
+  col.col-decision {
+    width: 170px;
+  }
+}
+
+.cell-action {
+  white-space: nowrap;
+}
+
+.actions {
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
 .empty {
