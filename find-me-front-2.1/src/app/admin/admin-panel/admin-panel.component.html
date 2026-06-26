@@ -47,6 +47,7 @@
             <th>Société</th>
             <th>Statut</th>
             <th>Actions</th>
+            <th>Gestion du compte</th>
           </tr>
         </thead>
         <tbody>
@@ -64,18 +65,20 @@
             </td>
             <td class="actions">
               <button class="btn-sm" (click)="openEditUser(u)">Modifier</button>
-              <button
-                class="btn-sm"
-                [class.danger]="isUserActive(u)"
-                [class.success]="!isUserActive(u)"
-                (click)="toggleUserStatus(u)"
+            </td>
+            <td class="actions actions-select">
+              <select
+                [ngModel]="userAccountActionValue(u)"
+                (ngModelChange)="updateUserAccountStatus(u, $event)"
               >
-                {{ isUserActive(u) ? 'Désactiver' : 'Activer' }}
-              </button>
+                <option value="" disabled hidden>Choisir</option>
+                <option value="ACTIVE">Activer</option>
+                <option value="INACTIVE">Désactiver</option>
+              </select>
             </td>
           </tr>
           <tr *ngIf="filteredUsers.length === 0">
-            <td colspan="8" class="empty">Aucun utilisateur trouvé</td>
+            <td colspan="9" class="empty">Aucun utilisateur trouvé</td>
           </tr>
         </tbody>
       </table>
@@ -166,7 +169,7 @@
             <th>Nom mission</th>
             <th>Statut</th>
             <th>Détails</th>
-            <th>Actions</th>
+            <th>Décision</th>
           </tr>
         </thead>
         <tbody>
@@ -181,21 +184,16 @@
             <td class="actions">
               <button class="btn-sm" (click)="openCandidatureDetails(c)">Voir détails</button>
             </td>
-            <td class="actions actions-candidature">
-              <button
-                class="btn-sm success"
-                [disabled]="c.statutCandidature === 'ACCEPTER'"
-                (click)="updateCandidatureStatus(c, 'ACCEPTER')"
+            <td class="actions actions-select">
+              <select
+                [ngModel]="candidatureActionValue(c)"
+                (ngModelChange)="updateCandidatureStatus(c, $event)"
               >
-                Accepter
-              </button>
-              <button
-                class="btn-sm danger"
-                [disabled]="c.statutCandidature === 'REFUSER'"
-                (click)="updateCandidatureStatus(c, 'REFUSER')"
-              >
-                Refuser
-              </button>
+                <option value="" disabled hidden>Choisir</option>
+                <option *ngFor="let s of candidatureActionStatuses" [value]="s">
+                  {{ candidatureStatusLabel(s) }}
+                </option>
+              </select>
             </td>
           </tr>
           <tr *ngIf="filteredCandidatures.length === 0">

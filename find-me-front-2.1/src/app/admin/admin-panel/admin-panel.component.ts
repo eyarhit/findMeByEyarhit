@@ -556,24 +556,27 @@ export class AdminPanelComponent implements OnInit {
     return !!control && control.invalid && (control.touched || control.dirty);
   }
 
-  isUserActive(user: AdminUser): boolean {
-    return user.status === 'ACTIVE';
+  userAccountActionValue(user: AdminUser): string {
+    if (user.status === 'ACTIVE' || user.status === 'INACTIVE') {
+      return user.status;
+    }
+    return '';
   }
 
-  toggleUserStatus(user: AdminUser): void {
-    const newStatus = this.isUserActive(user) ? 'INACTIVE' : 'ACTIVE';
-    const actionLabel = newStatus === 'ACTIVE' ? 'activer' : 'désactiver';
-    if (!confirm(`${actionLabel.charAt(0).toUpperCase()}${actionLabel.slice(1)} le compte de ${user.firstName} ${user.lastName} ?`)) {
+  updateUserAccountStatus(user: AdminUser, status: string): void {
+    if (!['ACTIVE', 'INACTIVE'].includes(status) || user.status === status) {
       return;
     }
     this.clearMessages();
-    this.adminService.updateUserStatus(user.userId, newStatus).subscribe({
+    this.adminService.updateUserStatus(user.userId, status).subscribe({
       next: () => {
-        this.successMsg = newStatus === 'ACTIVE' ? 'Compte activé.' : 'Compte désactivé.';
+        this.successMsg = status === 'ACTIVE' ? 'Compte activé.' : 'Compte désactivé.';
         this.loadTabData('users');
       },
       error: () => {
-        this.errorMsg = `Erreur lors de la ${actionLabel} du compte.`;
+        this.errorMsg = status === 'ACTIVE'
+          ? 'Erreur lors de l’activation du compte.'
+          : 'Erreur lors de la désactivation du compte.';
       },
     });
   }
@@ -588,8 +591,7 @@ export class AdminPanelComponent implements OnInit {
   }
 
   updateCandidatureStatus(candidature: any, status: string): void {
-    if (!this.candidatureActionStatuses.includes(status)) {
-      this.errorMsg = 'Seuls les statuts Accepter et Refuser sont autorisés.';
+    if (!this.candidatureActionStatuses.includes(status) || candidature.statutCandidature === status) {
       return;
     }
     this.candidatureService.updateCandidatureStatus(candidature.idCandidature, status).subscribe({
