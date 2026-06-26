@@ -349,6 +349,18 @@ table {
   max-width: 900px;
 }
 
+.modal-cv-full {
+  max-width: min(920px, 96vw);
+}
+
+.cv-preview-wrap {
+  background: #f3f4f6;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  overflow: auto;
+  max-height: calc(90vh - 120px);
+}
+
 .cv-modal-header {
   display: flex;
   justify-content: space-between;

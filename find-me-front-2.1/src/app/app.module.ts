@@ -35,7 +35,7 @@ import { CertifDiplomeComponent } from './components/certif-diplome/certif-diplo
 import { ModelCvComponent } from './components/model-cv/model-cv.component';
 import { ListDocumentComponent } from './components/list-document/list-document.component';
 import { CarteProfilCandiatComponent } from './components/carte-profil-candiat/carte-profil-candiat.component';
-import { VisualisationCvComponent } from './components/visualisation-cv/visualisation-cv.component';
+import { CvVisualisationModule } from './components/visualisation-cv/cv-visualisation.module';
 import { PopupCvComponent } from './components/popup-cv/popup-cv.component';
 import { MissionDetailsComponent } from './pages/mission-details/mission-details.component';
 import { MissionsPageComponent } from './pages/missions-page/missions-page.component';
@@ -114,7 +114,6 @@ import { MessengerChatComponent } from './components/messenger-chat/messenger-ch
     ModelCvComponent,
     ListDocumentComponent,
     CarteProfilCandiatComponent,
-    VisualisationCvComponent,
     PopupCvComponent,
     MissionDetailsComponent,
     MissionsPageComponent,
@@ -163,6 +162,7 @@ import { MessengerChatComponent } from './components/messenger-chat/messenger-ch
     FontAwesomeModule,
     BrowserModule,
     PickerModule,
+    CvVisualisationModule,
 ],
 
   exports: [

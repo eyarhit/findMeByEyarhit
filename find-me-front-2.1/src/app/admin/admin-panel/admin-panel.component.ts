@@ -7,6 +7,7 @@ import { MissionService } from '../../services/mission';
 import { CandidatureService } from '../../services/candidature';
 import { AppValidators } from '../../shared/validators/app-validators';
 import { Cv } from '../../_model/Cv';
+import { buildCvPreviewTemplate } from '../../shared/cv-preview.mapper';
 
 type AdminTab = 'users' | 'cvs' | 'offres' | 'candidatures';
 
@@ -42,6 +43,7 @@ export class AdminPanelComponent implements OnInit {
   cvDetailsLoading = false;
   selectedCv: Cv | null = null;
   selectedCvCandidate: AdminUser | null = null;
+  selectedCvPreviewTemplate: any | null = null;
 
   showOffreModal = false;
   offreDetailsLoading = false;
@@ -215,10 +217,15 @@ export class AdminPanelComponent implements OnInit {
     this.cvDetailsLoading = true;
     this.selectedCv = null;
     this.selectedCvCandidate = this.userById.get(userId) ?? null;
+    this.selectedCvPreviewTemplate = null;
 
     this.cvService.getCvByUserId(userId).subscribe({
       next: (fullCv) => {
         this.selectedCv = fullCv;
+        this.selectedCvPreviewTemplate = buildCvPreviewTemplate(
+          fullCv,
+          this.selectedCvCandidate
+        );
         this.cvDetailsLoading = false;
       },
       error: () => {
@@ -233,6 +240,7 @@ export class AdminPanelComponent implements OnInit {
     this.showCvModal = false;
     this.selectedCv = null;
     this.selectedCvCandidate = null;
+    this.selectedCvPreviewTemplate = null;
     this.cvDetailsLoading = false;
   }
 
