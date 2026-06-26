@@ -4,8 +4,11 @@ import { forkJoin, of } from 'rxjs';
 import { AdminService, AdminUser } from '../../services/admin.service';
 import { CvService } from '../../services/cv.service';
 import { MissionService } from '../../services/mission';
-import { CandidatureService } from '../../services/candidature';
-import { AppValidators } from '../../shared/validators/app-validators';
+import { NotificationService } from '../../services/notificationService';
+import {
+  buildCandidatureStatusUpdateMessage,
+  resolveCandidatureTarget,
+} from '../../shared/constants/notification-messages';
 import { Cv } from '../../_model/Cv';
 import { buildCvPreviewTemplate } from '../../shared/cv-preview.mapper';
 
@@ -69,6 +72,7 @@ export class AdminPanelComponent implements OnInit {
     private cvService: CvService,
     private missionService: MissionService,
     private candidatureService: CandidatureService,
+    private notificationService: NotificationService,
     private fb: FormBuilder
   ) {
     this.userFormGroup = this.buildUserForm();
@@ -597,12 +601,37 @@ export class AdminPanelComponent implements OnInit {
     this.candidatureService.updateCandidatureStatus(candidature.idCandidature, status).subscribe({
       next: () => {
         this.successMsg = `Candidature ${status === 'ACCEPTER' ? 'acceptée' : 'refusée'}.`;
+        this.notifyCandidateOnStatusChange(candidature, status);
         this.loadTabData('candidatures');
       },
       error: () => {
         this.errorMsg = 'Erreur mise à jour candidature.';
       },
     });
+  }
+
+  private notifyCandidateOnStatusChange(candidature: any, status: string): void {
+    const candidatId = candidature?.candidatId;
+    const mission = candidature?.mission;
+    const missionId = Number(mission?.idMission);
+    if (!candidatId || !Number.isFinite(missionId)) {
+      return;
+    }
+    const typeContrat = mission?.descrip_mission?.typeContrat;
+    const message = buildCandidatureStatusUpdateMessage({
+      missionName: mission?.descrip_mission?.mission_name ?? 'Sans titre',
+      status,
+      referenceCode: mission?.reference_code,
+      typeContrat,
+    });
+    const { targetRoute, targetType } = resolveCandidatureTarget(missionId, typeContrat);
+    this.notificationService.sendNotificationToUserWithTarget(
+      String(candidatId),
+      message,
+      targetRoute,
+      missionId,
+      targetType
+    );
   }
 
   roleLabel(role: string): string {

@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import Swal from 'sweetalert2';
 import { ActivatedRoute } from '@angular/router';
 import { NotificationService } from '../../services/notificationService';
+import { buildNewPublishedMissionMessage } from '../../shared/constants/notification-messages';
 import { catchError, finalize, forkJoin, of, timeout } from 'rxjs';
 import { isRecruiterRole } from '../../shared/constants/role-utils';
 
@@ -529,8 +530,12 @@ isStepInvalid(): boolean {
       ? `/OffreDetails/${missionId}`
       : `/MissionDetails/${missionId}`;
 
-    const missionName = createdMission?.descrip_mission?.mission_name || formData?.descrip_mission?.mission_name || 'nouvelle annonce';
-    const message = `Nouvelle annonce publiée: ${missionName}`;
+    const missionName = createdMission?.descrip_mission?.mission_name || formData?.descrip_mission?.mission_name || 'Sans titre';
+    const message = buildNewPublishedMissionMessage({
+      missionName,
+      referenceCode: createdMission?.reference_code,
+      typeContrat,
+    });
 
     const rolesToNotify = ['CANDIDAT', 'FREELANCER', 'PORTAGE_SALARIAL'];
     const roleRequests = rolesToNotify.map((role) =>

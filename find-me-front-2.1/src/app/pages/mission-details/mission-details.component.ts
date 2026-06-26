@@ -12,6 +12,10 @@ import { ApiRoutingServiceUser } from '../../services/api-routing-user.service';
 import { HttpParams } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { NotificationService } from '../../services/notificationService';
+import {
+  buildNewApplicationMessage,
+  resolveOwnerCandidatureListTarget,
+} from '../../shared/constants/notification-messages';
 import { Router } from '@angular/router';
 import {
   canApplyToJobOffer,
@@ -340,22 +344,26 @@ private notifyMissionOwnerOnApplication(): void {
     return;
   }
 
-  const offreTypes = ['CDI', 'CDD', 'ALTERNANCE'];
-  const isOffre = offreTypes.includes(String(mission.type || '').toUpperCase());
-  const targetRoute = isOffre
-    ? `/Offres/candidatures/${mission.id}`
-    : `/Missions/candidatures/${mission.id}`;
-  const targetType = isOffre ? 'OFFRE' : 'MISSION';
-  const reference = mission.ref ? ` (${mission.ref})` : '';
-  const message = `Nouvelle postulation reçue${reference}.`;
+  const typeContrat = String(mission.type || '');
+  const { targetRoute, targetType } = resolveOwnerCandidatureListTarget(mission.id, typeContrat);
 
-  this.notificationService.sendNotificationToUserWithTarget(
-    String(ownerId),
-    message,
-    targetRoute,
-    mission.id,
-    targetType
-  );
+  void this.authService.getUserFullName().then((candidateName) => {
+    const message = buildNewApplicationMessage({
+      candidateName: candidateName || 'Un candidat',
+      missionName: mission.title || 'Sans titre',
+      referenceCode: mission.ref,
+      typeContrat,
+      targetType,
+    });
+
+    this.notificationService.sendNotificationToUserWithTarget(
+      String(ownerId),
+      message,
+      targetRoute,
+      mission.id,
+      targetType
+    );
+  });
 }
   handDossierCompethenceVisibility(visible: any) {
 this.visible=visible}

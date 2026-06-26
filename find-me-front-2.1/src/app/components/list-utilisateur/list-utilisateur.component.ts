@@ -7,6 +7,10 @@ import Swal from 'sweetalert2';
 import { DocumentServiceService } from '../../services/document-service.service';
 import { CandidatureService } from '../../services/candidature';
 import { NotificationService } from '../../services/notificationService';
+import {
+  buildCandidatureStatusUpdateMessage,
+  resolveCandidatureTarget,
+} from '../../shared/constants/notification-messages';
 
 interface User {
   id: number;
@@ -25,6 +29,8 @@ interface User {
     mission: {
       idMission: number;
       referenceCode: string;
+      missionName?: string;
+      typeContrat?: string;
       typeContrat?: string;
     };
   };
@@ -108,7 +114,12 @@ updateCandidatureStatus(user: any): void {
       ////console.log('test',user.candidature)
       this.sendNotification(
         String(user.candidature.idCandidat),
-        `Votre candidature «${user.candidature.mission.referenceCode}» est maintenant: ${this.getReadableStatusLabel(normalizedStatus)}`,
+        buildCandidatureStatusUpdateMessage({
+          missionName: user.candidature.mission.missionName || user.candidature.mission.referenceCode,
+          status: normalizedStatus,
+          referenceCode: user.candidature.mission.referenceCode,
+          typeContrat: user.candidature.mission.typeContrat,
+        }),
         user.candidature?.mission?.idMission,
         user.candidature?.mission?.typeContrat
       );
@@ -159,17 +170,13 @@ private getReadableStatusLabel(status: string): string {
       this.notificationService.sendNotificationToUser(userId, message);
       return;
     }
-    const offreTypes = ['CDI', 'CDD', 'ALTERNANCE'];
-    const isOffre = offreTypes.includes(String(typeContrat || '').toUpperCase());
-    const targetRoute = isOffre
-      ? `/OffreDetails/${missionId}`
-      : `/MissionDetails/${missionId}`;
+    const { targetRoute, targetType } = resolveCandidatureTarget(missionId, typeContrat);
     this.notificationService.sendNotificationToUserWithTarget(
       userId,
       message,
       targetRoute,
       missionId,
-      isOffre ? 'OFFRE' : 'MISSION'
+      targetType
     );
   }
   ngOnInit():void{
@@ -305,6 +312,7 @@ loadCandidatures(missionId: string): void {
                   mission: {
                     idMission: candidature.mission.idMission,
                     referenceCode: candidature.mission.reference_code,
+                    missionName: candidature.mission?.descrip_mission?.mission_name,
                     typeContrat: candidature.mission?.descrip_mission?.typeContrat
                   }
                 }
