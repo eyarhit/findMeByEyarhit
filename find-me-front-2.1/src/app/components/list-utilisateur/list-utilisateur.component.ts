@@ -31,7 +31,6 @@ interface User {
       referenceCode: string;
       missionName?: string;
       typeContrat?: string;
-      typeContrat?: string;
     };
   };
 }

@@ -4,7 +4,9 @@ import { forkJoin, of } from 'rxjs';
 import { AdminService, AdminUser } from '../../services/admin.service';
 import { CvService } from '../../services/cv.service';
 import { MissionService } from '../../services/mission';
+import { CandidatureService } from '../../services/candidature';
 import { NotificationService } from '../../services/notificationService';
+import { AppValidators } from '../../shared/validators/app-validators';
 import {
   buildCandidatureStatusUpdateMessage,
   resolveCandidatureTarget,
