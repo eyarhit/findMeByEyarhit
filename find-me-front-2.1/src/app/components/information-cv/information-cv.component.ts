@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, FormControl, AbstractControl } from '@angular/forms';
 import { CvService } from '../../services/cv.service';
 import { isPlatformBrowser } from '@angular/common';
 import { jsPDF } from 'jspdf';
@@ -27,6 +27,7 @@ import {
   getSavedCvDisplayName,
   resolveCvDisplayName,
 } from '../../shared/utils/cv-file-name.util';
+import { AppValidators } from '../../shared/validators/app-validators';
 @Component({
   selector: 'app-information-cv', 
   templateUrl: './information-cv.component.html',
@@ -80,18 +81,18 @@ popupTitle: string = '';
       professionalExperiences: this.fb.array([]),
       languages: this.fb.array([]),
       technicalSkills: this.fb.group({
-        langageBallsage: [''],
-        languageProgrammation: [''],
-        framework: [''],
-        bibliotheque: [''],
-        api: [''],
-        db: [''],
-        systemExploitation: [''],
-        conception: [''],
-        methodologie: [''],
-        designPattern: [''],
-        architechture: [''],
-        outils: ['']
+        langageBallsage: ['', AppValidators.cvSkillsField],
+        languageProgrammation: ['', AppValidators.cvSkillsField],
+        framework: ['', AppValidators.cvSkillsField],
+        bibliotheque: ['', AppValidators.cvSkillsField],
+        api: ['', AppValidators.cvSkillsField],
+        db: ['', AppValidators.cvSkillsField],
+        systemExploitation: ['', AppValidators.cvSkillsField],
+        conception: ['', AppValidators.cvSkillsField],
+        methodologie: ['', AppValidators.cvSkillsField],
+        designPattern: ['', AppValidators.cvSkillsField],
+        architechture: ['', AppValidators.cvSkillsField],
+        outils: ['', AppValidators.cvSkillsField],
       })
     });
   }
@@ -114,6 +115,8 @@ popupTitle: string = '';
     // Charge les données du CV
     this.loadCvData();
     this.restoreCvFileName();
+    this.titreDeProfilControl.setValidators([AppValidators.cvProfileTitle]);
+    this.fileNameControl.setValidators([AppValidators.cvFileName]);
   }
 
   /** Réaffiche le dernier nom saisi (session ou dernier CV CvFindMe en base). */
@@ -279,11 +282,12 @@ popupTitle: string = '';
     };
 
     this.academicFormations.push(this.fb.group({
-      university: [data?.university || '', Validators.maxLength(120)],
-      diplome: [data?.diplome || '', Validators.maxLength(120)],
-      dateDebut: [formatDate(data?.dateDebut)],
-      dateFin: [formatDate(data?.dateFin)],
-    }));
+      university: [data?.university || '', AppValidators.cvEducationUniversity],
+      diplome: [data?.diplome || '', AppValidators.cvEducationDiplome],
+      dateDebut: [formatDate(data?.dateDebut), AppValidators.cvEducationDateDebut],
+      dateFin: [formatDate(data?.dateFin), AppValidators.cvEducationDateFin],
+    }, { validators: AppValidators.cvEducationDateRange }));
+    this.setupAcademicDateRevalidation(this.academicFormations.length - 1);
   }
   
 
@@ -305,17 +309,18 @@ popupTitle: string = '';
   
     const desc = data?.description || data?.travailRealise || '';
     this.professionalExperiences.push(this.fb.group({
-      entreprise: [data?.entreprise || ''],
-      dateDebut: [formatDate(data?.dateDebut)],
-      dateFin: [formatDate(data?.dateFin)],
-      poste: [data?.poste || ''],
-      nomProjet: [data?.nomProjet || ''],
-      client: [data?.client || ''],
-      equipe: [data?.equipe || ''],
-      description: [desc],
-      travailRealise: [data?.travailRealise || desc],
-      environnement: [data?.environnement || ''],
-    }));
+      entreprise: [data?.entreprise || '', AppValidators.cvExperienceEntreprise],
+      dateDebut: [formatDate(data?.dateDebut), AppValidators.cvExperienceDateDebut],
+      dateFin: [formatDate(data?.dateFin), AppValidators.cvExperienceDateFin],
+      poste: [data?.poste || '', AppValidators.cvExperiencePoste],
+      nomProjet: [data?.nomProjet || '', AppValidators.cvExperienceOptionalText(2)],
+      client: [data?.client || '', AppValidators.cvExperienceOptionalText(5)],
+      equipe: [data?.equipe || '', AppValidators.cvExperienceOptionalText(5)],
+      description: [desc, AppValidators.cvExperienceOptionalText(10)],
+      travailRealise: [data?.travailRealise || desc, AppValidators.cvExperienceOptionalText(10)],
+      environnement: [data?.environnement || '', AppValidators.cvSkillsField],
+    }, { validators: AppValidators.cvExperienceDateRange }));
+    this.setupExperienceDateRevalidation(this.professionalExperiences.length - 1);
   }
   
 
@@ -338,10 +343,96 @@ popupTitle: string = '';
     );
     this.languages.push(
       this.fb.group({
-        name: [name],
-        niveau: [niveau],
+        name: [name, AppValidators.cvLanguageName],
+        niveau: [niveau, AppValidators.cvLanguageLevel],
       })
     );
+  }
+
+  private setupAcademicDateRevalidation(index: number): void {
+    const group = this.academicFormations.at(index) as FormGroup;
+    group.get('dateDebut')?.valueChanges.subscribe(() => {
+      group.get('dateFin')?.updateValueAndValidity({ emitEvent: false });
+      group.updateValueAndValidity({ emitEvent: false });
+    });
+    group.get('dateFin')?.valueChanges.subscribe(() => {
+      group.updateValueAndValidity({ emitEvent: false });
+    });
+  }
+
+  private setupExperienceDateRevalidation(index: number): void {
+    const group = this.professionalExperiences.at(index) as FormGroup;
+    group.get('dateDebut')?.valueChanges.subscribe(() => {
+      group.get('dateFin')?.updateValueAndValidity({ emitEvent: false });
+      group.updateValueAndValidity({ emitEvent: false });
+    });
+    group.get('dateFin')?.valueChanges.subscribe(() => {
+      group.updateValueAndValidity({ emitEvent: false });
+    });
+  }
+
+  showCvError(control: AbstractControl | null, group?: AbstractControl | null): boolean {
+    if (!control) {
+      return false;
+    }
+    const touched = control.dirty || control.touched;
+    if (control.invalid && touched) {
+      return true;
+    }
+    if (group?.errors?.['cvDateRange'] && group instanceof FormGroup) {
+      const dateTouched =
+        touched ||
+        group.get('dateDebut')?.touched ||
+        group.get('dateFin')?.touched ||
+        group.get('dateDebut')?.dirty ||
+        group.get('dateFin')?.dirty;
+      if (dateTouched) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  getCvErrorMessage(control: AbstractControl | null, group?: AbstractControl | null): string {
+    if (control?.errors) {
+      for (const key of Object.keys(control.errors)) {
+        const payload = control.errors[key];
+        if (payload?.message) {
+          return payload.message;
+        }
+      }
+    }
+    if (group?.errors?.['cvDateRange']?.message) {
+      return group.errors['cvDateRange'].message;
+    }
+    return 'Valeur invalide';
+  }
+
+  private markFormArrayTouched(array: FormArray): void {
+    array.controls.forEach((ctrl) => {
+      if (ctrl instanceof FormGroup) {
+        Object.values(ctrl.controls).forEach((c) => c.markAsTouched());
+        ctrl.markAsTouched();
+      } else {
+        ctrl.markAsTouched();
+      }
+    });
+  }
+
+  private validateStep1Page1(): boolean {
+    this.markFormArrayTouched(this.academicFormations);
+    this.form.get('technicalSkills')?.markAllAsTouched();
+    const academicValid = this.academicFormations.controls.every((c) => c.valid);
+    const skillsValid = this.form.get('technicalSkills')?.valid ?? true;
+    return academicValid && skillsValid;
+  }
+
+  private validateStep1Page2(): boolean {
+    this.markFormArrayTouched(this.professionalExperiences);
+    this.markFormArrayTouched(this.languages);
+    const expValid = this.professionalExperiences.controls.every((c) => c.valid);
+    const langValid = this.languages.controls.every((c) => c.valid);
+    return expValid && langValid;
   }
 
   removeLanguage(index: number): void {
@@ -498,6 +589,11 @@ popupTitle: string = '';
       return;
     }
 
+    if (!this.validateStep1Page1() || !this.validateStep1Page2()) {
+      this.showAlert('Erreur', 'Veuillez corriger les erreurs dans le formulaire CV.', 'error');
+      return;
+    }
+
     const cvData = this.buildCvPayload();
   
     const currentStep = this.activeStep;
@@ -558,6 +654,20 @@ popupTitle: string = '';
 
     const previousStep = this.activeStep;
     if (stepNumber > previousStep) {
+      if (previousStep === 1) {
+        if (this.currentPage === 1 && stepNumber > 1) {
+          if (!this.validateStep1Page1()) {
+            this.showAlert('Erreur', 'Veuillez corriger les formations et compétences.', 'error');
+            return;
+          }
+          this.showAlert('Erreur', 'Complétez d\'abord la page expériences et langues.', 'error');
+          return;
+        }
+        if (!this.validateStep1Page1() || !this.validateStep1Page2()) {
+          this.showAlert('Erreur', 'Veuillez corriger les erreurs du formulaire CV.', 'error');
+          return;
+        }
+      }
       for (let s = previousStep; s < stepNumber; s++) {
         this.markStepCompleted(s);
       }
@@ -589,8 +699,16 @@ popupTitle: string = '';
 
   goToNextPage(): void {
     if (this.activeStep === 1 && this.currentPage === 1) {
+      if (!this.validateStep1Page1()) {
+        this.showAlert('Erreur', 'Veuillez corriger les formations et compétences.', 'error');
+        return;
+      }
       this.currentPage = 2;
     } else if (this.activeStep === 1 && this.currentPage === 2) {
+      if (!this.validateStep1Page2()) {
+        this.showAlert('Erreur', 'Veuillez corriger les expériences et langues.', 'error');
+        return;
+      }
       this.markStep1Complete();
       this.goToStep(2);
     } else {
@@ -598,7 +716,7 @@ popupTitle: string = '';
     }
   }
 
-  /** Étape 1 : navigation libre sans champs obligatoires. */
+  /** Étape 1 : validation avant passage à l'étape 2. */
   private markStep1Complete(): void {
     this.markStepCompleted(1);
     this.saveCvSilent();
@@ -666,14 +784,17 @@ popupTitle: string = '';
   }
 
 // Add to your component class properties
-fileNameControl = new FormControl('', Validators.required);
+fileNameControl = new FormControl('', [AppValidators.cvFileName]);
 isSaving = false;
 
 // Replace the existing SauvegarderCV method with this:
 async SauvegarderCV(): Promise<void> {
+  this.fileNameControl.markAsTouched();
   if (this.isSaving || !this.fileNameControl.valid) {
     this.showNotification(
-      this.fileNameControl.invalid ? 'Veuillez entrer un nom de fichier valide' : 'Opération déjà en cours',
+      this.fileNameControl.invalid
+        ? (this.getCvErrorMessage(this.fileNameControl) || 'Veuillez entrer un nom de fichier valide')
+        : 'Opération déjà en cours',
       'error'
     );
     return;
@@ -733,13 +854,21 @@ private async uploadDocument(pdfBlob: Blob, fileName: string): Promise<void> {
   levels: string[] = LANGUAGE_LEVEL_OPTIONS.map((o) => o.value);
 
   AjouterTitreDeProfil(): void {
-    if (this.titreDeProfilControl.value) {
-      sessionStorage.setItem("TitreProfile", this.titreDeProfilControl.value ?? '');
-      this.authService.notifyProfileUpdate();
-    } else if (!this.titreDeProfilControl.value) {
+    this.titreDeProfilControl.markAsTouched();
+    if (!String(this.titreDeProfilControl.value ?? '').trim()) {
       this.showAlert('Attention', 'Veuillez saisir un titre pour votre profil', 'info');
       return;
     }
+    if (this.titreDeProfilControl.invalid) {
+      this.showAlert(
+        'Attention',
+        this.getCvErrorMessage(this.titreDeProfilControl) || 'Veuillez saisir un titre valide pour votre profil',
+        'info'
+      );
+      return;
+    }
+    sessionStorage.setItem("TitreProfile", this.titreDeProfilControl.value ?? '');
+    this.authService.notifyProfileUpdate();
   
     const cvData: Partial<Cv> = {
       userId: this.userId!,

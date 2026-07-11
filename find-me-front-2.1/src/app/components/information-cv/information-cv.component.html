@@ -83,19 +83,35 @@
                   <!-- Form Fields -->
                   <div class="form-group">
                     <label>Date de début</label>
-                    <input type="date" formControlName="dateDebut" class="form-control">
+                    <input type="date" formControlName="dateDebut" class="form-control"
+                           [class.border-red-500]="showCvError(formation.get('dateDebut'), formation)">
+                    <div *ngIf="showCvError(formation.get('dateDebut'), formation)" class="field-error">
+                      {{ getCvErrorMessage(formation.get('dateDebut'), formation) }}
+                    </div>
                   </div>
                   <div class="form-group">
                     <label>Date de fin</label>
-                    <input type="date" formControlName="dateFin" class="form-control">
+                    <input type="date" formControlName="dateFin" class="form-control"
+                           [class.border-red-500]="showCvError(formation.get('dateFin'), formation)">
+                    <div *ngIf="showCvError(formation.get('dateFin'), formation)" class="field-error">
+                      {{ getCvErrorMessage(formation.get('dateFin'), formation) }}
+                    </div>
                   </div>
                   <div class="form-group">
                     <label>Université</label>
-                    <input type="text" formControlName="university" class="form-control" placeholder="Ex: Université de Paris">
+                    <input type="text" formControlName="university" class="form-control" placeholder="Ex: Université de Paris"
+                           [class.border-red-500]="showCvError(formation.get('university'), formation)">
+                    <div *ngIf="showCvError(formation.get('university'), formation)" class="field-error">
+                      {{ getCvErrorMessage(formation.get('university'), formation) }}
+                    </div>
                   </div>
                   <div class="form-group">
                     <label>Diplôme</label>
-                    <input type="text" formControlName="diplome" class="form-control" placeholder="Ex: Master en Informatique">
+                    <input type="text" formControlName="diplome" class="form-control" placeholder="Ex: Master en Informatique"
+                           [class.border-red-500]="showCvError(formation.get('diplome'), formation)">
+                    <div *ngIf="showCvError(formation.get('diplome'), formation)" class="field-error">
+                      {{ getCvErrorMessage(formation.get('diplome'), formation) }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -121,51 +137,99 @@
               <!-- Skills Inputs -->
               <div class="form-group">
                 <label>Langages de balisage</label>
-                <input type="text" formControlName="langageBallsage" class="form-control" placeholder="Ex: HTML, XML, Markdown">
+                <input type="text" formControlName="langageBallsage" class="form-control" placeholder="Ex: HTML, XML, Markdown"
+                       [class.border-red-500]="showCvError(form.get('technicalSkills.langageBallsage'))">
+                <div *ngIf="showCvError(form.get('technicalSkills.langageBallsage'))" class="field-error">
+                  {{ getCvErrorMessage(form.get('technicalSkills.langageBallsage')) }}
+                </div>
               </div>
               <div class="form-group">
                 <label>Langages de programmation</label>
-                <input type="text" formControlName="languageProgrammation" class="form-control" placeholder="Ex: JavaScript, Python, Java">
+                <input type="text" formControlName="languageProgrammation" class="form-control" placeholder="Ex: JavaScript, Python, Java"
+                       [class.border-red-500]="showCvError(form.get('technicalSkills.languageProgrammation'))">
+                <div *ngIf="showCvError(form.get('technicalSkills.languageProgrammation'))" class="field-error">
+                  {{ getCvErrorMessage(form.get('technicalSkills.languageProgrammation')) }}
+                </div>
               </div>
               <div class="form-group">
                 <label>Frameworks</label>
-                <input type="text" formControlName="framework" class="form-control" placeholder="Ex: Angular, React, Vue.js">
+                <input type="text" formControlName="framework" class="form-control" placeholder="Ex: Angular, React, Vue.js"
+                       [class.border-red-500]="showCvError(form.get('technicalSkills.framework'))">
+                <div *ngIf="showCvError(form.get('technicalSkills.framework'))" class="field-error">
+                  {{ getCvErrorMessage(form.get('technicalSkills.framework')) }}
+                </div>
               </div>
               <div class="form-group">
                 <label>Bibliothèques</label>
-                <input type="text" formControlName="bibliotheque" class="form-control" placeholder="Ex: jQuery, Bootstrap, Material UI">
+                <input type="text" formControlName="bibliotheque" class="form-control" placeholder="Ex: jQuery, Bootstrap, Material UI"
+                       [class.border-red-500]="showCvError(form.get('technicalSkills.bibliotheque'))">
+                <div *ngIf="showCvError(form.get('technicalSkills.bibliotheque'))" class="field-error">
+                  {{ getCvErrorMessage(form.get('technicalSkills.bibliotheque')) }}
+                </div>
               </div>
               <div class="form-group">
                 <label>APIs</label>
-                <input type="text" formControlName="api" class="form-control" placeholder="Ex: REST, GraphQL, WebSockets">
+                <input type="text" formControlName="api" class="form-control" placeholder="Ex: REST, GraphQL, WebSockets"
+                       [class.border-red-500]="showCvError(form.get('technicalSkills.api'))">
+                <div *ngIf="showCvError(form.get('technicalSkills.api'))" class="field-error">
+                  {{ getCvErrorMessage(form.get('technicalSkills.api')) }}
+                </div>
               </div>
               <div class="form-group">
                 <label>Base de données</label>
-                <input type="text" formControlName="db" class="form-control" placeholder="Ex: MySQL, MongoDB, PostgreSQL">
+                <input type="text" formControlName="db" class="form-control" placeholder="Ex: MySQL, MongoDB, PostgreSQL"
+                       [class.border-red-500]="showCvError(form.get('technicalSkills.db'))">
+                <div *ngIf="showCvError(form.get('technicalSkills.db'))" class="field-error">
+                  {{ getCvErrorMessage(form.get('technicalSkills.db')) }}
+                </div>
               </div>
               <div class="form-group">
                 <label>Système d'exploitation</label>
-                <input type="text" formControlName="systemExploitation" class="form-control" placeholder="Ex: Windows, Linux, macOS">
+                <input type="text" formControlName="systemExploitation" class="form-control" placeholder="Ex: Windows, Linux, macOS"
+                       [class.border-red-500]="showCvError(form.get('technicalSkills.systemExploitation'))">
+                <div *ngIf="showCvError(form.get('technicalSkills.systemExploitation'))" class="field-error">
+                  {{ getCvErrorMessage(form.get('technicalSkills.systemExploitation')) }}
+                </div>
               </div>
               <div class="form-group">
                 <label>Conception</label>
-                <input type="text" formControlName="conception" class="form-control" placeholder="Ex: UML, Wireframing, Prototyping">
+                <input type="text" formControlName="conception" class="form-control" placeholder="Ex: UML, Wireframing, Prototyping"
+                       [class.border-red-500]="showCvError(form.get('technicalSkills.conception'))">
+                <div *ngIf="showCvError(form.get('technicalSkills.conception'))" class="field-error">
+                  {{ getCvErrorMessage(form.get('technicalSkills.conception')) }}
+                </div>
               </div>
               <div class="form-group">
                 <label>Méthodologie</label>
-                <input type="text" formControlName="methodologie" class="form-control" placeholder="Ex: Agile, Scrum, Kanban">
+                <input type="text" formControlName="methodologie" class="form-control" placeholder="Ex: Agile, Scrum, Kanban"
+                       [class.border-red-500]="showCvError(form.get('technicalSkills.methodologie'))">
+                <div *ngIf="showCvError(form.get('technicalSkills.methodologie'))" class="field-error">
+                  {{ getCvErrorMessage(form.get('technicalSkills.methodologie')) }}
+                </div>
               </div>
               <div class="form-group">
                 <label>Design Pattern</label>
-                <input type="text" formControlName="designPattern" class="form-control" placeholder="Ex: MVC, Singleton, Observer">
+                <input type="text" formControlName="designPattern" class="form-control" placeholder="Ex: MVC, Singleton, Observer"
+                       [class.border-red-500]="showCvError(form.get('technicalSkills.designPattern'))">
+                <div *ngIf="showCvError(form.get('technicalSkills.designPattern'))" class="field-error">
+                  {{ getCvErrorMessage(form.get('technicalSkills.designPattern')) }}
+                </div>
               </div>
               <div class="form-group">
                 <label>Architecture</label>
-                <input type="text" formControlName="architechture" class="form-control" placeholder="Ex: Microservices, SOA, Serverless">
+                <input type="text" formControlName="architechture" class="form-control" placeholder="Ex: Microservices, SOA, Serverless"
+                       [class.border-red-500]="showCvError(form.get('technicalSkills.architechture'))">
+                <div *ngIf="showCvError(form.get('technicalSkills.architechture'))" class="field-error">
+                  {{ getCvErrorMessage(form.get('technicalSkills.architechture')) }}
+                </div>
               </div>
               <div class="form-group">
                 <label>Outils</label>
-                <input type="text" formControlName="outils" class="form-control" placeholder="Ex: Git, Docker, Jenkins">
+                <input type="text" formControlName="outils" class="form-control" placeholder="Ex: Git, Docker, Jenkins"
+                       [class.border-red-500]="showCvError(form.get('technicalSkills.outils'))">
+                <div *ngIf="showCvError(form.get('technicalSkills.outils'))" class="field-error">
+                  {{ getCvErrorMessage(form.get('technicalSkills.outils')) }}
+                </div>
               </div>
             </div>
             
@@ -203,43 +267,83 @@
                   <!-- Form Fields -->
                   <div class="form-group">
                     <label>Date de début</label>
-                    <input type="date" formControlName="dateDebut" class="form-control">
+                    <input type="date" formControlName="dateDebut" class="form-control"
+                           [class.border-red-500]="showCvError(experience.get('dateDebut'), experience)">
+                    <div *ngIf="showCvError(experience.get('dateDebut'), experience)" class="field-error">
+                      {{ getCvErrorMessage(experience.get('dateDebut'), experience) }}
+                    </div>
                   </div>
                   <div class="form-group">
                     <label>Date de fin</label>
-                    <input type="date" formControlName="dateFin" class="form-control">
+                    <input type="date" formControlName="dateFin" class="form-control"
+                           [class.border-red-500]="showCvError(experience.get('dateFin'), experience)">
+                    <div *ngIf="showCvError(experience.get('dateFin'), experience)" class="field-error">
+                      {{ getCvErrorMessage(experience.get('dateFin'), experience) }}
+                    </div>
                   </div>
                   <div class="form-group">
                     <label>Titre du poste</label>
-                    <input type="text" formControlName="poste" class="form-control" placeholder="Ex: Développeur Full Stack">
+                    <input type="text" formControlName="poste" class="form-control" placeholder="Ex: Développeur Full Stack"
+                           [class.border-red-500]="showCvError(experience.get('poste'), experience)">
+                    <div *ngIf="showCvError(experience.get('poste'), experience)" class="field-error">
+                      {{ getCvErrorMessage(experience.get('poste'), experience) }}
+                    </div>
                   </div>
                   <div class="form-group">
                     <label>Nom du projet</label>
-                    <input type="text" formControlName="nomProjet" class="form-control" placeholder="Ex: Plateforme e-commerce">
+                    <input type="text" formControlName="nomProjet" class="form-control" placeholder="Ex: Plateforme e-commerce"
+                           [class.border-red-500]="showCvError(experience.get('nomProjet'), experience)">
+                    <div *ngIf="showCvError(experience.get('nomProjet'), experience)" class="field-error">
+                      {{ getCvErrorMessage(experience.get('nomProjet'), experience) }}
+                    </div>
                   </div>
                   <div class="form-group">
                     <label>Entreprise</label>
-                    <input type="text" formControlName="entreprise" class="form-control" placeholder="Ex: Tech Solutions Inc.">
+                    <input type="text" formControlName="entreprise" class="form-control" placeholder="Ex: Tech Solutions Inc."
+                           [class.border-red-500]="showCvError(experience.get('entreprise'), experience)">
+                    <div *ngIf="showCvError(experience.get('entreprise'), experience)" class="field-error">
+                      {{ getCvErrorMessage(experience.get('entreprise'), experience) }}
+                    </div>
                   </div>
                   <div class="form-group">
                     <label>Client</label>
-                    <textarea formControlName="client" class="form-control" placeholder="Ex: Société internationale dans le secteur bancaire"></textarea>
+                    <textarea formControlName="client" class="form-control" placeholder="Ex: Société internationale dans le secteur bancaire"
+                              [class.border-red-500]="showCvError(experience.get('client'), experience)"></textarea>
+                    <div *ngIf="showCvError(experience.get('client'), experience)" class="field-error">
+                      {{ getCvErrorMessage(experience.get('client'), experience) }}
+                    </div>
                   </div>
                   <div class="form-group">
                     <label>Équipe</label>
-                    <textarea formControlName="equipe" class="form-control" placeholder="Ex: Équipe de 5 développeurs, 1 designer UX/UI"></textarea>
+                    <textarea formControlName="equipe" class="form-control" placeholder="Ex: Équipe de 5 développeurs, 1 designer UX/UI"
+                              [class.border-red-500]="showCvError(experience.get('equipe'), experience)"></textarea>
+                    <div *ngIf="showCvError(experience.get('equipe'), experience)" class="field-error">
+                      {{ getCvErrorMessage(experience.get('equipe'), experience) }}
+                    </div>
                   </div>
                   <div class="form-group">
                     <label>Travail réalisé</label>
-                    <textarea formControlName="travailRealise" class="form-control" placeholder="Ex: Développement du module de paiement en ligne"></textarea>
+                    <textarea formControlName="travailRealise" class="form-control" placeholder="Ex: Développement du module de paiement en ligne"
+                              [class.border-red-500]="showCvError(experience.get('travailRealise'), experience)"></textarea>
+                    <div *ngIf="showCvError(experience.get('travailRealise'), experience)" class="field-error">
+                      {{ getCvErrorMessage(experience.get('travailRealise'), experience) }}
+                    </div>
                   </div>
                   <div class="form-group">
                     <label>Environnement</label>
-                    <textarea formControlName="environnement" class="form-control" placeholder="Ex: Angular, Node.js, MongoDB, AWS"></textarea>
+                    <textarea formControlName="environnement" class="form-control" placeholder="Ex: Angular, Node.js, MongoDB, AWS"
+                              [class.border-red-500]="showCvError(experience.get('environnement'), experience)"></textarea>
+                    <div *ngIf="showCvError(experience.get('environnement'), experience)" class="field-error">
+                      {{ getCvErrorMessage(experience.get('environnement'), experience) }}
+                    </div>
                   </div>
                   <div class="form-group">
                     <label>Description</label>
-                    <textarea formControlName="description" class="form-control" placeholder="Ex: Projet de refonte complète d'une application existante"></textarea>
+                    <textarea formControlName="description" class="form-control" placeholder="Ex: Projet de refonte complète d'une application existante"
+                              [class.border-red-500]="showCvError(experience.get('description'), experience)"></textarea>
+                    <div *ngIf="showCvError(experience.get('description'), experience)" class="field-error">
+                      {{ getCvErrorMessage(experience.get('description'), experience) }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -271,18 +375,26 @@
                   <div class="language-card-content">
                     <div class="form-group">
                       <label>Langue</label>
-                      <select formControlName="name" class="form-control">
+                      <select formControlName="name" class="form-control"
+                              [class.border-red-500]="showCvError(language.get('name'), language)">
                         <option [ngValue]="''" disabled>Choisir une langue</option>
                         <option *ngFor="let lang of languageList" [value]="lang">{{ lang }}</option>
                       </select>
+                      <div *ngIf="showCvError(language.get('name'), language)" class="field-error">
+                        {{ getCvErrorMessage(language.get('name'), language) }}
+                      </div>
                     </div>
                     
                     <div class="form-group">
                       <label>Niveau</label>
-                      <select formControlName="niveau" class="form-control">
+                      <select formControlName="niveau" class="form-control"
+                              [class.border-red-500]="showCvError(language.get('niveau'), language)">
                         <option [ngValue]="''" disabled>Choisir un niveau</option>
                         <option *ngFor="let level of levels" [value]="level">{{ level }}</option>
                       </select>
+                      <div *ngIf="showCvError(language.get('niveau'), language)" class="field-error">
+                        {{ getCvErrorMessage(language.get('niveau'), language) }}
+                      </div>
                     </div>
                   </div>
                   <button type="button" class="btn-remove-language" (click)="removeLanguage(i)">
@@ -337,7 +449,11 @@
               placeholder="Ex: Développeur Full Stack Java/Spring - Expert en solutions cloud" 
               [formControl]="titreDeProfilControl"
               (keyup.enter)="AjouterTitreDeProfil()"
+              [class.border-red-500]="showCvError(titreDeProfilControl)"
             />
+            <div *ngIf="showCvError(titreDeProfilControl)" class="field-error">
+              {{ getCvErrorMessage(titreDeProfilControl) }}
+            </div>
             <button class="finish-button" (click)="AjouterTitreDeProfil()">
               <span *ngIf="!titreDeProfilControl.value">Ajouter</span>
               <span *ngIf="titreDeProfilControl.value">Mettre à jour</span>
@@ -368,7 +484,11 @@
         placeholder="Nom du cv" 
         [formControl]="fileNameControl"
         (keyup.enter)="SauvegarderCV()"
+        [class.border-red-500]="showCvError(fileNameControl)"
       />
+      <div *ngIf="showCvError(fileNameControl)" class="field-error">
+        {{ getCvErrorMessage(fileNameControl) }}
+      </div>
       <button class="download-button" (click)="SauvegarderCV()" [disabled]="isSaving">
         <span>Sauvegarder</span>
         <i class="fas fa-save"></i>

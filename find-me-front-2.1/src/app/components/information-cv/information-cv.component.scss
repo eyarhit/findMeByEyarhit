@@ -1191,3 +1191,13 @@ textarea.form-control {
 .swal2-content.text-left {
   text-align: left !important;
 }
+
+.field-error {
+  color: $error-color;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.border-red-500 {
+  border-color: $error-color !important;
+}
