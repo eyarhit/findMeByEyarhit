@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AppValidators } from '../../shared/validators/app-validators';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { MissionService } from '../../services/mission';
 import { ApiRoutingServiceUser } from '../../services/api-routing-user.service';
@@ -96,23 +97,23 @@ export class PublierContratComponent implements OnInit {
       statusMission: ["OPEN"],
       logo: "",
       descrip_mission: this.fb.group({
-        mission_name: ['', Validators.required],
-        avantages: ['', Validators.required],
-        description: ['', Validators.required],
-        date_debut: ['', Validators.required],
+        mission_name: ['', [Validators.required, AppValidators.missionLabel]],
+        avantages: ['', [Validators.required, AppValidators.meaningfulText(10)]],
+        description: ['', [Validators.required, AppValidators.meaningfulText(20)]],
+        date_debut: ['', [Validators.required, AppValidators.missionStartDate]],
         date_fin: ['', Validators.required],
-        poste: ['', Validators.required],
+        poste: ['', [Validators.required, AppValidators.missionLabel]],
         langue: ['', Validators.required],
-        futures_taches: ['', Validators.required],
-        nbre_recruteurs: [0, [Validators.required, Validators.min(1)]],
-        salaire: [0, [Validators.required, Validators.min(0)]],
+        futures_taches: ['', [Validators.required, AppValidators.meaningfulText(10)]],
+        nbre_recruteurs: [null, [Validators.required, AppValidators.positionsCount]],
+        salaire: [null, [Validators.required, AppValidators.salary]],
         isRemote: [false],
         statut: ['None'],
         typeContrat: ['', Validators.required],
-      }),
+      }, { validators: AppValidators.missionDateRange }),
       profilDemande: this.fb.group({
-        exigences: ['', Validators.required],
-        annees_experiences: [0, [Validators.required, Validators.min(0)]]
+        exigences: ['', [Validators.required, AppValidators.meaningfulText(10)]],
+        annees_experiences: [null, [Validators.required, AppValidators.experienceYears]]
       }),
       ville: this.fb.group({
         nomdeville: ["", Validators.required],
@@ -143,9 +144,8 @@ export class PublierContratComponent implements OnInit {
       this.missionForm.get('ville.pays.nom')?.setValue(defaultCountry);
     }
     this.onCountryChange();
-    // //console.log(this.storedtargetmarket)
+  this.setupDateRevalidation();
 
-    
     if (this.accountRole === "ESN_ADMIN") {
       this.missionForm.patchValue({
         id_societer: this.accountId
@@ -219,49 +219,117 @@ export class PublierContratComponent implements OnInit {
     }
   }
 
-  // Dans votre composant TypeScript
-showError(controlPath: string): boolean {
-  const control = this.getControl(controlPath);
-  if (!control) return false;
-  
-  return control.invalid && (control.dirty || control.touched);
-}
-
-showCompetencesError(): boolean {
-  const competencesControl = this.missionForm.get('competences');
-  return this.competences.length === 0 && 
-         (competencesControl?.dirty || competencesControl?.touched || false);
-}
-
-// Modifiez également la méthode isStepInvalid pour qu'elle ne marque pas tous les champs comme touchés
-isStepInvalid(): boolean {
-  if (this.currentStep === 1) {
-    return !this.getControl('reference_code')?.valid ||
-           !this.getControl('descrip_mission.mission_name')?.valid ||
-           !this.getControl('descrip_mission.poste')?.valid ||
-           !this.getControl('descrip_mission.typeContrat')?.valid ||
-           !this.getControl('descrip_mission.description')?.valid;
-  } else if (this.currentStep === 2) {
-    return !this.getControl('descrip_mission.date_debut')?.valid ||
-           !this.getControl('descrip_mission.date_fin')?.valid ||
-           !this.getControl('ville.pays.nom')?.valid ||
-           !this.getControl('ville.nomdeville')?.valid;
-  } else if (this.currentStep === 3) {
-    return !this.getControl('profilDemande.annees_experiences')?.valid ||
-           !this.getControl('descrip_mission.langue')?.valid ||
-           this.competences.length === 0;
-  } else if (this.currentStep === 4) {
-    return !this.getControl('descrip_mission.salaire')?.valid ||
-           !this.getControl('descrip_mission.nbre_recruteurs')?.valid ||
-           !this.getControl('descrip_mission.statut')?.valid ||
-           !this.getControl('descrip_mission.avantages')?.valid ||
-           !this.getControl('descrip_mission.futures_taches')?.valid;
+  private setupDateRevalidation(): void {
+    const descrip = this.missionForm.get('descrip_mission');
+    descrip?.get('date_debut')?.valueChanges.subscribe(() => {
+      descrip?.get('date_fin')?.updateValueAndValidity({ emitEvent: false });
+      descrip?.updateValueAndValidity({ emitEvent: false });
+    });
+    descrip?.get('date_fin')?.valueChanges.subscribe(() => {
+      descrip?.updateValueAndValidity({ emitEvent: false });
+    });
   }
-  return false;
-}
+
+  showError(controlPath: string): boolean {
+    const control = this.getControl(controlPath);
+    if (!control) {
+      return this.showDateRangeError(controlPath);
+    }
+    return (control.invalid && (control.dirty || control.touched)) ||
+           this.showDateRangeError(controlPath);
+  }
+
+  showDateRangeError(controlPath: string): boolean {
+    if (controlPath !== 'descrip_mission.date_fin' && controlPath !== 'descrip_mission.date_debut') {
+      return false;
+    }
+    const descrip = this.missionForm.get('descrip_mission');
+    const touched =
+      descrip?.get('date_debut')?.touched ||
+      descrip?.get('date_fin')?.touched ||
+      descrip?.get('date_debut')?.dirty ||
+      descrip?.get('date_fin')?.dirty;
+    return !!descrip?.errors?.['missionDateRange'] && !!touched;
+  }
+
+  getErrorMessage(controlPath: string): string {
+    const control = this.getControl(controlPath);
+    if (control?.errors) {
+      const errors = control.errors;
+      for (const key of Object.keys(errors)) {
+        const payload = errors[key];
+        if (payload?.message) {
+          return payload.message;
+        }
+      }
+      if (errors['required']) {
+        return 'Ce champ est requis';
+      }
+    }
+    if (this.showDateRangeError(controlPath)) {
+      return this.missionForm.get('descrip_mission')?.errors?.['missionDateRange']?.message
+        || 'Période invalide';
+    }
+    return 'Ce champ est requis';
+  }
+
+  showCompetencesError(): boolean {
+    return this.competences.length === 0 && this.competencesTouched;
+  }
+
+  private competencesTouched = false;
+
+  isStepInvalid(): boolean {
+    if (this.currentStep === 1) {
+      return !this.getControl('descrip_mission.mission_name')?.valid ||
+             !this.getControl('descrip_mission.poste')?.valid ||
+             !this.getControl('descrip_mission.typeContrat')?.valid ||
+             !this.getControl('descrip_mission.description')?.valid;
+    } else if (this.currentStep === 2) {
+      const descrip = this.missionForm.get('descrip_mission');
+      return !this.getControl('descrip_mission.date_debut')?.valid ||
+             !this.getControl('descrip_mission.date_fin')?.valid ||
+             !!descrip?.errors?.['missionDateRange'] ||
+             !this.getControl('ville.pays.nom')?.valid ||
+             !this.getControl('ville.nomdeville')?.valid;
+    } else if (this.currentStep === 3) {
+      return !this.getControl('profilDemande.annees_experiences')?.valid ||
+             !this.getControl('descrip_mission.langue')?.valid ||
+             !this.getControl('profilDemande.exigences')?.valid ||
+             this.competences.length === 0;
+    } else if (this.currentStep === 4) {
+      return !this.getControl('descrip_mission.salaire')?.valid ||
+             !this.getControl('descrip_mission.nbre_recruteurs')?.valid ||
+             !this.getControl('descrip_mission.avantages')?.valid ||
+             !this.getControl('descrip_mission.futures_taches')?.valid;
+    }
+    return false;
+  }
   nextStep(): void {
-    if (this.currentStep < this.steps.length && !this.isStepInvalid()) {
+    if (this.isStepInvalid()) {
+      this.markCurrentStepAsTouched();
+      return;
+    }
+    if (this.currentStep < this.steps.length) {
       this.currentStep++;
+    }
+  }
+
+  private markCurrentStepAsTouched(): void {
+    const pathsByStep: Record<number, string[]> = {
+      1: ['descrip_mission.mission_name', 'descrip_mission.poste', 'descrip_mission.typeContrat', 'descrip_mission.description'],
+      2: ['descrip_mission.date_debut', 'descrip_mission.date_fin', 'ville.pays.nom', 'ville.nomdeville'],
+      3: ['profilDemande.annees_experiences', 'descrip_mission.langue', 'profilDemande.exigences'],
+      4: ['descrip_mission.salaire', 'descrip_mission.nbre_recruteurs', 'descrip_mission.avantages', 'descrip_mission.futures_taches'],
+    };
+    for (const path of pathsByStep[this.currentStep] || []) {
+      this.getControl(path)?.markAsTouched();
+    }
+    if (this.currentStep === 3 && this.competences.length === 0) {
+      this.competencesTouched = true;
+    }
+    if (this.currentStep === 2) {
+      this.missionForm.get('descrip_mission')?.markAsTouched();
     }
   }
 
@@ -275,9 +343,15 @@ isStepInvalid(): boolean {
 
   addCompetence(input: HTMLInputElement): void {
     const value = input.value.trim();
+    const labelError = AppValidators.validateMissionLabel(value);
+    if (labelError) {
+      this.competencesTouched = true;
+      return;
+    }
     if (value && !this.competences.includes(value)) {
       this.competences.push(value);
       input.value = '';
+      this.competencesTouched = false;
     }
   }
 
@@ -498,17 +572,20 @@ isStepInvalid(): boolean {
   }
 
   markAllFieldsAsTouched(): void {
-    Object.keys(this.missionForm.controls).forEach(key => {
-      const control = this.missionForm.get(key);
-      if (control) {
+    const markGroup = (group: FormGroup): void => {
+      Object.keys(group.controls).forEach((key) => {
+        const control = group.get(key);
+        if (!control) {
+          return;
+        }
         control.markAsTouched();
         if (control instanceof FormGroup) {
-          Object.keys(control.controls).forEach(nestedKey => {
-            control.get(nestedKey)?.markAsTouched();
-          });
+          markGroup(control);
         }
-      }
-    });
+      });
+    };
+    markGroup(this.missionForm);
+    this.competencesTouched = true;
   }
 
   private notifyCandidatesOnNewPublication(createdMission: any, formData: any): void {

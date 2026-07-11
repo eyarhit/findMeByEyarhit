@@ -50,7 +50,7 @@
             <input formControlName="mission_name" type="text" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                    [class.border-red-500]="showError('descrip_mission.mission_name')">
             <div *ngIf="showError('descrip_mission.mission_name')" class="text-red-500 text-xs mt-1">
-              Ce champ est requis
+              {{ getErrorMessage('descrip_mission.mission_name') }}
             </div>
           </div>
 
@@ -59,7 +59,7 @@
             <input formControlName="poste" type="text" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                    [class.border-red-500]="showError('descrip_mission.poste')">
             <div *ngIf="showError('descrip_mission.poste')" class="text-red-500 text-xs mt-1">
-              Ce champ est requis
+              {{ getErrorMessage('descrip_mission.poste') }}
             </div>
           </div>
 
@@ -89,7 +89,7 @@
           <textarea formControlName="description" rows="4" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     [class.border-red-500]="showError('descrip_mission.description')"></textarea>
           <div *ngIf="showError('descrip_mission.description')" class="text-red-500 text-xs mt-1">
-            Ce champ est requis
+            {{ getErrorMessage('descrip_mission.description') }}
           </div>
         </div>
       </div>
@@ -104,7 +104,7 @@
             <input formControlName="date_debut" type="date" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                    [class.border-red-500]="showError('descrip_mission.date_debut')">
             <div *ngIf="showError('descrip_mission.date_debut')" class="text-red-500 text-xs mt-1">
-              Ce champ est requis
+              {{ getErrorMessage('descrip_mission.date_debut') }}
             </div>
           </div>
 
@@ -113,7 +113,7 @@
             <input formControlName="date_fin" type="date" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                    [class.border-red-500]="showError('descrip_mission.date_fin')">
             <div *ngIf="showError('descrip_mission.date_fin')" class="text-red-500 text-xs mt-1">
-              Ce champ est requis
+              {{ getErrorMessage('descrip_mission.date_fin') }}
             </div>
           </div>
 
@@ -164,10 +164,10 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div formGroupName="profilDemande">
             <label class="block text-sm font-medium text-gray-700 mb-1">Années d'expérience*</label>
-            <input formControlName="annees_experiences" type="number" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            <input formControlName="annees_experiences" type="number" min="0" max="50" step="1" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                    [class.border-red-500]="showError('profilDemande.annees_experiences')">
             <div *ngIf="showError('profilDemande.annees_experiences')" class="text-red-500 text-xs mt-1">
-              Ce champ est requis
+              {{ getErrorMessage('profilDemande.annees_experiences') }}
             </div>
           </div>
 
@@ -215,7 +215,7 @@
           <textarea formControlName="exigences" rows="4" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     [class.border-red-500]="showError('profilDemande.exigences')"></textarea>
                                 <div *ngIf="showError('profilDemande.exigences')" class="text-red-500 text-xs mt-1">
-              Ce champ est requis
+              {{ getErrorMessage('profilDemande.exigences') }}
             </div>
         </div>
       </div>
@@ -227,19 +227,19 @@
         <div formGroupName="descrip_mission" class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Salaire*</label>
-            <input formControlName="salaire" type="number" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            <input formControlName="salaire" type="number" min="100" max="999999" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                    [class.border-red-500]="showError('descrip_mission.salaire')">
             <div *ngIf="showError('descrip_mission.salaire')" class="text-red-500 text-xs mt-1">
-              Ce champ est requis
+              {{ getErrorMessage('descrip_mission.salaire') }}
             </div>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de postes disponibles*</label>
-            <input formControlName="nbre_recruteurs" type="number" min="1" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            <input formControlName="nbre_recruteurs" type="number" min="1" max="999" step="1" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                    [class.border-red-500]="showError('descrip_mission.nbre_recruteurs')">
             <div *ngIf="showError('descrip_mission.nbre_recruteurs')" class="text-red-500 text-xs mt-1">
-              Ce champ est requis
+              {{ getErrorMessage('descrip_mission.nbre_recruteurs') }}
             </div>
           </div>
 
@@ -262,7 +262,7 @@
             <textarea formControlName="avantages" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       [class.border-red-500]="showError('descrip_mission.avantages')"></textarea>
             <div *ngIf="showError('descrip_mission.avantages')" class="text-red-500 text-xs mt-1">
-              Ce champ est requis
+              {{ getErrorMessage('descrip_mission.avantages') }}
             </div>
           </div>
 
@@ -271,7 +271,7 @@
             <textarea formControlName="futures_taches" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       [class.border-red-500]="showError('descrip_mission.futures_taches')"></textarea>
             <div *ngIf="showError('descrip_mission.futures_taches')" class="text-red-500 text-xs mt-1">
-              Ce champ est requis
+              {{ getErrorMessage('descrip_mission.futures_taches') }}
             </div>
           </div>
         </div>
