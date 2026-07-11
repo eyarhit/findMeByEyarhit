@@ -294,7 +294,12 @@ export class CarteProfilCandiatComponent implements OnInit {
   }
 
   private validateLocationBlock(): boolean {
-    const err = AppValidators.validateAddress(this.profileLocation, true);
+    const location = String(this.profileLocation ?? '').trim();
+    if (location === 'Non spécifié') {
+      this.validationError = '';
+      return true;
+    }
+    const err = AppValidators.validateAddress(location, true);
     this.validationError = err ?? '';
     return !err;
   }
@@ -409,8 +414,14 @@ export class CarteProfilCandiatComponent implements OnInit {
         this.userData.linkedinUrl = newValue;
         this.profileLinkedIn = newValue;
       } else if (field === 'address') {
-        this.userData.address = newValue;
-        this.profileLocation = newValue;
+        const err = AppValidators.validateAddress(newValue, true);
+        if (err) {
+          this.validationError = err;
+          alert(err);
+          return;
+        }
+        this.userData.address = newValue.trim();
+        this.profileLocation = newValue.trim();
       }
  
       this.updateUserData();
@@ -444,7 +455,9 @@ export class CarteProfilCandiatComponent implements OnInit {
     } else if (block === 'location') {
       this.isSavedLocation = true;
       this.isEditingLocation = false;
-      this.userData.address = this.profileLocation;
+      const location = String(this.profileLocation ?? '').trim();
+      this.profileLocation = location || 'Non spécifié';
+      this.userData.address = location || 'Non spécifié';
     } else if (block === 'personal') {
       this.isSavedPersonal = true;
       this.isEditingPersonal = false;

@@ -127,7 +127,9 @@
       
       <div *ngIf="isEditingLocation">
         <div class="form-group">
-          <input [(ngModel)]="profileLocation" class="form-control" placeholder="Localisation" maxlength="200" />
+          <label class="info-label">Adresse</label>
+          <input [(ngModel)]="profileLocation" class="form-control" placeholder="Ex: 12 rue de la Liberté, Tunis" maxlength="200"
+                 [class.input-invalid]="validationError && isEditingLocation" />
         </div>
         <p *ngIf="validationError && isEditingLocation" class="field-error">{{ validationError }}</p>
         <button (click)="saveBlock('location')" class="save-button">

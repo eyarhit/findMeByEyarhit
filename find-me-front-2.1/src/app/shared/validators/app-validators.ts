@@ -213,14 +213,40 @@ export class AppValidators {
     if (value == null || String(value).trim() === '' || value === 'Non spécifié') {
       return optional ? null : "L'adresse est obligatoire.";
     }
-    if (String(value).trim().length < 3) {
-      return 'Adresse trop courte (3 caractères minimum).';
+    const v = String(value).trim();
+    if (v.length < 5) {
+      return 'Adresse trop courte (5 caractères minimum).';
     }
-    if (String(value).length > 200) {
+    if (v.length > 200) {
       return 'Adresse trop longue (200 caractères maximum).';
+    }
+    if (!/[A-Za-zÀ-ÿ]/.test(v)) {
+      return "L'adresse doit contenir au moins une lettre (ville, rue, etc.).";
+    }
+    if (/^\d+$/.test(v)) {
+      return "L'adresse ne peut pas être composée uniquement de chiffres.";
+    }
+    if (/^(.)\1+$/.test(v)) {
+      return 'Adresse non valide (caractères répétés).';
+    }
+    if (/([^A-Za-zÀ-ÿ0-9\s,.'°\-()/])\1{4,}/.test(v)) {
+      return 'Séquence de caractères invalide dans l\'adresse.';
+    }
+    if (!/^[A-Za-zÀ-ÿ0-9\s,.'°\-()/]+$/.test(v)) {
+      return 'Caractères invalides dans l\'adresse.';
     }
     return null;
   }
+
+  static addressOptional: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const err = AppValidators.validateAddress(control.value, true);
+    return err ? { address: { message: err } } : null;
+  };
+
+  static addressRequired: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+    const err = AppValidators.validateAddress(control.value, false);
+    return err ? { address: { message: err } } : null;
+  };
 
   /** Nom de département, poste, compétence, etc. */
   static missionLabel: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
