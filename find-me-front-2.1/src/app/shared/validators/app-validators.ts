@@ -455,6 +455,20 @@ export class AppValidators {
     });
   }
 
+  private static cvValidateWhenFilled(
+    validate: (value: unknown) => string | null
+  ): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const val = control.value;
+      if (val == null || String(val).trim() === '') {
+        return null;
+      }
+      const err = validate(val);
+      return err ? { cvInvalid: { message: err } } : null;
+    };
+  }
+
+  /** @deprecated Utiliser cvValidateWhenFilled — ne rend plus les champs obligatoires */
   private static cvRequiredWhenRowActive(
     rowFields: string[],
     validate: (value: unknown) => string | null,
@@ -713,30 +727,29 @@ export class AppValidators {
   ];
   static readonly CV_LANGUAGE_FIELDS = ['name', 'niveau'];
 
-  static cvEducationUniversity: ValidatorFn = AppValidators.cvRequiredWhenRowActive(
-    AppValidators.CV_ACADEMIC_FIELDS,
+  static cvEducationUniversity: ValidatorFn = AppValidators.cvValidateWhenFilled(
     AppValidators.validateCvInstitutionName
   );
 
-  static cvEducationDiplome: ValidatorFn = AppValidators.cvRequiredWhenRowActive(
-    AppValidators.CV_ACADEMIC_FIELDS,
+  static cvEducationDiplome: ValidatorFn = AppValidators.cvValidateWhenFilled(
     AppValidators.validateCvTitle
   );
 
-  static cvEducationDateDebut: ValidatorFn = AppValidators.cvRequiredWhenRowActive(
-    AppValidators.CV_ACADEMIC_FIELDS,
-    AppValidators.validateCvEducationDateDebut
+  static cvEducationDateDebut: ValidatorFn = AppValidators.cvValidateWhenFilled(
+    (value) => {
+      const err = AppValidators.validateCvEducationDateDebut(value);
+      return err === 'La date de début est obligatoire.' ? null : err;
+    }
   );
 
-  static cvEducationDateFin: ValidatorFn = AppValidators.cvRequiredWhenRowActive(
-    AppValidators.CV_ACADEMIC_FIELDS,
-    AppValidators.validateCvEducationDateFin
+  static cvEducationDateFin: ValidatorFn = AppValidators.cvValidateWhenFilled(
+    (value) => {
+      const err = AppValidators.validateCvEducationDateFin(value);
+      return err === 'La date de fin est obligatoire.' ? null : err;
+    }
   );
 
   static cvEducationDateRange: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
-    if (!AppValidators.cvRowHasData(group, AppValidators.CV_ACADEMIC_FIELDS)) {
-      return null;
-    }
     const err = AppValidators.validateCvEducationDateRange(
       group.get('dateDebut')?.value,
       group.get('dateFin')?.value
@@ -744,34 +757,26 @@ export class AppValidators {
     return err ? { cvDateRange: { message: err } } : null;
   };
 
-  static cvExperienceEntreprise: ValidatorFn = AppValidators.cvRequiredWhenRowActive(
-    AppValidators.CV_EXPERIENCE_FIELDS,
+  static cvExperienceEntreprise: ValidatorFn = AppValidators.cvValidateWhenFilled(
     AppValidators.validateCvInstitutionName
   );
 
-  static cvExperiencePoste: ValidatorFn = AppValidators.cvRequiredWhenRowActive(
-    AppValidators.CV_EXPERIENCE_FIELDS,
+  static cvExperiencePoste: ValidatorFn = AppValidators.cvValidateWhenFilled(
     AppValidators.validateCvTitle
   );
 
-  static cvExperienceDateDebut: ValidatorFn = AppValidators.cvRequiredWhenRowActive(
-    AppValidators.CV_EXPERIENCE_FIELDS,
-    AppValidators.validateCvExperienceDateDebut
+  static cvExperienceDateDebut: ValidatorFn = AppValidators.cvValidateWhenFilled(
+    (value) => {
+      const err = AppValidators.validateCvExperienceDateDebut(value);
+      return err === 'La date de début est obligatoire.' ? null : err;
+    }
   );
 
-  static cvExperienceDateFin: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
-    const group = control.parent;
-    if (!group || !AppValidators.cvRowHasData(group, AppValidators.CV_EXPERIENCE_FIELDS)) {
-      return null;
-    }
-    const err = AppValidators.validateCvExperienceDateFin(control.value);
-    return err ? { cvInvalid: { message: err } } : null;
-  };
+  static cvExperienceDateFin: ValidatorFn = AppValidators.cvValidateWhenFilled(
+    AppValidators.validateCvExperienceDateFin
+  );
 
   static cvExperienceDateRange: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
-    if (!AppValidators.cvRowHasData(group, AppValidators.CV_EXPERIENCE_FIELDS)) {
-      return null;
-    }
     const err = AppValidators.validateCvExperienceDateRange(
       group.get('dateDebut')?.value,
       group.get('dateFin')?.value
@@ -791,15 +796,9 @@ export class AppValidators {
     return err ? { cvSkills: { message: err } } : null;
   };
 
-  static cvLanguageName: ValidatorFn = AppValidators.cvRequiredWhenRowActive(
-    AppValidators.CV_LANGUAGE_FIELDS,
-    (v) => (String(v).trim() ? null : 'Choisissez une langue.')
-  );
+  static cvLanguageName: ValidatorFn = AppValidators.cvValidateWhenFilled(() => null);
 
-  static cvLanguageLevel: ValidatorFn = AppValidators.cvRequiredWhenRowActive(
-    AppValidators.CV_LANGUAGE_FIELDS,
-    (v) => (String(v).trim() ? null : 'Choisissez un niveau.')
-  );
+  static cvLanguageLevel: ValidatorFn = AppValidators.cvValidateWhenFilled(() => null);
 
   static cvProfileTitle: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
     const err = AppValidators.validateCvProfileTitle(control.value);
