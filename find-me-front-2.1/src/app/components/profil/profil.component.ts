@@ -51,7 +51,16 @@ export class ProfilComponent implements OnInit {
   filteredCodingameResults: any[] = [];
   totalYears: number = 0;
   userId: number = 0;
- 
+
+  private readonly candidateDocumentRoles = ['CANDIDAT', 'FREELANCER', 'PORTAGE_SALARIAL'];
+
+  /** CV FindMe / EXTRAIT : réservés aux candidats et freelances, pas aux comptes RH (ESN_ADMIN). */
+  shouldShowCandidateDocuments(): boolean {
+    if (this.profileId != null) {
+      return this.candidateDocumentRoles.includes(this.profileRole);
+    }
+    return this.candidateDocumentRoles.includes(this.role ?? '');
+  }
 
   constructor(public fb: FormBuilder, private router: Router, private cvService: CvService,
     private authService: AuthService, private codingameService: CodingameService ,   private educationService: EducationService,

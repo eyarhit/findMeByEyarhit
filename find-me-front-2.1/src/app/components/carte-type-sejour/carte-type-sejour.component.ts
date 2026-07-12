@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DocumentServiceService } from '../../services/document-service.service';
@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
   templateUrl: './carte-type-sejour.component.html',
   styleUrl: './carte-type-sejour.component.scss'
 })
-export class CarteTypeSejourComponent implements OnInit, OnDestroy {
+export class CarteTypeSejourComponent implements OnInit, OnChanges, OnDestroy {
   @Input() espace:string=''
   @Input() typedocument:string ='';
   @Input() profileId : number | null = null;
@@ -27,6 +27,7 @@ export class CarteTypeSejourComponent implements OnInit, OnDestroy {
   role: string | null = null;
   email: string | null = null;
   private subscription?: Subscription;
+  private loadRequestId = 0;
 
   constructor(
     private authService: AuthService,
@@ -56,21 +57,39 @@ export class CarteTypeSejourComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if(this.profileId === null){
-      this.role = this.authService.getRole();
-     this.userId = this.authService.getUserId();
-    } else{
-      this.role = this.profilerole;
-     this.userId = this.profileId;
-    }
-    
-    this.role = this.authService.getRole();
-   
+    this.resolveContext();
     if (this.userId) {
       this.loadDocuments();
     } else {
       console.error('User is not authenticated');
     }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['profileId'] || changes['profilerole'] || changes['typedocument']) {
+      this.resolveContext();
+      if (this.userId) {
+        this.loadDocuments();
+      }
+    }
+  }
+
+  private resolveContext(): void {
+    if (this.profileId == null) {
+      this.userId = this.authService.getUserId();
+      this.role = this.authService.getRole();
+    } else {
+      this.userId = this.profileId;
+      this.role = this.profilerole || this.authService.getRole();
+    }
+    this.email = this.authService.getEmail();
+  }
+
+  private normalizeDocumentsResponse(response: unknown): any[] {
+    if (!Array.isArray(response)) {
+      return [];
+    }
+    return response.filter((doc) => doc && doc.document != null);
   }
 handleItemClick(docId: number, event: MouseEvent): void {
   // Skip if clicked on an interactive element (buttons, links, etc.)
@@ -84,54 +103,83 @@ handleItemClick(docId: number, event: MouseEvent): void {
   }
 }
   loadDocuments(): void {
-    if (!this.userId) return;
-
-    if(this.typedocument==''){
-      if(this.role === 'FREELANCER'|| this.role === 'ESN_ADMIN'|| this.role === 'PORTAGE_SALARIAL'){
-        this.typedocument="Extrait";
-      } else if(this.role==="CANDIDAT"){ 
-        this.typedocument="Type_Sejour";
-      }
+    if (!this.userId) {
+      this.documents = [];
+      return;
     }
 
+    const folder = this.resolveDocumentFolder();
+    if (!folder) {
+      this.documents = [];
+      return;
+    }
+
+    const requestId = ++this.loadRequestId;
+    this.documents = [];
+
+    const applyDocuments = (response: unknown) => {
+      if (requestId !== this.loadRequestId) {
+        return;
+      }
+      this.documents = this.normalizeDocumentsResponse(response);
+    };
+
     const load = () => {
-      // During application flow, a "saved CV" can live under either folder.
-      if (this.typedocument === 'CvFindMe') {
+      if (folder === 'CvFindMe') {
         forkJoin([
           this.documentService.getDocumentsByUserAndFolder(this.userId!, 'CvFindMe').pipe(catchError(() => of([]))),
           this.documentService.getDocumentsByUserAndFolder(this.userId!, 'CvPDF').pipe(catchError(() => of([])))
         ]).subscribe({
           next: ([cvFindMeDocs, cvPdfDocs]) => {
-            const merged = [...(cvFindMeDocs || []), ...(cvPdfDocs || [])];
+            const merged = [
+              ...this.normalizeDocumentsResponse(cvFindMeDocs),
+              ...this.normalizeDocumentsResponse(cvPdfDocs),
+            ];
             const seen = new Set<number>();
-            this.documents = merged.filter((doc: any) => {
-              const id = Number(doc?.document);
-              if (!Number.isFinite(id) || seen.has(id)) return false;
-              seen.add(id);
-              return true;
-            });
+            applyDocuments(
+              merged.filter((doc: any) => {
+                const id = Number(doc?.document);
+                if (!Number.isFinite(id) || seen.has(id)) {
+                  return false;
+                }
+                seen.add(id);
+                return true;
+              })
+            );
           },
           error: (error) => {
             console.error('Erreur lors du chargement des CV sauvegardes', error);
-            this.documents = [];
+            applyDocuments([]);
           }
         });
         return;
       }
 
-      this.documentService.getDocumentsByUserAndFolder(this.userId!, this.typedocument!).subscribe({
-        next: (response) => {
-          this.documents = response;
-        },
+      this.documentService.getDocumentsByUserAndFolder(this.userId!, folder).subscribe({
+        next: (response) => applyDocuments(response),
         error: (error) => {
           console.error('Erreur lors du chargement des documents', error);
-          this.documents = [];
+          applyDocuments([]);
         }
       });
     };
 
     load();
+    this.subscription?.unsubscribe();
     this.subscription = this.authService.documentUpdate$.subscribe(() => load());
+  }
+
+  private resolveDocumentFolder(): string {
+    if (this.typedocument) {
+      return this.typedocument;
+    }
+    if (this.role === 'FREELANCER' || this.role === 'PORTAGE_SALARIAL') {
+      return 'Extrait';
+    }
+    if (this.role === 'CANDIDAT') {
+      return 'Type_Sejour';
+    }
+    return '';
   }
 
   viewDocument(documentData: any): void {

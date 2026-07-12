@@ -55,7 +55,7 @@
     <!-- Rangée des 3 cartes de documents -->
     <div class="documents-row" > 
       <!-- Carte 3 : Liste des Cvs Sauvegardées -->
-            <div class="document-card" *ngIf="this.role === 'FREELANCER'|| this.role === 'CANDIDAT'|| (this.role === 'ESN_ADMIN' && (this.profileRole==='ESN_ADMIN' || this.profileRole==='')) || this.role === 'PORTAGE_SALARIAL' || this.role === 'PORTAGE_SALARIAL'">
+            <div class="document-card" *ngIf="shouldShowCandidateDocuments()">
         <app-carte-type-sejour [profileId]="profileId" [typedocument]="'CvFindMe'" [profilerole]="this.profileRole!"></app-carte-type-sejour>
       </div>
       <!-- Carte 3 : Liste des Diplômes -->
@@ -69,8 +69,8 @@
       </div>
 
       <!-- Carte 5 : Liste des documents Type de séjour -->
-      <div class="document-card" *ngIf="this.role === 'FREELANCER'|| this.role === 'CANDIDAT'|| (this.role === 'ESN_ADMIN' && (this.profileRole==='ESN_ADMIN' || this.profileRole==='')) || this.role === 'PORTAGE_SALARIAL' || this.role === 'PORTAGE_SALARIAL'">
-        <app-carte-type-sejour [profileId]="profileId"  [profilerole]="this.profileRole!"></app-carte-type-sejour>
+      <div class="document-card" *ngIf="shouldShowCandidateDocuments()">
+        <app-carte-type-sejour [profileId]="profileId" [typedocument]="'Extrait'" [profilerole]="this.profileRole!"></app-carte-type-sejour>
       </div>
     </div>
 
